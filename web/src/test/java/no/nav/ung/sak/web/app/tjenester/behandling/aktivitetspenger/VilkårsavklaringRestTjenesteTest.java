@@ -33,10 +33,9 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnl
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.UttalelseDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringRadDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringOgUtfallPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingOgAvklaringPeriodeDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
@@ -130,7 +129,7 @@ class VilkårsavklaringRestTjenesteTest {
         lagreForeslåttAvklaring(behandling, a2, MAR_DES);
 
         assertThat(tjeneste.hentAvklaringer(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringRadDto::periode, VilkårsavklaringRestTjenesteTest::avklaringForeslått)
+            .extracting(VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringOgUtfallPeriodeDto::periode, VilkårsavklaringRestTjenesteTest::avklaringForeslått)
             .containsExactly(
                 tuple(a2, MAR_DES, true),
                 tuple(a1, JAN_JUN, false));
@@ -144,7 +143,7 @@ class VilkårsavklaringRestTjenesteTest {
         ferdigstill(behandling);
 
         assertThat(tjeneste.hentAvklaringer(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringRadDto::periode, VilkårsavklaringRestTjenesteTest::avklaringForeslått)
+            .extracting(VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringOgUtfallPeriodeDto::periode, VilkårsavklaringRestTjenesteTest::avklaringForeslått)
             .containsExactly(tuple(a1, JAN_DES, true));
     }
 
@@ -159,7 +158,7 @@ class VilkårsavklaringRestTjenesteTest {
         ferdigstill(behandling);
 
         assertThat(tjeneste.hentAvklaringer(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringRadDto::periode, VilkårsavklaringRestTjenesteTest::avklaringForeslått)
+            .extracting(VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringOgUtfallPeriodeDto::periode, VilkårsavklaringRestTjenesteTest::avklaringForeslått)
             .containsExactly(
                 tuple(a2, APR_JUN, true),
                 tuple(a1, JUL_DES, false),
@@ -176,7 +175,7 @@ class VilkårsavklaringRestTjenesteTest {
         lagreForeslåttAvklaring(behandling, a, APR_JUN);
 
         assertThat(tjeneste.hentAvklaringer(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsavklaringRadDto::periode, VilkårsavklaringRadDto::utfall, VilkårsavklaringRestTjenesteTest::avklaringReferanse)
+            .extracting(VilkårsavklaringOgUtfallPeriodeDto::periode, VilkårsavklaringOgUtfallPeriodeDto::utfall, VilkårsavklaringRestTjenesteTest::avklaringReferanse)
             .containsExactly(
                 tuple(APR_JUN, Utfall.IKKE_OPPFYLT, a),
                 tuple(JUL_DES, Utfall.OPPFYLT, null),
@@ -193,7 +192,7 @@ class VilkårsavklaringRestTjenesteTest {
         lagreForeslåttAvklaring(behandling, foreslått, JAN);
 
         assertThat(tjeneste.hentAvklaringer(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsavklaringRadDto::periode, VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringRestTjenesteTest::avklaringForeslått)
+            .extracting(VilkårsavklaringOgUtfallPeriodeDto::periode, VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringRestTjenesteTest::avklaringForeslått)
             .containsExactly(
                 tuple(JAN, foreslått, true),
                 tuple(MAR_DES, null, null),
@@ -210,14 +209,14 @@ class VilkårsavklaringRestTjenesteTest {
             bistandsvurdering(JAN, vurdertTidspunkt),
             bistandsvurdering(MAR, vurdertTidspunkt)));
 
-        var rader = tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder();
+        var avklaringOgVilkårperioder = tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder();
 
-        assertThat(rader).hasSize(1);
-        var rad = rader.getFirst();
-        assertThat(rad.periode()).isEqualTo(JAN_MAR);
-        assertThat(rad.utfall()).isEqualTo(Utfall.IKKE_VURDERT);
-        assertThat(rad.avklaringOgVurdering().avklaring().referanse()).isEqualTo(a);
-        assertThat(rad.avklaringOgVurdering().vurdering()).isEqualTo(new VilkårsvurderingDto(
+        assertThat(avklaringOgVilkårperioder).hasSize(1);
+        var førstePeriode = avklaringOgVilkårperioder.getFirst();
+        assertThat(førstePeriode.periode()).isEqualTo(JAN_MAR);
+        assertThat(førstePeriode.utfall()).isEqualTo(Utfall.IKKE_VURDERT);
+        assertThat(førstePeriode.avklaringOgVurdering().avklaring().referanse()).isEqualTo(a);
+        assertThat(førstePeriode.avklaringOgVurdering().vurdering()).isEqualTo(new VilkårsvurderingDto(
             false,
             BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID.getKode(),
             "begrunnelse for vurdering",
@@ -237,7 +236,7 @@ class VilkårsavklaringRestTjenesteTest {
         lagreForeslåttAvklaring(behandling, a, APR_JUN);
 
         assertThat(tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsvurderingRadDto::periode, VilkårsvurderingRadDto::utfall, VilkårsavklaringRestTjenesteTest::avklaringsreferanse)
+            .extracting(VilkårsvurderingOgAvklaringPeriodeDto::periode, VilkårsvurderingOgAvklaringPeriodeDto::utfall, VilkårsavklaringRestTjenesteTest::avklaringsreferanse)
             .containsExactly(
                 tuple(JUL_DES, Utfall.OPPFYLT, null),
                 tuple(APR_JUN, Utfall.IKKE_VURDERT, a),
@@ -251,7 +250,7 @@ class VilkårsavklaringRestTjenesteTest {
         lagreForeslåttAvklaring(behandling, a, APR_JUN);
 
         assertThat(tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsvurderingRadDto::periode, VilkårsvurderingRadDto::utfall, VilkårsavklaringRestTjenesteTest::avklaringsreferanse)
+            .extracting(VilkårsvurderingOgAvklaringPeriodeDto::periode, VilkårsvurderingOgAvklaringPeriodeDto::utfall, VilkårsavklaringRestTjenesteTest::avklaringsreferanse)
             .containsExactly(
                 tuple(APR_JUN, Utfall.OPPFYLT, a),
                 tuple(JAN_MAR, Utfall.OPPFYLT, null));
@@ -266,7 +265,7 @@ class VilkårsavklaringRestTjenesteTest {
         lagreForeslåttAvklaring(behandling, a, JAN_FEB);
 
         assertThat(tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsvurderingRadDto::periode, VilkårsvurderingRadDto::utfall, VilkårsavklaringRestTjenesteTest::avklaringsreferanse)
+            .extracting(VilkårsvurderingOgAvklaringPeriodeDto::periode, VilkårsvurderingOgAvklaringPeriodeDto::utfall, VilkårsavklaringRestTjenesteTest::avklaringsreferanse)
             .containsExactly(tuple(JAN_FEB, Utfall.IKKE_VURDERT, a));
     }
 
@@ -278,7 +277,7 @@ class VilkårsavklaringRestTjenesteTest {
             new Vilkårsperiode(JUL_DES, Utfall.IKKE_RELEVANT, null));
 
         assertThat(tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsvurderingRadDto::periode, VilkårsvurderingRadDto::utfall, VilkårsvurderingRadDto::avklaringOgVurdering)
+            .extracting(VilkårsvurderingOgAvklaringPeriodeDto::periode, VilkårsvurderingOgAvklaringPeriodeDto::utfall, VilkårsvurderingOgAvklaringPeriodeDto::avklaringOgVurdering)
             .containsExactly(tuple(JAN_MAR, Utfall.OPPFYLT, null));
     }
 
@@ -292,10 +291,10 @@ class VilkårsavklaringRestTjenesteTest {
         var forventet = new UttalelseDto(true, "tekst", mottattTidspunkt);
 
         assertThat(tjeneste.hentAvklaringer(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(rad -> rad.avklaring().uttalelse())
+            .extracting(avklaringOgUtfallPeriode -> avklaringOgUtfallPeriode.avklaring().uttalelse())
             .containsExactly(forventet);
         assertThat(tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(rad -> rad.avklaringOgVurdering().avklaring().uttalelse())
+            .extracting(vurderingOgAvklaringPeriode -> vurderingOgAvklaringPeriode.avklaringOgVurdering().avklaring().uttalelse())
             .containsExactly(forventet);
     }
 
@@ -311,7 +310,11 @@ class VilkårsavklaringRestTjenesteTest {
         lagreForeslåttAvklaring(behandling, a2, JUL_DES);
 
         assertThat(tjeneste.hentAvklaringer(behandling, VilkårType.BISTANDSVILKÅR).perioder())
-            .extracting(VilkårsavklaringRestTjenesteTest::avklaringReferanse, VilkårsavklaringRestTjenesteTest::avklaringForeslått, rad -> rad.avklaring().uttalelse())
+            .extracting(
+                VilkårsavklaringRestTjenesteTest::avklaringReferanse,
+                VilkårsavklaringRestTjenesteTest::avklaringForeslått,
+                avklaringOgUtfallPeriode -> avklaringOgUtfallPeriode.avklaring().uttalelse()
+            )
             .containsExactly(
                 tuple(a2, true, null),
                 tuple(a, false, new UttalelseDto(true, "tekst", mottattTidspunkt)));
@@ -397,16 +400,16 @@ class VilkårsavklaringRestTjenesteTest {
         );
     }
 
-    private static UUID avklaringsreferanse(VilkårsvurderingRadDto rad) {
-        return rad.avklaringOgVurdering() == null ? null : rad.avklaringOgVurdering().avklaring().referanse();
+    private static UUID avklaringsreferanse(VilkårsvurderingOgAvklaringPeriodeDto avklaringOgVurderingPeriode) {
+        return avklaringOgVurderingPeriode.avklaringOgVurdering() == null ? null : avklaringOgVurderingPeriode.avklaringOgVurdering().avklaring().referanse();
     }
 
-    private static UUID avklaringReferanse(VilkårsavklaringRadDto rad) {
-        return rad.avklaring() == null ? null : rad.avklaring().referanse();
+    private static UUID avklaringReferanse(VilkårsavklaringOgUtfallPeriodeDto avklaringOfUtfallPeriode) {
+        return avklaringOfUtfallPeriode.avklaring() == null ? null : avklaringOfUtfallPeriode.avklaring().referanse();
     }
 
-    private static Boolean avklaringForeslått(VilkårsavklaringRadDto rad) {
-        return rad.avklaring() == null ? null : rad.avklaring().foreslåttIBehandlingen();
+    private static Boolean avklaringForeslått(VilkårsavklaringOgUtfallPeriodeDto avklaringOgUtfallPeriode) {
+        return avklaringOgUtfallPeriode.avklaring() == null ? null : avklaringOgUtfallPeriode.avklaring().foreslåttIBehandlingen();
     }
 
     private static Periode periode(int fomMåned, int fomDag, int tomMåned, int tomDag) {

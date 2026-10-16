@@ -12,7 +12,7 @@ public record VilkårsavklaringDto(
     @NotNull UUID referanse,
     @NotNull @Valid Periode periode,
     @NotNull Avklaringtype avklaringtype,
-    // Koder som strenger: årsak og kilde er interfaces med én enum per vilkår
+    // ikkeOppfyltÅrsak og kilde har interfaces som implementeres av flere enum. Kontrakten har derfor String, og overlater casting til konsument
     @NotNull String ikkeOppfyltÅrsak,
     String begrunnelse,
     @NotNull boolean skalSendeVarsel,

@@ -8,6 +8,6 @@ import java.util.List;
 
 public record VilkårsavklaringVurderingerResponse(
     @NotNull VilkårType vilkårType,
-    @NotNull @Valid List<VilkårsvurderingRadDto> perioder
+    @NotNull @Valid List<VilkårsvurderingOgAvklaringPeriodeDto> perioder
 ) {
 }
