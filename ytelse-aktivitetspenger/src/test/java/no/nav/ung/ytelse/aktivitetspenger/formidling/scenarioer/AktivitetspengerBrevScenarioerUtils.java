@@ -108,6 +108,13 @@ public class AktivitetspengerBrevScenarioerUtils {
     }
 
     /**
+     * Beregningsgrunnlag der 66 prosent av årsinntekten er høyere enn høy minsteytelse, men årsinntekten er under 6G.
+     */
+    public static Beregningsgrunnlag lagBeregningsgrunnlagHøyereEnnHøyMinstesats(LocalDate skjæringstidspunkt) {
+        return lagBesteberegning(skjæringstidspunkt, 500_000, 500_000, 500_000);
+    }
+
+    /**
      * Beregningsgrunnlag der siste lignede år er over 6G, slik at beregnet årsinntekt avkortes til 6G.
      */
     public static Beregningsgrunnlag lagBeregningsgrunnlagAvkortetMotSeksG(LocalDate skjæringstidspunkt) {

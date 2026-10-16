@@ -71,7 +71,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Når vi har regnet ut hvor mye du får i aktivitetspenger etter at du fylte 25 år, har vi sett på inntekten din de tre siste årene. Fordi minstesatsen for deg som er over 25 år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen. \
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
-                """ + meldFraOmArbeidsinntektAvsnitt()
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("11 første ledd og § 12 første og andre ledd") + meldFraOmArbeidsinntektAvsnitt()
         );
 
         assertThatHtml(brevtekst)
@@ -111,7 +111,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Minstesatsen er 2/3 av 2,041 ganger grunnbeløpet som er på 130 160 kroner. \
                 Det vil si at du kan få opptil 177 104 kroner i året. Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
-                """ + meldFraOmArbeidsinntektAvsnitt()
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 første og andre ledd") + meldFraOmArbeidsinntektAvsnitt()
         );
 
         assertThatHtml(brevtekst)
@@ -153,7 +153,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
-                """ + meldFraOmArbeidsinntektAvsnitt()
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 første og andre ledd") + meldFraOmArbeidsinntektAvsnitt()
         );
 
         assertThatHtml(brevtekst)
@@ -179,7 +179,51 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextContains("har vi brukt årsinntekten din for 2024 på 780 960 kroner.")
             .asPlainTextContains("For å finne dagsatsen din, har vi regnet ut hva 66 prosent av 780 960 kroner er. " +
-                "Vi har brukt en årsinntekt som tilsvarer seks ganger grunnbeløpet fordi det er det maksimale beløpet Nav kan beregne aktivitetspengene ut fra.");
+                "Vi har brukt en årsinntekt som tilsvarer seks ganger grunnbeløpet fordi det er det maksimale beløpet Nav kan beregne aktivitetspengene ut fra.")
+            .asPlainTextContains("per dag. " + VedtaksbrevVerifikasjon.hjemmelsetning("11 første og andre ledd") + "Meld fra til oss");
+    }
+
+    @DisplayName("Førstegangsinnvilgelse med minstesats og barnetillegg viser § 12 i hjemmelsetningen for beregningen")
+    @Test
+    void minstesatsMedBarnetillegg() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var behandling = lagScenario(AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySatsMedBarn(fom));
+
+        assertThatHtml(genererVedtaksbrev(behandling.getId()).dokument().html())
+            .asPlainTextContains("i barnetillegg. " + VedtaksbrevVerifikasjon.hjemmelsetning("12") + "Meld fra til oss");
+    }
+
+    @DisplayName("Førstegangsinnvilgelse med besteberegning og barnetillegg viser § 11 første ledd og § 12 tredje ledd")
+    @Test
+    void besteberegningMedBarnetillegg() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var behandling = lagScenario(AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySatsMedBesteberegningOgBarn(fom));
+
+        assertThatHtml(genererVedtaksbrev(behandling.getId()).dokument().html())
+            .asPlainTextContains("i barnetillegg. " + VedtaksbrevVerifikasjon.hjemmelsetning("11 første ledd og § 12 tredje ledd") + "Meld fra til oss");
+    }
+
+    @DisplayName("Førstegangsinnvilgelse med besteberegning før 25 år, minstesats etter og barnetillegg viser § 11 første ledd og § 12")
+    @Test
+    void besteberegningOgMinstesatsMedBarnetillegg() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var behandling = lagScenario(AktivitetspengerFørstegangsbehandlingScenarioer.innvilget24ÅrBle25ÅrLavSatsMedBesteberegningOgBarn(fom));
+
+        assertThatHtml(genererVedtaksbrev(behandling.getId()).dokument().html())
+            .asPlainTextContains("i barnetillegg. " + VedtaksbrevVerifikasjon.hjemmelsetning("11 første ledd og § 12") + "Meld fra til oss");
+    }
+
+    @DisplayName("Førstegangsinnvilgelse der søker fyller 25 år og besteberegningen er høyere enn høy minstesats, sier ikke at søker får mer penger")
+    @Test
+    void fyller25ÅrMedBesteberegningHøyereEnnHøyMinstesats() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var behandling = lagScenario(AktivitetspengerFørstegangsbehandlingScenarioer.innvilget24ÅrBle25ÅrMedBesteberegningHøyereEnnHøyMinstesats(fom));
+
+        assertThatHtml(genererVedtaksbrev(behandling.getId()).dokument().html())
+            .asPlainTextNotContains("Fordi du fylte 25 år")
+            .asPlainTextNotContains("to ulike beregninger")
+            .asPlainTextContains("Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi brukt årsinntektene dine")
+            .asPlainTextContains("per dag. " + VedtaksbrevVerifikasjon.hjemmelsetning("11 første ledd") + "Meld fra til oss");
     }
 
     @DisplayName("Førstegangsinnvilgelse med lav og høy sats (24 år blir 25)")
@@ -214,7 +258,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Minstesatsen når du er over 25 år, er grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
-                """ + meldFraOmArbeidsinntektAvsnitt()
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 første og andre ledd") + meldFraOmArbeidsinntektAvsnitt()
         );
 
         assertThatHtml(brevtekst)
@@ -259,7 +303,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
-                """ + meldFraOmArbeidsinntektAvsnitt()
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 første og andre ledd") + meldFraOmArbeidsinntektAvsnitt()
         );
 
         assertThatHtml(brevtekst)
@@ -305,7 +349,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
-                """ + meldFraOmArbeidsinntektAvsnitt()
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 første og andre ledd") + meldFraOmArbeidsinntektAvsnitt()
         );
 
         assertThatHtml(brevtekst)
@@ -342,7 +386,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         return """
             Hvorfor får du aktivitetspenger? \
             Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp, sykepenger og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
-            Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i 52 uker. \
+            Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år. \
             """;
     }
 

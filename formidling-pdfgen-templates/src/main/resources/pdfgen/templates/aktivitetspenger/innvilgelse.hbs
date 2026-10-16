@@ -57,7 +57,7 @@
             {{#if søkerBlirOverHøyesteAlder}}Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år.{{/if}}
             </p>
         {{else}}
-            <p>Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i 52 uker.</p>
+            <p>Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år.</p>
         {{/if}}
 
         {{> aktivitetspenger/footer/hjemmel paragrafer="1–14 og § 18"}}
@@ -79,7 +79,7 @@
                             Når vi har regnet ut hvor mye du får i aktivitetspenger før du fylte {{aldersgrenseSatsendring}} år
                         {{~else~}}
                             Når vi har regnet ut hvor mye du får i aktivitetspenger
-                        {{/if~}}, har vi brukt årsinntektene dine for de tre siste ferdiglignede årene og funnet gjennomsnittet av disse.
+                        {{~/if~}}, har vi brukt årsinntektene dine for de tre siste ferdiglignede årene og funnet gjennomsnittet av disse.
                         Gjennomsnittet er på {{> felles/beløp beregnetPrAar}}.
                     </p>
 
@@ -94,7 +94,7 @@
                             Når vi har regnet ut hvor mye du får i aktivitetspenger før du fylte {{aldersgrenseSatsendring}} år
                         {{~else~}}
                             Når vi har regnet ut hvor mye du får i aktivitetspenger
-                        {{/if~}}, har vi brukt årsinntekten din for {{sisteLignedeÅr}} på {{> felles/beløp beregnetPrAar}}.
+                        {{~/if~}}, har vi brukt årsinntekten din for {{sisteLignedeÅr}} på {{> felles/beløp beregnetPrAar}}.
                     </p>
 
                     <p>
@@ -182,6 +182,31 @@
             {{#with barnetillegg}}
                 <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp dagsatsBarnetillegg}} per dag i barnetillegg{{#if harFlereBarn}} for hvert barn{{/if}}.</p>
             {{/with}}
+
+            {{#if beregningsgrunnlag}}
+                {{#if minsteYtelsegrunnlagOvergangTilHøySats}}
+                    {{!-- Et grunnlag som er avkortet mot 6G, er alltid høyere enn minstesatsen, så § 11 andre ledd er ikke aktuelt her --}}
+                    {{#if barnetillegg}}
+                        {{> aktivitetspenger/footer/hjemmel paragraf="11 første ledd og § 12"}}
+                    {{else}}
+                        {{> aktivitetspenger/footer/hjemmel paragraf="11 første ledd og § 12 første og andre ledd"}}
+                    {{/if}}
+                {{else if beregningsgrunnlag.avkortetMotSeksG}}
+                    {{#if barnetillegg}}
+                        {{> aktivitetspenger/footer/hjemmel paragraf="11 første og andre ledd og § 12 tredje ledd"}}
+                    {{else}}
+                        {{> aktivitetspenger/footer/hjemmel paragraf="11 første og andre ledd"}}
+                    {{/if}}
+                {{else if barnetillegg}}
+                    {{> aktivitetspenger/footer/hjemmel paragraf="11 første ledd og § 12 tredje ledd"}}
+                {{else}}
+                    {{> aktivitetspenger/footer/hjemmel paragraf="11 første ledd"}}
+                {{/if}}
+            {{else if barnetillegg}}
+                {{> aktivitetspenger/footer/hjemmel paragraf="12"}}
+            {{else}}
+                {{> aktivitetspenger/footer/hjemmel paragraf="12 første og andre ledd"}}
+            {{/if}}
         {{/with}}
 
     {{/felles/seksjon/hoved}}

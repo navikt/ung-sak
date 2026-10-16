@@ -3,18 +3,13 @@
     {{#> felles/seksjon/hoved }}
         <h1>Nav har ikke endret aktivitetspengene dine</h1>
 
-        {{#if erVarsletSomOpphør}}
-            <p>Du vil fortsatt få aktivitetspenger fra {{periode.fom}}.</p>
-        {{else}}
-            <p>Du får likevel aktivitetspenger i perioden fra og med {{periode.fom}} til og med {{periode.tom}}.</p>
-        {{/if}}
+        <p>Vi har vurdert saken din, og du får fortsatt aktivitetspenger så lenge du oppfyller vilkårene, men ikke lenger enn til {{maksdato}}.</p>
 
-        <h2>Hvorfor får du aktivitetspenger?</h2>
-        <p>{{fritekstBrev}}</p>
+        {{> aktivitetspenger/footer/hjemmel paragrafer="2–8"}}
 
     {{/felles/seksjon/hoved}}
 
-    {{> aktivitetspenger/footer/endringer }}
+    {{> aktivitetspenger/footer/meld-endringer }}
     {{> aktivitetspenger/footer/footer-vedtak }}
 
 {{/felles/base}}
