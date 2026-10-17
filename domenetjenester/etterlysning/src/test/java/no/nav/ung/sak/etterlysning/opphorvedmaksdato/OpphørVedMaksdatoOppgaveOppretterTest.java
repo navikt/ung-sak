@@ -1,6 +1,7 @@
 package no.nav.ung.sak.etterlysning.opphorvedmaksdato;
 
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.opphorvedmaksdato.BekreftOpphorVedMaksdatoOppgavetypeDataDto;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -54,7 +56,7 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
     void skal_opprette_oppgave_for_etterlysning() {
         var maksdato = LocalDate.now().plusWeeks(2);
         var etterlysning = opprettEtterlysning(maksdato);
-        stubGrunnlag(etterlysning, maksdato);
+        stubGrunnlag(etterlysning, TIDENES_ENDE, maksdato);
 
         oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123"));
 
@@ -64,11 +66,50 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
     }
 
     @Test
+    void skal_bruke_maksdato_som_sluttdato_når_programperioden_er_åpen() {
+        var maksdato = LocalDate.of(2026, 10, 30);
+        var etterlysning = opprettEtterlysning(maksdato);
+        stubGrunnlag(etterlysning, TIDENES_ENDE, maksdato);
+
+        oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123"));
+
+        var data = (BekreftOpphorVedMaksdatoOppgavetypeDataDto) capturerOppgave().oppgavetypeData();
+        assertThat(data.sluttdato()).isEqualTo(maksdato);
+        assertThat(data.maxDato()).isEqualTo(maksdato);
+    }
+
+    @Test
+    void skal_bruke_maksdato_som_sluttdato_når_programperioden_slutter_etter_maksdato() {
+        var maksdato = LocalDate.of(2026, 10, 30);
+        var etterlysning = opprettEtterlysning(maksdato);
+        stubGrunnlag(etterlysning, LocalDate.of(2026, 12, 31), maksdato);
+
+        oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123"));
+
+        var data = (BekreftOpphorVedMaksdatoOppgavetypeDataDto) capturerOppgave().oppgavetypeData();
+        assertThat(data.sluttdato()).isEqualTo(maksdato);
+        assertThat(data.maxDato()).isEqualTo(maksdato);
+    }
+
+    @Test
+    void skal_bruke_maksdato_som_sluttdato_når_programperioden_slutter_på_maksdato() {
+        var maksdato = LocalDate.of(2026, 10, 30);
+        var etterlysning = opprettEtterlysning(maksdato);
+        stubGrunnlag(etterlysning, maksdato, maksdato);
+
+        oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123"));
+
+        var data = (BekreftOpphorVedMaksdatoOppgavetypeDataDto) capturerOppgave().oppgavetypeData();
+        assertThat(data.sluttdato()).isEqualTo(maksdato);
+        assertThat(data.maxDato()).isEqualTo(maksdato);
+    }
+
+    @Test
     void skal_opprette_oppgave_for_alle_etterlysninger() {
         var etterlysning1 = opprettEtterlysning(LocalDate.now().plusWeeks(2));
         var etterlysning2 = opprettEtterlysning(LocalDate.now().plusWeeks(1));
-        stubGrunnlag(etterlysning1, LocalDate.now().plusWeeks(2));
-        stubGrunnlag(etterlysning2, LocalDate.now().plusWeeks(1));
+        stubGrunnlag(etterlysning1, TIDENES_ENDE, LocalDate.now().plusWeeks(2));
+        stubGrunnlag(etterlysning2, TIDENES_ENDE, LocalDate.now().plusWeeks(1));
 
         oppretter.opprettOppgave(behandling, List.of(etterlysning1, etterlysning2), new AktørId("1234567890123"));
 
@@ -84,9 +125,9 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
         return captor.getValue();
     }
 
-    private void stubGrunnlag(Etterlysning etterlysning, LocalDate maksdato) {
-        var fom = maksdato.minusDays(1);
-        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, maksdato);
+    private void stubGrunnlag(Etterlysning etterlysning, LocalDate programperiodeTom, LocalDate maksdato) {
+        var fom = maksdato.minusWeeks(52);
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, programperiodeTom);
         var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
         when(grunnlag.hentForEksaktEnPeriode()).thenReturn(periode);
         when(grunnlag.getPeriodeMaksDato()).thenReturn(Optional.of(maksdato));
