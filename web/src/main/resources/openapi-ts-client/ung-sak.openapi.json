@@ -2637,7 +2637,22 @@
             "type" : "string"
           }
         },
-        "required" : [ "avklaringtype", "ikkeOppfyltÅrsak", "kilde", "periode", "referanse" ],
+        "required" : [ "avklaringtype", "foreslåttIBehandlingen", "ikkeOppfyltÅrsak", "kilde", "periode", "referanse", "skalSendeVarsel", "vurdertAv", "vurdertTidspunkt" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringOgUtfallPeriodeDto" : {
+        "properties" : {
+          "avklaring" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "utfall" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
+          }
+        },
+        "required" : [ "periode", "utfall" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingDto" : {
@@ -2652,11 +2667,11 @@
         "required" : [ "avklaring" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerResponse" : {
         "properties" : {
           "perioder" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto"
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingOgAvklaringPeriodeDto"
             },
             "type" : "array"
           },
@@ -2667,11 +2682,11 @@
         "required" : [ "perioder", "vilkårType" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerResponse" : {
         "properties" : {
-          "avklaringer" : {
+          "perioder" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto"
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringOgUtfallPeriodeDto"
             },
             "type" : "array"
           },
@@ -2679,7 +2694,7 @@
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
           }
         },
-        "required" : [ "avklaringer", "vilkårType" ],
+        "required" : [ "perioder", "vilkårType" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingDto" : {
@@ -2707,9 +2722,10 @@
             "type" : "string"
           }
         },
+        "required" : [ "erManuellVurdering", "erVilkårOppfylt", "vurdertAv", "vurdertTidspunkt" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingOgAvklaringPeriodeDto" : {
         "properties" : {
           "avklaringOgVurdering" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingDto"
@@ -8167,7 +8183,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerDto"
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerResponse"
                 }
               }
             },
@@ -8203,7 +8219,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerDto"
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerResponse"
                 }
               }
             },

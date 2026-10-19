@@ -47,8 +47,8 @@ public class OpphørVedMaksdatoOppgaveOppretter {
 
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
-        LocalDate sluttdato = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato();
         LocalDate maksdato = ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElseThrow(() -> new IllegalStateException("Forventer å finne maksdato"));
+        LocalDate sluttdato = utledSisteDagMedYtelse(ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato(), maksdato);
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
@@ -57,6 +57,14 @@ public class OpphørVedMaksdatoOppgaveOppretter {
             etterlysning.getFrist(),
             new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
+    }
+
+    /**
+     * Sluttdatoen vises til deltaker som siste dag med ytelsen. Programperioden er typisk åpen
+     * (tom = TIDENES_ENDE), så siste dag med ytelse er den tidligste av programperiodens tom og maksdato.
+     */
+    private static LocalDate utledSisteDagMedYtelse(LocalDate programperiodeTom, LocalDate maksdato) {
+        return programperiodeTom.isBefore(maksdato) ? programperiodeTom : maksdato;
     }
 }
 
