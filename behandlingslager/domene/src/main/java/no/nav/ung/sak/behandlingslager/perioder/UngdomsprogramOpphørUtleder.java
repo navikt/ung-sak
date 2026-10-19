@@ -17,9 +17,6 @@ import java.util.stream.Collectors;
  * {@code periodeMaksDato} er siste dag med ytelse (inklusiv). Programperioden er typisk åpen
  * ({@code tom = TIDENES_ENDE}), så sluttdatoen i registeret alene sier ikke når ytelsen opphører.
  * <p>
- * Metodene tar inn periodegrunnlaget og henter programperiode og maksdato derfra, slik at kallestedene ikke pakker ut
- * og sammenligner datoene selv. Utlederen gjør ingen repository-kall: kallestedet henter selv grunnlaget det er
- * interessert i - for behandlingen, for originalbehandlingen eller fra en etterlysnings grunnlagsreferanse.
  */
 public final class UngdomsprogramOpphørUtleder {
 
