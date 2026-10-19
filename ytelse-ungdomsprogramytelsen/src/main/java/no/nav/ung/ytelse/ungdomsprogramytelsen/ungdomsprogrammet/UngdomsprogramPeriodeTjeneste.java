@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UngdomsprogramPeriodeTjeneste {
@@ -86,35 +85,16 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
     /**
-     * Returnerer ungdomsprogramperiodene for en behandling der hver periode sin {@code tom}-dato
-     * er kappet mot {@code periodeMaksDato} fra grunnlaget.
-     *
-     * <p>For hver periode brukes {@code min(opprinnelig tom, periodeMaksDato)}.
-     * {@code periodeMaksDato} er allerede beregnet som en virkedag av ung-deltakelse-opplyser.
-     * Dersom {@code periodeMaksDato} ikke er satt på grunnlaget beholdes opprinnelig {@code tom} uendret.
-     * Perioder som ligger helt etter maksdato filtreres bort.
+     * Returnerer ungdomsprogramperiodene for en behandling kappet mot {@code periodeMaksDato} fra grunnlaget,
+     * se {@link UngdomsprogramOpphørUtleder#finnPerioderKappetMotMaksdato}.
      *
      * @param behandlingId Behandling som det skal hentes perioder for
      * @return Perioder kappet mot maksdato, eller tom mengde dersom grunnlag mangler
      */
     public Set<DatoIntervallEntitet> finnPerioderKappetMotMaksdato(Long behandlingId) {
-        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
-        if (grunnlag.isEmpty()) {
-            return Set.of();
-        }
-        var perioder = grunnlag.get().getUngdomsprogramPerioder().getPerioder();
-        var maksDato = grunnlag.get().getPeriodeMaksDato();
-        if (maksDato.isEmpty()) {
-            return perioder.stream()
-                .map(UngdomsprogramPeriode::getPeriode)
-                .collect(Collectors.toSet());
-        }
-        var periodeMaksDato = maksDato.get();
-        return perioder.stream()
-            .map(UngdomsprogramPeriode::getPeriode)
-            .filter(p -> !UngdomsprogramOpphørUtleder.erEtterMaksdato(p.getFomDato(), periodeMaksDato))
-            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(p.getTomDato(), periodeMaksDato)))
-            .collect(Collectors.toSet());
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .map(UngdomsprogramOpphørUtleder::finnPerioderKappetMotMaksdato)
+            .orElse(Set.of());
     }
 
     /**
@@ -210,7 +190,7 @@ public class UngdomsprogramPeriodeTjeneste {
         var maksdato = andreGrunnlag.getPeriodeMaksDato();
         if (maksdato.isPresent()
             && UngdomsprogramOpphørUtleder.erEtterMaksdato(førsteSluttdato, maksdato.get())
-            && UngdomsprogramOpphørUtleder.opphørerVedMaksdato(andreSluttdato, maksdato.get())) {
+            && UngdomsprogramOpphørUtleder.opphørerVedMaksdato(andreGrunnlag)) {
             return List.of();
         }
 

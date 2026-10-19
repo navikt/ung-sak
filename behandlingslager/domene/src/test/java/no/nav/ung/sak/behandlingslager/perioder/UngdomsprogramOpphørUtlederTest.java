@@ -1,5 +1,6 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UngdomsprogramOpphørUtlederTest {
 
@@ -19,24 +21,50 @@ class UngdomsprogramOpphørUtlederTest {
 
         @Test
         void skal_gi_maksdato_når_programperioden_er_åpen() {
-            assertThat(UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(TIDENES_ENDE, MAKSDATO)).isEqualTo(MAKSDATO);
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(grunnlag)).isEqualTo(MAKSDATO);
         }
 
         @Test
         void skal_gi_maksdato_når_programperioden_slutter_etter_maksdato() {
-            assertThat(UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(MAKSDATO.plusDays(1), MAKSDATO)).isEqualTo(MAKSDATO);
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO.plusDays(1)));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(grunnlag)).isEqualTo(MAKSDATO);
         }
 
         @Test
         void skal_gi_maksdato_når_programperioden_slutter_på_maksdato() {
-            assertThat(UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(MAKSDATO, MAKSDATO)).isEqualTo(MAKSDATO);
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(grunnlag)).isEqualTo(MAKSDATO);
         }
 
         @Test
         void skal_gi_programperiodens_sluttdato_når_den_er_før_maksdato() {
             var tom = MAKSDATO.minusDays(1);
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, tom));
 
-            assertThat(UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(tom, MAKSDATO)).isEqualTo(tom);
+            assertThat(UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(grunnlag)).isEqualTo(tom);
+        }
+
+        @Test
+        void skal_feile_når_maksdato_mangler() {
+            var grunnlag = lagGrunnlag(null, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
+
+            assertThatThrownBy(() -> UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(grunnlag))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("periodeMaksDato");
+        }
+
+        @Test
+        void skal_feile_når_grunnlaget_har_flere_perioder() {
+            var grunnlag = lagGrunnlag(MAKSDATO,
+                new UngdomsprogramPeriode(FOM, FOM.plusDays(10)),
+                new UngdomsprogramPeriode(FOM.plusDays(20), TIDENES_ENDE));
+
+            assertThatThrownBy(() -> UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(grunnlag))
+                .isInstanceOf(IllegalStateException.class);
         }
     }
 
@@ -45,22 +73,102 @@ class UngdomsprogramOpphørUtlederTest {
 
         @Test
         void skal_opphøre_ved_maksdato_når_programperioden_er_åpen() {
-            assertThat(UngdomsprogramOpphørUtleder.opphørerVedMaksdato(TIDENES_ENDE, MAKSDATO)).isTrue();
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
+
+            assertThat(UngdomsprogramOpphørUtleder.opphørerVedMaksdato(grunnlag)).isTrue();
         }
 
         @Test
         void skal_opphøre_ved_maksdato_når_programperioden_slutter_etter_maksdato() {
-            assertThat(UngdomsprogramOpphørUtleder.opphørerVedMaksdato(MAKSDATO.plusDays(1), MAKSDATO)).isTrue();
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO.plusDays(1)));
+
+            assertThat(UngdomsprogramOpphørUtleder.opphørerVedMaksdato(grunnlag)).isTrue();
         }
 
         @Test
         void skal_opphøre_ved_maksdato_når_programperioden_slutter_på_maksdato() {
-            assertThat(UngdomsprogramOpphørUtleder.opphørerVedMaksdato(MAKSDATO, MAKSDATO)).isTrue();
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO));
+
+            assertThat(UngdomsprogramOpphørUtleder.opphørerVedMaksdato(grunnlag)).isTrue();
         }
 
         @Test
         void skal_ikke_opphøre_ved_maksdato_når_programperioden_slutter_før_maksdato() {
-            assertThat(UngdomsprogramOpphørUtleder.opphørerVedMaksdato(MAKSDATO.minusDays(1), MAKSDATO)).isFalse();
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO.minusDays(1)));
+
+            assertThat(UngdomsprogramOpphørUtleder.opphørerVedMaksdato(grunnlag)).isFalse();
+        }
+
+        @Test
+        void skal_feile_når_maksdato_mangler() {
+            var grunnlag = lagGrunnlag(null, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
+
+            assertThatThrownBy(() -> UngdomsprogramOpphørUtleder.opphørerVedMaksdato(grunnlag))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("periodeMaksDato");
+        }
+    }
+
+    @Nested
+    class FinnPerioderKappetMotMaksdato {
+
+        @Test
+        void skal_beholde_perioder_uendret_når_maksdato_mangler() {
+            var grunnlag = lagGrunnlag(null, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnPerioderKappetMotMaksdato(grunnlag))
+                .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TIDENES_ENDE));
+        }
+
+        @Test
+        void skal_kappe_åpen_periode_på_maksdato() {
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnPerioderKappetMotMaksdato(grunnlag))
+                .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO));
+        }
+
+        @Test
+        void skal_kappe_periode_som_slutter_etter_maksdato() {
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO.plusDays(1)));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnPerioderKappetMotMaksdato(grunnlag))
+                .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO));
+        }
+
+        @Test
+        void skal_beholde_periode_som_slutter_på_maksdato() {
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnPerioderKappetMotMaksdato(grunnlag))
+                .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO));
+        }
+
+        @Test
+        void skal_beholde_periode_som_slutter_før_maksdato() {
+            var tom = MAKSDATO.minusDays(1);
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, tom));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnPerioderKappetMotMaksdato(grunnlag))
+                .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, tom));
+        }
+
+        @Test
+        void skal_beholde_periode_som_starter_på_maksdato_som_én_dag() {
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(MAKSDATO, TIDENES_ENDE));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnPerioderKappetMotMaksdato(grunnlag))
+                .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(MAKSDATO, MAKSDATO));
+        }
+
+        @Test
+        void skal_fjerne_periode_som_starter_etter_maksdato() {
+            var grunnlag = lagGrunnlag(MAKSDATO,
+                new UngdomsprogramPeriode(FOM, MAKSDATO.minusDays(10)),
+                new UngdomsprogramPeriode(MAKSDATO.plusDays(1), TIDENES_ENDE));
+
+            assertThat(UngdomsprogramOpphørUtleder.finnPerioderKappetMotMaksdato(grunnlag))
+                .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO.minusDays(10)));
         }
     }
 
@@ -88,7 +196,7 @@ class UngdomsprogramOpphørUtlederTest {
 
         @Test
         void skal_finne_lukket_sluttdato() {
-            var grunnlag = lagGrunnlag(new UngdomsprogramPeriode(FOM, MAKSDATO));
+            var grunnlag = lagGrunnlag(null, new UngdomsprogramPeriode(FOM, MAKSDATO));
 
             assertThat(UngdomsprogramOpphørUtleder.finnLukketSluttdato(grunnlag)).contains(MAKSDATO);
             assertThat(UngdomsprogramOpphørUtleder.harLukketSluttdato(grunnlag)).isTrue();
@@ -97,7 +205,7 @@ class UngdomsprogramOpphørUtlederTest {
 
         @Test
         void skal_ikke_finne_lukket_sluttdato_når_programperioden_er_åpen() {
-            var grunnlag = lagGrunnlag(new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
+            var grunnlag = lagGrunnlag(null, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
 
             assertThat(UngdomsprogramOpphørUtleder.finnLukketSluttdato(grunnlag)).isEmpty();
             assertThat(UngdomsprogramOpphørUtleder.harLukketSluttdato(grunnlag)).isFalse();
@@ -114,9 +222,12 @@ class UngdomsprogramOpphørUtlederTest {
         }
     }
 
-    private static UngdomsprogramPeriodeGrunnlag lagGrunnlag(UngdomsprogramPeriode periode) {
+    private static UngdomsprogramPeriodeGrunnlag lagGrunnlag(LocalDate maksdato, UngdomsprogramPeriode... perioder) {
         var grunnlag = new UngdomsprogramPeriodeGrunnlag(1L);
-        grunnlag.leggTil(List.of(periode));
+        grunnlag.leggTil(List.of(perioder));
+        if (maksdato != null) {
+            grunnlag.setUngdomsprogramMaksPeriode(new UngdomsprogramMaksPeriode(false, maksdato));
+        }
         return grunnlag;
     }
 }

@@ -49,7 +49,7 @@ public class OpphørVedMaksdatoOppgaveOppretter {
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
         LocalDate maksdato = ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElseThrow(() -> new IllegalStateException("Forventer å finne maksdato"));
-        LocalDate sluttdato = UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato(), maksdato);
+        LocalDate sluttdato = UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(ungdomsprogramPeriodeGrunnlag);
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,

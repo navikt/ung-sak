@@ -1,10 +1,12 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Samler semantikken for når ungdomsprogramytelsen opphører:
@@ -15,7 +17,9 @@ import java.util.Set;
  * {@code periodeMaksDato} er siste dag med ytelse (inklusiv). Programperioden er typisk åpen
  * ({@code tom = TIDENES_ENDE}), så sluttdatoen i registeret alene sier ikke når ytelsen opphører.
  * <p>
- * Kallestedet henter selv grunnlaget det er interessert i - for behandlingen selv eller for originalbehandlingen.
+ * Metodene tar inn periodegrunnlaget og henter programperiode og maksdato derfra, slik at kallestedene ikke pakker ut
+ * og sammenligner datoene selv. Utlederen gjør ingen repository-kall: kallestedet henter selv grunnlaget det er
+ * interessert i - for behandlingen, for originalbehandlingen eller fra en etterlysnings grunnlagsreferanse.
  */
 public final class UngdomsprogramOpphørUtleder {
 
@@ -23,25 +27,57 @@ public final class UngdomsprogramOpphørUtleder {
     }
 
     /**
-     * @return siste dag med ytelse for en programperiode: den tidligste av programperiodens {@code tom} og maksdato.
+     * @return siste dag med ytelse: den tidligste av programperiodens {@code tom} og maksdato.
+     * @throws IllegalStateException dersom grunnlaget mangler maksdato eller ikke har nøyaktig én programperiode
      */
-    public static LocalDate finnSisteDagMedYtelse(LocalDate programperiodeTom, LocalDate maksdato) {
-        return programperiodeTom.isBefore(maksdato) ? programperiodeTom : maksdato;
+    public static LocalDate finnSisteDagMedYtelse(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        var maksdato = hentMaksdato(grunnlag);
+        return finnSisteDagMedYtelse(grunnlag.hentForEksaktEnPeriode().getTomDato(), maksdato);
     }
 
     /**
      * @return true dersom programperioden varer minst til og med maksdato, slik at det er maksdato (og ikke en
      * tidligere sluttdato) som avslutter ytelsen. Da varsles deltaker via varsel om opphør ved maksdato.
+     * @throws IllegalStateException dersom grunnlaget mangler maksdato eller ikke har nøyaktig én programperiode
      */
-    public static boolean opphørerVedMaksdato(LocalDate programperiodeTom, LocalDate maksdato) {
-        return !programperiodeTom.isBefore(maksdato);
+    public static boolean opphørerVedMaksdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        var maksdato = hentMaksdato(grunnlag);
+        return !grunnlag.hentForEksaktEnPeriode().getTomDato().isBefore(maksdato);
     }
 
     /**
+     * Programperiodene i grunnlaget med {@code tom} kappet mot maksdato, i stedet for rå registerperioder som kan ha
+     * {@code tom = TIDENES_ENDE}. Perioder som starter etter maksdato fjernes. Uten maksdato returneres periodene uendret.
+     */
+    public static Set<DatoIntervallEntitet> finnPerioderKappetMotMaksdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        var perioder = hentPerioder(grunnlag).stream().map(UngdomsprogramPeriode::getPeriode);
+        var maksdato = grunnlag.getPeriodeMaksDato();
+        if (maksdato.isEmpty()) {
+            return perioder.collect(Collectors.toSet());
+        }
+        return perioder
+            .filter(p -> !erEtterMaksdato(p.getFomDato(), maksdato.get()))
+            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), finnSisteDagMedYtelse(p.getTomDato(), maksdato.get())))
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * For sammenligninger der datoen ikke kommer fra samme grunnlag som maksdato, f.eks. en sluttdato fra et annet
+     * grunnlag eller en dato fra en tidslinje-diff.
+     *
      * @return true dersom datoen ligger etter maksdato, dvs. utenfor perioden det kan gis ytelse for.
      */
     public static boolean erEtterMaksdato(LocalDate dato, LocalDate maksdato) {
         return dato.isAfter(maksdato);
+    }
+
+    private static LocalDate finnSisteDagMedYtelse(LocalDate programperiodeTom, LocalDate maksdato) {
+        return programperiodeTom.isBefore(maksdato) ? programperiodeTom : maksdato;
+    }
+
+    private static LocalDate hentMaksdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        return grunnlag.getPeriodeMaksDato()
+            .orElseThrow(() -> new IllegalStateException("Forventer at periodeMaksDato er satt på ungdomsprogramperiodegrunnlaget"));
     }
 
     /**

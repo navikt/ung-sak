@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
@@ -104,6 +103,7 @@ class UngdomsprogramPeriodeTjenesteTest {
 
     @Nested
     class FinnPerioderKappetMotMaksdato {
+        // Selve kappingen er testet i UngdomsprogramOpphørUtlederTest
 
         @Test
         void skal_returnere_tom_mengde_når_grunnlag_mangler() {
@@ -116,63 +116,14 @@ class UngdomsprogramPeriodeTjenesteTest {
         }
 
         @Test
-        void skal_beholde_perioder_uendret_når_maksdato_mangler() {
-            var resultat = finnPerioderKappetMotMaksdato(null, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
-
-            assertThat(resultat).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TIDENES_ENDE));
-        }
-
-        @Test
-        void skal_kappe_åpen_periode_på_maksdato() {
-            var resultat = finnPerioderKappetMotMaksdato(MAKSDATO, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
-
-            assertThat(resultat).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO));
-        }
-
-        @Test
-        void skal_kappe_periode_som_slutter_etter_maksdato() {
-            var resultat = finnPerioderKappetMotMaksdato(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO.plusDays(1)));
-
-            assertThat(resultat).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO));
-        }
-
-        @Test
-        void skal_beholde_periode_som_slutter_på_maksdato() {
-            var resultat = finnPerioderKappetMotMaksdato(MAKSDATO, new UngdomsprogramPeriode(FOM, MAKSDATO));
-
-            assertThat(resultat).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO));
-        }
-
-        @Test
-        void skal_beholde_periode_som_slutter_før_maksdato() {
-            var tom = MAKSDATO.minusDays(1);
-
-            var resultat = finnPerioderKappetMotMaksdato(MAKSDATO, new UngdomsprogramPeriode(FOM, tom));
-
-            assertThat(resultat).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, tom));
-        }
-
-        @Test
-        void skal_beholde_periode_som_starter_på_maksdato_som_én_dag() {
-            var resultat = finnPerioderKappetMotMaksdato(MAKSDATO, new UngdomsprogramPeriode(MAKSDATO, TIDENES_ENDE));
-
-            assertThat(resultat).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(MAKSDATO, MAKSDATO));
-        }
-
-        @Test
-        void skal_fjerne_periode_som_starter_etter_maksdato() {
-            var resultat = finnPerioderKappetMotMaksdato(MAKSDATO,
-                new UngdomsprogramPeriode(FOM, MAKSDATO.minusDays(10)),
-                new UngdomsprogramPeriode(MAKSDATO.plusDays(1), TIDENES_ENDE));
-
-            assertThat(resultat).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO.minusDays(10)));
-        }
-
-        private static Set<DatoIntervallEntitet> finnPerioderKappetMotMaksdato(LocalDate maksdato, UngdomsprogramPeriode... perioder) {
+        void skal_kappe_periodene_i_behandlingens_grunnlag_mot_maksdato() {
             var repository = mock(UngdomsprogramPeriodeRepository.class);
-            var grunnlag = lagGrunnlag(maksdato, perioder);
+            var grunnlag = lagGrunnlag(MAKSDATO, new UngdomsprogramPeriode(FOM, TIDENES_ENDE));
             when(repository.hentGrunnlag(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
-            return new UngdomsprogramPeriodeTjeneste(repository).finnPerioderKappetMotMaksdato(BEHANDLING_ID);
+
+            var resultat = new UngdomsprogramPeriodeTjeneste(repository).finnPerioderKappetMotMaksdato(BEHANDLING_ID);
+
+            assertThat(resultat).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, MAKSDATO));
         }
     }
 
