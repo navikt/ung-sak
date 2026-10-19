@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
  * </ul>
  * {@code periodeMaksDato} er siste dag med ytelse (inklusiv). Programperioden er typisk åpen
  * ({@code tom = TIDENES_ENDE}), så sluttdatoen i registeret alene sier ikke når ytelsen opphører.
- * <p>
  */
 public final class UngdomsprogramOpphørUtleder {
 
@@ -34,7 +33,7 @@ public final class UngdomsprogramOpphørUtleder {
 
     /**
      * @return true dersom programperioden varer minst til og med maksdato, slik at det er maksdato (og ikke en
-     * tidligere sluttdato) som avslutter ytelsen. Da varsles deltaker via varsel om opphør ved maksdato.
+     * tidligere sluttdato) som avslutter ytelsen.
      * @throws IllegalStateException dersom grunnlaget mangler maksdato eller ikke har nøyaktig én programperiode
      */
     public static boolean opphørerVedMaksdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
@@ -43,8 +42,8 @@ public final class UngdomsprogramOpphørUtleder {
     }
 
     /**
-     * Programperiodene i grunnlaget med {@code tom} kappet mot maksdato, i stedet for rå registerperioder som kan ha
-     * {@code tom = TIDENES_ENDE}. Perioder som starter etter maksdato fjernes. Uten maksdato returneres periodene uendret.
+     * @return programperiodene i grunnlaget med {@code tom} kappet mot maksdato. Perioder som starter etter maksdato
+     * fjernes. Uten maksdato returneres periodene uendret.
      */
     public static Set<DatoIntervallEntitet> finnPerioderKappetMotMaksdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
         var perioder = hentPerioder(grunnlag).stream().map(UngdomsprogramPeriode::getPeriode);
@@ -59,8 +58,7 @@ public final class UngdomsprogramOpphørUtleder {
     }
 
     /**
-     * For sammenligninger der datoen ikke kommer fra samme grunnlag som maksdato, f.eks. en sluttdato fra et annet
-     * grunnlag eller en dato fra en tidslinje-diff.
+     * For datoer som ikke kommer fra samme grunnlag som maksdato.
      *
      * @return true dersom datoen ligger etter maksdato, dvs. utenfor perioden det kan gis ytelse for.
      */
