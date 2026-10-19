@@ -40,7 +40,7 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
      *   <li>Siste ytelsesbehandling har et aktivt grunnlag med {@code periodeMaksDato} satt</li>
      *   <li>{@code harPassertVarseldato}: {@code periodeMaksDato} er innenfor
      *       {@value MaksdatoOpphørVarslingPeriode#VARSEL_UKER_FØR_MAKSDATO} uker fra i dag</li>
-     *   <li>{@code opphørErIkkeSattTidligereEnnMaksdato}: programmets maks sluttdato er ikke
+     *   <li>{@code UngdomsprogramOpphørUtleder#opphørerVedMaksdato}: programmets maks sluttdato er ikke
      *       satt tidligere enn {@code periodeMaksDato}</li>
      * </ol>
      *

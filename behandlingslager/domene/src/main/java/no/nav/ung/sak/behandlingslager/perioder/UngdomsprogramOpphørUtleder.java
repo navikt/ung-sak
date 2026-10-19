@@ -7,12 +7,41 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Svarer på om programperioden i et periodegrunnlag er lukket eller åpen. Kallestedet henter selv grunnlaget det
- * er interessert i - for behandlingen selv eller for originalbehandlingen.
+ * Samler semantikken for når ungdomsprogramytelsen opphører:
+ * <ul>
+ *     <li>om programperioden i et periodegrunnlag er lukket eller åpen, og</li>
+ *     <li>hvordan programperiodens sluttdato forholder seg til {@code periodeMaksDato}.</li>
+ * </ul>
+ * {@code periodeMaksDato} er siste dag med ytelse (inklusiv). Programperioden er typisk åpen
+ * ({@code tom = TIDENES_ENDE}), så sluttdatoen i registeret alene sier ikke når ytelsen opphører.
+ * <p>
+ * Kallestedet henter selv grunnlaget det er interessert i - for behandlingen selv eller for originalbehandlingen.
  */
 public final class UngdomsprogramOpphørUtleder {
 
     private UngdomsprogramOpphørUtleder() {
+    }
+
+    /**
+     * @return siste dag med ytelse for en programperiode: den tidligste av programperiodens {@code tom} og maksdato.
+     */
+    public static LocalDate finnSisteDagMedYtelse(LocalDate programperiodeTom, LocalDate maksdato) {
+        return programperiodeTom.isBefore(maksdato) ? programperiodeTom : maksdato;
+    }
+
+    /**
+     * @return true dersom programperioden varer minst til og med maksdato, slik at det er maksdato (og ikke en
+     * tidligere sluttdato) som avslutter ytelsen. Da varsles deltaker via varsel om opphør ved maksdato.
+     */
+    public static boolean opphørerVedMaksdato(LocalDate programperiodeTom, LocalDate maksdato) {
+        return !programperiodeTom.isBefore(maksdato);
+    }
+
+    /**
+     * @return true dersom datoen ligger etter maksdato, dvs. utenfor perioden det kan gis ytelse for.
+     */
+    public static boolean erEtterMaksdato(LocalDate dato, LocalDate maksdato) {
+        return dato.isAfter(maksdato);
     }
 
     /**

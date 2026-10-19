@@ -1,5 +1,7 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet;
 
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
+
 import java.time.LocalDate;
 
 public class MaksdatoOpphørVarslingPeriode {
@@ -14,8 +16,7 @@ public class MaksdatoOpphørVarslingPeriode {
     }
 
     public static boolean erRelevantForVarsling(LocalDate tomDato, LocalDate maksDato) {
-        boolean opphørErIkkeSattTidligereEnnMaksdato = !tomDato.isBefore(maksDato);
-        return harPassertVarseldato(maksDato) && opphørErIkkeSattTidligereEnnMaksdato;
+        return harPassertVarseldato(maksDato) && UngdomsprogramOpphørUtleder.opphørerVedMaksdato(tomDato, maksDato);
     }
 
 }

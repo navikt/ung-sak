@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -108,14 +109,11 @@ public class UngdomsprogramPeriodeTjeneste {
                 .map(UngdomsprogramPeriode::getPeriode)
                 .collect(Collectors.toSet());
         }
-        var kappetTom = maksDato.get();
+        var periodeMaksDato = maksDato.get();
         return perioder.stream()
-            .filter(p -> !p.getPeriode().getFomDato().isAfter(kappetTom))
-            .map(p -> {
-                var opprinneligTom = p.getPeriode().getTomDato();
-                var nyTom = opprinneligTom.isBefore(kappetTom) ? opprinneligTom : kappetTom;
-                return DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFomDato(), nyTom);
-            })
+            .map(UngdomsprogramPeriode::getPeriode)
+            .filter(p -> !UngdomsprogramOpphørUtleder.erEtterMaksdato(p.getFomDato(), periodeMaksDato))
+            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(p.getTomDato(), periodeMaksDato)))
             .collect(Collectors.toSet());
     }
 
@@ -208,8 +206,11 @@ public class UngdomsprogramPeriodeTjeneste {
             return List.of();
         }
 
-        // Dersom sluttdato endres til å være maksdato eller senere og denne før enten ikke var satt (tidenes ende) eller satt til noe lenger frem i tid enn gjeldende sluttdato håndteres varsling av varsel ved opphør på maksdato
-        if (andreGrunnlag.getPeriodeMaksDato().isPresent() && førsteSluttdato.isAfter(andreGrunnlag.getPeriodeMaksDato().get()) && !andreSluttdato.isBefore(andreGrunnlag.getPeriodeMaksDato().get())) {
+        // Dersom sluttdato endres til å være maksdato eller senere og denne før enten ikke var satt (tidenes ende) eller satt til noe lenger frem i tid enn maksdato håndteres varsling av varsel ved opphør på maksdato
+        var maksdato = andreGrunnlag.getPeriodeMaksDato();
+        if (maksdato.isPresent()
+            && UngdomsprogramOpphørUtleder.erEtterMaksdato(førsteSluttdato, maksdato.get())
+            && UngdomsprogramOpphørUtleder.opphørerVedMaksdato(andreSluttdato, maksdato.get())) {
             return List.of();
         }
 
