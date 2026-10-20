@@ -1,7 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.vilkår;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -12,7 +10,6 @@ import no.nav.ung.sak.typer.Periode;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 class VilkårDtoMapper {
@@ -21,17 +18,17 @@ class VilkårDtoMapper {
         // SONAR - Utility classes should not have public constructors
     }
 
-    static List<VilkårMedPerioderDto> lagVilkarMedPeriodeDto(Behandling behandling, boolean medVilkårkjøring, Vilkårene vilkårene, Map<VilkårType, LocalDateTimeline<Boolean>> vurdertePerioderForVilkår) {
+    static List<VilkårMedPerioderDto> lagVilkarMedPeriodeDto(Behandling behandling, boolean medVilkårkjøring, Vilkårene vilkårene) {
         if (vilkårene != null) {
             return vilkårene.getVilkårene()
                 .stream()
-                .map(vilkår -> mapVilkår(vilkår, medVilkårkjøring, behandling, vurdertePerioderForVilkår.get(vilkår.getVilkårType())))
+                .map(vilkår -> mapVilkår(vilkår, medVilkårkjøring, behandling))
                 .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
 
-    private static VilkårPeriodeDto mapTilPeriode(boolean medVilkårkjøring, VilkårPeriode it, LocalDateTimeline<Boolean> vurdertePerioder) {
+    private static VilkårPeriodeDto mapTilPeriode(boolean medVilkårkjøring, VilkårPeriode it) {
         VilkårPeriodeDto dto = new VilkårPeriodeDto();
         dto.setPeriode(new Periode(it.getFom(), it.getTom()));
         dto.setAvslagKode(it.getAvslagsårsak() != null ? it.getAvslagsårsak().getKode() : null);
@@ -41,7 +38,7 @@ class VilkårDtoMapper {
         dto.setFritekstVurderingBrev(it.getFritekstVurderingBrev());
         dto.setIkkeOppfyltÅrsak(it.getIkkeOppfyltÅrsak());
         dto.setMerknad(it.getMerknad());
-        dto.setVurderesIBehandlingen(vurderesIBehandlingen(it, vurdertePerioder));
+        dto.setVurderesIBehandlingen(true);
 
         if (medVilkårkjøring) {
             dto.setInput(it.getRegelInput());
@@ -50,15 +47,8 @@ class VilkårDtoMapper {
         return dto;
     }
 
-    private static boolean vurderesIBehandlingen(VilkårPeriode vilkårPeriode, LocalDateTimeline<Boolean> vurdertePerioder) {
-        if (vurdertePerioder == null) {
-            return true;
-        }
-        return !vurdertePerioder.intersection(vilkårPeriode.getPeriode().toLocalDateInterval()).isEmpty();
-    }
-
-    private static VilkårMedPerioderDto mapVilkår(Vilkår vilkår, boolean medVilkårkjøring, Behandling behandling, LocalDateTimeline<Boolean> vurdertePerioder) {
-        var vilkårsPerioder = vilkår.getPerioder().stream().map(it -> mapTilPeriode(medVilkårkjøring, it, vurdertePerioder))
+    private static VilkårMedPerioderDto mapVilkår(Vilkår vilkår, boolean medVilkårkjøring, Behandling behandling) {
+        var vilkårsPerioder = vilkår.getPerioder().stream().map(it -> mapTilPeriode(medVilkårkjøring, it))
             .collect(Collectors.toList());
         var vilkårMedPerioderDto = new VilkårMedPerioderDto(vilkår.getVilkårType(), vilkårsPerioder);
         vilkårMedPerioderDto.setLovReferanse(vilkår.getVilkårType().getLovReferanse(behandling.getFagsakYtelseType()));

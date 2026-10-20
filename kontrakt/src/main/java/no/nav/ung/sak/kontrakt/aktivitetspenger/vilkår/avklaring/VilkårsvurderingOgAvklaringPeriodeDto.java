@@ -8,7 +8,6 @@ import no.nav.ung.sak.typer.Periode;
 public record VilkårsvurderingOgAvklaringPeriodeDto(
     @NotNull @Valid Periode periode,
     @NotNull Utfall utfall,
-    @NotNull boolean vurderesIBehandlingen,
     @Valid VilkårsavklaringVurderingDto avklaringOgVurdering
 ) {
 }

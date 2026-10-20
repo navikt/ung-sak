@@ -186,18 +186,16 @@ public class VilkårsavklaringRestTjeneste {
                     .max(Comparator.comparing(VilkårsvurderingResultat::vurdertTidspunkt, Comparator.nullsFirst(Comparator.naturalOrder())))
                     .map(VilkårsavklaringRestTjeneste::tilVurderingDto)
                     .orElse(null);
-                var avklaringDto = tilAvklaringDto(avklaring, true, uttalelser);
                 return new VilkårsvurderingOgAvklaringPeriodeDto(
                     avklaring.getPeriode().tilPeriode(),
                     utfall,
-                    avklaringDto.foreslåttIBehandlingen(),
-                    new VilkårsavklaringVurderingDto(avklaringDto, vurdering));
+                    new VilkårsavklaringVurderingDto(tilAvklaringDto(avklaring, true, uttalelser), vurdering));
             });
 
         // tilTidslinje tåler overlapp, i tilfelle eldre data har flere foreslåtte avklaringer
         var foreslåtteTidslinje = TidslinjeUtil.tilTidslinje(foreslåtte.stream().map(VilkårPeriodeAvklaring::getPeriode).toList());
         var raderUtenAvklaring = relevanteVilkårsperioder.disjoint(foreslåtteTidslinje).stream()
-            .map(s -> new VilkårsvurderingOgAvklaringPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), false, null));
+            .map(s -> new VilkårsvurderingOgAvklaringPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), null));
 
         var perioder = Stream.concat(raderMedAvklaring, raderUtenAvklaring)
             .sorted(Comparator.comparing((VilkårsvurderingOgAvklaringPeriodeDto vurderingPeriode) -> vurderingPeriode.periode().getFom()).reversed())
