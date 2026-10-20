@@ -18,20 +18,19 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårMedPerioderDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.perioder.BehandlingstriggerPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
@@ -56,7 +55,7 @@ public class VilkårRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private VilkårTjeneste vilkårTjeneste;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private Instance<BehandlingstriggerPerioderTilVurderingTjeneste> behandlingstriggerPerioderTilVurderingTjenester;
 
     public VilkårRestTjeneste() {
         // for CDI proxy
@@ -65,10 +64,10 @@ public class VilkårRestTjeneste {
     @Inject
     public VilkårRestTjeneste(BehandlingRepository behandlingRepository,
                               VilkårTjeneste vilkårTjeneste,
-                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+                              @Any Instance<BehandlingstriggerPerioderTilVurderingTjeneste> behandlingstriggerPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårTjeneste = vilkårTjeneste;
-        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.behandlingstriggerPerioderTilVurderingTjenester = behandlingstriggerPerioderTilVurderingTjenester;
     }
 
     @GET
@@ -102,18 +101,15 @@ public class VilkårRestTjeneste {
         return dto;
     }
 
-    // Aktivitetspenger skal ikke vise perioder fra tidligere søknader som vurderesIBehandling
     private Map<VilkårType, LocalDateTimeline<Boolean>> utledPerioderTilVurdering(Behandling behandling, Vilkårene vilkårene) {
-        if (behandling.getFagsakYtelseType() != FagsakYtelseType.AKTIVITETSPENGER) {
-            return Map.of();
-        }
-        var tjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
-        return vilkårene.getVilkårene().stream()
-            .map(Vilkår::getVilkårType)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                vilkårType -> TidslinjeUtil.tilTidslinje(tjeneste.utled(behandling.getId(), vilkårType)))
-            );
+        return BehandlingstriggerPerioderTilVurderingTjeneste.finnTjeneste(behandlingstriggerPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
+            .map(tjeneste -> vilkårene.getVilkårene().stream()
+                .map(Vilkår::getVilkårType)
+                .collect(Collectors.toMap(
+                    Function.identity(),
+                    vilkårType -> tjeneste.utledPerTrigger(behandling.getId(), vilkårType).values().stream()
+                        .reduce(LocalDateTimeline.empty(), (a, b) -> a.crossJoin(b, StandardCombinators::alwaysTrueForMatch)))))
+            .orElse(Map.of());
     }
 
     @GET

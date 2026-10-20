@@ -1,7 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -17,6 +15,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -46,7 +45,6 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandAvklaring
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
@@ -83,9 +81,6 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Inject
     private EntityManager entityManager;
-
-    @Inject
-    private @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
@@ -125,7 +120,6 @@ class VurderFaktaOmBistandOppdatererTest {
             behandlingRepository,
             historikkinnslagRepository,
             new VilkårsavklaringEtterlysningTjeneste(etterlysningRepository, prosessTaskTjeneste),
-            vilkårsPerioderTilVurderingTjenester,
             bistandAvklaringTjeneste,
             inngangsvilkårVurderingTjeneste
         );
@@ -211,6 +205,28 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     @Test
+    void apen_tom_skal_lukkes_for_avkortet_del_av_vilkarsperioden() {
+        var avkortetFom = LocalDate.of(2026, 7, 1);
+        settVilkårsperiodenFra(avkortetFom, Utfall.IKKE_OPPFYLT, Avslagsårsak.AVKORTET);
+
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
+
+        assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
+            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), avkortetFom.minusDays(1)));
+    }
+
+    @Test
+    void apen_tom_skal_lukkes_for_ikke_relevant_del_av_vilkarsperioden() {
+        var ikkeRelevantFom = LocalDate.of(2026, 7, 1);
+        settVilkårsperiodenFra(ikkeRelevantFom, Utfall.IKKE_RELEVANT, null);
+
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
+
+        assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
+            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), ikkeRelevantFom.minusDays(1)));
+    }
+
+    @Test
     void skal_sette_vilkarsperiode_for_avklaringen_til_ikke_vurdert() {
         var dto = dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
         var param = new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto);
@@ -282,6 +298,16 @@ class VurderFaktaOmBistandOppdatererTest {
 
     private void oppdater(VurderFaktaOmBistandDto dto) {
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+    }
+
+    private void settVilkårsperiodenFra(LocalDate fom, Utfall utfall, Avslagsårsak avslagsårsak) {
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandling.getId()));
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.BISTANDSVILKÅR);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, TOM)
+            .medUtfall(utfall)
+            .medAvslagsårsak(avslagsårsak));
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
     }
 
     private LocalDateTimeline<VilkårPeriode> oppdater(Behandling behandling, VurderFaktaOmBistandDto dto) {

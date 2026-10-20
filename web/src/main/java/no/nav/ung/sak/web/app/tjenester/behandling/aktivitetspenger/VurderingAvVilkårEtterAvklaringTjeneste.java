@@ -6,12 +6,10 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.GenereltVilkårsvurderingResultat;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
@@ -21,6 +19,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtt
 import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.VilkårsvurderingResultatOgEvaluering;
 import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.VurdertPeriode;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,7 +51,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         }
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = relevanteVilkårsperioder(vilkårene, vilkårType);
+        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(vilkårene, vilkårType);
 
         if (eksisterendeVilkårperioder.isEmpty()) {
             throw new IllegalArgumentException("Fant ingen relevante vilkårsperioder for " + vilkårType
@@ -105,13 +104,6 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             dto.periode().getFom(),
             dto.periode().getTom(),
             dto.erVilkårOppfylt());
-    }
-
-    // Delt med VilkårsavklaringRestTjeneste, slik at det som vises til vurdering er det samme som utled godtar
-    static LocalDateTimeline<VilkårPeriode> relevanteVilkårsperioder(Vilkårene vilkårene, VilkårType vilkårType) {
-        return vilkårene.getVilkårTimeline(vilkårType)
-            .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT)
-            .filterValue(v -> v.getAvslagsårsak() != Avslagsårsak.AVKORTET);
     }
 
     private static void validerPerioderFraDtoOverlapperEksisterendeVilkårperioder(long behandlingId,

@@ -1,8 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -24,7 +22,6 @@ import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedAvklaringTjeneste;
@@ -41,8 +38,6 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste;
-
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
     private BostedAvklaringTjeneste bostedAvklaringTjeneste;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
@@ -54,13 +49,11 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     public VurderFaktaOmBostedOppdaterer(BehandlingRepository behandlingRepository,
                                          HistorikkinnslagRepository historikkinnslagRepository,
                                          VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste,
-                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                          @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED) BostedAvklaringTjeneste bostedAvklaringTjeneste,
                                          InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårsavklaringEtterlysningTjeneste = vilkårsavklaringEtterlysningTjeneste;
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.bostedAvklaringTjeneste = bostedAvklaringTjeneste;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
@@ -77,13 +70,12 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         bostedAvklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId,
             dto.getAvklaringer().stream().map(BostedFaktaavklaringPeriodeDto::periode).toList());
 
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste
-            .finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType())
-            .utled(behandlingId, VilkårType.BOSTEDSVILKÅR);
-        var maxTomDato = perioderTilVurdering.stream()
-            .map(DatoIntervallEntitet::getTomDato)
-            .max(Comparator.naturalOrder())
-            .orElseThrow(() -> new IllegalStateException("Må ha perioder til vurdering"));
+        // Opphør lukkes mot slutten av vilkårsperioden, siden avklaringen kan gjelde en vilkårlig periode i den.
+        var vilkårsperioder = inngangsvilkårVurderingTjeneste.hentRelevanteVilkårsperioder(behandlingId, VilkårType.BOSTEDSVILKÅR);
+        if (vilkårsperioder.isEmpty()) {
+            throw new IllegalStateException("Må ha relevante vilkårsperioder");
+        }
+        var maxTomDato = vilkårsperioder.getMaxLocalDate();
 
         Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = bostedAvklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId);
 
