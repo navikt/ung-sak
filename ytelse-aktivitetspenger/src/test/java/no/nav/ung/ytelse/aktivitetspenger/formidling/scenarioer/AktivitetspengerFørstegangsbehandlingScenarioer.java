@@ -93,6 +93,14 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
     }
 
     /**
+     * Person over 25 år gjennom hele programperioden.
+     * Besteberegning der årsinntekten er avkortet til 6G, og ett barn. Ingen inntektsgradering.
+     */
+    public static AktivitetspengerTestScenario innvilgetKunHøySatsMedBesteberegningAvkortetMotSeksGOgBarn(LocalDate fom) {
+        return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(30), høySatsBuilderMedBarn(fom, 1).build(), lagBeregningsgrunnlagAvkortetMotSeksG(fom)).build();
+    }
+
+    /**
      * Person under 25 år gjennom hele programperioden.
      * Kun lav sats (minstesats). Ingen inntektsgradering og ingen barn.
      */
