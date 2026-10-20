@@ -3,7 +3,6 @@ package no.nav.ung.sak.hendelsemottak.tjenester.kabal.vedtak;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.apptjeneste.AppServiceHandler;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
@@ -22,21 +21,14 @@ public class KlageVedtakConsumer implements AppServiceHandler {
     private static final Logger log = LoggerFactory.getLogger(KlageVedtakConsumer.class);
     private KafkaStreams stream;
     private String topic;
-    private boolean consumerEnabled;
 
     KlageVedtakConsumer() {
     }
 
     @Inject
     public KlageVedtakConsumer(KlageinstansVedtaksHendelseHåndterer klageinstansVedtaksHendelseHåndterer,
-                               VedtakFattetStreamKafkaProperties streamKafkaProperties,
-                               @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean consumerEnabled) {
+                               VedtakFattetStreamKafkaProperties streamKafkaProperties) {
         this.topic = streamKafkaProperties.getTopic();
-        this.consumerEnabled = consumerEnabled;
-
-        if(!consumerEnabled) {
-            return;
-        }
 
         Consumed<String, String> consumed = Consumed.with(Topology.AutoOffsetReset.EARLIEST);
 
@@ -74,19 +66,15 @@ public class KlageVedtakConsumer implements AppServiceHandler {
 
     @Override
     public void start() {
-        if (consumerEnabled) {
-            addShutdownHooks();
-            stream.start();
-            log.info("Starter konsumering av topic={}, tilstand={}", topic, stream.state());
-        }
+        addShutdownHooks();
+        stream.start();
+        log.info("Starter konsumering av topic={}, tilstand={}", topic, stream.state());
     }
 
     @Override
     public void stop() {
-        if (consumerEnabled) {
-            log.info("Starter shutdown av topic={}, tilstand={} med 10 sekunder timeout", topic, stream.state());
-            stream.close(Duration.of(60, ChronoUnit.SECONDS));
-            log.info("Shutdown av topic={}, tilstand={} med 10 sekunder timeout", topic, stream.state());
-        }
+        log.info("Starter shutdown av topic={}, tilstand={} med 10 sekunder timeout", topic, stream.state());
+        stream.close(Duration.of(60, ChronoUnit.SECONDS));
+        log.info("Shutdown av topic={}, tilstand={} med 10 sekunder timeout", topic, stream.state());
     }
 }
