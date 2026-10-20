@@ -4,10 +4,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -16,7 +14,6 @@ import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
@@ -52,18 +49,22 @@ public class VedtaksbrevTjeneste {
         this.behandlingRepository = behandlingRepository;
     }
 
+    public BehandlingVedtaksbrevResultat vedtaksbrevResultat(Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
+        return vedtaksbrevRegel.kjør(behandlingId);
+    }
+
     public VedtaksbrevValgResponse vedtaksbrevValg(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var erAvsluttet = behandling.erAvsluttet();
-
-        VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
-        BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevRegel.kjør(behandlingId);
+        BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevResultat(behandlingId);
         LOG.info("Regel resultater: {}", totalResultat.safePrint());
 
         if (!totalResultat.harBrev()) {
             return mapIngenBrevResponse(totalResultat);
         }
 
+        var erAvsluttet = behandling.erAvsluttet();
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
         var deaktiverteValg = vedtaksbrevValgRepository.finnNyesteDeaktiverteVedtakbrevValg(behandlingId);
         var vedtaksbrevValg = mapVedtaksbrevValg(totalResultat, valg, deaktiverteValg, erAvsluttet);
@@ -162,9 +163,7 @@ public class VedtaksbrevTjeneste {
 
     public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisInput dto) {
         Long behandlingId = dto.behandlingId();
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
-        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegel.kjør(behandlingId);
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevResultat(behandlingId);
         validerHarBrev(totalresultater);
 
         var vedtaksbrev = totalresultater.finnVedtaksbrev(dto.dokumentMalType())
@@ -192,9 +191,7 @@ public class VedtaksbrevTjeneste {
 
     //Brukes foreløpig bare i test - gir ikke mening å generere alle i ett kall.
     public List<GenerertBrev> genererAlleForBehandling(Long behandlingId, Boolean kunHtml) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
-        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegel.kjør(behandlingId);
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevResultat(behandlingId);
         validerHarBrev(totalresultater);
 
         List<GenerertBrev> genererteBrev = totalresultater.vedtaksbrevResultater().stream()
