@@ -28,8 +28,10 @@ public class VedtaksbrevVerifikasjon {
         side av""";
 
     // Sammenlignes med ren tekst, så span-en som hindrer linjeskift i paragrafhenvisningen er ikke med.
-    private static final String HJEMMELSETNING_PREFIKS = "Vedtaket er gjort etter folketrygdloven § 25-13 tredje ledd og forskrift om forsøk med aktivitetspenger for unge " +
+    private static final String LOVHENVISNING = "folketrygdloven § 25-13 tredje ledd og forskrift om forsøk med aktivitetspenger for unge " +
         "(forsøket Et enklere Nav), Trondheim kommune, Trøndelag ";
+    private static final String HJEMMELSETNING_PREFIKS = "Vedtaket er gjort etter " + LOVHENVISNING;
+    private static final String BEREGNING_HJEMMELSETNING_PREFIKS = "Beregningen er gjort etter " + LOVHENVISNING;
 
     public static String hjemmelsetning(String paragraf) {
         return HJEMMELSETNING_PREFIKS + "§ " + paragraf + ". ";
@@ -37,6 +39,10 @@ public class VedtaksbrevVerifikasjon {
 
     public static String hjemmelsetningFlereParagrafer(String paragrafer) {
         return HJEMMELSETNING_PREFIKS + "§§ " + paragrafer + ". ";
+    }
+
+    public static String beregningHjemmelsetning(String paragraf) {
+        return BEREGNING_HJEMMELSETNING_PREFIKS + "§ " + paragraf + ". ";
     }
 
     public static final String HILSEN_SENTRAL = hilsen(
