@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -30,14 +29,12 @@ public class OverførKlagebehandlingEventObserver {
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    private Boolean lansert;
 
     @Inject
-    public OverførKlagebehandlingEventObserver(ProsessTaskTjeneste prosessTaskRepository, BehandlingRepository behandlingRepository,
-                                               @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") Boolean lansert) {
+    public OverførKlagebehandlingEventObserver(ProsessTaskTjeneste prosessTaskRepository,
+                                               BehandlingRepository behandlingRepository) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
-        this.lansert = lansert;
     }
 
     /**
@@ -46,11 +43,6 @@ public class OverførKlagebehandlingEventObserver {
     public void overførBehandlingTilKabal(@Observes BehandlingskontrollEvent.StoppetEvent event) {
         Behandling behandling = behandlingRepository.hentBehandling(event.getBehandlingId());
         if (behandling.erYtelseBehandling()) {
-            return;
-        }
-
-        if (!lansert) {
-            logger.info("Overføring til Kabal er ikke lansert, avslutter uten å opprette task");
             return;
         }
 
