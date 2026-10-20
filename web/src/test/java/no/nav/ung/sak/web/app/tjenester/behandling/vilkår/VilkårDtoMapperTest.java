@@ -26,7 +26,7 @@ class VilkårDtoMapperTest {
 
     @Test
     void periode_vurderes_i_behandlingen_når_ytelsen_ikke_har_tidslinje_for_perioder_til_vurdering() {
-        var dto = mapVilkår(Map.of());
+        var dto = mapVilkår(FagsakYtelseType.UNGDOMSYTELSE, Map.of());
 
         assertThat(dto).isTrue();
     }
@@ -35,7 +35,7 @@ class VilkårDtoMapperTest {
     void periode_vurderes_ikke_når_den_ikke_overlapper_perioder_til_vurdering() {
         var tilVurdering = new LocalDateTimeline<>(FOM.minusMonths(6), FOM.minusMonths(5), Boolean.TRUE);
 
-        var dto = mapVilkår(Map.of(VilkårType.ALDERSVILKÅR, tilVurdering));
+        var dto = mapVilkår(FagsakYtelseType.AKTIVITETSPENGER, Map.of(VilkårType.ALDERSVILKÅR, tilVurdering));
 
         assertThat(dto).isFalse();
     }
@@ -44,14 +44,14 @@ class VilkårDtoMapperTest {
     void periode_vurderes_når_den_overlapper_perioder_til_vurdering() {
         var tilVurdering = new LocalDateTimeline<>(FOM, FOM.plusDays(5), Boolean.TRUE);
 
-        var dto = mapVilkår(Map.of(VilkårType.ALDERSVILKÅR, tilVurdering));
+        var dto = mapVilkår(FagsakYtelseType.AKTIVITETSPENGER, Map.of(VilkårType.ALDERSVILKÅR, tilVurdering));
 
         assertThat(dto).isTrue();
     }
 
-    private boolean mapVilkår(Map<VilkårType, LocalDateTimeline<Boolean>> perioderTilVurdering) {
+    private boolean mapVilkår(FagsakYtelseType ytelseType, Map<VilkårType, LocalDateTimeline<Boolean>> perioderTilVurdering) {
         var behandling = mock(Behandling.class);
-        when(behandling.getFagsakYtelseType()).thenReturn(FagsakYtelseType.UNGDOMSYTELSE);
+        when(behandling.getFagsakYtelseType()).thenReturn(ytelseType);
         var vilkårene = Vilkårene.builder()
             .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)).medUtfall(Utfall.OPPFYLT)))
