@@ -121,8 +121,7 @@ public class PdlLeesahOversetter {
 
         AktørId barnAktørId = optionalAktørId.get();
 
-        //TODO legg til aktivitetpenger i lista når det lanseres/er lansert
-        var behandlingsnumre = List.of(Behandlingsnummer.AKTIVITETSPENGER);
+        var behandlingsnumre = List.of(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN, Behandlingsnummer.AKTIVITETSPENGER);
         PersoninfoBasis barn = personTjeneste.hentBasisPersoninfo(barnAktørId, barnPersonIdent, behandlingsnumre);
         LocalDate fødselsdato = barn.getFødselsdato();
 
