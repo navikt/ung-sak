@@ -187,25 +187,25 @@
                 {{#if minsteYtelsegrunnlagOvergangTilHøySats}}
                     {{!-- Et grunnlag som er avkortet mot 6G, er alltid høyere enn minstesatsen, så § 11 andre ledd er ikke aktuelt her --}}
                     {{#if barnetillegg}}
-                        {{> aktivitetspenger/footer/hjemmel paragraf="11 første ledd og § 12"}}
+                        {{> aktivitetspenger/footer/hjemmel-beregning paragraf="11 første ledd og § 12"}}
                     {{else}}
-                        {{> aktivitetspenger/footer/hjemmel paragraf="11 første ledd og § 12 første og andre ledd"}}
+                        {{> aktivitetspenger/footer/hjemmel-beregning paragraf="11 første ledd og § 12 første og andre ledd"}}
                     {{/if}}
                 {{else if beregningsgrunnlag.avkortetMotSeksG}}
                     {{#if barnetillegg}}
-                        {{> aktivitetspenger/footer/hjemmel paragraf="11 første og andre ledd og § 12 tredje ledd"}}
+                        {{> aktivitetspenger/footer/hjemmel-beregning paragraf="11 første og andre ledd og § 12 tredje ledd"}}
                     {{else}}
-                        {{> aktivitetspenger/footer/hjemmel paragraf="11 første og andre ledd"}}
+                        {{> aktivitetspenger/footer/hjemmel-beregning paragraf="11 første og andre ledd"}}
                     {{/if}}
                 {{else if barnetillegg}}
-                    {{> aktivitetspenger/footer/hjemmel paragraf="11 første ledd og § 12 tredje ledd"}}
+                    {{> aktivitetspenger/footer/hjemmel-beregning paragraf="11 første ledd og § 12 tredje ledd"}}
                 {{else}}
-                    {{> aktivitetspenger/footer/hjemmel paragraf="11 første ledd"}}
+                    {{> aktivitetspenger/footer/hjemmel-beregning paragraf="11 første ledd"}}
                 {{/if}}
             {{else if barnetillegg}}
-                {{> aktivitetspenger/footer/hjemmel paragraf="12"}}
+                {{> aktivitetspenger/footer/hjemmel-beregning paragraf="12"}}
             {{else}}
-                {{> aktivitetspenger/footer/hjemmel paragraf="12 første og andre ledd"}}
+                {{> aktivitetspenger/footer/hjemmel-beregning paragraf="12 første og andre ledd"}}
             {{/if}}
         {{/with}}
 
