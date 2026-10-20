@@ -269,8 +269,10 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
-    - name: KLAGE_ENABLED
-      value: "true"
+    - name: KLAGE_AVP_ENABLED
+      value: "false"
+    - name: REVURDERING_AVP_ENABLED
+      value: "false"
     - name: INTEGRASJON_KABAL
       value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
