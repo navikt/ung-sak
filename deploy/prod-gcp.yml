@@ -281,8 +281,6 @@ spec:
       value: "false"
     - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
       value: "true"
-    - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
-      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

@@ -121,11 +121,8 @@ public class PdlLeesahOversetter {
 
         AktørId barnAktørId = optionalAktørId.get();
 
-        // Vi vet ikke her tidspunktet hvilken ytelse det gjelder (eller om det gjelder flere). Sender med alle aktuelle ytelser
-        Boolean aktivertSpesifikkBehandlingsnummer = Boolean.valueOf(Environment.current().getProperty("BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE", "false"));
-        var behandlingsnumre = aktivertSpesifikkBehandlingsnummer
-            ? List.of(Behandlingsnummer.AKTIVITETSPENGER, Behandlingsnummer.UNGDOMSPROGRAMYTELSEN)
-            : List.of(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
+        //TODO legg til aktivitetpenger i lista når det lanseres/er lansert
+        var behandlingsnumre = List.of(Behandlingsnummer.AKTIVITETSPENGER);
         PersoninfoBasis barn = personTjeneste.hentBasisPersoninfo(barnAktørId, barnPersonIdent, behandlingsnumre);
         LocalDate fødselsdato = barn.getFødselsdato();
 
