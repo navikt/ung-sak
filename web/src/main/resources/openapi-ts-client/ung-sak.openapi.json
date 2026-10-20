@@ -9319,6 +9319,33 @@
         "tags" : [ "formidling" ]
       }
     },
+    "/api/formidling/navkontor/vedtaksbrev" : {
+      "get" : {
+        "description" : "Avslag- og opphørsbrev som kan forhåndsvises av Nav-kontor. Ingen redigering eller hindring. Forhåndsvisning gjøres med POST /formidling/vedtaksbrev/forhaandsvis",
+        "operationId" : "vedtaksbrevValgForNavKontor",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
     "/api/formidling/vedtaksbrev" : {
       "get" : {
         "description" : "Operasjoner som er mulig for vedtaksbrev",
