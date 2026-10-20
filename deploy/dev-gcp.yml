@@ -271,7 +271,9 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
-    - name: KLAGE_ENABLED
+    - name: KLAGE_AVP_ENABLED
+      value: "true"
+    - name: REVURDERING_AVP_ENABLED
       value: "true"
     - name: INTEGRASJON_KABAL
       value: "true"

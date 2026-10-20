@@ -39,6 +39,7 @@ import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
@@ -104,7 +105,8 @@ public class FagsakRestTjeneste {
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
-    private boolean klageEnabled;
+    private boolean klageAktivitetspengerEnabled;
+    private boolean revurderingAktivitetspengerEnabled;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste taskTjeneste;
     private FagsakRepository fagsakRepository;
@@ -120,7 +122,8 @@ public class FagsakRestTjeneste {
     public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
                               FagsakTjeneste fagsakTjeneste,
                               BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
-                              @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled,
+                              @KonfigVerdi(value = "KLAGE_AVP_ENABLED", defaultVerdi = "false") boolean klageAktivitetspengerEnabled,
+                              @KonfigVerdi(value = "REVURDERING_AVP_ENABLED", defaultVerdi = "false") boolean revurderingAktivitetspengerEnabled,
                               BehandlingRepository behandlingRepository,
                               ProsessTaskTjeneste taskTjeneste,
                               FagsakRepository fagsakRepository,
@@ -128,7 +131,8 @@ public class FagsakRestTjeneste {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
-        this.klageEnabled = klageEnabled;
+        this.klageAktivitetspengerEnabled = klageAktivitetspengerEnabled;
+        this.revurderingAktivitetspengerEnabled = revurderingAktivitetspengerEnabled;
         this.behandlingRepository = behandlingRepository;
         this.taskTjeneste = taskTjeneste;
         this.fagsakRepository = fagsakRepository;
@@ -239,11 +243,15 @@ public class FagsakRestTjeneste {
         }
         var fagsakId = fagsak.map(Fagsak::getId).orElseThrow();
         var perioderMedGjennomførtKontroll = behandlingsoppretterTjeneste.finnGyldigeVurderingsperioderPrÅrsak(fagsak.get());
+
+        var erAktivitetspenger = fagsak.get().getYtelseType() == FagsakYtelseType.AKTIVITETSPENGER;
+
         var oppretting = BehandlingType.getYtelseBehandlingTyper().stream()
             .map(bt -> new BehandlingOpprettingDto(bt, behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsakId, bt), perioderMedGjennomførtKontroll))
+            .filter(dto -> !erAktivitetspenger || revurderingAktivitetspengerEnabled || dto.getBehandlingType() != BehandlingType.REVURDERING)
             .collect(Collectors.toList());
 
-        if (klageEnabled) {
+        if (!erAktivitetspenger || klageAktivitetspengerEnabled) {
             oppretting.add(new BehandlingOpprettingDto(BehandlingType.KLAGE, true, List.of()));
         }
 
