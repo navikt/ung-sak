@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -19,16 +21,26 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårMedPerioderDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
@@ -44,6 +56,7 @@ public class VilkårRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private VilkårTjeneste vilkårTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     public VilkårRestTjeneste() {
         // for CDI proxy
@@ -51,9 +64,11 @@ public class VilkårRestTjeneste {
 
     @Inject
     public VilkårRestTjeneste(BehandlingRepository behandlingRepository,
-                              VilkårTjeneste vilkårTjeneste) {
+                              VilkårTjeneste vilkårTjeneste,
+                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårTjeneste = vilkårTjeneste;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
     @GET
@@ -83,8 +98,22 @@ public class VilkårRestTjeneste {
     private List<VilkårMedPerioderDto> getVilkårV3(BehandlingUuidDto behandlingUuid, boolean inkluderVilkårkjøring) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var vilkåreneOpt = vilkårTjeneste.hentHvisEksisterer(behandling.getId());
-        var dto = vilkåreneOpt.map(vilkårene -> VilkårDtoMapper.lagVilkarMedPeriodeDto(behandling, inkluderVilkårkjøring, vilkårene)).orElse(Collections.emptyList());
+        var dto = vilkåreneOpt.map(vilkårene -> VilkårDtoMapper.lagVilkarMedPeriodeDto(behandling, inkluderVilkårkjøring, vilkårene, utledPerioderTilVurdering(behandling, vilkårene))).orElse(Collections.emptyList());
         return dto;
+    }
+
+    // Aktivitetspenger skal ikke vise perioder fra tidligere søknader som vurderesIBehandling
+    private Map<VilkårType, LocalDateTimeline<Boolean>> utledPerioderTilVurdering(Behandling behandling, Vilkårene vilkårene) {
+        if (behandling.getFagsakYtelseType() != FagsakYtelseType.AKTIVITETSPENGER) {
+            return Map.of();
+        }
+        var tjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+        return vilkårene.getVilkårene().stream()
+            .map(Vilkår::getVilkårType)
+            .collect(Collectors.toMap(
+                Function.identity(),
+                vilkårType -> TidslinjeUtil.tilTidslinje(tjeneste.utled(behandling.getId(), vilkårType)))
+            );
     }
 
     @GET
