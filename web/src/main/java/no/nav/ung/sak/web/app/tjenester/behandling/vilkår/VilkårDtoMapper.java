@@ -52,9 +52,9 @@ class VilkårDtoMapper {
 
     private static boolean vurderesIBehandlingen(VilkårPeriode vilkårPeriode, LocalDateTimeline<Boolean> vurdertePerioder) {
         if (vurdertePerioder == null) {
-            return false;
+            return true;
         }
-        return  !vurdertePerioder.intersection(vilkårPeriode.getPeriode().toLocalDateInterval()).isEmpty();
+        return !vurdertePerioder.intersection(vilkårPeriode.getPeriode().toLocalDateInterval()).isEmpty();
     }
 
     private static VilkårMedPerioderDto mapVilkår(Vilkår vilkår, boolean medVilkårkjøring, Behandling behandling, LocalDateTimeline<Boolean> vurdertePerioder) {

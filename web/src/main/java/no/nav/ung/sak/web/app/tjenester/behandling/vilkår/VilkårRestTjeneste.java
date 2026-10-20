@@ -116,7 +116,6 @@ public class VilkårRestTjeneste {
             );
     }
 
-
     @GET
     @Path(VILKÅR_SAMLET_PATH)
     @Operation(description = "Hent informasjon om vilkår samlet for en behandling", tags = "vilkår", responses = {
