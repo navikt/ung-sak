@@ -11,9 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.kontrakt.abac.*;
@@ -132,10 +130,17 @@ public class PipRestTjeneste {
             FagsakStatus fagsakStatus = pipData.fagsakStatus();
             Set<String> ansvarligSaksbehandlere = pipData.ansvarligSaksbehandlere();
             Saksnummer saksnummer = pipData.saksnummer();
-            return Optional.of(new PipDtoV6(pipData.fagsakYtelseType(), saksnummer, personer, personerForSporingslogg, behandlingStatus, fagsakStatus, ansvarligSaksbehandlere, null));
+            BehandlingDel behandlingDel = utledBehandlingDel(pipData);
+            return Optional.of(new PipDtoV6(pipData.fagsakYtelseType(), saksnummer, personer, personerForSporingslogg, behandlingStatus, fagsakStatus, ansvarligSaksbehandlere, behandlingDel));
         } else {
             return Optional.empty();
         }
+    }
+
+    private static BehandlingDel utledBehandlingDel(PipBehandlingsData pipData) {
+        return pipData.fagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER && pipData.aktivtSteg() != null ?
+            BehandlingStegDel.forAktivitetspenger(pipData.aktivtSteg()).orElse(null) :
+            null;
     }
 
     private Set<AktørId> hentAktørIder(PipBehandlingsData pipBehandlingsData) {
