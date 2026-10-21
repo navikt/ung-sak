@@ -1,19 +1,15 @@
 package no.nav.ung.sak.web.server.abac;
 
 import no.nav.k9.felles.exception.ManglerTilgangException;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
-import no.nav.k9.felles.sikkerhet.abac.Fnr;
-import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
-import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.*;
+import no.nav.sif.abac.kontrakt.abac.AbacBehandlingDel;
 import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
@@ -24,11 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,13 +57,28 @@ public class PdpRequestBuilderTest {
         String ansvarligSaksbehandler = "Z123456";
         FagsakStatus fagsakStatus = FagsakStatus.UNDER_BEHANDLING;
         when(pipRepository.hentDataForBehandling(any()))
-            .thenReturn(Optional.of(new PipBehandlingsData(UUID.randomUUID(), behandligStatus, fagsakStatus, Set.of(ansvarligSaksbehandler), SAKSNUMMER_1, FagsakYtelseType.UNGDOMSYTELSE)));
+            .thenReturn(Optional.of(new PipBehandlingsData(UUID.randomUUID(), behandligStatus, fagsakStatus, Set.of(ansvarligSaksbehandler), SAKSNUMMER_1, FagsakYtelseType.UNGDOMSYTELSE, null)));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getAktørIder()).containsOnly(new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_1.getId()));
         assertThat(request.getAnsvarligSaksbehandler()).isEqualTo(ansvarligSaksbehandler);
         assertThat(request.getBehandlingStatusEksternKode()).isEqualTo(AbacBehandlingStatus.OPPRETTET.getEksternKode());
         assertThat(request.getFagsakStatusEksternKode()).isEqualTo(AbacFagsakStatus.UNDER_BEHANDLING.getEksternKode());
+        assertThat(((UngSakPdpRequest) request).getBehandlingDel()).isNull();
+    }
+
+    @Test
+    public void skal_sende_behandlingsdel_utledet_fra_aktivt_steg_for_aktivitetspenger() {
+        PdpRequest request = lagRequestForBehandling(FagsakYtelseType.AKTIVITETSPENGER, BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR);
+
+        assertThat(((UngSakPdpRequest) request).getBehandlingDel()).isEqualTo(AbacBehandlingDel.NAV_KONTOR);
+    }
+
+    @Test
+    public void skal_ikke_sende_behandlingsdel_for_aktivitetspenger_uten_aktivt_steg() {
+        PdpRequest request = lagRequestForBehandling(FagsakYtelseType.AKTIVITETSPENGER, null);
+
+        assertThat(((UngSakPdpRequest) request).getBehandlingDel()).isNull();
     }
 
     @Test
@@ -193,7 +200,7 @@ public class PdpRequestBuilderTest {
         Saksnummer saksnummer = new Saksnummer("ABC");
         when(pipRepository.finnSaksnumerSomEksisterer(any())).thenReturn(Set.of(new Saksnummer("XXX")));
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
-            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET, FagsakStatus.OPPRETTET, Set.of("Z1234"), saksnummer,FagsakYtelseType.UNGDOMSYTELSE)));
+            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET, FagsakStatus.OPPRETTET, Set.of("Z1234"), saksnummer,FagsakYtelseType.UNGDOMSYTELSE, null)));
 
         // Assert
         Assertions.assertThrows(ManglerTilgangException.class, () -> {
@@ -202,6 +209,15 @@ public class PdpRequestBuilderTest {
             requestBuilder.lagPdpRequest(attributter);
 
         });
+    }
+
+    private PdpRequest lagRequestForBehandling(FagsakYtelseType ytelseType, BehandlingStegType aktivtSteg) {
+        AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
+            .leggTil(StandardAbacAttributtType.BEHANDLING_ID, BEHANDLING_ID));
+        when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
+        when(pipRepository.hentDataForBehandling(any())).thenReturn(Optional.of(new PipBehandlingsData(
+            UUID.randomUUID(), BehandlingStatus.UTREDES, FagsakStatus.UNDER_BEHANDLING, Set.of("Z123456"), SAKSNUMMER_1, ytelseType, aktivtSteg)));
+        return requestBuilder.lagPdpRequest(attributter);
     }
 
     private AbacAttributtSamling byggAbacAttributtSamling() {

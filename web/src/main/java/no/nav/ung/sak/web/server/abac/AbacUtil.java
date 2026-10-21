@@ -1,8 +1,10 @@
 package no.nav.ung.sak.web.server.abac;
 
+import no.nav.sif.abac.kontrakt.abac.AbacBehandlingDel;
 import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -48,4 +50,10 @@ public final class AbacUtil {
         // util class
     }
 
+    public static AbacBehandlingDel oversettBehandlingDel(BehandlingDel behandlingDel) {
+        return switch (behandlingDel) {
+            case SENTRAL -> AbacBehandlingDel.NAV_SENTRAL;
+            case NAV_KONTOR -> AbacBehandlingDel.NAV_KONTOR;
+        };
+    }
 }

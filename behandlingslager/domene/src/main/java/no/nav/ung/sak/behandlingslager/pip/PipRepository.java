@@ -7,6 +7,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -15,14 +16,7 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -46,9 +40,11 @@ public class PipRepository {
                ba.ansvarlig_saksbehandler ansvarligSaksbehandler,
                f.fagsak_status fagsakStatus,
                f.saksnummer,
-               f.ytelse_type fagsakYtelseType
+               f.ytelse_type fagsakYtelseType,
+               bst.behandling_steg aktivtSteg
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
+             LEFT JOIN behandling_steg_tilstand bst ON bst.behandling_id = b.id AND bst.behandling_steg_status NOT IN ('AVBRUTT', 'UTFØRT', 'TILBAKEFØRT')
              LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id AND ba.behandling_del = 'SENTRAL'
              WHERE b.id = :behandlingId
             """;
@@ -78,7 +74,8 @@ public class PipRepository {
             FagsakStatus.fraKode(t.get("fagsakStatus", String.class)),
             ansvarligSaksbehandlere,
             new Saksnummer(t.get("saksnummer", String.class)),
-            FagsakYtelseType.fraKode(t.get("fagsakYtelseType", String.class))
+            FagsakYtelseType.fraKode(t.get("fagsakYtelseType", String.class)),
+            Optional.ofNullable(t.get("aktivtSteg", String.class)).map(BehandlingStegType::fraKode).orElse(null)
         );
     }
 
@@ -93,9 +90,11 @@ public class PipRepository {
                 ba.ansvarlig_saksbehandler ansvarligSaksbehandler,
                 f.fagsak_status fagsakStatus,
                 f.ytelse_type fagsakYtelseType,
-                f.saksnummer
+                f.saksnummer,
+                bst.behandling_steg aktivtSteg
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
+             LEFT JOIN behandling_steg_tilstand bst ON bst.behandling_id = b.id AND bst.behandling_steg_status NOT IN ('AVBRUTT', 'UTFØRT', 'TILBAKEFØRT')
              LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id
              WHERE b.uuid = :behandlingUuid
             """;

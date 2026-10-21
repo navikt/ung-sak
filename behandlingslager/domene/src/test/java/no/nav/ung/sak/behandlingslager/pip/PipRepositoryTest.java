@@ -3,10 +3,13 @@ package no.nav.ung.sak.behandlingslager.pip;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -65,6 +68,37 @@ public class PipRepositoryTest {
         assertThat(pipBehandlingsData).isPresent();
         assertThat(pipBehandlingsData.get().behandligStatus()).isEqualTo(behandling.getStatus());
         assertThat(pipBehandlingsData.get().fagsakStatus()).isEqualTo(behandling.getFagsak().getStatus());
+    }
+
+    @Test
+    public void skal_ta_med_aktivt_steg_for_behandling() {
+        Behandling behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.AKTIVITETSPENGER);
+        new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR, BehandlingStegStatus.STARTET);
+        lagreBehandling(behandling);
+        entityManager.flush();
+
+        assertThat(pipRepository.hentDataForBehandling(behandling.getId()).orElseThrow().aktivtSteg())
+            .isEqualTo(BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR);
+        assertThat(pipRepository.hentDataForBehandlingUuid(behandling.getUuid()).orElseThrow().aktivtSteg())
+            .isEqualTo(BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR);
+    }
+
+    @Test
+    public void skal_ikke_ta_med_steg_som_er_utført() {
+        Behandling behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.AKTIVITETSPENGER);
+        new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR, BehandlingStegStatus.UTFØRT);
+        lagreBehandling(behandling);
+        entityManager.flush();
+
+        assertThat(pipRepository.hentDataForBehandling(behandling.getId()).orElseThrow().aktivtSteg()).isNull();
+    }
+
+    @Test
+    public void skal_gi_tomt_aktivt_steg_for_behandling_uten_steg() {
+        Behandling behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.AKTIVITETSPENGER);
+        lagreBehandling(behandling);
+
+        assertThat(pipRepository.hentDataForBehandling(behandling.getId()).orElseThrow().aktivtSteg()).isNull();
     }
 
     @Test
