@@ -103,7 +103,7 @@ public class AntallDagerStatistikk {
                 INNER JOIN UNG_GR_UNGDOMSPROGRAMPERIODE gr ON gr.behandling_id = b.id
                 INNER JOIN UNG_UNGDOMSPROGRAMPERIODER perioder ON perioder.id = gr.ung_ungdomsprogramperioder_id
                 INNER JOIN UNG_UNGDOMSPROGRAMPERIODE periode ON periode.ung_ungdomsprogramperioder_id = perioder.id
-                WHERE f.ytelse_type = :ytelseType     -- Kun ungdomsprogramytelsen
+                WHERE f.ytelse_type = :ytelseType
                   AND gr.aktiv = true                 -- Kun aktive grunnlag
                   AND b.opprettet_tid = (SELECT max(b2.opprettet_tid) FROM behandling b2 WHERE b2.fagsak_id = f.id)  -- Siste behandling
                   AND periode.fom <= CAST(:dagensDato AS date) - INTERVAL '1 day'  -- Periode har startet
