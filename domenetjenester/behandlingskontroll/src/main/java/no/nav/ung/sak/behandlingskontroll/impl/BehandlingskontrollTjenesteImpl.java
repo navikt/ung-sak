@@ -3,24 +3,10 @@ package no.nav.ung.sak.behandlingskontroll.impl;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
-import no.nav.ung.sak.behandlingskontroll.BehandlingModellVisitor;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegKonfigurasjon;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegTilstandSnapshot;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegUtfall;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingTransisjonEvent;
@@ -44,14 +30,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -460,12 +439,12 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     }
 
     private void settAutopunkterTilUtført(BehandlingskontrollKontekst kontekst, Behandling behandling) {
-        List<Aksjonspunkt> åpneAutopunkter = behandling.getÅpneAksjonspunkter(AksjonspunktType.AUTOPUNKT);
+        List<Aksjonspunkt> åpneAutopunkter = behandling.getÅpneAutopunkter();
         lagreAksjonspunkterUtført(kontekst, behandling.getAktivtBehandlingSteg(), åpneAutopunkter);
     }
 
     private void settAutopunkterTilAvbrutt(BehandlingskontrollKontekst kontekst, Behandling behandling) {
-        List<Aksjonspunkt> åpneAutopunkter = behandling.getÅpneAksjonspunkter(AksjonspunktType.AUTOPUNKT);
+        List<Aksjonspunkt> åpneAutopunkter = behandling.getÅpneAutopunkter();
         lagreAksjonspunkterAvbrutt(kontekst, behandling.getAktivtBehandlingSteg(), åpneAutopunkter);
     }
 

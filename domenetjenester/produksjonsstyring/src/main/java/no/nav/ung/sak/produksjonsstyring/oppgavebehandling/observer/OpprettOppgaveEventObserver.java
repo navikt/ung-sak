@@ -7,9 +7,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
-import no.nav.ung.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -21,10 +19,7 @@ import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobl
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveForBehandlingTask;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveGodkjennVedtakTask;
-import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
-import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -68,7 +63,7 @@ public class OpprettOppgaveEventObserver {
             oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling);
             return;
         }
-        List<Aksjonspunkt> åpneAksjonspunkt = filterAksjonspunkt(behandling.getÅpneAksjonspunkter(AksjonspunktType.MANUELL), event);
+        List<Aksjonspunkt> åpneAksjonspunkt = filterAksjonspunkt(behandling.getÅpneManuelleAksjonspunkter(), event);
         if (!åpneAksjonspunkt.isEmpty()) {
             if (harAksjonspunkt(åpneAksjonspunkt, AksjonspunktDefinisjon.FATTER_VEDTAK)) {
                 oppgaveTjeneste.avsluttOppgaveOgStartTask(behandling, behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK, OpprettOppgaveGodkjennVedtakTask.TASKTYPE);

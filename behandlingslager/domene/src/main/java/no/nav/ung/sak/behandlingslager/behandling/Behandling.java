@@ -1,30 +1,10 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
+import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PreRemove;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.ung.kodeverk.Fagsystem;
-import no.nav.ung.kodeverk.behandling.BehandlingDel;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
@@ -38,24 +18,11 @@ import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsystemKodeverkConverter;
 import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.sak.typer.AktørId;
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -448,9 +415,19 @@ public class Behandling extends BaseEntitet {
             .collect(Collectors.toList());
     }
 
-    public List<Aksjonspunkt> getÅpneAksjonspunkter(AksjonspunktType aksjonspunktType) {
+    public List<Aksjonspunkt> getÅpneAutopunkter() {
         return getÅpneAksjonspunkterStream()
-            .filter(ad -> Objects.equals(aksjonspunktType, ad.getAksjonspunktDefinisjon().getAksjonspunktType()))
+            .filter(ad -> ad.getAksjonspunktDefinisjon().erAutopunkt())
+            .collect(Collectors.toList());
+    }
+
+    public List<Aksjonspunkt> getÅpneManuelleAksjonspunkter() {
+        return getÅpneAksjonspunkterStream()
+            .filter(ad -> {
+                AksjonspunktType aksjonspunktType = ad.getAksjonspunktDefinisjon().getAksjonspunktType();
+                return aksjonspunktType == AksjonspunktType.MANUELL
+                    || aksjonspunktType == AksjonspunktType.NAV_KONTOR_MANUELL;
+            })
             .collect(Collectors.toList());
     }
 
@@ -496,12 +473,11 @@ public class Behandling extends BaseEntitet {
     }
 
     private Optional<Aksjonspunkt> getFørsteÅpneAutopunkt() {
-        return getÅpneAksjonspunkter(AksjonspunktType.AUTOPUNKT).stream()
-            .findFirst();
+        return getÅpneAutopunkter().stream().findFirst();
     }
 
     public boolean isBehandlingPåVent() {
-        return !getÅpneAksjonspunkter(AksjonspunktType.AUTOPUNKT).isEmpty();
+        return !getÅpneAutopunkter().isEmpty();
     }
 
     private Stream<Aksjonspunkt> getAksjonspunkterStream() {

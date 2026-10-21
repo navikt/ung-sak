@@ -1,15 +1,15 @@
 package no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt;
 
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.*;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BehandlingPåVentTest {
 
@@ -44,11 +44,18 @@ public class BehandlingPåVentTest {
     }
 
     @Test
-    // TODO PKMANTIS-1137 Har satt midlertidig frist, må endres når dynamisk frist er implementert
     public void testErPåVentNårVenterPåOpptjeningsopplysninger() {
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_SATT_PÅ_VENT_REVURDERING);
         assertThat(behandling.isBehandlingPåVent()).isTrue();
         assertThat(behandling.getOpprettetDato().plusWeeks(2).toLocalDate()).isEqualTo(aksjonspunkt.getFristTid().toLocalDate());
+        aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "");
+        assertThat(behandling.isBehandlingPåVent()).isFalse();
+    }
+
+    @Test
+    public void skal_være_på_vent_når_nav_kontor_autopunkt_er_eneste_åpne_aksjonspunkt() {
+        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE);
+        assertThat(behandling.isBehandlingPåVent()).isTrue();
         aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "");
         assertThat(behandling.isBehandlingPåVent()).isFalse();
     }
