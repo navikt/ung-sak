@@ -30,7 +30,7 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
         var sluttdato = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
             .orElseThrow(() -> new IllegalStateException("Fant ikke ungdomsprogramperiodegrunnlag for behandling " + behandling.getId()))
             .hentForEksaktEnPeriode().getTomDato();
-        if (sluttdato == LocalDateInterval.TIDENES_ENDE) {
+        if (LocalDateInterval.TIDENES_ENDE.equals(sluttdato)) {
             throw new IllegalStateException("Sluttdato var TIDENES_ENDE og er ikke satt");
         }
 

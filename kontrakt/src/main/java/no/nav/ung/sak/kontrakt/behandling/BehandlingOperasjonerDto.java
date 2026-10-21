@@ -44,8 +44,8 @@ public class BehandlingOperasjonerDto {
     @JsonProperty(value = "behandlingTilGodkjenning")
     private boolean behandlingTilGodkjenning;
 
-    @JsonProperty(value = "behandlingTilGodkjenningVedLokalkontor")
-    private boolean behandlingTilGodkjenningVedLokalkontor;
+    @JsonProperty(value = "behandlingTilGodkjenningVedNavKontor")
+    private boolean behandlingTilGodkjenningVedNavKontor;
 
     public UUID getUuid() {
         return uuid;
@@ -83,8 +83,8 @@ public class BehandlingOperasjonerDto {
         return behandlingTilGodkjenning;
     }
 
-    public boolean isBehandlingTilGodkjenningVedLokalkontor() {
-        return behandlingTilGodkjenningVedLokalkontor;
+    public boolean isBehandlingTilGodkjenningVedNavKontor() {
+        return behandlingTilGodkjenningVedNavKontor;
     }
 
 
@@ -140,8 +140,8 @@ public class BehandlingOperasjonerDto {
             return this;
         }
 
-        public Builder medTilGodkjenningVedLokalkontor(boolean tilGodkjenningVedLokalkontor) {
-            this.kladd.behandlingTilGodkjenningVedLokalkontor = tilGodkjenningVedLokalkontor;
+        public Builder medTilGodkjenningVedNavKontor(boolean tilGodkjenningVedNavKontor) {
+            this.kladd.behandlingTilGodkjenningVedNavKontor = tilGodkjenningVedNavKontor;
             return this;
         }
 

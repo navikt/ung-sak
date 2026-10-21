@@ -38,7 +38,7 @@ import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.*;
-import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.avkort.AvkortTjeneste;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -171,7 +171,7 @@ public class AktivitetspengerRestTjeneste {
     }
 
     private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag, List<Inntektspost> inntektsposter) {
-        BeregningInput beregningInput = grunnlag.getBeregningInput().getBeregningInput(grunnlag.getSkjæringstidspunkt());
+        BeregningInput beregningInput = grunnlag.getBeregningInput();
         PgiKalkulator pgiKalkulator = new PgiKalkulator(beregningInput);
         Map<Year, BigDecimal> sumAvkortetPerÅr = pgiKalkulator.avgrensÅrsinntekterUtenOppjustering();
         Map<Year, BigDecimal> sumAvkortetOgOppjustertPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();

@@ -1,11 +1,8 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.formidling.TemplateType;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.typer.Periode;
@@ -26,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
 
     private static final LocalDate FOM = LocalDate.of(2025, 8, 1);
+    private static final LocalDate MAKSDATO = FOM.plusWeeks(52).minusDays(1);
+    private static final String FRITEKST = "Du får likevel aktivitetspenger fordi vilkåret fortsatt er oppfylt.";
 
     UendretInnholdByggerTest() {
         super(1, "Nav har ikke endret aktivitetspengene dine");
@@ -37,18 +36,14 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
             FOM,
             BostedsAvklaringTestData.opphør(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
-            null
+            FRITEKST
         );
-        var behandling = lagUendretScenario(scenario);
 
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
+        var generertBrev = genererVedtaksbrev(lagUendretScenario(scenario).getId());
 
+        assertUendretBrev(generertBrev, MAKSDATO);
         assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom())
-            );
+            .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_NAV_KONTOR);
     }
 
     @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig avslag pga bosted, men vilkåret er fortsatt oppfylt")
@@ -57,92 +52,113 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
             FOM,
             BostedsAvklaringTestData.avslag(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
-            null
+            FRITEKST
         );
-        var behandling = lagUendretScenario(scenario);
 
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du får likevel aktivitetspenger i perioden fra og med " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom())
-            );
-    }
-
-    @DisplayName("Uendret vedtak med fritekst på bostedsvurderingen")
-    @Test
-    void uendretMedFritekst() {
-        var fritekst = "Fritekstbegrunnelse som beskriver hvorfor du likevel beholder ytelsen";
-        var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
-            FOM,
-            BostedsAvklaringTestData.opphør(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
-            fritekst
-        );
-        var behandling = lagUendretScenario(scenario);
-
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                fritekst
-            );
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), MAKSDATO);
     }
 
     @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig opphør pga andre livsoppholdsytelser")
     @Test
     void uendretEtterVarsletOpphørLivsopphold() {
-        var fritekst = "Du får likevel aktivitetspenger fordi den andre ytelsen er stanset.";
         var scenario = AktivitetspengerUendretScenarioer.uendretLivsoppholdScenario(
             FOM,
             VilkårsavklaringTestData.opphør(vurdertPeriode(FOM),
                 AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER,
                 AndreLivsoppholdsytelserAvklaringKildeType.NAV),
-            fritekst
+            FRITEKST
         );
-        var behandling = lagUendretScenario(scenario);
 
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(vurdertPeriode(FOM).getFom()),
-                fritekst
-            );
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), MAKSDATO);
     }
 
     @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig opphør pga bistandsvilkåret")
     @Test
     void uendretEtterVarsletOpphørBistand() {
-        var fritekst = "Du får likevel aktivitetspenger fordi du fortsatt har behov for bistand fra Nav.";
         var scenario = AktivitetspengerUendretScenarioer.uendretBistandScenario(
             FOM,
             VilkårsavklaringTestData.opphør(vurdertPeriode(FOM),
                 BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID,
                 BistandsavklaringKildeType.BRUKER),
-            fritekst
+            FRITEKST
         );
-        var behandling = lagUendretScenario(scenario);
 
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), MAKSDATO);
+    }
+
+    @DisplayName("Uendret vedtak krever ikke fritekst fra saksbehandler")
+    @Test
+    void uendretUtenFritekst() {
+        var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
+            FOM,
+            BostedsAvklaringTestData.opphør(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
+            null
+        );
+
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), MAKSDATO);
+    }
+
+    @DisplayName("Maksdato er siste dag før en avkortet periode")
+    @Test
+    void uendretMedAvkortetHale() {
+        var avkortetFom = FOM.plusMonths(6);
+        var scenario = AktivitetspengerUendretScenarioer.uendretBistandMedAvkortetHale(
+            FOM,
+            VilkårsavklaringTestData.opphør(vurdertPeriode(FOM),
+                BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID,
+                BistandsavklaringKildeType.BRUKER),
+            avkortetFom
+        );
+
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), avkortetFom.minusDays(1));
+    }
+
+    @DisplayName("Maksdato er slutten av den innvilgede perioden, også når den er etter perioden til vurdering")
+    @Test
+    void uendretMedKortVurderingsperiode() {
+        var scenario = AktivitetspengerUendretScenarioer.uendretBistandMedKortVurderingsperiode(
+            FOM,
+            VilkårsavklaringTestData.opphør(kortVurdertPeriode(FOM),
+                BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID,
+                BistandsavklaringKildeType.BRUKER)
+        );
+
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), MAKSDATO);
+    }
+
+    @DisplayName("Maksdato er siste dag før en avkortet periode som er etter perioden til vurdering")
+    @Test
+    void uendretMedKortVurderingsperiodeOgAvkortetHale() {
+        var avkortetFom = FOM.plusMonths(9);
+        var scenario = AktivitetspengerUendretScenarioer.uendretBistandMedKortVurderingsperiodeOgAvkortetHale(
+            FOM,
+            VilkårsavklaringTestData.opphør(kortVurdertPeriode(FOM),
+                BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID,
+                BistandsavklaringKildeType.BRUKER),
+            avkortetFom
+        );
+
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), avkortetFom.minusDays(1));
+    }
+
+    private static void assertUendretBrev(GenerertBrev generertBrev, LocalDate maksdato) {
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
-
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(vurdertPeriode(FOM).getFom()),
-                fritekst
-            );
+                "<p>Vi har vurdert saken din, og du får fortsatt aktivitetspenger så lenge du oppfyller vilkårene, men ikke lenger enn til "
+                    + brevDatoString(maksdato) + ".</p>",
+                "<span class=\"ikke-bryt\">§§ 2–8</span>.</p>",
+                "<h2>Du må melde fra om endringer</h2>"
+            )
+            .asPlainTextNotContains(FRITEKST)
+            .asPlainTextNotContains("Hvorfor får du aktivitetspenger?")
+            .asPlainTextNotContains("arbeidsinntekt");
     }
 
     // Uendret-brevet krever en originalbehandling å sammenligne resultatet mot, så scenarioet bygges som en revurdering.
     private Behandling lagUendretScenario(AktivitetspengerTestScenario scenario) {
-        return AktivitetspengerRevurderingTestOppsett.lagRevurdering(repositories, scenario, scenario);
+        return AktivitetspengerRevurderingTestOppsett.lagRevurdering(repositories, scenario, scenario, BehandlingDel.NAV_KONTOR);
     }
 
     private static Periode vurdertPeriode(LocalDate fom) {
@@ -150,12 +166,16 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         return new Periode(fom.plusMonths(3), tom);
     }
 
+    private static Periode kortVurdertPeriode(LocalDate fom) {
+        return new Periode(fom.plusMonths(3), fom.plusMonths(6).minusDays(1));
+    }
+
     @Override
     protected Behandling lagScenarioForFellesTester() {
         var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
             FOM,
             BostedsAvklaringTestData.opphør(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
-            null
+            FRITEKST
         );
         return lagUendretScenario(scenario);
     }

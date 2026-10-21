@@ -147,8 +147,8 @@ public class KontrollerteInntektperioderTjeneste {
                 var rapporterteInntekter = Optional.ofNullable(rapporterteInntekterTidslinje.getSegment(vurdertInntektTidslinjesegment.getLocalDateInterval())).map(it -> it.getValue());
                 return KontrollertInntektPeriode.ny()
                     .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(vurdertInntektTidslinjesegment.getFom(), vurdertInntektTidslinjesegment.getTom()))
-                    .medInntekt(vurdertInntektTidslinjesegment.getValue().inntekter().stream().filter(it -> it.inntektType().equals(InntektType.ARBEIDSTAKER_ELLER_FRILANSER)).map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO))
-                    .medYtelse(vurdertInntektTidslinjesegment.getValue().inntekter().stream().filter(it -> it.inntektType().equals(InntektType.YTELSE)).map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO))
+                    .medInntekt(InntektMedNedreGrense.summerForType(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, vurdertInntektTidslinjesegment.getValue().inntekter()))
+                    .medYtelse(InntektMedNedreGrense.summerForType(InntektType.YTELSE, vurdertInntektTidslinjesegment.getValue().inntekter()))
                     .medKilde(vurdertInntektTidslinjesegment.getValue().kilde())
                     .medErManueltVurdert(false)
                     .medRegisterInntekt(rapporterteInntekter.map(it -> it.registerRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))

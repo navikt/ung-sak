@@ -24,6 +24,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsTy
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.InnvilgelseDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.SatsOgBeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.UtbetalingDto;
@@ -130,7 +131,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var satserGrunnlag = aktivitetspengerSatser.satsGrunnlag();
         return new SatsEndringUtlederInput(
             satserGrunnlag.antallBarn(),
-            satserGrunnlag.satsType() == UngdomsytelseSatsType.HØY,
+            // Høy sats gir bare mer penger når minstesatsen brukes, ikke når besteberegningen er høyere
+            aktivitetspengerSatser.hentSatsType() == AktivitetspengerSatsType.HØY,
             Satsberegner.beregnDagsatsInklBarnetillegg(aktivitetspengerSatser),
             Satsberegner.beregnBarnetilleggSats(satserGrunnlag),
             segment.getFom()
@@ -201,12 +203,19 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
+    // Siste lignede år avkortet gir alltid 6G i resultatet, fordi det da er minst like høyt som gjennomsnittet av de avkortede årene
     private static BeregningDto lagBeregningsgrunnlagDto(Beregningsgrunnlag beregningsgrunnlag) {
+        var sisteLignedeÅr = beregningsgrunnlag.getSisteLignedeÅr();
+        var beregningInput = beregningsgrunnlag.getBeregningInput();
+        var årAvkortetMotSeksG = new PgiKalkulator(beregningInput).finnÅrAvkortetMotSeksG();
+        var avkortetMotSeksG = årAvkortetMotSeksG.contains(sisteLignedeÅr) || årAvkortetMotSeksG.size() > 2;
+
         return new BeregningDto(
-            beregningsgrunnlag.getSisteLignedeÅr().toString(),
+            sisteLignedeÅr.toString(),
             beregningsgrunnlag.utledBesteBeregningResultatType(),
             beregningsgrunnlag.getBeregnetPrAar(),
-            tilHeltall(beregningsgrunnlag.getDagsats())
+            tilHeltall(beregningsgrunnlag.getDagsats()),
+            avkortetMotSeksG
         );
     }
 

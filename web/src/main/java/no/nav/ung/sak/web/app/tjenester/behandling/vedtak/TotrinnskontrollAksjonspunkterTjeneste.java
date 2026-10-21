@@ -39,8 +39,8 @@ public class TotrinnskontrollAksjonspunkterTjeneste {
     }
 
     public List<TotrinnskontrollSkjermlenkeContextDto> hentTotrinnsSkjermlenkeContext(Behandling behandling) {
-        Set<BehandlingStatus> beslutningssteg = Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR);
-        BehandlingDel behandlingDel = behandling.getStatus() == BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
+        Set<BehandlingStatus> beslutningssteg = Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR);
+        BehandlingDel behandlingDel = behandling.getStatus() == BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR ? BehandlingDel.NAV_KONTOR : BehandlingDel.SENTRAL;
         List<TotrinnskontrollSkjermlenkeContextDto> skjermlenkeContext = new ArrayList<>();
         List<Aksjonspunkt> aksjonspunkter = behandling.getAksjonspunkterMedTotrinnskontroll()
             .stream()
@@ -71,7 +71,7 @@ public class TotrinnskontrollAksjonspunkterTjeneste {
 
     public List<TotrinnskontrollSkjermlenkeContextDto> hentTotrinnsvurderingSkjermlenkeContext(Behandling behandling) {
         List<TotrinnskontrollSkjermlenkeContextDto> skjermlenkeContext = new ArrayList<>();
-        BehandlingDel behandlingDel = behandling.getStatus() == BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
+        BehandlingDel behandlingDel = behandling.getStatus() == BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR ? BehandlingDel.NAV_KONTOR : BehandlingDel.SENTRAL;
         Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, behandlingDel);
         Map<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenkeMap = new HashMap<>();
         for (var vurdering : totrinnaksjonspunktvurderinger) {

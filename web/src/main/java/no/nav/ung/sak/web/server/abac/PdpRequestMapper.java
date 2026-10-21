@@ -85,10 +85,10 @@ public class PdpRequestMapper {
             case MANUELL -> AksjonspunktType.MANUELL;
             case OVERSTYRING -> AksjonspunktType.OVERSTYRING;
             case SAKSBEHANDLEROVERSTYRING -> AksjonspunktType.SAKSBEHANDLEROVERSTYRING;
-            case LOKALKONTOR_AUTOPUNKT -> AksjonspunktType.DEL1_AUTOPUNKT;
-            case LOKALKONTOR_MANUELL -> AksjonspunktType.DEL1_MANUELL;
-            case LOKALKONTOR_OVERSTYRING -> AksjonspunktType.DEL1_OVERSTYRING;
-            case LOKALKONTOR_SAKSBEHANDLEROVERSTYRING -> AksjonspunktType.DEL1_SAKSBEHANDLEROVERSTYRING;
+            case NAV_KONTOR_AUTOPUNKT -> AksjonspunktType.NAV_KONTOR_AUTOPUNKT;
+            case NAV_KONTOR_MANUELL -> AksjonspunktType.NAV_KONTOR_MANUELL;
+            case NAV_KONTOR_OVERSTYRING -> AksjonspunktType.NAV_KONTOR_OVERSTYRING;
+            case NAV_KONTOR_SAKSBEHANDLEROVERSTYRING -> AksjonspunktType.NAV_KONTOR_SAKSBEHANDLEROVERSTYRING;
             case UDEFINERT -> throw new IllegalStateException("Uforventet verdi: " + internAksjonspunktType);
         };
     }

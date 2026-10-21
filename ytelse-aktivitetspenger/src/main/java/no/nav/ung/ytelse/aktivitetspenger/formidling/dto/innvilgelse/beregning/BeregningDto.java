@@ -8,5 +8,7 @@ public record BeregningDto(
     String sisteLignedeÅr,
     BesteBeregningResultatType besteBeregningResultat,
     BigDecimal beregnetPrAar,
-    long dagsats) {
+    long dagsats,
+    boolean avkortetMotSeksG
+) {
 }

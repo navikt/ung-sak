@@ -21,11 +21,41 @@ public class VedtaksbrevVerifikasjon {
         Trenger du mer informasjon? \
         Du finner mer informasjon på nav.no/aktivitetspenger. \
         På nav.no/kontakt kan du chatte eller skrive til oss. \
-        Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
+        Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00–15:00. \
         Med vennlig hilsen \
-        Nav Tiltak Oslo \
+        Nav \
         %s \
         side av""";
+
+    // Sammenlignes med ren tekst, så span-en som hindrer linjeskift i paragrafhenvisningen er ikke med.
+    private static final String LOVHENVISNING = "folketrygdloven § 25-13 tredje ledd og forskrift om forsøk med aktivitetspenger for unge " +
+        "(forsøket Et enklere Nav), Trondheim kommune, Trøndelag ";
+    private static final String HJEMMELSETNING_PREFIKS = "Vedtaket er gjort etter " + LOVHENVISNING;
+    private static final String BEREGNING_HJEMMELSETNING_PREFIKS = "Beregningen er gjort etter " + LOVHENVISNING;
+
+    public static String hjemmelsetning(String paragraf) {
+        return HJEMMELSETNING_PREFIKS + "§ " + paragraf + ". ";
+    }
+
+    public static String hjemmelsetningFlereParagrafer(String paragrafer) {
+        return HJEMMELSETNING_PREFIKS + "§§ " + paragrafer + ". ";
+    }
+
+    public static String beregningHjemmelsetning(String paragraf) {
+        return BEREGNING_HJEMMELSETNING_PREFIKS + "§ " + paragraf + ". ";
+    }
+
+    public static final String HILSEN_SENTRAL = hilsen(
+        AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_BESLUTTER_NAVN);
+    public static final String HILSEN_NAV_KONTOR = hilsen(
+        AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_BESLUTTER_NAVN);
+    public static final String HILSEN_NAV_KONTOR_OG_SENTRAL = hilsen(
+        AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_BESLUTTER_NAVN,
+        AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_BESLUTTER_NAVN);
+
+    private static String hilsen(String... navn) {
+        return "Med vennlig hilsen Nav " + String.join(" ", navn) + " side av";
+    }
 
     public static String medHeaderOgFooter(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
@@ -47,6 +77,17 @@ public class VedtaksbrevVerifikasjon {
                 AktivitetspengerBrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
                 body,
-                AktivitetspengerBrevScenarioerUtils.DEFAULT_SAKSBEHANDLER_NAVN + " " + AktivitetspengerBrevScenarioerUtils.DEFAULT_BESLUTTER_NAVN);
+                AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_SAKSBEHANDLER_NAVN + " " + AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_BESLUTTER_NAVN);
+    }
+
+    public static String medHeaderOgFooterNavKontor(String fnr, String body) {
+        LocalDate brevdato = LocalDate.now();
+        return STANDARD_HEADER_FOOTER
+            .formatted(
+                BrevTestUtils.brevDatoString(brevdato),
+                AktivitetspengerBrevScenarioerUtils.DEFAULT_NAVN,
+                fnr,
+                body,
+                AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_SAKSBEHANDLER_NAVN + " " + AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_BESLUTTER_NAVN);
     }
 }

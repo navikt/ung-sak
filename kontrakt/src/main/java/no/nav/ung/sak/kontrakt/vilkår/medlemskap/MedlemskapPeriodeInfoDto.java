@@ -2,7 +2,7 @@ package no.nav.ung.sak.kontrakt.vilkår.medlemskap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.typer.Periode;
 
 public record MedlemskapPeriodeInfoDto(
@@ -15,6 +15,8 @@ public record MedlemskapPeriodeInfoDto(
     MedlemskapAvslagsÅrsakType avslagsårsak,
 
     String begrunnelse,
+
+    String fritekstVurderingBrev,
 
     @JsonProperty(required = true)
     boolean vurderesIBehandlingen,

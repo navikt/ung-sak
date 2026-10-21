@@ -18,7 +18,7 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnl
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VurderingAvBostedsvilkårEtterAvklaringDto;
-import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 
@@ -59,12 +59,14 @@ public class VurderingAvBostedsvilkårEtterAvklaringOppdaterer implements Aksjon
 
         HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, AKTUELT_VILKÅR);
 
-        var resultatTidslinje = vurderingAvVilkårEtterAvklaringTjeneste.utled(
+        var vurderingResultat = vurderingAvVilkårEtterAvklaringTjeneste.utled(
             behandlingId, AKTUELT_VILKÅR, dto.getVurdertePerioder(), hentÅrsakTidslinje(behandlingId));
 
-        var periodeVurderinger = resultatTidslinje.segmenter().stream()
+        var periodeVurderinger = vurderingResultat.vurderinger().segmenter().stream()
             .map(s -> new BostedsvilkårResultatPeriode(
-                DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue()))
+                DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()),
+                s.getValue().resultat(),
+                vurderingResultat.tilRegelsporing(s.getValue().evaluering())))
             .toList();
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, periodeVurderinger);
@@ -72,7 +74,7 @@ public class VurderingAvBostedsvilkårEtterAvklaringOppdaterer implements Aksjon
 
         historikkinnslagInput.setSkjermlenkeType(SkjermlenkeType.BOSTEDSVILKÅR)
             .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, AKTUELT_VILKÅR))
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
+            .setHistorikkAktør(HistorikkAktør.NAV_KONTOR_SAKSBEHANDLER);
         vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return OppdateringResultat.nyttResultat();

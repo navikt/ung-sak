@@ -5,6 +5,8 @@ import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserVurderingResultat;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.GenereltVilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser;
@@ -16,7 +18,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -59,13 +60,12 @@ class AvslåttVilkårBrevinnholdHjelperTest {
         assertThat(brevårsaker).doesNotHaveDuplicates().containsExactlyInAnyOrder(Livsoppholdsårsak.values());
     }
 
-    @DisplayName("Alle livsoppholdsårsaker utenom MOTTAR_ANNEN_YTELSE navngir ytelsen i brevet")
+    @DisplayName("Alle livsoppholdsårsaker navngir ytelsen i brevet")
     @Test
     void livsoppholdsårsakerNavngirYtelsen() {
-        for (var årsak : EnumSet.complementOf(EnumSet.of(Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE))) {
+        for (var årsak : Livsoppholdsårsak.values()) {
             assertThat(AvslåttAndreLivsoppholdsytelser.av(årsak, FRITEKST, PERIODE).ytelseNavn()).isNotBlank();
         }
-        assertThat(AvslåttAndreLivsoppholdsytelser.av(Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE, FRITEKST, PERIODE).ytelseNavn()).isNull();
     }
 
     @DisplayName("Fritekst følger med standardårsaken, den erstatter den ikke")
@@ -78,6 +78,18 @@ class AvslåttVilkårBrevinnholdHjelperTest {
         assertThat(livsopphold.ytelseNavn()).isEqualTo("dagpenger");
         assertThat(livsopphold.fritekstBrev()).isEqualTo(FRITEKST);
         assertThat(livsopphold.periode()).isEqualTo(PERIODE);
+    }
+
+    @DisplayName("Ytelsenavn fra vurderingen brukes ved MOTTAR_ANNEN_YTELSE, ellers standardteksten")
+    @Test
+    void ytelseNavnFraVurderingBrukesVedAnnenYtelse() {
+        var medNavn = AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(
+            new AvslåttVurdering(livsoppholdVurdering("sosialhjelp"), PERIODE));
+        var utenNavn = AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(
+            new AvslåttVurdering(livsoppholdVurdering(null), PERIODE));
+
+        assertThat(medNavn.ytelseNavn()).isEqualTo("sosialhjelp");
+        assertThat(utenNavn.ytelseNavn()).isEqualTo("en annen livsoppholdsytelse");
     }
 
     @DisplayName("Årsak som ikke krever fritekst kan stå uten")
@@ -131,6 +143,10 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     }
 
     private static VilkårsvurderingResultat vurdering(VilkårType vilkårType, IkkeOppfyltDetaljertÅrsak årsak, String fritekstBrev) {
-        return new VilkårsvurderingResultat(vilkårType, false, årsak, true, "begrunnelse", fritekstBrev, "Z123456", null);
+        return new GenereltVilkårsvurderingResultat(vilkårType, false, årsak, true, "begrunnelse", fritekstBrev, "Z123456", null);
+    }
+
+    private static VilkårsvurderingResultat livsoppholdVurdering(String ytelseNavn) {
+        return new AndreLivsoppholdsytelserVurderingResultat(false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, true, "begrunnelse", null, ytelseNavn, "Z123456", null);
     }
 }

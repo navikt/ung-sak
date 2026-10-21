@@ -6,17 +6,12 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.InngangsvilkårVurderingTestData;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårsavklaringTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,118 +26,43 @@ import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.Aktivitet
 public class AktivitetspengerUendretScenarioer {
 
     public static AktivitetspengerTestScenario uendretScenario(LocalDate fom, BostedsAvklaringTestData bostedsAvklaring, String fritekstTilBrev) {
-        LocalDate fødselsdato = fom.minusYears(20);
-        var tom = fom.plusWeeks(52).minusDays(1);
-        var p = new LocalDateInterval(fom, tom);
+        return uendretScenarioBuilder(fom, bostedsAvklaring, fritekstTilBrev).build();
+    }
+
+    public static AktivitetspengerTestScenario.Builder uendretScenarioBuilder(LocalDate fom, BostedsAvklaringTestData bostedsAvklaring, String fritekstTilBrev) {
         var vurdertPeriode = bostedsAvklaring.periode();
-
-        var lavSats = lavSatsBuilder(fom).build();
-        var satsperioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats))
-        ));
-
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, lavSats)
-        ));
-
-        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
-        ));
-
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
             .medBostedsvilkårResultat(vurdertPeriode, true, null, fritekstTilBrev)
             .build();
 
-        var bostedVilkårTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt())
-        ));
-
-        return AktivitetspengerTestScenario.builder()
-            .medNavn(DEFAULT_NAVN)
-            .medSøknadsperioder(List.of(new Periode(fom, tom)))
-            .medSatsperioder(satsperioder)
-            .medBeregningsgrunnlag(beregningsgrunnlag)
-            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), p))
-            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
-            .medFødselsdato(fødselsdato)
-            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(p))))
+        return uendretBuilder(fom, BehandlingÅrsakType.ENDRET_BOSTED, maksperiode(fom))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
-            .medVilkår(VilkårType.BOSTEDSVILKÅR, bostedVilkårTidslinje)
-            .medBostedsAvklaringer(List.of(bostedsAvklaring))
-            .build();
+            .medVilkår(VilkårType.BOSTEDSVILKÅR, new LocalDateTimeline<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt()))
+            .medBostedsAvklaringer(List.of(bostedsAvklaring));
     }
 
     public static AktivitetspengerTestScenario uendretLivsoppholdScenario(LocalDate fom, VilkårsavklaringTestData avklaring, String fritekstTilBrev) {
-        LocalDate fødselsdato = fom.minusYears(20);
-        var tom = fom.plusWeeks(52).minusDays(1);
-        var p = new LocalDateInterval(fom, tom);
         var vurdertPeriode = avklaring.periode();
-
-        var lavSats = lavSatsBuilder(fom).build();
-        var satsperioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats))
-        ));
-
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, lavSats)
-        ));
-
-        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
-        ));
-
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
             .medAndreYtelser(vurdertPeriode, true, null, fritekstTilBrev)
             .build();
 
-        var vilkårTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt())
-        ));
-
-        return AktivitetspengerTestScenario.builder()
-            .medNavn(DEFAULT_NAVN)
-            .medSøknadsperioder(List.of(new Periode(fom, tom)))
-            .medSatsperioder(satsperioder)
-            .medBeregningsgrunnlag(beregningsgrunnlag)
-            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), p))
-            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
-            .medFødselsdato(fødselsdato)
-            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE, DatoIntervallEntitet.fra(p))))
+        return uendretBuilder(fom, BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE, maksperiode(fom))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
-            .medVilkår(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, vilkårTidslinje)
+            .medVilkår(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, new LocalDateTimeline<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt()))
             .medVilkårsavklaringer(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, List.of(avklaring))
             .build();
     }
 
     public static AktivitetspengerTestScenario uendretBistandScenario(LocalDate fom, VilkårsavklaringTestData avklaring, String fritekstTilBrev) {
-        LocalDate fødselsdato = fom.minusYears(20);
-        var tom = fom.plusWeeks(52).minusDays(1);
-        var p = new LocalDateInterval(fom, tom);
         var vurdertPeriode = avklaring.periode();
-
-        var lavSats = lavSatsBuilder(fom).build();
-        var satsperioder = new LocalDateTimeline<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats));
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(fom, tom, lavSats);
-
-        var beregningsgrunnlag = new LocalDateTimeline<>(fom, null, lagBeregningsgrunnlag(fom));
-
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
             .medBistandsvilkårResultat(vurdertPeriode, true, null, fritekstTilBrev)
             .build();
 
-        var vilkårTidslinje = new LocalDateTimeline<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt());
-
-        return AktivitetspengerTestScenario.builder()
-            .medNavn(DEFAULT_NAVN)
-            .medSøknadsperioder(List.of(new Periode(fom, tom)))
-            .medSatsperioder(satsperioder)
-            .medBeregningsgrunnlag(beregningsgrunnlag)
-            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), p))
-            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
-            .medFødselsdato(fødselsdato)
-            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, DatoIntervallEntitet.fra(p))))
+        return uendretBuilder(fom, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, maksperiode(fom))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
-            .medVilkår(VilkårType.BISTANDSVILKÅR, vilkårTidslinje)
+            .medVilkår(VilkårType.BISTANDSVILKÅR, new LocalDateTimeline<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt()))
             .medVilkårsavklaringer(VilkårType.BISTANDSVILKÅR, List.of(avklaring))
             .build();
     }
@@ -151,18 +71,7 @@ public class AktivitetspengerUendretScenarioer {
      * Bistandsvilkåret er fortsatt oppfylt, men avklaringen dekker også en hale som er avkortet fra avkortetFom.
      */
     public static AktivitetspengerTestScenario uendretBistandMedAvkortetHale(LocalDate fom, VilkårsavklaringTestData avklaring, LocalDate avkortetFom) {
-        LocalDate fødselsdato = fom.minusYears(20);
-        var tom = fom.plusWeeks(52).minusDays(1);
-        var p = new LocalDateInterval(fom, tom);
         var vurdertPeriode = avklaring.periode();
-
-        var lavSats = lavSatsBuilder(fom).build();
-        var satsperioder = new LocalDateTimeline<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats));
-
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(fom, tom, lavSats);
-
-        var beregningsgrunnlag = new LocalDateTimeline<>(fom, null, lagBeregningsgrunnlag(fom));
-
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
             .medBistandsvilkårResultat(new Periode(vurdertPeriode.getFom(), avkortetFom.minusDays(1)), true, null, null)
             .medBistandsvilkårResultat(new Periode(avkortetFom, vurdertPeriode.getTom()), false, BistandsvilkårIkkeOppfyltÅrsak.AVKORTET, null)
@@ -173,19 +82,83 @@ public class AktivitetspengerUendretScenarioer {
             new LocalDateSegment<>(avkortetFom, vurdertPeriode.getTom(), VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
         ));
 
-        return AktivitetspengerTestScenario.builder()
-            .medNavn(DEFAULT_NAVN)
-            .medSøknadsperioder(List.of(new Periode(fom, tom)))
-            .medSatsperioder(satsperioder)
-            .medBeregningsgrunnlag(beregningsgrunnlag)
-            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag),
-                new LocalDateInterval(fom, avkortetFom.minusDays(1))))
-            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
-            .medFødselsdato(fødselsdato)
-            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, DatoIntervallEntitet.fra(p))))
+        return uendretBuilder(fom, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, new LocalDateInterval(fom, avkortetFom.minusDays(1)))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
             .medVilkår(VilkårType.BISTANDSVILKÅR, vilkårTidslinje)
             .medVilkårsavklaringer(VilkårType.BISTANDSVILKÅR, List.of(avklaring))
             .build();
+    }
+
+    /**
+     * Bistandsvilkåret er fortsatt oppfylt. Avklaringen, og dermed perioden til vurdering, slutter før den innvilgede perioden.
+     */
+    public static AktivitetspengerTestScenario uendretBistandMedKortVurderingsperiode(LocalDate fom, VilkårsavklaringTestData avklaring) {
+        var p = maksperiode(fom);
+        var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBistandsvilkårResultat(avklaring.periode(), true, null, null)
+            .build();
+
+        return uendretBistandMedKortVurderingsperiode(fom, avklaring, inngangsvilkårVurderinger,
+            new LocalDateTimeline<>(p, VilkårUtfall.oppfylt()), p);
+    }
+
+    /**
+     * Som {@link #uendretBistandMedKortVurderingsperiode}, men bistandsvilkåret er avkortet fra avkortetFom, som ligger etter perioden til vurdering.
+     */
+    public static AktivitetspengerTestScenario uendretBistandMedKortVurderingsperiodeOgAvkortetHale(LocalDate fom, VilkårsavklaringTestData avklaring, LocalDate avkortetFom) {
+        var p = maksperiode(fom);
+        var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBistandsvilkårResultat(avklaring.periode(), true, null, null)
+            .medBistandsvilkårResultat(new Periode(avkortetFom, p.getTomDato()), false, BistandsvilkårIkkeOppfyltÅrsak.AVKORTET, null)
+            .build();
+
+        var vilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, avkortetFom.minusDays(1), VilkårUtfall.oppfylt()),
+            new LocalDateSegment<>(avkortetFom, p.getTomDato(), VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
+        ));
+
+        return uendretBistandMedKortVurderingsperiode(fom, avklaring, inngangsvilkårVurderinger,
+            vilkårTidslinje, new LocalDateInterval(fom, avkortetFom.minusDays(1)));
+    }
+
+    private static AktivitetspengerTestScenario uendretBistandMedKortVurderingsperiode(LocalDate fom,
+                                                                                      VilkårsavklaringTestData avklaring,
+                                                                                      InngangsvilkårVurderingTestData inngangsvilkårVurderinger,
+                                                                                      LocalDateTimeline<VilkårUtfall> bistandsvilkår,
+                                                                                      LocalDateInterval tilkjentPeriode) {
+        var vurdertPeriode = avklaring.periode();
+        var triggerPeriode = new LocalDateInterval(vurdertPeriode.getFom(), vurdertPeriode.getTom());
+
+        return uendretBuilder(fom, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, tilkjentPeriode, triggerPeriode)
+            .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
+            .medVilkår(VilkårType.BISTANDSVILKÅR, bistandsvilkår)
+            .medVilkårsavklaringer(VilkårType.BISTANDSVILKÅR, List.of(avklaring))
+            .build();
+    }
+
+    private static LocalDateInterval maksperiode(LocalDate fom) {
+        return new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+    }
+
+    private static AktivitetspengerTestScenario.Builder uendretBuilder(LocalDate fom, BehandlingÅrsakType årsak, LocalDateInterval tilkjentPeriode) {
+        return uendretBuilder(fom, årsak, tilkjentPeriode, maksperiode(fom));
+    }
+
+    private static AktivitetspengerTestScenario.Builder uendretBuilder(LocalDate fom, BehandlingÅrsakType årsak, LocalDateInterval tilkjentPeriode, LocalDateInterval triggerPeriode) {
+        var p = maksperiode(fom);
+        var lavSats = lavSatsBuilder(fom).build();
+        var satsperioder = new LocalDateTimeline<>(p, new AktivitetspengerSatsPeriode(p, lavSats));
+        var satsGrunnlagTidslinje = new LocalDateTimeline<>(p, lavSats);
+        var beregningsgrunnlag = new LocalDateTimeline<>(fom, null, lagBeregningsgrunnlag(fom));
+
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(p.getFomDato(), p.getTomDato())))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode))
+            .medVilkår(VilkårType.ALDERSVILKÅR, new LocalDateTimeline<>(p, VilkårUtfall.oppfylt()))
+            .medFødselsdato(fom.minusYears(20))
+            .medTriggere(Set.of(new Trigger(årsak, DatoIntervallEntitet.fra(triggerPeriode))));
     }
 }

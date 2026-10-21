@@ -7,22 +7,15 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.søknad.JsonUtils;
-import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.Kildesystem;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.hendelse.EventHendelse;
-import no.nav.ung.kodeverk.produksjonsstyring.UtvidetSøknadÅrsak;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.SøktPeriodeData;
@@ -38,7 +31,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +58,7 @@ public class BehandlingProsessHendelseMapper {
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
 
         Optional<BehandlingAnsvarlig> behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.SENTRAL);
-        Optional<BehandlingAnsvarlig> behandlingAnsvarligNavKontor = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.LOKAL);
+        Optional<BehandlingAnsvarlig> behandlingAnsvarligNavKontor = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.NAV_KONTOR);
 
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())

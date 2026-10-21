@@ -149,7 +149,7 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>3.0.4</version>
+                <version>3.1.2</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
@@ -344,7 +344,7 @@
             <dependency>
                 <groupId>no.nav.sif.abac</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.14.0</version>
+                <version>1.14.1</version>
             </dependency>
 
             <dependency>

@@ -19,14 +19,14 @@ import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestRepositories;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestRepositories;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +40,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -110,18 +109,15 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
 
     private Behandling lagBehandlingMedBarn(Periode søknadsperiode, AktørId barnAktørId, LocalDate barnFødselsdato) {
         Behandling behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad().medAktivitetspengerTestGrunnlag(
-            new AktivitetspengerTestScenario(
-                "Test Testesen",
-                List.of(søknadsperiode),
-                LocalDateTimeline.empty(),
-                LocalDateTimeline.empty(),
-                LocalDateTimeline.empty(),
-                LocalDateTimeline.empty(),
-                LocalDate.now().minusYears(19),
-                Set.of(),
-                List.of(PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).leggTilPersonopplysning(Personopplysning.builder().aktørId(barnAktørId).fødselsdato(barnFødselsdato).build()).build()),
-                null,
-                null)
+            AktivitetspengerTestScenario.builder()
+                .medNavn("Test Testesen")
+                .medSøknadsperioder(List.of(søknadsperiode))
+                .medSatsperioder(LocalDateTimeline.empty())
+                .medBeregningsgrunnlag(LocalDateTimeline.empty())
+                .medTilkjentYtelse(LocalDateTimeline.empty())
+                .medFødselsdato(LocalDate.now().minusYears(19))
+                .medBarn(List.of(PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).leggTilPersonopplysning(Personopplysning.builder().aktørId(barnAktørId).fødselsdato(barnFødselsdato).build()).build()))
+                .build()
         ).buildOgLagreMedAktivitspenger(AktivitetspengerTestRepositories.lagAlleAktivitetspengerTestRepositoriesOgAbakusTjeneste(entityManager, null));
         return behandling;
     }

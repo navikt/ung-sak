@@ -366,18 +366,18 @@ public class BehandlingDtoTjeneste {
                 && behandlingAnsvarligSentralDel.getAnsvarligSaksbehandler() != null
                 && !behandlingAnsvarligSentralDel.getAnsvarligSaksbehandler().equalsIgnoreCase(SubjectHandler.getSubjectHandler().getUid());
             return BehandlingOperasjonerDto.builder(b.getUuid()).medTilGodkjenning(tilgokjenning).build();
-        } else if (BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR == b.getStatus()) {
+        } else if (BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR == b.getStatus()) {
             boolean tilgokjenning = behandlingAnsvarligLokalDel != null
                 && behandlingAnsvarligLokalDel.getAnsvarligSaksbehandler() != null
                 && !behandlingAnsvarligLokalDel.getAnsvarligSaksbehandler().equalsIgnoreCase(SubjectHandler.getSubjectHandler().getUid());
-            return BehandlingOperasjonerDto.builder(b.getUuid()).medTilGodkjenningVedLokalkontor(tilgokjenning).build();
+            return BehandlingOperasjonerDto.builder(b.getUuid()).medTilGodkjenningVedNavKontor(tilgokjenning).build();
         } else {
             boolean kanÅpnesForEndring = b.erRevurdering() && !b.isBehandlingPåVent();
             boolean totrinnRetur = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(b).stream()
                 .anyMatch(tt -> !tt.isGodkjent());
             return BehandlingOperasjonerDto.builder(b.getUuid())
                 .medTilGodkjenning(false)
-                .medTilGodkjenningVedLokalkontor(false)
+                .medTilGodkjenningVedNavKontor(false)
                 .medFraBeslutter(!b.isBehandlingPåVent() && totrinnRetur)
                 .medKanBytteEnhet(false)
                 .medKanHenlegges(false)

@@ -35,9 +35,9 @@ class EndringHøySatsTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygg
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får mer i aktivitetspenger fordi du fyller 25 år \
-                Du får mer penger fordi du fyller 25 år 16. august 2025. \
+                Du får mer i aktivitetspenger fordi du fyller 25 år 16. august 2025. \
                 Fra og med denne datoen får du 1 022 kroner per dag, utenom lørdag og søndag (før skatt). \
-                """);
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 første ledd"));
 
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextIsEqualTo(forventet)
@@ -57,9 +57,9 @@ class EndringHøySatsTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygg
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får mer i aktivitetspenger fordi du fyller 25 år \
-                Du får mer penger fordi du fyller 25 år 16. august 2025. \
+                Du får mer i aktivitetspenger fordi du fyller 25 år 16. august 2025. \
                 Fra og med denne datoen får du 1 022 kroner per dag, utenom lørdag og søndag (før skatt). \
-                """);
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 første ledd"));
 
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextIsEqualTo(forventet)

@@ -16,6 +16,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.VilkårsvurderingResultatOgEvaluering;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +71,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     void ikke_oppfylt_periode_får_årsak_fra_avklaringen_og_ikke_fra_dto() {
         medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT));
 
-        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+        var resultat = utled(BEHANDLING_ID, VILKÅR_TYPE,
             List.of(vurdering(JANUAR, false, "flyttet ut av Trondheim", null)),
             årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
 
@@ -86,7 +87,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     void oppfylt_periode_får_ingen_ikkeOppfyltÅrsak() {
         medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT));
 
-        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+        var resultat = utled(BEHANDLING_ID, VILKÅR_TYPE,
             List.of(vurdering(JANUAR, true, "oppfylt uansett årsak i avklaringen", null)),
             årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.ANNET));
 
@@ -99,7 +100,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     void åpen_periode_lukkes_mot_seneste_vilkårsperiode() {
         medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_VURDERT));
 
-        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+        var resultat = utled(BEHANDLING_ID, VILKÅR_TYPE,
             List.of(vurdering(new Periode(JANUAR.getFom(), null), false, "opphørt", null)),
             årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
 
@@ -114,7 +115,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         );
         var opphørsdato = LocalDate.of(2026, 1, 15);
 
-        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+        var resultat = utled(BEHANDLING_ID, VILKÅR_TYPE,
             List.of(vurdering(new Periode(opphørsdato, null), false, "opphørt", null)),
             årsakTidslinje(new Periode(opphørsdato, MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
 
@@ -132,13 +133,47 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
             vilkårsperiode(MARS, Utfall.IKKE_RELEVANT)
         );
 
-        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
+        var resultat = utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
                 vurdering(new Periode(JANUAR.getFom(), null), false, "opphørt", null)
             ),
             årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)
         );
 
         assertThat(resultat.getMaxLocalDate()).isEqualTo(JANUAR.getTom());
+    }
+
+    @Test
+    void ulikt_utfall_i_samme_avklaring_gir_feil() {
+        medVilkårsperioder(
+            vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
+            vilkårsperiode(MARS, Utfall.IKKE_VURDERT)
+        );
+
+        assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
+                vurdering(JANUAR, false, "ikke oppfylt i januar", null),
+                vurdering(MARS, true, "oppfylt i mars", null)
+            ),
+            // Én sammenhengende avklaring, selv om vilkårsperiodene har et hull i februar
+            årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("må vurderes samlet med ett utfall");
+    }
+
+    @Test
+    void likt_innhold_i_flere_dto_er_fortsatt_én_vurdering() {
+        medVilkårsperioder(
+            vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
+            vilkårsperiode(MARS, Utfall.IKKE_VURDERT)
+        );
+
+        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
+                vurdering(JANUAR, false, "samme vurdering", null),
+                vurdering(MARS, false, "samme vurdering", null)
+            ),
+            årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)
+        );
+
+        assertThat(resultat.vurderinger().getLocalDateIntervals()).hasSize(2);
     }
 
     @Test
@@ -200,6 +235,32 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
             .hasMessageContaining("fritekstVurderingBrev er påkrevd");
     }
 
+    @Test
+    void regelsporing_viser_klipping_mot_hull_i_vilkårsperioderne() {
+        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_VURDERT));
+        var opphørsdato = LocalDate.of(2026, 1, 15);
+
+        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+            List.of(vurdering(new Periode(opphørsdato, null), false, "opphørt", null)),
+            årsakTidslinje(new Periode(opphørsdato, MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
+
+        var evalueringer = resultat.vurderinger().stream().map(s -> s.getValue().evaluering()).toList();
+        assertThat(evalueringer).hasSize(2);
+        assertThat(evalueringer).allSatisfy(e -> {
+            assertThat(e.utfall()).isEqualTo(Utfall.IKKE_OPPFYLT.getKode());
+            assertThat(e.ikkeOppfyltÅrsak()).isEqualTo(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM.getKode());
+            assertThat(e.avvikerFraVurdertPeriode()).isTrue();
+        });
+
+        var input = resultat.regelInput();
+        assertThat(input.vurdertePerioder()).singleElement().satisfies(p -> {
+            assertThat(p.fom()).isEqualTo(opphørsdato);
+            assertThat(p.tom()).isNull();
+        });
+        assertThat(input.avklaringer()).singleElement().satisfies(a -> assertThat(a.fom()).isEqualTo(opphørsdato));
+        assertThat(input.eksisterendeVilkårperioder()).hasSize(2);
+    }
+
     private void medVilkårsperioder(VilkårPeriodeBuilder... perioder) {
         var vilkårResultatBuilder = Vilkårene.builder();
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VILKÅR_TYPE);
@@ -222,8 +283,14 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev);
     }
 
-    private static VilkårsvurderingResultat enesteSegment(LocalDateTimeline<VilkårsvurderingResultat> resultat) {
+    private LocalDateTimeline<VilkårsvurderingResultatOgEvaluering> utled(long behandlingId, VilkårType vilkårType,
+                                                                          List<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder,
+                                                                          LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
+        return tjeneste.utled(behandlingId, vilkårType, vurdertePerioder, årsakTidslinje).vurderinger();
+    }
+
+    private static VilkårsvurderingResultat enesteSegment(LocalDateTimeline<VilkårsvurderingResultatOgEvaluering> resultat) {
         assertThat(resultat.getLocalDateIntervals()).hasSize(1);
-        return resultat.stream().findFirst().orElseThrow().getValue();
+        return resultat.stream().findFirst().orElseThrow().getValue().resultat();
     }
 }

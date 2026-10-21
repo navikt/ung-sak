@@ -68,8 +68,14 @@ spec:
           - id: a7b4ffd6-d512-4b0d-991d-24d582b83a57
           # 0000-CA-ung-veileder
           - id: 9fe53d71-5eca-4b26-b77a-534468e0db4a
-          # 0000-CA-ung-drift
+          # 0000-CA-ung-drift (brukes også for aktivitetspenger
           - id: 873ae729-e918-4f35-9a26-652ca994b9c3
+          # 0000-CA-aktivitetspenger-saksbehandler-del1
+          - id: e1bd0c68-0c47-4dd0-ba77-c6e1e46f9d30
+          # 0000-CA-aktivitetspenger-saksbehandler-del2
+          - id: 4b3f571a-44c7-4d2b-9811-c6a1ea2cc9f4
+          # 0000-CA-aktivitetspenger-veileder
+          - id: 6add4432-bfd1-4952-a8b4-28e746e9592c
         extra:
           - "NAVident"
           - "azp_name"
@@ -99,6 +105,9 @@ spec:
           namespace: k9saksbehandling
           cluster: prod-fss
         - application: sif-abac-pdp
+        - application: sif-abac-pdp
+          namespace: k9saksbehandling
+          cluster: prod-fss
         - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
@@ -266,8 +275,10 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
-    - name: KLAGE_ENABLED
-      value: "true"
+    - name: KLAGE_AVP_ENABLED
+      value: "false"
+    - name: REVURDERING_AVP_ENABLED
+      value: "false"
     - name: INTEGRASJON_KABAL
       value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
@@ -275,6 +286,8 @@ spec:
     - name: ENABLE_BREV_ANSVARLIG
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
+      value: "true"
+    - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
       value: "true"
     - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
       value: "false"
@@ -310,4 +323,4 @@ spec:
     - name: PIP_USERS
       value: "srvPDP,srvsaf,srvk9-abakus"
     - name: PIP_APPS
-      value: "prod-gcp:k9saksbehandling:sif-abac-pdp,prod-fss:teamdokumenthandtering:saf"
+      value: "prod-gcp:k9saksbehandling:sif-abac-pdp,prod-fss:k9saksbehandling:sif-abac-pdp,prod-fss:teamdokumenthandtering:saf"

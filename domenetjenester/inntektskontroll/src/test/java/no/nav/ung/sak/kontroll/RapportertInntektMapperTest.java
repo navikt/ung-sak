@@ -3,11 +3,18 @@ package no.nav.ung.sak.kontroll;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.InntektBuilder;
+import no.nav.ung.sak.domene.iay.modell.InntektspostBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
+import no.nav.ung.sak.domene.iay.modell.VersjonType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -138,6 +145,38 @@ class RapportertInntektMapperTest {
     }
 
 
+    @Test
+    void skal_beholde_negativ_registerinntekt_uendret() {
+        // Arrange
+        final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+        mockIAYMedRegisterinntekter(List.of(), periode, List.of(BigDecimal.valueOf(-5830.54)));
+
+        // Act
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L, new LocalDateTimeline<>(periode.toLocalDateInterval(), true));
+
+        // Assert
+        final var registerinntekter = tidslinje.getSegment(periode.toLocalDateInterval()).getValue().registerRapporterteInntekter();
+        assertThat(registerinntekter).hasSize(1);
+        final var registerinntekt = registerinntekter.iterator().next();
+        assertThat(registerinntekt.inntektType()).isEqualTo(InntektType.ARBEIDSTAKER_ELLER_FRILANSER);
+        assertThat(registerinntekt.beløp()).isEqualByComparingTo(BigDecimal.valueOf(-5830.54));
+    }
+
+    @Test
+    void skal_motregne_negativ_korrigering_mot_positiv_registerinntekt_i_samme_måned() {
+        // Arrange
+        final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+        mockIAYMedRegisterinntekter(List.of(), periode, List.of(BigDecimal.valueOf(10000), BigDecimal.valueOf(-4000)));
+
+        // Act
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L, new LocalDateTimeline<>(periode.toLocalDateInterval(), true));
+
+        // Assert
+        final var registerinntekter = tidslinje.getSegment(periode.toLocalDateInterval()).getValue().registerRapporterteInntekter();
+        assertThat(registerinntekter).hasSize(1);
+        assertThat(registerinntekter.iterator().next().beløp()).isEqualByComparingTo(BigDecimal.valueOf(6000));
+    }
+
     private static OppgittOpptjening lagMottattATFLInntekt(DatoIntervallEntitet periode, BigDecimal inntekt, LocalDateTime innsendt) {
         final var oppgittArbeidsforhold = lagOppgittArbeidOgFrilansInntekt(periode, inntekt);
         final var oppgittOpptjening = OppgittOpptjeningBuilder.ny()
@@ -150,6 +189,26 @@ class RapportertInntektMapperTest {
 
     private void mockIAY(List<OppgittOpptjening> oppgittOpptjeninger) {
         final var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
+            .medOppgitteOpptjeninger(oppgittOpptjeninger).build();
+        when(inntektArbeidYtelseTjeneste.finnGrunnlag(anyLong())).thenReturn(Optional.of(iayGrunnlag));
+    }
+
+    private void mockIAYMedRegisterinntekter(List<OppgittOpptjening> oppgittOpptjeninger, DatoIntervallEntitet periode, List<BigDecimal> beløp) {
+        final var registerBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        final var inntekterBuilder = registerBuilder.getInntekterBuilder();
+        for (int i = 0; i < beløp.size(); i++) {
+            final var inntektBuilder = InntektBuilder.oppdatere(Optional.empty())
+                .medInntektsKilde(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("97300000" + i))
+                .leggTilInntektspost(InntektspostBuilder.ny()
+                    .medPeriode(periode.getFomDato(), periode.getTomDato())
+                    .medInntektspostType(InntektspostType.LØNN)
+                    .medBeløp(beløp.get(i)));
+            inntekterBuilder.leggTilInntekt(inntektBuilder);
+        }
+        registerBuilder.leggTilInntekter(inntekterBuilder);
+        final var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
+            .medData(registerBuilder)
             .medOppgitteOpptjeninger(oppgittOpptjeninger).build();
         when(inntektArbeidYtelseTjeneste.finnGrunnlag(anyLong())).thenReturn(Optional.of(iayGrunnlag));
     }

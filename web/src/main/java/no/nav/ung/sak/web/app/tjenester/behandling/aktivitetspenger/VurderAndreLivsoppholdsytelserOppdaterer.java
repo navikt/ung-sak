@@ -20,11 +20,11 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VilkårLivsoppholdsytelserPeriodeVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto;
-import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.avkort.AvkortTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 
@@ -84,8 +84,10 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                 true,
                 it.begrunnelse(),
                 it.fritekstVurderingBrev(),
+                utledYtelseNavn(it),
                 vurdertAv,
-                vurdertTidspunkt))
+                vurdertTidspunkt,
+                null))
             .toList();
         inngangsvilkårVurderingRepository.lagreYtelseVurderinger(param.getBehandlingId(), periodeVurderinger);
 
@@ -105,7 +107,7 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
         historikkinnslagInput
             .setSkjermlenkeType(SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
             .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR))
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
+            .setHistorikkAktør(HistorikkAktør.NAV_KONTOR_SAKSBEHANDLER);
         vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return OppdateringResultat.nyttResultat();
@@ -117,6 +119,16 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
             .toList());
         avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, AKTUELT_VILKÅR);
+    }
+
+    // For å ikke stoppe testing før frontend er tilpasset
+    static String utledYtelseNavn(VilkårLivsoppholdsytelserPeriodeVurderingDto vurdering) {
+        if (vurdering.ytelseNavn() != null) {
+            return vurdering.ytelseNavn();
+        }
+        return vurdering.avslagsårsak() == AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE
+            ? vurdering.fritekstVurderingBrev()
+            : null;
     }
 
 }

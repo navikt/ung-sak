@@ -14,6 +14,7 @@ import org.hibernate.annotations.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 @Immutable
 @Entity(name = "BostedsvilkårResultatPeriode")
@@ -51,12 +52,18 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
+    @Column(name = "regel_input", updatable = false)
+    private String regelInput;
+
+    @Column(name = "regel_evaluering", updatable = false)
+    private String regelEvaluering;
+
     protected BostedsvilkårResultatPeriode() {
         // Hibernate
     }
 
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, BostedsvilkårResultatPeriode kilde) {
-        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.erManuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
+        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.erManuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
     }
 
     public BostedsvilkårResultatPeriode(BostedsvilkårResultatPeriode kilde) {
@@ -64,6 +71,10 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     }
 
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
+        this(periode, vilkårsvurderingResultat, null);
+    }
+
+    public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat, Regelsporing regelsporing) {
         this(periode,
             vilkårsvurderingResultat.godkjent(),
             validerOgCastÅrsak(vilkårsvurderingResultat.ikkeOppfyltÅrsak()),
@@ -71,7 +82,8 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
             vilkårsvurderingResultat.begrunnelse(),
             vilkårsvurderingResultat.fritekstVurderingBrev(),
             vilkårsvurderingResultat.vurdertAv(),
-            vilkårsvurderingResultat.vurdertTidspunkt());
+            vilkårsvurderingResultat.vurdertTidspunkt(),
+            regelsporing);
     }
 
     private static BostedsvilkårIkkeOppfyltÅrsak validerOgCastÅrsak(IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak) {
@@ -81,7 +93,7 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         return (BostedsvilkårIkkeOppfyltÅrsak) ikkeOppfyltÅrsak;
     }
 
-    public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt, Regelsporing regelsporing) {
         Objects.requireNonNull(periode, "periode");
         if (erManuellVurdering) {
             Objects.requireNonNull(vurdertAv, "vurdertAv");
@@ -99,6 +111,8 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         this.fritekstVurderingBrev = fritekstVurderingBrev;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.regelInput = regelsporing != null ? regelsporing.input() : null;
+        this.regelEvaluering = regelsporing != null ? regelsporing.evaluering() : null;
     }
 
     public Long getId() {
@@ -133,8 +147,12 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         return fritekstVurderingBrev;
     }
 
+    public Optional<Regelsporing> getRegelsporing() {
+        return regelInput == null ? Optional.empty() : Optional.of(new Regelsporing(regelInput, regelEvaluering));
+    }
+
     public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
-        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+        return new GenereltVilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
     }
 
     public String getVurdertAv() {
@@ -160,12 +178,14 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
             && Objects.equals(begrunnelse, that.begrunnelse)
             && Objects.equals(fritekstVurderingBrev, that.fritekstVurderingBrev)
             && Objects.equals(vurdertAv, that.vurdertAv)
-            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt)
+            && Objects.equals(regelInput, that.regelInput)
+            && Objects.equals(regelEvaluering, that.regelEvaluering);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+        return Objects.hash(getPeriode(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt, regelInput, regelEvaluering);
     }
 
     @Override

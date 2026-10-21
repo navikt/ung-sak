@@ -20,6 +20,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
@@ -27,11 +28,13 @@ import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevTjeneste;
 import no.nav.ung.sak.formidling.klage.vedtak.KlageVedtaksbrevTjeneste;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevForhåndsvisInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
+import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgResponseDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevKlageForhåndsvisRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse;
@@ -40,8 +43,10 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.CREATE;
@@ -58,6 +63,7 @@ public class FormidlingRestTjeneste {
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
+    private static final Set<DokumentMalType> NAV_KONTOR_MALER = EnumSet.of(DokumentMalType.AVSLAG__DOK, DokumentMalType.OPPHØR_DOK);
     private static final String PDF_MEDIA_STRING = "application/pdf";
 
     @Inject
@@ -72,6 +78,27 @@ public class FormidlingRestTjeneste {
     FormidlingRestTjeneste() {
     }
 
+
+    @GET
+    @Path("/formidling/navkontor/vedtaksbrev")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Avslag- og opphørsbrev som kan forhåndsvises av Nav-kontor. Ingen redigering eller hindring. Forhåndsvisning gjøres med POST /formidling/vedtaksbrev/forhaandsvis", tags = "formidling")
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    public VedtaksbrevValgResponse vedtaksbrevValgForNavKontor(
+        @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
+        return tilNavKontorValg(vedtaksbrevTjeneste.vedtaksbrevResultat(dto.getBehandlingId()));
+    }
+
+    // Avslag og opphør er de eneste brevene som er ferdig når Nav-kontor er ferdig med vilkårene.
+    static VedtaksbrevValgResponse tilNavKontorValg(BehandlingVedtaksbrevResultat resultat) {
+        var valg = resultat.vedtaksbrevResultater().stream()
+            .filter(it -> NAV_KONTOR_MALER.contains(it.dokumentMalType()))
+            .map(it -> new VedtaksbrevValg(new KodeverdiSomObjekt<>(it.dokumentMalType()),
+                false, false, false, false, false, false, it.forklaring(), false))
+            .toList();
+        return new VedtaksbrevValgResponse(!valg.isEmpty(), valg);
+    }
 
     @GET
     @Path("/formidling/vedtaksbrev")

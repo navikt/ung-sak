@@ -25,10 +25,10 @@ import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderFaktaOmAndreLivsoppholdsytelserDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaring;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaringDataMapper;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaringTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaring;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaringDataMapper;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaringTjeneste;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -110,7 +110,7 @@ public class VurderFaktaOmAndreLivsoppholdsytelserOppdaterer implements Aksjonsp
         vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER, tidligereForeslåtteAvklaringer, nyeForeslåtteAvklaringer);
 
         var historikkinnslag = new Historikkinnslag.Builder()
-            .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
+            .medAktør(HistorikkAktør.NAV_KONTOR_SAKSBEHANDLER)
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandlingId)
             .medTittel(SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)

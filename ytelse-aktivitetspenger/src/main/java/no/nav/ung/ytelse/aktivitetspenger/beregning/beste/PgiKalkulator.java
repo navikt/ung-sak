@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.Year;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PgiKalkulator {
@@ -59,6 +60,14 @@ public class PgiKalkulator {
                 segment -> Year.of(segment.getFom().getYear()),
                 Collectors.reducing(BigDecimal.ZERO, LocalDateSegment::getValue, BigDecimal::add)
             ));
+    }
+
+    public Set<Year> finnÅrAvkortetMotSeksG() {
+        return hentPeriodisertPgiUtregner()
+            .filterValue(PgiØvreGrenseVurderer::erAvkortetMotSeksG)
+            .segmenter().stream()
+            .map(segment -> Year.of(segment.getFom().getYear()))
+            .collect(Collectors.toSet());
     }
 
     private LocalDateTimeline<PgiØvreGrenseVurderer> hentPeriodisertPgiUtregner() {
@@ -114,6 +123,10 @@ public class PgiKalkulator {
 
         public BigDecimal avkortÅrsinntektMotSeksG() {
             return pgiÅrsinntekt.min(grunnbeløpSnitt(6));
+        }
+
+        public boolean erAvkortetMotSeksG() {
+            return pgiÅrsinntekt.compareTo(grunnbeløpSnitt(6)) > 0;
         }
 
         private BigDecimal grunnbeløpSnitt(int antall) {

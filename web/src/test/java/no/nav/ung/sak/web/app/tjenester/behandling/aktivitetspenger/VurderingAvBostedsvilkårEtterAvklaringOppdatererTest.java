@@ -39,7 +39,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

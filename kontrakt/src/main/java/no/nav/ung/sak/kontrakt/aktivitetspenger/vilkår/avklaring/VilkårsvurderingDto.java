@@ -1,14 +1,16 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 public record VilkårsvurderingDto(
-    boolean erVilkårOppfylt,
+    @NotNull boolean erVilkårOppfylt,
     String ikkeOppfyltÅrsak,
     String begrunnelse,
     String fritekstVurderingBrev,
-    boolean erManuellVurdering,
-    String vurdertAv,
-    LocalDateTime vurdertTidspunkt
+    @NotNull boolean erManuellVurdering,
+    @NotNull String vurdertAv,
+    @NotNull LocalDateTime vurdertTidspunkt
 ) {
 }
