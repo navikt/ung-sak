@@ -1,6 +1,8 @@
 package no.nav.ung.sak.metrikker.bigquery;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.util.Tuple;
@@ -9,6 +11,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +21,7 @@ import java.util.List;
 
 /**
  * Task for publisering av metrikker til BigQuery.
- * Denne tasken henter daglig rapporterte metrikker fra BigQueryStatistikkRepository og publiserer dem til BigQuery.
+ * Denne tasken henter daglig rapporterte metrikker for hver støttede ytelse ({@link YtelseStatistikk}) og publiserer dem til BigQuery.
  * Det er satt opp en cron-jobb som kjører denne tasken kl. 07:00 hver dag.
  * Det er også satt en grense for maksimalt antall mislykkede kjøringer til 20.
  */
@@ -33,7 +36,7 @@ public class BigQueryMetrikkDagligTask implements BatchProsessTaskHandler {
 
     private BigQueryKlient bigQueryKlient;
 
-    private BigQueryStatistikkRepository statistikkRepository;
+    private Instance<YtelseStatistikk> ytelseStatistikk;
 
     @Override
     public CronExpression getCron() {
@@ -45,9 +48,9 @@ public class BigQueryMetrikkDagligTask implements BatchProsessTaskHandler {
     }
 
     @Inject
-    public BigQueryMetrikkDagligTask(@KonfigVerdi(value = "BIGQUERY_ENABLED", required = false, defaultVerdi = "false") boolean bigQueryEnabled, BigQueryKlient bigQueryKlient, BigQueryStatistikkRepository statistikkRepository) {
+    public BigQueryMetrikkDagligTask(@KonfigVerdi(value = "BIGQUERY_ENABLED", required = false, defaultVerdi = "false") boolean bigQueryEnabled, BigQueryKlient bigQueryKlient, @Any Instance<YtelseStatistikk> ytelseStatistikk) {
         this.bigQueryKlient = bigQueryKlient;
-        this.statistikkRepository = statistikkRepository;
+        this.ytelseStatistikk = ytelseStatistikk;
         this.bigQueryEnabled = bigQueryEnabled;
     }
 
@@ -56,7 +59,9 @@ public class BigQueryMetrikkDagligTask implements BatchProsessTaskHandler {
         long startTime = System.nanoTime();
 
         try {
-            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentDagligRapporterte();
+            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = YtelsesTabell.STØTTEDE_YTELSER.stream()
+                .flatMap(ytelse -> YtelseStatistikk.finn(ytelseStatistikk, ytelse).hentDagligRapporterte().stream())
+                .toList();
 
             if (bigQueryEnabled && !metrikker.isEmpty()) {
                 publiserMetrikker(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, metrikker);

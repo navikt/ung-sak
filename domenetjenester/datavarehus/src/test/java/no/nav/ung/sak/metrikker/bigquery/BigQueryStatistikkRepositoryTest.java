@@ -92,12 +92,18 @@ class BigQueryStatistikkRepositoryTest {
 
     private BigQueryStatistikkRepository statistikkRepository;
 
+    private UngdomsprogramytelseStatistikk ungdomsprogramytelseStatistikk;
+
+    private AktivitetspengerStatistikk aktivitetspengerStatistikk;
+
     private final AtomicLong journalpostSekvens = new AtomicLong(System.nanoTime() % 1_000_000_000L);
 
 
     @BeforeEach
     void setup() {
-        statistikkRepository = new BigQueryStatistikkRepository(entityManager, null);
+        statistikkRepository = new BigQueryStatistikkRepository(entityManager);
+        ungdomsprogramytelseStatistikk = new UngdomsprogramytelseStatistikk(statistikkRepository, null);
+        aktivitetspengerStatistikk = new AktivitetspengerStatistikk(statistikkRepository, entityManager);
     }
 
     @ParameterizedTest
@@ -240,30 +246,31 @@ class BigQueryStatistikkRepositoryTest {
             byggFagsak(FagsakYtelseType.OBSOLETE, FagsakStatus.LØPENDE)
         ));
 
-        // Når vi henter hyppig rapporterte metrikker
-        List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte(LocalDateTime.now().minusMinutes(1));
+        // Når vi henter hyppig rapporterte metrikker for hver ytelse
+        LocalDateTime sistKjørt = LocalDateTime.now().minusMinutes(1);
+        List<Tuple<BigQueryTabell<?>, Collection<?>>> ungMetrikker = ungdomsprogramytelseStatistikk.hentHyppigRapporterte(sistKjørt);
+        Map<String, Collection<?>> ungPerTabell = perTabell(ungMetrikker);
+        Map<String, Collection<?>> aktPerTabell = perTabell(aktivitetspengerStatistikk.hentHyppigRapporterte(sistKjørt));
 
         // Så skal første metrikk fortsatt være fagsak-status for ungdomsytelsen
-        assertThat(metrikker.get(0).getElement1()).isEqualTo(FagsakStatusRecord.FAGSAK_STATUS_TABELL_V2);
+        assertThat(ungMetrikker.get(0).getElement1()).isEqualTo(FagsakStatusRecord.FAGSAK_STATUS_TABELL_V2);
 
-        // Og alle tabeller skal være med, med egne tabeller for aktivitetspenger
-        Map<String, Collection<?>> perTabell = metrikker.stream()
-            .collect(Collectors.toMap(it -> it.getElement1().getTabellnavn(), Tuple::getElement2));
-        assertThat(perTabell.keySet()).containsExactlyInAnyOrder(
-            "fagsak_status_v2", "aktivitetspenger_fagsak_status",
-            "behandling_status", "aktivitetspenger_behandling_status",
-            "aksjonspunkter_status", "aktivitetspenger_aksjonspunkter_status",
-            "sats_statistikk", "aktivitetspenger_sats_statistikk",
-            "behandlingsresultat_statistikk_v2", "aktivitetspenger_behandlingsresultat_statistikk",
-            "etterlysning", "aktivitetspenger_etterlysning",
-            "uttalelse", "aktivitetspenger_uttalelse",
-            "behandling_årsak", "aktivitetspenger_behandling_årsak",
-            "aktivitetspenger_soknad_mottatt"
+        // Og ungdomsytelsen skal publisere til de opprinnelige tabellene, uten søknadsstatistikk
+        assertThat(ungPerTabell.keySet()).containsExactlyInAnyOrder(
+            "fagsak_status_v2", "behandling_status", "aksjonspunkter_status", "sats_statistikk",
+            "behandlingsresultat_statistikk_v2", "etterlysning", "uttalelse", "behandling_årsak"
+        );
+
+        // Og aktivitetspenger skal publisere til egne tabeller, inkludert søknadsstatistikk
+        assertThat(aktPerTabell.keySet()).containsExactlyInAnyOrder(
+            "aktivitetspenger_fagsak_status", "aktivitetspenger_behandling_status", "aktivitetspenger_aksjonspunkter_status",
+            "aktivitetspenger_sats_statistikk", "aktivitetspenger_behandlingsresultat_statistikk", "aktivitetspenger_etterlysning",
+            "aktivitetspenger_uttalelse", "aktivitetspenger_behandling_årsak", "aktivitetspenger_soknad_mottatt"
         );
 
         // Og fagsak-status skal være separert per ytelse
-        assertThat(antallFagsaker(perTabell.get("fagsak_status_v2"))).isEqualTo(3L);
-        assertThat(antallFagsaker(perTabell.get("aktivitetspenger_fagsak_status"))).isEqualTo(1L);
+        assertThat(antallFagsaker(ungPerTabell.get("fagsak_status_v2"))).isEqualTo(3L);
+        assertThat(antallFagsaker(aktPerTabell.get("aktivitetspenger_fagsak_status"))).isEqualTo(1L);
     }
 
     @ParameterizedTest
@@ -387,7 +394,7 @@ class BigQueryStatistikkRepositoryTest {
         lagreMottattDokument(utgåttFagsak, Brevkode.AKTIVITETSPENGER_SOKNAD, idag, DokumentStatus.MOTTATT);
 
         // Når vi henter søknadsstatistikken
-        Collection<SøknadStatistikkRecord> resultat = statistikkRepository.søknadStatistikk(FagsakYtelseType.AKTIVITETSPENGER);
+        Collection<SøknadStatistikkRecord> resultat = aktivitetspengerStatistikk.søknadStatistikk();
 
         // Så skal søknadene telles per status, med antall mottatt i dag
         assertThat(resultat)
@@ -431,11 +438,15 @@ class BigQueryStatistikkRepositoryTest {
         assertThatThrownBy(() -> statistikkRepository.uttalelseData(ytelse, sistKjørt, null)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> statistikkRepository.behandlingÅrsakStatistikk(ytelse)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> statistikkRepository.alderOgKjønnStatistikk(ytelse)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> statistikkRepository.søknadStatistikk(ytelse)).isInstanceOf(IllegalArgumentException.class);
     }
 
     private static FagsakYtelseType annenYtelse(FagsakYtelseType ytelse) {
         return ytelse == FagsakYtelseType.UNGDOMSYTELSE ? FagsakYtelseType.AKTIVITETSPENGER : FagsakYtelseType.UNGDOMSYTELSE;
+    }
+
+    private static Map<String, Collection<?>> perTabell(List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker) {
+        return metrikker.stream()
+            .collect(Collectors.toMap(it -> it.getElement1().getTabellnavn(), Tuple::getElement2));
     }
 
     private static long antallFagsaker(Collection<?> fagsakStatusRecords) {

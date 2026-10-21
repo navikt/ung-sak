@@ -5,8 +5,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.ung.kodeverk.behandling.*;
-import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -17,7 +15,6 @@ import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.MetrikkUtils;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
@@ -27,8 +24,6 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecor
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.soknad.SøknadStatistikkRecord;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.uttalelse.UttalelseRecord;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
@@ -47,10 +42,10 @@ import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
 
 
 /**
- * Henter statistikk som publiseres til BigQuery.
+ * Felles spørringer for statistikk som publiseres til BigQuery.
  * <p>
- * Alle spørringer filtrerer eksplisitt på én ytelse, og hver ytelse publiseres til egne tabeller
- * (se {@link YtelsesTabell}) slik at tilgang kan styres per ytelse i Datamarkedsplassen.
+ * Alle spørringer er parametrisert på ytelse og filtrerer eksplisitt på én ytelse. Hvilke metrikker som publiseres
+ * for hver ytelse, og til hvilke tabeller, bestemmes av implementasjonene av {@link YtelseStatistikk}.
  * Kun {@link YtelsesTabell#STØTTEDE_YTELSER} er tillatt, slik at utgåtte fagsaker ({@link FagsakYtelseType#OBSOLETE})
  * aldri kommer med i statistikken.
  */
@@ -59,67 +54,9 @@ public class BigQueryStatistikkRepository {
 
     private final EntityManager entityManager;
 
-    private final AntallDagerStatistikk antallDagerStatistikk;
-
     @Inject
-    public BigQueryStatistikkRepository(
-        EntityManager entityManager,
-        AntallDagerStatistikk antallDagerStatistikk
-    ) {
+    public BigQueryStatistikkRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.antallDagerStatistikk = antallDagerStatistikk;
-    }
-
-    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentDagligRapporterte() {
-        List<Tuple<BigQueryTabell<?>, Collection<?>>> dagligRapporterte = new ArrayList<>();
-
-        for (FagsakYtelseType ytelse : YtelsesTabell.STØTTEDE_YTELSER) {
-            Collection<AlderOgKjønnRecord> alderOgKjønn = alderOgKjønnStatistikk(ytelse);
-            dagligRapporterte.add(new Tuple<>(AlderOgKjønnRecord.ALDER_OG_KJØNN_TABELLER.forYtelse(ytelse), alderOgKjønn));
-        }
-
-        // Dager i programmet er kun relevant for ungdomsprogramytelsen
-        Collection<DagerIProgrammetRecord> dagerIProgrammet = antallDagerStatistikk.dagerIProgrammet();
-        dagligRapporterte.add(new Tuple<>(DagerIProgrammetRecord.DAGER_I_PROGRAMMET_LØPENDE_BIG_QUERY_TABELL, dagerIProgrammet));
-
-        return dagligRapporterte;
-    }
-
-
-    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
-        List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
-
-        for (FagsakYtelseType ytelse : YtelsesTabell.STØTTEDE_YTELSER) {
-            Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk(ytelse);
-            hyppigRapporterte.add(new Tuple<>(FagsakStatusRecord.FAGSAK_STATUS_TABELLER.forYtelse(ytelse), fagsakStatusStatistikk));
-
-            Collection<BehandlingStatusRecord> behandlingStatusStatistikk = behandlingStatusStatistikk(ytelse);
-            hyppigRapporterte.add(new Tuple<>(BehandlingStatusRecord.BEHANDLING_STATUS_TABELLER.forYtelse(ytelse), behandlingStatusStatistikk));
-
-            Collection<AksjonspunktRecord> aksjonspunktStatistikk = aksjonspunktStatistikk(ytelse);
-            hyppigRapporterte.add(new Tuple<>(AksjonspunktRecord.AKSJONSPUNKT_TABELLER.forYtelse(ytelse), aksjonspunktStatistikk));
-
-            Collection<SatsStatistikkRecord> satsStatistikk = satsSatistikk(ytelse);
-            hyppigRapporterte.add(new Tuple<>(SatsStatistikkRecord.SATS_STATISTIKK_TABELLER.forYtelse(ytelse), satsStatistikk));
-
-            Collection<BehandslingsresultatStatistikkRecord> behandlingResultatStatistikk = behandlingResultatStatistikk(ytelse);
-            hyppigRapporterte.add(new Tuple<>(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELLER.forYtelse(ytelse), behandlingResultatStatistikk));
-
-            Collection<EtterlysningRecord> etterlysningData = etterlysningData(ytelse, sistKjørtTidspunkt);
-            hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELLER.forYtelse(ytelse), etterlysningData));
-
-            Collection<UttalelseRecord> uttalelseData = uttalelseData(ytelse, sistKjørtTidspunkt, null);
-            hyppigRapporterte.add(new Tuple<>(UttalelseRecord.UTTALELSE_TABELLER.forYtelse(ytelse), uttalelseData));
-
-            Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk(ytelse);
-            hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELLER.forYtelse(ytelse), behandlingÅrsakData));
-        }
-
-        // Søknadsstatistikk er kun ønsket for aktivitetspenger
-        Collection<SøknadStatistikkRecord> søknadStatistikk = søknadStatistikk(FagsakYtelseType.AKTIVITETSPENGER);
-        hyppigRapporterte.add(new Tuple<>(SøknadStatistikkRecord.AKTIVITETSPENGER_SØKNAD_TABELL, søknadStatistikk));
-
-        return hyppigRapporterte;
     }
 
     private static String ytelseKode(FagsakYtelseType ytelse) {
@@ -607,47 +544,4 @@ public class BigQueryStatistikkRepository {
             return new AlderOgKjønnRecord(BigDecimal.valueOf(antall), alder.intValue(), kjønn, ZonedDateTime.now());
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
-
-    /**
-     * Henter statistikk over mottatte søknadsdokumenter for én ytelse, gruppert på dokumentstatus.
-     * <p>
-     * Alle mottatte søknadsdokumenter telles (også henlagte og ugyldige), slik at statusfordelingen viser
-     * hvor mange som er ferdig behandlet i mottaket. I tillegg telles antall søknader mottatt i dag.
-     *
-     * @param ytelse ytelsen det skal hentes statistikk for
-     * @return En samling av SøknadStatistikkRecord per dokumentstatus.
-     */
-    Collection<SøknadStatistikkRecord> søknadStatistikk(FagsakYtelseType ytelse) {
-        String sql = """
-            select md.status, count(*) as antall_totalt, count(*) filter (where md.mottatt_dato = :dagensDato) as antall_i_dag
-             from mottatt_dokument md
-             inner join fagsak f on f.id = md.fagsak_id
-             where f.ytelse_type = :ytelseType
-               and md.type in (:soknadTyper)
-             group by 1
-             order by 1
-            """;
-
-        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
-        Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("ytelseType", ytelseKode(ytelse))
-            .setParameter("soknadTyper", Brevkode.SØKNAD_TYPER.stream().map(Brevkode::getKode).collect(Collectors.toSet()))
-            .setParameter("dagensDato", LocalDate.now())
-            .getResultStream();
-
-        return stream.map(t -> {
-            String statusKode = t.get(0, String.class);
-            Long antallTotalt = t.get(1, Long.class);
-            Long antallIDag = t.get(2, Long.class);
-
-            return new SøknadStatistikkRecord(
-                DokumentStatus.fraKode(statusKode),
-                antallTotalt,
-                antallIDag,
-                ZonedDateTime.now()
-            );
-        }).collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-
 }
