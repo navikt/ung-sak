@@ -1,4 +1,4 @@
--- TSFF-3187: Henleggelsen av behandling 3018856 (KVNYC) slettet prosesstaskene 1776563 og 1776570,
+-- TSFF-3297: Henleggelsen av behandling 3018856 slettet prosesstaskene 1776563 og 1776570,
 -- men ikke koblingene i fagsak_prosess_task. Koblingen til 1776563 har lavest gruppe_sekvensnr og
 -- blokkerer behandlingskontroll.opprettRevurderingEllerDiff (1798171) for inntektskontroll av september.
 delete from fagsak_prosess_task fpt
