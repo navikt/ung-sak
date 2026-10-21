@@ -3,12 +3,7 @@ package no.nav.ung.sak.web.server.abac;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
-import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
-import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
-import no.nav.sif.abac.kontrakt.abac.AbacFagsakYtelseType;
-import no.nav.sif.abac.kontrakt.abac.AksjonspunktType;
-import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt;
-import no.nav.sif.abac.kontrakt.abac.ResourceType;
+import no.nav.sif.abac.kontrakt.abac.*;
 import no.nav.sif.abac.kontrakt.abac.dto.OperasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
@@ -16,15 +11,11 @@ import no.nav.sif.abac.kontrakt.person.AktørId;
 import no.nav.sif.abac.kontrakt.person.PersonIdent;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class PdpRequestMapper {
 
-    public static SaksinformasjonOgPersonerTilgangskontrollInputDto map(PdpRequest pdpRequest) {
+    public static SaksinformasjonOgPersonerTilgangskontrollInputDto map(UngSakPdpRequest pdpRequest) {
         return new SaksinformasjonOgPersonerTilgangskontrollInputDto(
             pdpRequest.getAktørIder().stream().map(it -> new AktørId(it.aktørId())).toList(),
             pdpRequest.getFødselsnumre().stream().map(it -> new PersonIdent(it.fnr())).toList(),
@@ -39,7 +30,7 @@ public class PdpRequestMapper {
         return new OperasjonDto(resource, mapAction(pdpRequest.getActionType()), aksjonspunktTyper);
     }
 
-    public static SaksinformasjonDto saksinformasjon(PdpRequest pdpRequest) {
+    public static SaksinformasjonDto saksinformasjon(UngSakPdpRequest pdpRequest) {
         Set<String> ansvarligSaksbehandlere = pdpRequest.getAnsvarligSaksbehandlere();
         AbacBehandlingStatus behandlingStatus = Arrays.stream(AbacBehandlingStatus.values())
             .filter(v -> v.getEksternKode().equals(pdpRequest.getBehandlingStatusEksternKode()))
@@ -48,8 +39,9 @@ public class PdpRequestMapper {
             .filter(v1 -> v1.getEksternKode().equals(pdpRequest.getFagsakStatusEksternKode()))
             .findFirst().orElse(null);
         AbacFagsakYtelseType ytelseType = map(pdpRequest.getFagsakYtelseTyper(), pdpRequest.getResourceType());
+        AbacBehandlingDel behandlingDel = pdpRequest.getBehandlingDel();
         return !ansvarligSaksbehandlere.isEmpty() || behandlingStatus != null || fagsakStatus != null || ytelseType != null
-            ? new SaksinformasjonDto(ansvarligSaksbehandlere, behandlingStatus, fagsakStatus, ytelseType)
+            ? new SaksinformasjonDto(ansvarligSaksbehandlere, behandlingStatus, fagsakStatus, ytelseType, behandlingDel)
             : null;
     }
 

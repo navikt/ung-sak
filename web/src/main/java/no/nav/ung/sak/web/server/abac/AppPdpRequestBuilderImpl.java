@@ -8,14 +8,7 @@ import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.konfigurasjon.env.Cluster;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
-import no.nav.k9.felles.sikkerhet.abac.BerørtePersonerForAuditlogg;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
-import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
-import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
-import no.nav.k9.felles.sikkerhet.abac.PdpRequestMedBerørtePersonerForAuditlogg;
-import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.*;
 import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
@@ -26,15 +19,7 @@ import no.nav.ung.sak.typer.Saksnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -93,7 +78,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         Set<AktørId> aktørIderSporingslogg = utledAktørIderForSporingslogg(attributter, saksnumre);
         Set<String> aksjonspunktType = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(attributter.getVerdier(StandardAbacAttributtType.AKSJONSPUNKT_KODE));
 
-        PdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aktørIderSporingslogg, aksjonspunktType);
+        UngSakPdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aktørIderSporingslogg, aksjonspunktType);
         if (behandlingData != null) {
             AbacUtil.oversettBehandlingStatus(behandlingData.behandligStatus())
                 .ifPresent(it -> pdpRequest.setBehandlingStatusEksternKode(it.getEksternKode()));
@@ -127,7 +112,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         return match;
     }
 
-    private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Set<AktørId> aktørIderForSporingslogg, Set<String> aksjonspunktType) {
+    private UngSakPdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Set<AktørId> aktørIderForSporingslogg, Set<String> aksjonspunktType) {
         Set<String> aktører = new TreeSet<>();
         aktører.addAll(aktørIder.stream().map(AktørId::getId).toList());
         aktører.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_AKTØR_ID));
@@ -136,7 +121,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         fnrs.addAll(attributter.getVerdier(StandardAbacAttributtType.FNR));
         fnrs.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR));
 
-        PdpRequestMedBerørtePersonerForAuditlogg pdpRequest = new PdpRequestMedBerørtePersonerForAuditlogg();
+        UngSakPdpRequest pdpRequest = new UngSakPdpRequest();
         pdpRequest.setActionType(attributter.getActionType());
         pdpRequest.setResourceType(attributter.getResourceType());
         pdpRequest.setAktørIderStr(aktører);
