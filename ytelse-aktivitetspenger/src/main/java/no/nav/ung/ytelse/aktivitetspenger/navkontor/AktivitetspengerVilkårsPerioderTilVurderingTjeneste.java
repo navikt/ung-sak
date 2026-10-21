@@ -81,33 +81,25 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public LocalDateTimeline<Boolean> utledPerioderFraVilkårsvurderendeTriggere(Long behandlingId, VilkårType vilkårType) {
-        return hentVilkårsperioder(behandlingId, vilkårType)
-            .map(vilkårsperioder -> perioderFraVilkårsvurderendeTriggere(
-                prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId), VILKÅRSVURDERENDE_ÅRSAKER, vilkårsperioder))
-            .orElse(LocalDateTimeline.empty());
-    }
-
-    public LocalDateTimeline<Boolean> utledAvklartePerioder(Long behandlingId, VilkårType vilkårType) {
-        return hentVilkårsperioder(behandlingId, vilkårType)
-            .map(vilkårsperioder -> avklartePerioder(behandlingId, vilkårType, vilkårsperioder))
-            .orElse(LocalDateTimeline.empty());
-    }
-
     @Override
     public Map<BehandlingÅrsakType, LocalDateTimeline<Boolean>> utledPerTrigger(Long behandlingId, VilkårType vilkårType) {
         List<DatoIntervallEntitet> vilkårsperioder = hentVilkårsperioder(behandlingId, vilkårType).orElse(List.of());
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggere = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
-        Optional<BehandlingÅrsakType> avklaringsårsak = VilkårsavklaringÅrsaker.avklaringsårsakFor(vilkårType);
 
         var perioderPerÅrsak = new EnumMap<BehandlingÅrsakType, LocalDateTimeline<Boolean>>(BehandlingÅrsakType.class);
         VILKÅRSVURDERENDE_ÅRSAKER.forEach(årsak ->
-            perioderPerÅrsak.put(årsak, perioderFraVilkårsvurderendeTriggere(prosesstriggere, Set.of(årsak), vilkårsperioder))
+            perioderPerÅrsak.put(årsak, perioderFraVilkårsvurderendeTriggere(prosesstriggere, Set.of(årsak), vilkårsperioder)));
+
+        VilkårsavklaringÅrsaker.avklaringsårsakFor(vilkårType).ifPresent(årsak ->
+            perioderPerÅrsak.put(årsak, avklartePerioder(behandlingId, vilkårType, vilkårsperioder))
         );
 
-        avklaringsårsak.ifPresent(årsak -> perioderPerÅrsak.put(årsak, avklartePerioder(behandlingId, vilkårType, vilkårsperioder)));
-
-        årsakerSomIkkeVurdererVilkårEllerErAvklaring(prosesstriggere, avklaringsårsak).forEach(årsak ->
+        Set<BehandlingÅrsakType> avklaringsårsaker = VilkårsavklaringÅrsaker.alleÅrsaker();
+        prosesstriggere.stream()
+            .flatMap(segment -> segment.getValue().stream())
+            .filter(årsak -> !VILKÅRSVURDERENDE_ÅRSAKER.contains(årsak))
+            .filter(årsak -> !avklaringsårsaker.contains(årsak))
+            .collect(Collectors.toSet()).forEach(årsak ->
             perioderPerÅrsak.put(årsak, perioderFraTriggerSomIkkeVurdererVilkår(prosesstriggere, årsak, vilkårsperioder))
         );
 
@@ -124,21 +116,13 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
             .toList());
     }
 
+    // Foreslåtte avklaringer gjelder ett vilkår og kopieres ikke til nye behandlinger, så de trenger ingen trigger.
     private LocalDateTimeline<Boolean> avklartePerioder(Long behandlingId, VilkårType vilkårType, List<DatoIntervallEntitet> vilkårsperioder) {
         var foreslåtteAvklaringer = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId, vilkårType)
             .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)
             .orElse(Set.of());
         return TidslinjeUtil.tilTidslinje(foreslåtteAvklaringer.stream().map(VilkårPeriodeAvklaring::getPeriode).toList())
             .intersection(TidslinjeUtil.tilTidslinje(vilkårsperioder));
-    }
-
-    private static Set<BehandlingÅrsakType> årsakerSomIkkeVurdererVilkårEllerErAvklaring(LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggere,
-                                                                                         Optional<BehandlingÅrsakType> avklaringsårsak) {
-        return prosesstriggere.stream()
-            .flatMap(segment -> segment.getValue().stream())
-            .filter(årsak -> !VILKÅRSVURDERENDE_ÅRSAKER.contains(årsak))
-            .filter(årsak -> avklaringsårsak.filter(årsak::equals).isEmpty())
-            .collect(Collectors.toSet());
     }
 
     private static LocalDateTimeline<Boolean> perioderFraTriggerSomIkkeVurdererVilkår(LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggere,

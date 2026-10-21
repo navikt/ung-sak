@@ -70,7 +70,7 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
         bistandAvklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId,
             dto.getAvklaringer().stream().map(BistandFaktaavklaringPeriodeDto::periode).toList());
 
-        // Opphør lukkes mot slutten av vilkårsperioden, siden avklaringen kan gjelde en vilkårlig periode i den.
+        // Opphør lukkes mot slutten av relevante vilkårsperioder, siden avklaringen kan gjelde en vilkårlig periode i den.
         var vilkårsperioder = inngangsvilkårVurderingTjeneste.hentRelevanteVilkårsperioder(behandlingId, VilkårType.BISTANDSVILKÅR);
         if (vilkårsperioder.isEmpty()) {
             throw new IllegalStateException("Må ha relevante vilkårsperioder");
