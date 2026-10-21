@@ -33,8 +33,6 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private TpsTjeneste pdlTjeneste;
     private KlageRepository klageRepository;
-    private boolean klageEnabled;
-
 
     OverføringTilKabalTask() {
         // for CDI proxy
@@ -47,8 +45,7 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
                                   BehandlingRepository behandlingRepository,
                                   BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                   TpsTjeneste pdlTjeneste,
-                                  KlageRepository klageRepository,
-                                  @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled) {
+                                  KlageRepository klageRepository) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.restKlient = restKlient;
         this.kabalRequestMapper = kabalRequestMapper;
@@ -56,7 +53,6 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.pdlTjeneste = pdlTjeneste;
         this.klageRepository = klageRepository;
-        this.klageEnabled = klageEnabled;
     }
 
     @Override
@@ -66,13 +62,9 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
         logContext(behandling);
         var personIdent = pdlTjeneste.hentFnrForAktør(behandling.getAktørId());
         var klageUtredning = klageRepository.hentKlageUtredning(behandling.getId());
-        var klageVurdering = klageUtredning.hentKlagevurdering(KlageVurdertAv.VEDTAKSINSTANS)
-            .orElseThrow(() -> new IllegalStateException("Fann ikke NFP-klageVurdering for klage: " + behandling));
 
-        if (klageEnabled) {
-            var request = kabalRequestMapper.map(behandling, behandlingAnsvarlig, personIdent, klageUtredning);
-            log.info("Overfører til kabal - request={}", request);
-            restKlient.overførKlagebehandling(request);
-        }
+        var request = kabalRequestMapper.map(behandling, behandlingAnsvarlig, personIdent, klageUtredning);
+        log.info("Overfører til kabal - request={}", request);
+        restKlient.overførKlagebehandling(request);
     }
 }

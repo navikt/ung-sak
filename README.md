@@ -55,11 +55,13 @@ På denne måten kan man teste om backend endringer fører til feil i frontend f
 Se også [openapi-ts-client/README](web/src/main/resources/openapi-ts-client/README.md) for mer teknisk info.
 
 ## Tilkobling til database
-For å koble til databasen i dev-gcp kan man kjøre denne hjelpe-scriptet:
+For å koble til databasen kan man kjøre dette hjelpeskriptet, som bruker [`nais cloudsql`](https://cli.nais.io/nais_cloudsql.html):
 
 ```shell script
-./scripts/nais-postgres.sh --context dev-gcp --namespace k9saksbehandling --app ung-sak
+./scripts/nais-postgres.sh --app ung-sak --environment dev-gcp --team k9saksbehandling --reason "<begrunnelse>"
 ```
+
+`--environment` kan være `dev-gcp` eller `prod-gcp`. Valgfrie flagg: `--all-privileges` (gir alle rettigheter på skjemaet i `prepare`) og `--port` (lokal port for proxy, default `5432`).
 
 ## Kode generert av GitHub Copilot
 

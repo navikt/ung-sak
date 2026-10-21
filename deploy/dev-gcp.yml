@@ -271,7 +271,9 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
-    - name: KLAGE_ENABLED
+    - name: KLAGE_AVP_ENABLED
+      value: "true"
+    - name: REVURDERING_AVP_ENABLED
       value: "true"
     - name: INTEGRASJON_KABAL
       value: "true"
@@ -284,8 +286,6 @@ spec:
     - name: AKTIVITETSPENGER_ENABLED
       value: "true"
     - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
-      value: "true"
-    - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
       value: "true"
     - name: HISTORIKKINNSLAG_FOR_OPPGAVE_ENABLED
       value: "true"
