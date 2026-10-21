@@ -10,8 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.FieldSource;
+
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -26,6 +30,21 @@ class YtelseStatistikkTest {
     void skal_finne_egen_statistikk_for_hver_støttede_ytelse() {
         assertThat(YtelseStatistikk.finn(ytelseStatistikk, FagsakYtelseType.UNGDOMSYTELSE)).isInstanceOf(UngdomsprogramytelseStatistikk.class);
         assertThat(YtelseStatistikk.finn(ytelseStatistikk, FagsakYtelseType.AKTIVITETSPENGER)).isInstanceOf(AktivitetspengerStatistikk.class);
+    }
+
+    /**
+     * Kjører alle spørringene mot Flyway-skjemaet, slik at en migrering som endrer en tabell eller kolonne
+     * som statistikken leser fra, feiler her i stedet for i tasken som kjører hver time i produksjon.
+     */
+    @ParameterizedTest
+    @FieldSource("no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell#STØTTEDE_YTELSER")
+    void skal_kunne_kjøre_alle_spørringer_mot_databaseskjemaet(FagsakYtelseType ytelse) {
+        YtelseStatistikk statistikk = YtelseStatistikk.finn(ytelseStatistikk, ytelse);
+
+        assertThatCode(() -> {
+            statistikk.hentHyppigRapporterte(LocalDateTime.now().minusHours(1));
+            statistikk.hentDagligRapporterte();
+        }).doesNotThrowAnyException();
     }
 
     @ParameterizedTest

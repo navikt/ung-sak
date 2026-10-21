@@ -2,6 +2,8 @@ package no.nav.ung.sak.metrikker.bigquery;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
@@ -13,6 +15,8 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.kodeverk.hjemmel.Hjemmel;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
@@ -34,6 +38,9 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.saksnummer.SaksnummerRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
@@ -44,6 +51,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅ
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.soknad.SøknadStatistikkRecord;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -102,7 +110,7 @@ class BigQueryStatistikkRepositoryTest {
     @BeforeEach
     void setup() {
         statistikkRepository = new BigQueryStatistikkRepository(entityManager);
-        ungdomsprogramytelseStatistikk = new UngdomsprogramytelseStatistikk(statistikkRepository, null);
+        ungdomsprogramytelseStatistikk = new UngdomsprogramytelseStatistikk(statistikkRepository, null, entityManager);
         aktivitetspengerStatistikk = new AktivitetspengerStatistikk(statistikkRepository, entityManager);
     }
 
@@ -406,6 +414,106 @@ class BigQueryStatistikkRepositoryTest {
             );
     }
 
+    @ParameterizedTest
+    @EnumSource(value = FagsakYtelseType.class, names = {"UNGDOMSYTELSE", "AKTIVITETSPENGER"})
+    void skal_telle_gjeldende_sats_på_siste_avsluttede_behandling(FagsakYtelseType ytelse) {
+        LocalDate idag = LocalDate.now();
+
+        // Gitt en avsluttet behandling med en tidligere og en gjeldende satsperiode
+        lagreSatsperioder(ytelse, lagreBehandlingPåNyFagsak(ytelse, BehandlingStatus.AVSLUTTET),
+            new Satsperiode(fraOgMedTilOgMed(idag.minusDays(60), idag.minusDays(31)), UngdomsytelseSatsType.LAV, 0),
+            new Satsperiode(fraOgMedTilOgMed(idag.minusDays(30), idag.plusDays(30)), UngdomsytelseSatsType.HØY, 2));
+
+        // Og en avsluttet behandling der første satsperiode starter fram i tid
+        lagreSatsperioder(ytelse, lagreBehandlingPåNyFagsak(ytelse, BehandlingStatus.AVSLUTTET),
+            new Satsperiode(fraOgMedTilOgMed(idag.plusDays(10), idag.plusDays(40)), UngdomsytelseSatsType.LAV, 1),
+            new Satsperiode(fraOgMedTilOgMed(idag.plusDays(41), idag.plusDays(70)), UngdomsytelseSatsType.HØY, 1));
+
+        // Og en behandling som ikke er avsluttet
+        lagreSatsperioder(ytelse, lagreBehandlingPåNyFagsak(ytelse, BehandlingStatus.UTREDES),
+            new Satsperiode(fraOgMedTilOgMed(idag.minusDays(30), idag.plusDays(30)), UngdomsytelseSatsType.HØY, 3));
+
+        // Når vi henter satsstatistikk for ytelsen
+        Collection<SatsStatistikkRecord> resultat = switch (ytelse) {
+            case UNGDOMSYTELSE -> ungdomsprogramytelseStatistikk.satsStatistikk();
+            case AKTIVITETSPENGER -> aktivitetspengerStatistikk.satsStatistikk();
+            default -> throw new IllegalArgumentException("Ukjent ytelse " + ytelse);
+        };
+
+        // Så telles kun gjeldende eller første framtidige satsperiode på avsluttede behandlinger
+        assertThat(resultat)
+            .extracting(SatsStatistikkRecord::satsType, SatsStatistikkRecord::antallBarn, SatsStatistikkRecord::antall)
+            .containsExactlyInAnyOrder(
+                org.assertj.core.groups.Tuple.tuple(UngdomsytelseSatsType.HØY, 2, 1L),
+                org.assertj.core.groups.Tuple.tuple(UngdomsytelseSatsType.LAV, 1, 1L)
+            );
+    }
+
+    private record Satsperiode(DatoIntervallEntitet periode, UngdomsytelseSatsType satsType, int antallBarn) {
+    }
+
+    private Behandling lagreBehandlingPåNyFagsak(FagsakYtelseType ytelse, BehandlingStatus status) {
+        Fagsak fagsak = byggFagsak(ytelse, FagsakStatus.LØPENDE);
+        lagreFagsaker(List.of(fagsak));
+        Behandling behandling = byggBehandlingForFagsak(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, status);
+        lagreBehandling(behandling);
+        return behandling;
+    }
+
+    private void lagreSatsperioder(FagsakYtelseType ytelse, Behandling behandling, Satsperiode... perioder) {
+        switch (ytelse) {
+            case UNGDOMSYTELSE -> lagreUngdomsytelseSatsperioder(behandling, perioder);
+            case AKTIVITETSPENGER -> lagreAktivitetspengerSatsperioder(behandling, perioder);
+            default -> throw new IllegalArgumentException("Ukjent ytelse " + ytelse);
+        }
+        entityManager.flush();
+    }
+
+    private void lagreUngdomsytelseSatsperioder(Behandling behandling, Satsperiode... perioder) {
+        var tidslinje = new LocalDateTimeline<>(Stream.of(perioder)
+            .map(p -> new LocalDateSegment<>(p.periode().toLocalDateInterval(), new UngdomsytelseSatser(
+                BigDecimal.valueOf(1000), BigDecimal.valueOf(124028), BigDecimal.valueOf(2), p.satsType(), p.antallBarn(), 0)))
+            .toList());
+        new UngdomsytelseGrunnlagRepository(entityManager).lagre(behandling.getId(), new UngdomsytelseSatsResultat(tidslinje, "input", "sporing"));
+    }
+
+    /**
+     * Entitetene for aktivitetspenger ligger i <code>ytelse-aktivitetspenger</code>, som datavarehus ikke er avhengig av.
+     * Satsperiodene lagres derfor med SQL.
+     */
+    private void lagreAktivitetspengerSatsperioder(Behandling behandling, Satsperiode... perioder) {
+        long satsperioderId = nesteId("seq_avp_sats_perioder");
+        // regel_input og regel_sporing er large objects som statistikken ikke leser
+        entityManager.createNativeQuery("insert into avp_sats_perioder (id, regel_input, regel_sporing) values (:id, 0, 0)")
+            .setParameter("id", satsperioderId)
+            .executeUpdate();
+        for (Satsperiode periode : perioder) {
+            entityManager.createNativeQuery("""
+                    insert into avp_sats_periode (id, avp_sats_perioder_id, dagsats, periode, grunnbeløp, grunnbeløp_faktor,
+                                                  sats_type, hjemmel, antall_barn, dagsats_barnetillegg, minsteytelse)
+                    values (:id, :satsperioderId, 1000, daterange(:fom, :tom, '[]'), 124028, 2,
+                            :satsType, :hjemmel, :antallBarn, 0, 248056)
+                    """)
+                .setParameter("id", nesteId("seq_avp_sats_periode"))
+                .setParameter("satsperioderId", satsperioderId)
+                .setParameter("fom", periode.periode().getFomDato())
+                .setParameter("tom", periode.periode().getTomDato())
+                .setParameter("satsType", periode.satsType().getKode())
+                .setParameter("hjemmel", Hjemmel.AKT_FORSKRIFT_PARAGRAF_12.getKode())
+                .setParameter("antallBarn", periode.antallBarn())
+                .executeUpdate();
+        }
+        entityManager.createNativeQuery("insert into gr_avp (id, behandling_id, avp_sats_perioder_id) values (:id, :behandlingId, :satsperioderId)")
+            .setParameter("id", nesteId("seq_gr_avp"))
+            .setParameter("behandlingId", behandling.getId())
+            .setParameter("satsperioderId", satsperioderId)
+            .executeUpdate();
+    }
+
+    private long nesteId(String sekvens) {
+        return ((Number) entityManager.createNativeQuery("select nextval('" + sekvens + "')").getSingleResult()).longValue();
+    }
+
     private void lagFagsakOgBehandlingMedUngdomsprogram(DatoIntervallEntitet... perioder) {
         var fagsak1 = byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.LØPENDE);
         lagreFagsaker(List.of(fagsak1));
@@ -432,7 +540,6 @@ class BigQueryStatistikkRepositoryTest {
         assertThatThrownBy(() -> statistikkRepository.fagsakStatusStatistikk(ytelse)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> statistikkRepository.behandlingStatusStatistikk(ytelse)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> statistikkRepository.aksjonspunktStatistikk(ytelse)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> statistikkRepository.satsSatistikk(ytelse)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> statistikkRepository.behandlingResultatStatistikk(ytelse)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> statistikkRepository.etterlysningData(ytelse, sistKjørt)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> statistikkRepository.uttalelseData(ytelse, sistKjørt, null)).isInstanceOf(IllegalArgumentException.class);

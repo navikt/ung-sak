@@ -4,9 +4,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.util.Tuple;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
@@ -59,7 +61,7 @@ public class AktivitetspengerStatistikk implements YtelseStatistikk {
             metrikk(FagsakStatusRecord.FAGSAK_STATUS_TABELLER.aktivitetspenger(), statistikkRepository.fagsakStatusStatistikk(YTELSE)),
             metrikk(BehandlingStatusRecord.BEHANDLING_STATUS_TABELLER.aktivitetspenger(), statistikkRepository.behandlingStatusStatistikk(YTELSE)),
             metrikk(AksjonspunktRecord.AKSJONSPUNKT_TABELLER.aktivitetspenger(), statistikkRepository.aksjonspunktStatistikk(YTELSE)),
-            metrikk(SatsStatistikkRecord.SATS_STATISTIKK_TABELLER.aktivitetspenger(), statistikkRepository.satsSatistikk(YTELSE)),
+            metrikk(SatsStatistikkRecord.SATS_STATISTIKK_TABELLER.aktivitetspenger(), satsStatistikk()),
             metrikk(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELLER.aktivitetspenger(), statistikkRepository.behandlingResultatStatistikk(YTELSE)),
             metrikk(EtterlysningRecord.ETTERLYSNING_TABELLER.aktivitetspenger(), statistikkRepository.etterlysningData(YTELSE, sistKjørtTidspunkt)),
             metrikk(UttalelseRecord.UTTALELSE_TABELLER.aktivitetspenger(), statistikkRepository.uttalelseData(YTELSE, sistKjørtTidspunkt, null)),
@@ -73,6 +75,63 @@ public class AktivitetspengerStatistikk implements YtelseStatistikk {
         return List.of(
             metrikk(AlderOgKjønnRecord.ALDER_OG_KJØNN_TABELLER.aktivitetspenger(), statistikkRepository.alderOgKjønnStatistikk(YTELSE))
         );
+    }
+
+    /**
+     * Henter antall gjeldende satser for aktivitetspenger, gruppert på antall barn og satstype.
+     * <p>
+     * Leser tabellene til <code>AktivitetspengerGrunnlag</code> (<code>gr_avp</code>), <code>AktivitetspengerSatsPerioder</code>
+     * (<code>avp_sats_perioder</code>) og <code>AktivitetspengerSatsPeriode</code> (<code>avp_sats_periode</code>) i modulen
+     * <code>ytelse-aktivitetspenger</code>. Datavarehus er ikke avhengig av den modulen og kan derfor ikke lenke til entitetene.
+     * Kun det aktive grunnlaget på siste avsluttede behandling per fagsak telles. Fra grunnlaget telles
+     * satsperioden som gjelder i dag, eller den første framtidige perioden dersom ingen periode gjelder i dag.
+     * <p>
+     * Spørringen kjøres mot Flyway-skjemaet i testene, slik at en migrering som endrer tabellene, feiler i bygget.
+     */
+    Collection<SatsStatistikkRecord> satsStatistikk() {
+        // language=sql
+        String sql = """
+            select asp.antall_barn, asp.sats_type, count(*) as antall
+            from gr_avp gr
+                 inner join behandling b on b.id = gr.behandling_id
+                 inner join fagsak f on f.id = b.fagsak_id
+                 inner join avp_sats_perioder aspr on aspr.id = gr.avp_sats_perioder_id
+                 inner join avp_sats_periode asp on asp.avp_sats_perioder_id = aspr.id
+
+            where f.ytelse_type = :ytelseType
+              and gr.aktiv is true
+              and b.opprettet_tid = (SELECT max(b2.opprettet_tid)
+                                     FROM Behandling b2
+                                     WHERE b2.fagsak_id = f.id
+                                       and b2.behandling_status = :behandlingStatusAvsluttetLKode) -- siste avsluttede behandling for fagsaken
+              and (asp.periode @> current_date -- og perioden overlapper med dagens dato
+                or (lower(asp.periode) > current_date -- eller fom dato på perioden er i fremtiden
+                -- og er første satsperiode for denne behandlingen
+                    and lower(asp.periode) =
+                        (select min(lower(asp2.periode)) from avp_sats_periode asp2 where asp2.avp_sats_perioder_id = aspr.id)
+
+                    -- og det finnes ingen andre perioder som overlapper med dagens dato
+                    and not exists(select 1
+                                   from avp_sats_periode asp2
+                                   where asp2.avp_sats_perioder_id = aspr.id
+                                     and asp2.periode @> current_date)
+                       )
+                )
+            group by asp.antall_barn, asp.sats_type
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        return query
+            .setParameter("ytelseType", YTELSE.getKode())
+            .setParameter("behandlingStatusAvsluttetLKode", BehandlingStatus.AVSLUTTET.getKode())
+            .getResultStream()
+            .map(t -> new SatsStatistikkRecord(
+                t.get(2, Long.class),
+                t.get(0, Integer.class),
+                UngdomsytelseSatsType.fraKode(t.get(1, String.class)),
+                ZonedDateTime.now()
+            ))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**

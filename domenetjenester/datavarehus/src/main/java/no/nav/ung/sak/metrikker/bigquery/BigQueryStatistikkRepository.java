@@ -12,7 +12,6 @@ import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.MetrikkUtils;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
@@ -23,7 +22,6 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅ
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.uttalelse.UttalelseRecord;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
@@ -61,34 +59,6 @@ public class BigQueryStatistikkRepository {
 
     private static String ytelseKode(FagsakYtelseType ytelse) {
         return YtelsesTabell.validerStøttet(ytelse).getKode();
-    }
-
-    /**
-     * Tabeller for satsgrunnlag per ytelse. Verdiene er kodekonstanter og settes inn i SQL med {@link String#formatted}.
-     */
-    private enum SatsKilde {
-        UNGDOMSYTELSE("ung_gr", "ung_sats_perioder", "ung_sats_periode", "ung_sats_perioder_id"),
-        AKTIVITETSPENGER("gr_avp", "avp_sats_perioder", "avp_sats_periode", "avp_sats_perioder_id");
-
-        private final String grunnlag;
-        private final String perioder;
-        private final String periode;
-        private final String perioderFk;
-
-        SatsKilde(String grunnlag, String perioder, String periode, String perioderFk) {
-            this.grunnlag = grunnlag;
-            this.perioder = perioder;
-            this.periode = periode;
-            this.perioderFk = perioderFk;
-        }
-
-        static SatsKilde forYtelse(FagsakYtelseType ytelse) {
-            return switch (ytelse) {
-                case UNGDOMSYTELSE -> UNGDOMSYTELSE;
-                case AKTIVITETSPENGER -> AKTIVITETSPENGER;
-                default -> throw new IllegalArgumentException("Satsstatistikk er ikke støttet for ytelse " + ytelse);
-            };
-        }
     }
 
     /**
@@ -236,85 +206,6 @@ public class BigQueryStatistikkRepository {
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-
-    /**
-     * Henter statistikk for sats basert på antall barn og sats-type.
-     * <p>
-     * Funksjonelt:
-     * Denne metoden henter statistikk fra flere relaterte tabeller der satsdata registreres.
-     * Spørringen filtrerer på oppgitt ytelse og tar kun med aktive poster fra satsgrunnlaget
-     * (<code>ung_gr</code> for ungdomsytelsen, <code>gr_avp</code> for aktivitetspenger). Den sikrer også at data
-     * for en fagsak kun vurderes dersom de hører til den siste avsluttede behandlingen. Resultatene grupperes
-     * etter antall barn og sats-type for å gi en oversikt over hvor mange poster som finnes per kategori.
-     * <p>
-     * Teknisk:
-     * - Tabellnavnene for satsgrunnlaget velges per ytelse via {@link SatsKilde}. Strukturen er lik for begge ytelsene.
-     * - Spørringen bruker flere INNER JOINs for å koble sammen satsgrunnlaget, <code>behandling</code>,
-     * <code>fagsak</code>, satsperiodene og hver enkelt satsperiode.
-     * - WHERE-betingelsene filtrerer på <code>f.ytelse_type = :ytelseType</code> og at grunnlaget er aktivt.
-     * - En subquery benyttes for å hente den siste avsluttede behandlingen (basert på maks <code>opprettet_tid</code>)
-     * for hver fagsak, ved å sammenligne <code>behandling_status</code> med parameteren <code>:behandlingStatusAvsluttetLKode</code>.
-     * - Satsperioden sjekkes for om den enten overlapper med dagens dato eller om
-     * startdatoen er i fremtiden, samtidig som den sikrer at det ikke finnes andre perioder som overlapper.
-     * - Resultatene grupperes etter <code>antall_barn</code> og <code>sats_type</code> med en aggregeringsfunksjon for
-     * å telle antall forekomster per gruppe.
-     *
-     * @param ytelse ytelsen det skal hentes statistikk for
-     * @return En samling av SatsStatistikkRecord-objekter som inneholder antall poster, antall barn,
-     * sats-type og tidspunkt for innhentingen.
-     */
-    Collection<SatsStatistikkRecord> satsSatistikk(FagsakYtelseType ytelse) {
-        SatsKilde kilde = SatsKilde.forYtelse(ytelse);
-        // language=sql
-        String sql = """
-            select usp.antall_barn, usp.sats_type, count(*) as antall
-            from %1$s ur
-                 inner join behandling b on b.id = ur.behandling_id
-                 inner join fagsak f on f.id = b.fagsak_id
-                 inner join %2$s uspr on uspr.id = ur.%4$s
-                 inner join %3$s usp on usp.%4$s = uspr.id
-
-            where f.ytelse_type = :ytelseType
-              and ur.aktiv is true
-              and b.opprettet_tid = (SELECT max(b2.opprettet_tid)
-                                     FROM Behandling b2
-                                     WHERE b2.fagsak_id = f.id
-                                       and b2.behandling_status = :behandlingStatusAvsluttetLKode) -- siste avsluttede behandling for fagsaken
-              and (usp.periode @> current_date -- og perioden overlapper med dagens dato
-                or (lower(usp.periode) > current_date -- eller fom dato på perioden er i fremtiden
-                -- og er første satsperiode for denne behandlingen
-                    and lower(usp.periode) =
-                        (select min(lower(usp2.periode)) from %3$s usp2 where usp2.%4$s = uspr.id)
-
-                    -- og det finnes ingen andre perioder som overlapper med dagens dato
-                    and not exists(select 1
-                                   from %3$s usp2
-                                   where usp2.%4$s = uspr.id
-                                     and usp2.periode @> current_date)
-                       )
-                )
-            group by usp.antall_barn, usp.sats_type
-            """.formatted(kilde.grunnlag, kilde.perioder, kilde.periode, kilde.perioderFk);
-
-        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
-        Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("ytelseType", ytelseKode(ytelse))
-            .setParameter("behandlingStatusAvsluttetLKode", BehandlingStatus.AVSLUTTET.getKode())
-            .getResultStream();
-
-        return stream.map(t -> {
-            Integer antallBarn = t.get(0, Integer.class);
-            String satsTypeKode = t.get(1, String.class);
-            Long antall = t.get(2, Long.class);
-
-            return new SatsStatistikkRecord(
-                antall,
-                antallBarn,
-                UngdomsytelseSatsType.fraKode(satsTypeKode),
-                ZonedDateTime.now()
-            );
-        }).collect(Collectors.toCollection(LinkedHashSet::new));
-    }
 
     /**
      * Henter statistikk for behandlingsresultater basert på behandling-type, behandling-resultat-type,
