@@ -73,11 +73,10 @@ public class PdpRequestMapper {
         no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType internAksjonspunktType = no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType.fraKode(kode);
 
         return switch (internAksjonspunktType) {
-            case AUTOPUNKT -> AksjonspunktType.AUTOPUNKT;
+            case AUTOPUNKT, NAV_KONTOR_AUTOPUNKT -> AksjonspunktType.AUTOPUNKT;
             case MANUELL -> AksjonspunktType.MANUELL;
             case OVERSTYRING -> AksjonspunktType.OVERSTYRING;
             case SAKSBEHANDLEROVERSTYRING -> AksjonspunktType.SAKSBEHANDLEROVERSTYRING;
-            case NAV_KONTOR_AUTOPUNKT -> AksjonspunktType.NAV_KONTOR_AUTOPUNKT;
             case NAV_KONTOR_MANUELL -> AksjonspunktType.NAV_KONTOR_MANUELL;
             case NAV_KONTOR_OVERSTYRING -> AksjonspunktType.NAV_KONTOR_OVERSTYRING;
             case NAV_KONTOR_SAKSBEHANDLEROVERSTYRING -> AksjonspunktType.NAV_KONTOR_SAKSBEHANDLEROVERSTYRING;
