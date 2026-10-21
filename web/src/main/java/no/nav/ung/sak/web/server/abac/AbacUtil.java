@@ -29,7 +29,7 @@ public final class AbacUtil {
         } else if (status == BehandlingStatus.FATTER_VEDTAK) {
             return Optional.of(AbacBehandlingStatus.FATTE_VEDTAK);
         } else if (status == BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR) {
-            return Optional.of(AbacBehandlingStatus.FATTE_VEDTAK); //TODO vurder egen status isdf å gjenbruke FATTE_VEDTAK
+            return Optional.of(AbacBehandlingStatus.FATTE_VEDTAK);
         } else {
             return Optional.empty();
         }
