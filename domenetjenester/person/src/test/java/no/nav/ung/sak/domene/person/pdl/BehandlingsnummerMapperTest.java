@@ -11,27 +11,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BehandlingsnummerMapperTest {
 
-    private static final String FEATURE_FLAG = "BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE";
-
-    @AfterEach
-    void ryddOpp() {
-        System.clearProperty(FEATURE_FLAG);
-    }
 
     @Test
-    void skalReturnereKunUngdomsprogramytelsenNårFeatureFlaggetErAvUansettYtelsetype() {
-        System.setProperty(FEATURE_FLAG, "false");
-
-        assertThat(BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(FagsakYtelseType.UDEFINERT))
-            .containsExactly(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
-        assertThat(BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(FagsakYtelseType.AKTIVITETSPENGER))
-            .containsExactly(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
-    }
-
-    @Test
-    void skalReturnereBehandlingsnummerForAlleKjenteYtelserNårYtelsetypeErUdefinertOgFeatureFlaggetErPå() {
-        System.setProperty(FEATURE_FLAG, "true");
-
+    void skalReturnereBehandlingsnummerForAlleKjenteYtelserNårYtelsetypeErUdefinert() {
         List<Behandlingsnummer> behandlingsnumre = BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(FagsakYtelseType.UDEFINERT);
 
         assertThat(behandlingsnumre).containsExactlyInAnyOrder(
@@ -40,9 +22,7 @@ class BehandlingsnummerMapperTest {
     }
 
     @Test
-    void skalReturnereRiktigBehandlingsnummerForKjenteYtelserNårFeatureFlaggetErPå() {
-        System.setProperty(FEATURE_FLAG, "true");
-
+    void skalReturnereRiktigBehandlingsnummerForKjenteYtelser() {
         assertThat(BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(FagsakYtelseType.UNGDOMSYTELSE))
             .containsExactly(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
         assertThat(BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(FagsakYtelseType.AKTIVITETSPENGER))
@@ -50,9 +30,7 @@ class BehandlingsnummerMapperTest {
     }
 
     @Test
-    void skalKasteForUkjentYtelsetypeNårFeatureFlaggetErPå() {
-        System.setProperty(FEATURE_FLAG, "true");
-
+    void skalKasteForUkjentYtelsetype() {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
             () -> BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(FagsakYtelseType.OBSOLETE));
     }
