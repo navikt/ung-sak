@@ -438,7 +438,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     }
 
     public boolean erAutopunkt() {
-        return AksjonspunktType.AUTOPUNKT.equals(getAksjonspunktType());
+        return aksjonspunktType.erAutopunkt();
     }
 
     public boolean getDefaultTotrinnBehandling() {
