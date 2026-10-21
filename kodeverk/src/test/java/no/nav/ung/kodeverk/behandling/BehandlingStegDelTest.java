@@ -29,7 +29,8 @@ class BehandlingStegDelTest {
     @Test
     void aksjonspunkt_og_steget_det_ligger_på_skal_ha_samme_del() {
         for (AksjonspunktDefinisjon aksjonspunkt : AksjonspunktDefinisjon.values()) {
-            if (aksjonspunkt.getBehandlingSteg() == null) {
+            // Autopunkt løses ikke av saksbehandler, og typen sier derfor ikke noe om del.
+            if (aksjonspunkt.getBehandlingSteg() == null || aksjonspunkt.erAutopunkt()) {
                 continue;
             }
             BehandlingStegDel.forAktivitetspenger(aksjonspunkt.getBehandlingSteg())
