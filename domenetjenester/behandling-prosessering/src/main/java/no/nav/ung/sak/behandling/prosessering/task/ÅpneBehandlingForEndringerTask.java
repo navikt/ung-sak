@@ -1,21 +1,23 @@
 package no.nav.ung.sak.behandling.prosessering.task;
 
+import static no.nav.ung.sak.behandling.prosessering.task.ÅpneBehandlingForEndringerTask.TASKTYPE;
+
+import java.util.List;
+import java.util.Set;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
+
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
-
-import java.util.List;
-import java.util.Set;
-
-import static no.nav.ung.sak.behandling.prosessering.task.ÅpneBehandlingForEndringerTask.TASKTYPE;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(TASKTYPE)
@@ -57,7 +59,7 @@ public class ÅpneBehandlingForEndringerTask extends UnderBehandlingProsessTask 
 
         behandling.getAksjonspunkter().stream()
             .filter(ap -> aksjonspunkterFraOgMedStartpunkt.contains(ap.getAksjonspunktDefinisjon().getKode()))
-            .filter(ap -> !ap.erAutopunkt())
+            .filter(ap -> !AksjonspunktType.AUTOPUNKT.equals(ap.getAksjonspunktDefinisjon().getAksjonspunktType()))
             .forEach(ap -> behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, List.of(ap), true));
     }
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.TypedQuery;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.hibernate.jpa.QueryHints;
@@ -16,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Ulike spesialmetoder for å hente opp behandlinger som er kandidater for videre spesiell prosessering, slik som
@@ -28,8 +28,7 @@ import java.util.stream.Stream;
 @Dependent
 public class BehandlingKandidaterRepository {
 
-    private static final Set<AksjonspunktDefinisjon> AUTOPUNKTER = Stream.of(AksjonspunktDefinisjon.values())
-        .filter(AksjonspunktDefinisjon::erAutopunkt)
+    private static final Set<AksjonspunktDefinisjon> AUTOPUNKTER = List.of(AksjonspunktDefinisjon.values()).stream().filter(a -> AksjonspunktType.AUTOPUNKT.equals(a.getAksjonspunktType()))
         .collect(Collectors.toSet());
     private static final Set<BehandlingStatus> AVSLUTTENDE_STATUS = BehandlingStatus.getFerdigbehandletStatuser();
     private static final String AVSLUTTENDE_KEY = "avsluttetOgIverksetterStatus";
