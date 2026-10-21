@@ -119,13 +119,28 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
         var avklartPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 31));
         lagreAvklaring(behandling, avklartPeriode);
 
-        var perioderPerTrigger = ((AktivitetspengerVilkårsPerioderTilVurderingTjeneste) tjeneste).utledPerTrigger(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
+        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
 
-        assertThat(perioderFor(perioderPerTrigger, BehandlingÅrsakType.NY_SØKT_PERIODE))
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.NY_SØKT_PERIODE))
             .containsExactly(PERIODE_1.toLocalDateInterval());
-        assertThat(perioderFor(perioderPerTrigger, BehandlingÅrsakType.ENDRET_BOSTED))
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED))
             .containsExactly(avklartPeriode.toLocalDateInterval());
         assertThat(tjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR)).containsExactly(PERIODE_1);
+    }
+
+    @Test
+    void skal_kun_gi_vilkårsvurderende_årsaker_og_avklaringsårsak_per_årsak_til_vurdering() {
+        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
+        leggTilTriggere(behandling,
+            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1),
+            new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, PERIODE_2));
+        lagreAvklaring(behandling, PERIODE_2);
+
+        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
+
+        assertThat(perioderPerÅrsak).containsOnlyKeys(BehandlingÅrsakType.NY_SØKT_PERIODE, BehandlingÅrsakType.ENDRET_BOSTED);
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.NY_SØKT_PERIODE)).containsExactly(PERIODE_1.toLocalDateInterval());
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED)).containsExactly(PERIODE_2.toLocalDateInterval());
     }
 
     @Test
@@ -143,9 +158,9 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
         leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1));
         lagreAvklaring(behandling, PERIODE_2);
 
-        var perioderPerTrigger = aktivitetspengerTjeneste().utledPerTrigger(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
+        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
 
-        assertThat(perioderFor(perioderPerTrigger, BehandlingÅrsakType.ENDRET_BOSTED))
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED))
             .containsExactly(PERIODE_2.toLocalDateInterval());
     }
 
@@ -154,21 +169,8 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
         var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
         leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_1));
 
-        assertThat(aktivitetspengerTjeneste().utledPerTrigger(behandling.getId(), VilkårType.BOSTEDSVILKÅR))
+        assertThat(aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR))
             .doesNotContainKey(BehandlingÅrsakType.ENDRET_BOSTED);
-    }
-
-    @Test
-    void skal_klippe_trigger_som_ikke_vurderer_vilkår_til_vilkårsperiodene() {
-        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
-        leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 3, 10))));
-
-        var perioderPerTrigger = aktivitetspengerTjeneste().utledPerTrigger(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
-
-        assertThat(perioderFor(perioderPerTrigger, BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)).containsExactly(
-            new LocalDateInterval(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 31)),
-            new LocalDateInterval(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 10)));
     }
 
     @Test
@@ -194,8 +196,8 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
         return (AktivitetspengerVilkårsPerioderTilVurderingTjeneste) tjeneste;
     }
 
-    private static List<LocalDateInterval> perioderFor(Map<BehandlingÅrsakType, LocalDateTimeline<Boolean>> perioderPerTrigger, BehandlingÅrsakType årsak) {
-        return List.copyOf(perioderPerTrigger.get(årsak).getLocalDateIntervals());
+    private static List<LocalDateInterval> perioderFor(Map<BehandlingÅrsakType, LocalDateTimeline<Boolean>> perioderPerÅrsak, BehandlingÅrsakType årsak) {
+        return List.copyOf(perioderPerÅrsak.get(årsak).getLocalDateIntervals());
     }
 
     @Test
