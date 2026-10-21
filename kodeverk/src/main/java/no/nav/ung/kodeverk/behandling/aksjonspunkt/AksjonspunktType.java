@@ -14,6 +14,11 @@ public enum AksjonspunktType implements Kodeverdi {
     OVERSTYRING("OVST", "Overstyring"),
     SAKSBEHANDLEROVERSTYRING("SAOV", "Saksbehandleroverstyring"),
 
+    /**
+     * Ikke i bruk. Autopunkt kan ikke løses av saksbehandler, så det trengs ikke et eget skille mellom Nav-kontor
+     * og Nav sentral. Hvilken del behandlingen er i utledes fra aktivt steg. Bruk {@link #AUTOPUNKT}.
+     */
+    @Deprecated
     NAV_KONTOR_AUTOPUNKT("NAV_KONTOR_AUTO", "Nav-kontor Autopunkt"),
     NAV_KONTOR_MANUELL("NAV_KONTOR_MANU", "Nav-kontor Manuell"),
     NAV_KONTOR_OVERSTYRING("NAV_KONTOR_OVST", "Nav-kontor Overstyring"),
