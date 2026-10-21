@@ -287,8 +287,6 @@ spec:
       value: "true"
     - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
       value: "true"
-    - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
-      value: "true"
     - name: HISTORIKKINNSLAG_FOR_OPPGAVE_ENABLED
       value: "true"
 

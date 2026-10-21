@@ -11,10 +11,6 @@ public class BehandlingsnummerMapper {
     }
 
     public static List<Behandlingsnummer> ytelsestypeTilBehandlingsnummer(FagsakYtelseType ytelseType){
-        Boolean aktivert = Boolean.valueOf(Environment.current().getProperty("BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE", "false"));
-        if (!aktivert){
-            return List.of(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
-        }
         return switch (ytelseType){
             case AKTIVITETSPENGER -> List.of(Behandlingsnummer.AKTIVITETSPENGER);
             case UNGDOMSYTELSE -> List.of(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
