@@ -103,10 +103,17 @@ if [ "$ALL_PRIVILEGES" = true ]; then
   PREPARE_ARGS+=(--all-privileges)
 fi
 
-# --- Step 1: nais login ---
-echo "Starting nais login. This command will open a browser for authentication..."
-nais login
-# The command waits until login is complete.
+# --- Step 1: nais login (skipped if already logged in) ---
+# `nais login` runs `gcloud auth login --update-adc`. Check both the gcloud user credentials
+# (used by nais/kubectl) and Application Default Credentials (used by the Cloud SQL proxy).
+# Tokens are discarded; only the exit codes are used.
+if nais auth print-access-token >/dev/null 2>&1 && gcloud auth application-default print-access-token >/dev/null 2>&1; then
+  echo "Already logged in, skipping nais login."
+else
+  echo "Starting nais login. This command will open a browser for authentication..."
+  nais login
+  # The command waits until login is complete.
+fi
 
 # --- Step 2: nais cloudsql prepare ---
 echo -e "\nRunning 'nais cloudsql prepare' for:"
