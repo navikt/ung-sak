@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.ung.kodeverk.behandling.*;
+import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -16,6 +18,7 @@ import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.MetrikkUtils;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
@@ -24,6 +27,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecor
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.soknad.SøknadStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.uttalelse.UttalelseRecord;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -42,10 +46,16 @@ import static no.nav.ung.sak.metrikker.MetrikkUtils.UDEFINERT;
 import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
 
 
+/**
+ * Henter statistikk som publiseres til BigQuery.
+ * <p>
+ * Alle spørringer filtrerer eksplisitt på én ytelse, og hver ytelse publiseres til egne tabeller
+ * (se {@link YtelsesTabell}) slik at tilgang kan styres per ytelse i Datamarkedsplassen.
+ * Kun {@link YtelsesTabell#STØTTEDE_YTELSER} er tillatt, slik at utgåtte fagsaker ({@link FagsakYtelseType#OBSOLETE})
+ * aldri kommer med i statistikken.
+ */
 @Dependent
 public class BigQueryStatistikkRepository {
-
-    private static final String OBSOLETE_KODE = FagsakYtelseType.OBSOLETE.getKode();
 
     private final EntityManager entityManager;
 
@@ -63,9 +73,12 @@ public class BigQueryStatistikkRepository {
     public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentDagligRapporterte() {
         List<Tuple<BigQueryTabell<?>, Collection<?>>> dagligRapporterte = new ArrayList<>();
 
-        Collection<AlderOgKjønnRecord> alderOgKjønn = alderOgKjønnStatistikk();
-        dagligRapporterte.add(new Tuple<>(AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL, alderOgKjønn));
+        for (FagsakYtelseType ytelse : YtelsesTabell.STØTTEDE_YTELSER) {
+            Collection<AlderOgKjønnRecord> alderOgKjønn = alderOgKjønnStatistikk(ytelse);
+            dagligRapporterte.add(new Tuple<>(AlderOgKjønnRecord.ALDER_OG_KJØNN_TABELLER.forYtelse(ytelse), alderOgKjønn));
+        }
 
+        // Dager i programmet er kun relevant for ungdomsprogramytelsen
         Collection<DagerIProgrammetRecord> dagerIProgrammet = antallDagerStatistikk.dagerIProgrammet();
         dagligRapporterte.add(new Tuple<>(DagerIProgrammetRecord.DAGER_I_PROGRAMMET_LØPENDE_BIG_QUERY_TABELL, dagerIProgrammet));
 
@@ -76,61 +89,100 @@ public class BigQueryStatistikkRepository {
     public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
         List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
 
-        Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
-        hyppigRapporterte.add(new Tuple<>(FagsakStatusRecord.FAGSAK_STATUS_TABELL_V2, fagsakStatusStatistikk));
+        for (FagsakYtelseType ytelse : YtelsesTabell.STØTTEDE_YTELSER) {
+            Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk(ytelse);
+            hyppigRapporterte.add(new Tuple<>(FagsakStatusRecord.FAGSAK_STATUS_TABELLER.forYtelse(ytelse), fagsakStatusStatistikk));
 
-        Collection<BehandlingStatusRecord> behandlingStatusStatistikk = behandlingStatusStatistikk();
-        hyppigRapporterte.add(new Tuple<>(BehandlingStatusRecord.BEHANDLING_STATUS_TABELL, behandlingStatusStatistikk));
+            Collection<BehandlingStatusRecord> behandlingStatusStatistikk = behandlingStatusStatistikk(ytelse);
+            hyppigRapporterte.add(new Tuple<>(BehandlingStatusRecord.BEHANDLING_STATUS_TABELLER.forYtelse(ytelse), behandlingStatusStatistikk));
 
-        Collection<AksjonspunktRecord> aksjonspunktStatistikk = aksjonspunktStatistikk();
-        hyppigRapporterte.add(new Tuple<>(AksjonspunktRecord.AKSJONSPUNKT_TABELL, aksjonspunktStatistikk));
+            Collection<AksjonspunktRecord> aksjonspunktStatistikk = aksjonspunktStatistikk(ytelse);
+            hyppigRapporterte.add(new Tuple<>(AksjonspunktRecord.AKSJONSPUNKT_TABELLER.forYtelse(ytelse), aksjonspunktStatistikk));
 
-        Collection<SatsStatistikkRecord> satsStatistikk = satsSatistikk();
-        hyppigRapporterte.add(new Tuple<>(SatsStatistikkRecord.SATS_STATISTIKK_TABELL, satsStatistikk));
+            Collection<SatsStatistikkRecord> satsStatistikk = satsSatistikk(ytelse);
+            hyppigRapporterte.add(new Tuple<>(SatsStatistikkRecord.SATS_STATISTIKK_TABELLER.forYtelse(ytelse), satsStatistikk));
 
-        Collection<BehandslingsresultatStatistikkRecord> behandlingResultatStatistikk = behandlingResultatStatistikk();
-        hyppigRapporterte.add(new Tuple<>(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL, behandlingResultatStatistikk));
+            Collection<BehandslingsresultatStatistikkRecord> behandlingResultatStatistikk = behandlingResultatStatistikk(ytelse);
+            hyppigRapporterte.add(new Tuple<>(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELLER.forYtelse(ytelse), behandlingResultatStatistikk));
 
-        Collection<EtterlysningRecord> etterlysningData = etterlysningData(sistKjørtTidspunkt);
-        hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELL, etterlysningData));
+            Collection<EtterlysningRecord> etterlysningData = etterlysningData(ytelse, sistKjørtTidspunkt);
+            hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELLER.forYtelse(ytelse), etterlysningData));
 
-        Collection<UttalelseRecord> uttalelseData = uttalelseData(sistKjørtTidspunkt, null);
-        hyppigRapporterte.add(new Tuple<>(UttalelseRecord.UTTALELSE_TABELL, uttalelseData));
+            Collection<UttalelseRecord> uttalelseData = uttalelseData(ytelse, sistKjørtTidspunkt, null);
+            hyppigRapporterte.add(new Tuple<>(UttalelseRecord.UTTALELSE_TABELLER.forYtelse(ytelse), uttalelseData));
 
-        Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk();
-        hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, behandlingÅrsakData));
+            Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk(ytelse);
+            hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELLER.forYtelse(ytelse), behandlingÅrsakData));
+        }
+
+        // Søknadsstatistikk er kun ønsket for aktivitetspenger
+        Collection<SøknadStatistikkRecord> søknadStatistikk = søknadStatistikk(FagsakYtelseType.AKTIVITETSPENGER);
+        hyppigRapporterte.add(new Tuple<>(SøknadStatistikkRecord.AKTIVITETSPENGER_SØKNAD_TABELL, søknadStatistikk));
 
         return hyppigRapporterte;
+    }
+
+    private static String ytelseKode(FagsakYtelseType ytelse) {
+        return YtelsesTabell.validerStøttet(ytelse).getKode();
+    }
+
+    /**
+     * Tabeller for satsgrunnlag per ytelse. Verdiene er kodekonstanter og settes inn i SQL med {@link String#formatted}.
+     */
+    private enum SatsKilde {
+        UNGDOMSYTELSE("ung_gr", "ung_sats_perioder", "ung_sats_periode", "ung_sats_perioder_id"),
+        AKTIVITETSPENGER("gr_avp", "avp_sats_perioder", "avp_sats_periode", "avp_sats_perioder_id");
+
+        private final String grunnlag;
+        private final String perioder;
+        private final String periode;
+        private final String perioderFk;
+
+        SatsKilde(String grunnlag, String perioder, String periode, String perioderFk) {
+            this.grunnlag = grunnlag;
+            this.perioder = perioder;
+            this.periode = periode;
+            this.perioderFk = perioderFk;
+        }
+
+        static SatsKilde forYtelse(FagsakYtelseType ytelse) {
+            return switch (ytelse) {
+                case UNGDOMSYTELSE -> UNGDOMSYTELSE;
+                case AKTIVITETSPENGER -> AKTIVITETSPENGER;
+                default -> throw new IllegalArgumentException("Satsstatistikk er ikke støttet for ytelse " + ytelse);
+            };
+        }
     }
 
     /**
      * Henter statistikk for fagsaker basert på fagsak-status.
      * <p>
      * Funksjonelt:
-     * Denne metoden henter statistikk over fagsaker fra databasen, filtrerer ut utdatert ytelse,
+     * Denne metoden henter statistikk over fagsaker for én ytelse fra databasen,
      * og grupperer resultatene etter fagsak-status. Den returnerer en samling av FagsakStatusRecord-objekter
      * som inneholder antall fagsaker for hver status.
      * <p>
      * Teknisk:
      * - Spørringen bruker en enkel SELECT-setning for å hente fagsak-status og antall fagsaker.
-     * - WHERE-betingelsen filtrerer ut fagsaker med en spesifikk ytelse-type som er utdatert.
+     * - WHERE-betingelsen filtrerer på oppgitt ytelse-type.
      * - Resultatene grupperes etter fagsak-status, og antall fagsaker telles opp.
      *
+     * @param ytelse ytelsen det skal hentes statistikk for
      * @return En samling av FagsakStatusRecord-objekter som inneholder antall fagsaker,
      * fagsak-status og tidspunkt for innhentingen.
      */
-    Collection<FagsakStatusRecord> fagsakStatusStatistikk() {
+    Collection<FagsakStatusRecord> fagsakStatusStatistikk(FagsakYtelseType ytelse) {
         String sql = """
             select f.fagsak_status, count(*) as antall
                      from fagsak f
-                     where f.ytelse_type <> :obsoleteKode
+                     where f.ytelse_type = :ytelseType
                      group by 1
                      order by 1
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", ytelseKode(ytelse))
             .getResultStream();
 
         return stream.map(t -> {
@@ -145,33 +197,34 @@ public class BigQueryStatistikkRepository {
      * Henter statistikk for behandlinger basert på ytelse-type, behandling-type og behandling-status.
      * <p>
      * Funksjonelt:
-     * Denne metoden henter statistikk over behandlinger fra databasen, filtrerer ut utdatert ytelse,
+     * Denne metoden henter statistikk over behandlinger for én ytelse fra databasen,
      * og grupperer resultatene etter ytelse-type, behandling-type og behandling-status.
      * Den returnerer en samling av BehandlingStatusRecord-objekter som inneholder antall behandlinger
      * for hver kombinasjon av disse feltene.
      * <p>
      * Teknisk:
      * - Spørringen bruker INNER JOINs for å koble sammen tabellene <code>fagsak</code> og <code>behandling</code>.
-     * - WHERE-betingelsene filtrerer ut behandlinger med en spesifikk ytelse-type som er utdatert.
+     * - WHERE-betingelsen filtrerer på oppgitt ytelse-type.
      * - Resultatene grupperes etter ytelse-type, behandling-type og behandling-status,
      * og antall behandlinger telles opp.
      *
+     * @param ytelse ytelsen det skal hentes statistikk for
      * @return En samling av BehandlingStatusRecord-objekter som inneholder antall behandlinger,
      * ytelse-type, behandling-type, behandling-status og tidspunkt for innhentingen.
      */
-    Collection<BehandlingStatusRecord> behandlingStatusStatistikk() {
+    Collection<BehandlingStatusRecord> behandlingStatusStatistikk(FagsakYtelseType ytelse) {
         String sql = """
             select f.ytelse_type, b.behandling_type, b.behandling_status, count(*) as antall\
                   from fagsak f\
                   inner join behandling b on b.fagsak_id=f.id\
-                  where f.ytelse_type <> :obsoleteKode \
+                  where f.ytelse_type = :ytelseType \
                   group by 1, 2, 3\
                   order by 1, 2
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", ytelseKode(ytelse))
             .getResultStream();
 
         return stream.map(t -> {
@@ -193,7 +246,7 @@ public class BigQueryStatistikkRepository {
      * Henter statistikk for aksjonspunkter basert på ytelse-type, aksjonspunkt-definisjon, status og venteårsak.
      * <p>
      * Funksjonelt:
-     * Denne metoden henter statistikk over aksjonspunkter fra databasen, filtrerer ut utdatert ytelse,
+     * Denne metoden henter statistikk over aksjonspunkter for én ytelse fra databasen,
      * og grupperer resultatene etter ytelse-type, aksjonspunkt-definisjon, status og venteårsak.
      * Den returnerer en samling av AksjonspunktRecord-objekter som inneholder antall aksjonspunkter
      * for hver kombinasjon av disse feltene.
@@ -201,28 +254,29 @@ public class BigQueryStatistikkRepository {
      * Teknisk:
      * - Spørringen bruker INNER JOINs for å koble sammen tabellene <code>aksjonspunkt</code>, <code>behandling</code>
      * og <code>fagsak</code>.
-     * - WHERE-betingelsene filtrerer ut aksjonspunkter med spesifikke statuser og ytelse-typer.
+     * - WHERE-betingelsene filtrerer på spesifikke aksjonspunktstatuser og oppgitt ytelse-type.
      * - Resultatene grupperes etter ytelse-type, aksjonspunkt-definisjon, status og venteårsak,
      * og antall aksjonspunkter telles opp.
      *
+     * @param ytelse ytelsen det skal hentes statistikk for
      * @return En samling av AksjonspunktRecord-objekter som inneholder antall aksjonspunkter,
      * ytelse-type, aksjonspunkt-definisjon, status, venteårsak og tidspunkt for innhentingen.
      */
-    Collection<AksjonspunktRecord> aksjonspunktStatistikk() {
+    Collection<AksjonspunktRecord> aksjonspunktStatistikk(FagsakYtelseType ytelse) {
         String sql = """
             select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status as status, a.vent_aarsak, count(*) as antall
              from aksjonspunkt a
              inner join behandling b on b.id = a.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
              where a.aksjonspunkt_status IN (:statuser)
-             and f.ytelse_type <> :obsoleteKode
+             and f.ytelse_type = :ytelseType
              group by 1, 2, 3, 4
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
             .setParameter("statuser", MetrikkUtils.AKSJONSPUNKT_STATUSER)
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", ytelseKode(ytelse))
             .getResultStream();
 
         return stream.map(t -> {
@@ -251,37 +305,39 @@ public class BigQueryStatistikkRepository {
      * <p>
      * Funksjonelt:
      * Denne metoden henter statistikk fra flere relaterte tabeller der satsdata registreres.
-     * Spørringen filtrerer ut fagsaker med en utdatert ytelse og tar kun med aktive poster fra
-     * tabellen <code>ung_gr</code>. Den sikrer også at data for en fagsak kun vurderes dersom de hører til
-     * den siste avsluttede behandlingen. Resultatene grupperes etter antall barn og sats-type for å
-     * gi en oversikt over hvor mange poster som finnes per kategori.
+     * Spørringen filtrerer på oppgitt ytelse og tar kun med aktive poster fra satsgrunnlaget
+     * (<code>ung_gr</code> for ungdomsytelsen, <code>gr_avp</code> for aktivitetspenger). Den sikrer også at data
+     * for en fagsak kun vurderes dersom de hører til den siste avsluttede behandlingen. Resultatene grupperes
+     * etter antall barn og sats-type for å gi en oversikt over hvor mange poster som finnes per kategori.
      * <p>
      * Teknisk:
-     * - Spørringen bruker flere INNER JOINs for å koble sammen tabellene <code>ung_gr</code>, <code>behandling</code>,
-     * <code>fagsak</code>, <code>ung_sats_perioder</code> og <code>ung_sats_periode</code>.
-     * - WHERE-betingelsene filtrerer ut rader basert på ytelse-type, hvor <code>f.ytelse_type</code> ikke
-     * matcher den utdatert koden (<code>:obsoleteKode</code>) og hvor <code>ur.aktiv</code> er true.
+     * - Tabellnavnene for satsgrunnlaget velges per ytelse via {@link SatsKilde}. Strukturen er lik for begge ytelsene.
+     * - Spørringen bruker flere INNER JOINs for å koble sammen satsgrunnlaget, <code>behandling</code>,
+     * <code>fagsak</code>, satsperiodene og hver enkelt satsperiode.
+     * - WHERE-betingelsene filtrerer på <code>f.ytelse_type = :ytelseType</code> og at grunnlaget er aktivt.
      * - En subquery benyttes for å hente den siste avsluttede behandlingen (basert på maks <code>opprettet_tid</code>)
      * for hver fagsak, ved å sammenligne <code>behandling_status</code> med parameteren <code>:behandlingStatusAvsluttetLKode</code>.
-     * - Perioden fra <code>ung_sats_periode</code> sjekkes for om den enten overlapper med dagens dato eller om
+     * - Satsperioden sjekkes for om den enten overlapper med dagens dato eller om
      * startdatoen er i fremtiden, samtidig som den sikrer at det ikke finnes andre perioder som overlapper.
      * - Resultatene grupperes etter <code>antall_barn</code> og <code>sats_type</code> med en aggregeringsfunksjon for
      * å telle antall forekomster per gruppe.
      *
+     * @param ytelse ytelsen det skal hentes statistikk for
      * @return En samling av SatsStatistikkRecord-objekter som inneholder antall poster, antall barn,
      * sats-type og tidspunkt for innhentingen.
      */
-    Collection<SatsStatistikkRecord> satsSatistikk() {
+    Collection<SatsStatistikkRecord> satsSatistikk(FagsakYtelseType ytelse) {
+        SatsKilde kilde = SatsKilde.forYtelse(ytelse);
         // language=sql
         String sql = """
             select usp.antall_barn, usp.sats_type, count(*) as antall
-            from ung_gr ur
+            from %1$s ur
                  inner join behandling b on b.id = ur.behandling_id
                  inner join fagsak f on f.id = b.fagsak_id
-                 inner join ung_sats_perioder uspr on uspr.id = ur.ung_sats_perioder_id
-                 inner join ung_sats_periode usp on usp.ung_sats_perioder_id = uspr.id
+                 inner join %2$s uspr on uspr.id = ur.%4$s
+                 inner join %3$s usp on usp.%4$s = uspr.id
 
-            where f.ytelse_type <> :obsoleteKode
+            where f.ytelse_type = :ytelseType
               and ur.aktiv is true
               and b.opprettet_tid = (SELECT max(b2.opprettet_tid)
                                      FROM Behandling b2
@@ -291,21 +347,21 @@ public class BigQueryStatistikkRepository {
                 or (lower(usp.periode) > current_date -- eller fom dato på perioden er i fremtiden
                 -- og er første satsperiode for denne behandlingen
                     and lower(usp.periode) =
-                        (select min(lower(usp2.periode)) from ung_sats_periode usp2 where usp2.ung_sats_perioder_id = uspr.id)
+                        (select min(lower(usp2.periode)) from %3$s usp2 where usp2.%4$s = uspr.id)
 
                     -- og det finnes ingen andre perioder som overlapper med dagens dato
                     and not exists(select 1
-                                   from ung_sats_periode usp2
-                                   where usp2.ung_sats_perioder_id = uspr.id
+                                   from %3$s usp2
+                                   where usp2.%4$s = uspr.id
                                      and usp2.periode @> current_date)
                        )
                 )
             group by usp.antall_barn, usp.sats_type
-            """;
+            """.formatted(kilde.grunnlag, kilde.perioder, kilde.periode, kilde.perioderFk);
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", ytelseKode(ytelse))
             .setParameter("behandlingStatusAvsluttetLKode", BehandlingStatus.AVSLUTTET.getKode())
             .getResultStream();
 
@@ -328,7 +384,7 @@ public class BigQueryStatistikkRepository {
      * antall behandlinger, manuelle behandlinger og totrinnsbehandlinger.
      * <p>
      * Funksjonelt:
-     * Denne metoden henter statistikk over behandlingsresultater fra databasen, filtrerer ut utdatert ytelse,
+     * Denne metoden henter statistikk over behandlingsresultater for én ytelse fra databasen,
      * og grupperer resultatene etter behandling-type og behandling-resultat-type. Den returnerer en samling
      * av BehandslingsresultatStatistikkRecord-objekter som inneholder antall behandlinger, manuelle behandlinger
      * og totrinnsbehandlinger for hver kombinasjon av disse feltene.
@@ -336,17 +392,18 @@ public class BigQueryStatistikkRepository {
      * Teknisk:
      * - Spørringen bruker INNER JOINs for å koble sammen tabellene <code>fagsak</code> og <code>behandling</code>.
      * - WHERE-betingelsene filtrerer ut behandlinger med spesifikke statuser (IVERKSETTER_VEDTAK og AVSLUTTET),
-     * og deretter filtrerer ut behandlinger med en spesifikk ytelse-type som er utdatert.
+     * og filtrerer på oppgitt ytelse-type.
      * - Resultatene grupperes etter behandling-type og behandling-resultat-type,
      * og antall behandlinger telles opp.
      * - I tillegg telles antall manuelle behandlinger (hvor ansvarlig saksbehandler ikke er null)
      * og antall totrinnsbehandlinger (hvor totrinnsbehandling er true).
      *
+     * @param ytelse ytelsen det skal hentes statistikk for
      * @return En samling av BehandslingsresultatStatistikkRecord-objekter som inneholder antall behandlinger,
      * behandling-type, behandling-resultat-type, manuelle behandlinger,
      * totrinnsbehandlinger og tidspunkt for innhentingen.
      */
-    public Collection<BehandslingsresultatStatistikkRecord> behandlingResultatStatistikk() {
+    public Collection<BehandslingsresultatStatistikkRecord> behandlingResultatStatistikk(FagsakYtelseType ytelse) {
         //language=sql
         String sql = """
             select b.behandling_type,
@@ -358,7 +415,7 @@ public class BigQueryStatistikkRepository {
                 inner join behandling b on b.fagsak_id=f.id
             where b.behandling_status IN (:statuser)
               and behandling_resultat_type is not null
-              and f.ytelse_type <> :obsoleteKode
+              and f.ytelse_type = :ytelseType
             group by 1, 2
             order by 1, 2
             """;
@@ -366,7 +423,7 @@ public class BigQueryStatistikkRepository {
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
             .setParameter("statuser", Set.of(BehandlingStatus.IVERKSETTER_VEDTAK.getKode(), BehandlingStatus.AVSLUTTET.getKode()))
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", ytelseKode(ytelse))
             .getResultStream();
 
         return stream.map(t -> {
@@ -388,20 +445,20 @@ public class BigQueryStatistikkRepository {
     }
 
 
-    /* Henter etterlysning-data for fagsaker.
+    /* Henter etterlysning-data for fagsaker på oppgitt ytelse.
      */
-    Collection<EtterlysningRecord> etterlysningData(LocalDateTime sistKjørtTidspunkt) {
+    Collection<EtterlysningRecord> etterlysningData(FagsakYtelseType ytelse, LocalDateTime sistKjørtTidspunkt) {
         String sql = """
             select f.saksnummer, e.type, e.status, e.fom, e.tom, frist, coalesce(e.endret_tid, e.opprettet_tid) opprettet_tid
              from etterlysning e
              inner join behandling b on b.id = e.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
-             where f.ytelse_type <> :obsoleteKode and coalesce(e.endret_tid, e.opprettet_tid) > :sistKjørtTidspunkt
+             where f.ytelse_type = :ytelseType and coalesce(e.endret_tid, e.opprettet_tid) > :sistKjørtTidspunkt
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", ytelseKode(ytelse))
             .setParameter("sistKjørtTidspunkt", sistKjørtTidspunkt)
             .getResultStream();
 
@@ -426,9 +483,9 @@ public class BigQueryStatistikkRepository {
     }
 
 
-    /* Henter uttalelse-data for fagsaker.
+    /* Henter uttalelse-data for fagsaker på oppgitt ytelse.
      */
-    Collection<UttalelseRecord> uttalelseData(LocalDateTime sistKjørtTidspunkt, LocalDateTime førsteKjørtTidspunkt) {
+    Collection<UttalelseRecord> uttalelseData(FagsakYtelseType ytelse, LocalDateTime sistKjørtTidspunkt, LocalDateTime førsteKjørtTidspunkt) {
         String sql = """
             select f.saksnummer, u.har_uttalelse, u.endring_type, u.fom, u.tom, m.mottatt_tidspunkt
              from gr_uttalelse gr
@@ -436,14 +493,14 @@ public class BigQueryStatistikkRepository {
              inner join behandling b on b.id = gr.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
              inner join mottatt_dokument m on m.journalpost_id = u.svar_journalpost_id and m.behandling_id = b.id
-             where f.ytelse_type <> :obsoleteKode and
+             where f.ytelse_type = :ytelseType and
             """;
         sql += førsteKjørtTidspunkt == null
             ? "(m.mottatt_tidspunkt > :sistKjørtTidspunkt)"
             : "(m.mottatt_tidspunkt > :sistKjørtTidspunkt or m.mottatt_tidspunkt < :førsteKjørtTidspunkt)";
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
-        query.setParameter("obsoleteKode", OBSOLETE_KODE);
+        query.setParameter("ytelseType", ytelseKode(ytelse));
         query.setParameter("sistKjørtTidspunkt", sistKjørtTidspunkt);
         if (førsteKjørtTidspunkt != null) {
             query.setParameter("førsteKjørtTidspunkt", førsteKjørtTidspunkt);
@@ -476,22 +533,23 @@ public class BigQueryStatistikkRepository {
      * Denne metoden henter antall behandlinger for hver kombinasjon av relevante årsakstyper og om behandlingen er ferdigbehandlet eller ikke.
      * Resultatet inkluderer alle relevante årsaker, også de med 0 forekomster, for både ferdigbehandlet og ikke-ferdigbehandlet status.
      *
+     * @param ytelse ytelsen det skal hentes statistikk for
      * @return En samling av BehandlingÅrsakRecord for alle relevante årsaker og ferdigbehandlet-status.
      */
-    Collection<BehandlingÅrsakRecord> behandlingÅrsakStatistikk() {
+    Collection<BehandlingÅrsakRecord> behandlingÅrsakStatistikk(FagsakYtelseType ytelse) {
         String sql = """
             select ba.behandling_arsak_type, b.behandling_status, count(distinct b.id) as antall\
                   from fagsak f\
                   inner join behandling b on b.fagsak_id=f.id\
                   inner join behandling_arsak ba on ba.behandling_id = b.id\
-                  where f.ytelse_type <> :obsoleteKode \
+                  where f.ytelse_type = :ytelseType \
                   group by 1, 2 \
                   order by 1, 2
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", ytelseKode(ytelse))
             .getResultStream();
 
         // Gruppér på behandling_årsak_type og erFerdigbehandletStatus
@@ -521,7 +579,7 @@ public class BigQueryStatistikkRepository {
     }
 
 
-    Collection<AlderOgKjønnRecord> alderOgKjønnStatistikk() {
+    Collection<AlderOgKjønnRecord> alderOgKjønnStatistikk(FagsakYtelseType ytelse) {
         String sql = """
             select po.bruker_kjoenn,  extract(YEAR from AGE(current_date, po.foedselsdato)),  count(*) as antall
                      from fagsak f
@@ -529,14 +587,14 @@ public class BigQueryStatistikkRepository {
                      inner join gr_personopplysning gr on gr.behandling_id = b.id
                     inner join po_informasjon pi on pi.id = gr.registrert_informasjon_id
                      inner join PO_PERSONOPPLYSNING po on po.po_informasjon_id = pi.id and po.aktoer_id = f.bruker_aktoer_id
-                     where f.ytelse_type <> :obsoleteKode and gr.aktiv is true and b.behandling_type = :førstegangsbehandling
+                     where f.ytelse_type = :ytelseType and gr.aktiv is true and b.behandling_type = :førstegangsbehandling
                      group by 1,2
                      order by 1,2
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", ytelseKode(ytelse))
             .setParameter("førstegangsbehandling", BehandlingType.FØRSTEGANGSSØKNAD.getKode())
             .getResultStream();
 
@@ -547,6 +605,47 @@ public class BigQueryStatistikkRepository {
             Long antall = t.get(2, Long.class);
 
             return new AlderOgKjønnRecord(BigDecimal.valueOf(antall), alder.intValue(), kjønn, ZonedDateTime.now());
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    /**
+     * Henter statistikk over mottatte søknadsdokumenter for én ytelse, gruppert på dokumentstatus.
+     * <p>
+     * Alle mottatte søknadsdokumenter telles (også henlagte og ugyldige), slik at statusfordelingen viser
+     * hvor mange som er ferdig behandlet i mottaket. I tillegg telles antall søknader mottatt i dag.
+     *
+     * @param ytelse ytelsen det skal hentes statistikk for
+     * @return En samling av SøknadStatistikkRecord per dokumentstatus.
+     */
+    Collection<SøknadStatistikkRecord> søknadStatistikk(FagsakYtelseType ytelse) {
+        String sql = """
+            select md.status, count(*) as antall_totalt, count(*) filter (where md.mottatt_dato = :dagensDato) as antall_i_dag
+             from mottatt_dokument md
+             inner join fagsak f on f.id = md.fagsak_id
+             where f.ytelse_type = :ytelseType
+               and md.type in (:soknadTyper)
+             group by 1
+             order by 1
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("ytelseType", ytelseKode(ytelse))
+            .setParameter("soknadTyper", Brevkode.SØKNAD_TYPER.stream().map(Brevkode::getKode).collect(Collectors.toSet()))
+            .setParameter("dagensDato", LocalDate.now())
+            .getResultStream();
+
+        return stream.map(t -> {
+            String statusKode = t.get(0, String.class);
+            Long antallTotalt = t.get(1, Long.class);
+            Long antallIDag = t.get(2, Long.class);
+
+            return new SøknadStatistikkRecord(
+                DokumentStatus.fraKode(statusKode),
+                antallTotalt,
+                antallIDag,
+                ZonedDateTime.now()
+            );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
