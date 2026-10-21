@@ -87,10 +87,14 @@ if [[ "$ENVIRONMENT" != "dev-gcp" && "$ENVIRONMENT" != "prod-gcp" ]]; then
   exit 1
 fi
 
-if ! [[ "$PORT" =~ ^[0-9]+$ ]]; then
-  echo "Invalid port: $PORT"
+# Validate before any nais command runs, so invalid input does not grant access before the proxy fails.
+# 10# forces base 10, so leading zeros are not parsed as octal.
+if ! [[ "$PORT" =~ ^[0-9]{1,5}$ ]] || (( 10#$PORT < 1 || 10#$PORT > 65535 )); then
+  echo "Invalid port: $PORT (must be between 1 and 65535)"
   exit 1
 fi
+# Normalize, since nais parses leading zeros as octal.
+PORT=$((10#$PORT))
 
 COMMON_ARGS=(--environment "$ENVIRONMENT" --team "$TEAM" --reason "$REASON")
 
