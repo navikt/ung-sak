@@ -98,12 +98,11 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     }
 
     private static void mapBehandlingDel(PipBehandlingsData behandlingData, UngSakPdpRequest pdpRequest) {
-        if (behandlingData.aktivtSteg() == null) {
+        if (behandlingData.fagsakYtelseType() != FagsakYtelseType.AKTIVITETSPENGER || behandlingData.aktivtSteg() == null) {
             return;
         }
         var behandlingDel = BehandlingStegDel.forAktivitetspenger(behandlingData.aktivtSteg());
-        behandlingDel.map(AbacUtil::oversettBehandlingDel)
-            .ifPresent(pdpRequest::setBehandlingDel);
+        pdpRequest.setBehandlingDel(AbacUtil.oversettBehandlingDel(behandlingDel));
     }
 
     private Set<String> utledYtelsetyper(AbacAttributtSamling attributter, Set<Saksnummer> saksnumre, PipBehandlingsData behandlingData) {

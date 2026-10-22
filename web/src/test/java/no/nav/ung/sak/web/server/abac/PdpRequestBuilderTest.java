@@ -82,6 +82,13 @@ public class PdpRequestBuilderTest {
     }
 
     @Test
+    public void skal_ikke_sende_behandlingsdel_for_andre_ytelser() {
+        PdpRequest request = lagRequestForBehandling(FagsakYtelseType.UNGDOMSYTELSE, BehandlingStegType.UNGDOMSYTELSE_BEREGNING);
+
+        assertThat(((UngSakPdpRequest) request).getBehandlingDel()).isNull();
+    }
+
+    @Test
     public void skal_angi_aktørId_gitt_journalpost_id_som_input() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
             .leggTil(StandardAbacAttributtType.JOURNALPOST_ID, JOURNALPOST_ID.getVerdi()));
