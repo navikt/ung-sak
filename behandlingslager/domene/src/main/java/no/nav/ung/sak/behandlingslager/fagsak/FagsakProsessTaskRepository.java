@@ -443,8 +443,14 @@ public class FagsakProsessTaskRepository {
             em.flush(); // flush alt annet
             em.createNativeQuery("delete from fagsak_prosess_task fpt where fpt.fagsak_id=:fagsakId and fpt.behandling_id=:behandlingId")
                 .setParameter("fagsakId", fagsakId)
-                .setParameter("behandlingId", "'" + behandlingId + "'")
+                .setParameter("behandlingId", String.valueOf(behandlingId))
                 .executeUpdate();
+            // Tasker som blokkeres av tasker som slettes, blir ellers stående i VETO for alltid
+            // (prosesstask frigir bare når blokkerende task finnes og er ferdig).
+            int frigitt = frigiVetoBlokkertAv(skalSlettes.stream().map(ProsessTaskData::getId).toList());
+            if (frigitt > 0) {
+                log.info("Frigitt {} tasker som var blokkert av tasker som slettes for fagsak[{}], behandling[{}]", frigitt, fagsakId, behandlingId);
+            }
             em.flush();
             for (var s : skalSlettes) {
                 em.createNativeQuery("delete from prosess_task p where p.id = :pid")
@@ -454,6 +460,23 @@ public class FagsakProsessTaskRepository {
             }
         }
 
+    }
+
+    private int frigiVetoBlokkertAv(Collection<Long> blokkerendeTaskIder) {
+        if (blokkerendeTaskIder.isEmpty()) {
+            return 0;
+        }
+        return em.createNativeQuery("""
+                update prosess_task set status = 'KLAR'
+                  , blokkert_av = null
+                  , siste_kjoering_feil_kode = null
+                  , siste_kjoering_feil_tekst = null
+                  , neste_kjoering_etter = null
+                  , versjon = versjon + 1
+                where status = 'VETO' and blokkert_av in (:ider)
+                """)
+            .setParameter("ider", blokkerendeTaskIder)
+            .executeUpdate();
     }
 
     public List<ProsessTaskData> finnAlleÅpneTasksForAngittSøk(Long fagsakId, Long behandlingId, String gruppe) {
