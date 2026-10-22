@@ -22,8 +22,6 @@ import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.person.AktørIdDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -134,7 +132,7 @@ public class PipRestTjeneste {
             FagsakStatus fagsakStatus = pipData.fagsakStatus();
             Set<String> ansvarligSaksbehandlere = pipData.ansvarligSaksbehandlere();
             Saksnummer saksnummer = pipData.saksnummer();
-            return Optional.of(new PipDtoV6(pipData.fagsakYtelseType(), saksnummer, personer, personerForSporingslogg, behandlingStatus, fagsakStatus, ansvarligSaksbehandlere));
+            return Optional.of(new PipDtoV6(pipData.fagsakYtelseType(), saksnummer, personer, personerForSporingslogg, behandlingStatus, fagsakStatus, ansvarligSaksbehandlere, null));
         } else {
             return Optional.empty();
         }
