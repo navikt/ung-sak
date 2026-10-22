@@ -33,11 +33,12 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VilkårBostedPeriodeVurderingDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.avkort.AvkortTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
@@ -48,6 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -63,7 +65,6 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
 
     private static final Periode PERIODE_1 = new Periode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
     private static final Periode PERIODE_2 = new Periode(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31));
-    private static final Periode PERIODE_3 = new Periode(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 31));
 
     @Inject
     private EntityManager entityManager;
@@ -77,7 +78,7 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
     private AvkortTjeneste avkortTjeneste;
     @Inject
     @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     @Inject
     private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
@@ -105,7 +106,6 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
 
         oppdaterer = new ManuellVurderingBostedsvilkårOppdaterer(
-            behandlingRepository,
             vilkårResultatRepository,
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
@@ -170,54 +170,63 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
     }
 
     @Test
-    void endret_bosted_opphør_skal_skal_tillate_å_lagre_uavhengig_av_vurdering() {
+    void skal_kreve_vurdering_av_alle_nye_søknadsperioder() {
+        var behandling = opprettFørstegangsbehandling(
+            ikkeVurdertVilkårsperiode(PERIODE_1),
+            ikkeVurdertVilkårsperiode(PERIODE_2));
+
+        var dto = dto(oppfylt(PERIODE_1, "bor i Trondheim"));
+        var param = oppdaterParameter(behandling, dto);
+
+        assertThatThrownBy(() -> oppdaterer.oppdater(dto, param))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Forventer at alle perioder til vurdering vurderes");
+    }
+
+    @Test
+    void skal_avvise_vurdering_av_avklart_periode() {
         var originalBehandling = opprettFørstegangsbehandling(
             vilkårsperiode(PERIODE_1, Utfall.OPPFYLT, null, "original periode 1"),
-            vilkårsperiode(PERIODE_2, Utfall.IKKE_OPPFYLT, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, "original periode 2"),
-            vilkårsperiode(PERIODE_3, Utfall.OPPFYLT, null, "original periode 3"));
-
+            vilkårsperiode(PERIODE_2, Utfall.OPPFYLT, null, "original periode 2"));
         var revurdering = opprettRevurdering(originalBehandling, BehandlingÅrsakType.ENDRET_BOSTED,
-            vilkårsperiode(PERIODE_1, Utfall.OPPFYLT, null, "original periode 1 (kopiert grunnlag)"),
-            ikkeVurdertVilkårsperiode(PERIODE_2),
-            ikkeVurdertVilkårsperiode(PERIODE_3));
+            ikkeVurdertVilkårsperiode(PERIODE_1),
+            ikkeVurdertVilkårsperiode(PERIODE_2));
+        leggTilTriggere(revurdering,
+            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, tilDatoIntervallEntitet(PERIODE_1)),
+            new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, tilDatoIntervallEntitet(PERIODE_2)));
 
-        var opphørFraMidtenAvPeriode1 = new Periode(PERIODE_1.getFom().plusDays(15), null);
-        var dto = dto(ikkeOppfylt(opphørFraMidtenAvPeriode1, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, "vurdert på nytt i denne behandlingen"));
+        var dto = dto(
+            oppfylt(PERIODE_1, "ny søknadsperiode"),
+            ikkeOppfylt(PERIODE_2, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, "avklart periode"));
+        var param = oppdaterParameter(revurdering, dto);
 
-        var vilkårResultat = utførOppdatering(revurdering, dto);
+        assertThatThrownBy(() -> oppdaterer.oppdater(dto, param))
+            .as("avklarte perioder vurderes i aksjonspunktet for vurdering etter avklaring")
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Forsøker å vurdere perioder som ikke er til vurdering");
+    }
 
-        var periodeFørOpphør = new Periode(PERIODE_1.getFom(), opphørFraMidtenAvPeriode1.getFom().minusDays(1));
-        var vilkårPeriode0 = hentVilkårsperiode(vilkårResultat, periodeFørOpphør);
-        assertThat(vilkårPeriode0.getGjeldendeUtfall())
-            .as("vurdering gjort i denne behandlingen skal ikke overskrives av forrige behandling")
-            .isEqualTo(Utfall.OPPFYLT);
-        assertThat(vilkårPeriode0.getBegrunnelse()).isEqualTo("original periode 1 (kopiert grunnlag)");
+    @Test
+    void skal_avvise_vurdering_av_avkortet_periode() {
+        var behandling = opprettFørstegangsbehandling(
+            ikkeVurdertVilkårsperiode(PERIODE_1),
+            vilkårsperiode(PERIODE_2, Utfall.IKKE_OPPFYLT, Avslagsårsak.AVKORTET, null));
 
-        // Sjekker at overlapp med periode 1 også får nytt utfall - selv om den ikke var til vurdering
-        var periode1_rest = new Periode(opphørFraMidtenAvPeriode1.getFom(), PERIODE_1.getTom());
-        var vilkårPeriode1 = hentVilkårsperiode(vilkårResultat, periode1_rest);
-        assertThat(vilkårPeriode1.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(vilkårPeriode1.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
-        assertThat(vilkårPeriode1.getBegrunnelse()).isEqualTo("vurdert på nytt i denne behandlingen");
+        var dto = dto(
+            oppfylt(PERIODE_1, "bor i Trondheim"),
+            oppfylt(PERIODE_2, "avkortet periode"));
+        var param = oppdaterParameter(behandling, dto);
 
-        var vilkårPeriode2 = hentVilkårsperiode(vilkårResultat, PERIODE_2);
-        assertThat(vilkårPeriode2.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(vilkårPeriode2.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
-        assertThat(vilkårPeriode2.getBegrunnelse()).isEqualTo("vurdert på nytt i denne behandlingen");
+        assertThatThrownBy(() -> oppdaterer.oppdater(dto, param))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Forsøker å vurdere perioder som ikke er til vurdering");
 
-        var vilkårPeriode3 = hentVilkårsperiode(vilkårResultat, PERIODE_3);
-        assertThat(vilkårPeriode3.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(vilkårPeriode3.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
-        assertThat(vilkårPeriode3.getBegrunnelse()).isEqualTo("vurdert på nytt i denne behandlingen");
-
-        assertThat(vilkårResultat.filterValue(v -> Utfall.IKKE_VURDERT.equals(v.getGjeldendeUtfall())).isEmpty())
-            .as("ingen bostedsperioder skal stå igjen som ikke vurdert")
-            .isTrue();
-
-        assertThat(hentBostedvurderinger(revurdering))
-            .as("kun perioden vurdert i denne behandlingen skal lagres som vurdering på revurderingen")
+        var kunIkkeAvkortet = dto(oppfylt(PERIODE_1, "bor i Trondheim"));
+        utførOppdatering(behandling, kunIkkeAvkortet);
+        assertThat(hentBostedvurderinger(behandling))
+            .as("avkortet periode skal ikke kreves vurdert")
             .extracting(BostedsvilkårResultatPeriode::getPeriode)
-            .containsExactlyInAnyOrder(tilDatoIntervallEntitet(periode1_rest), tilDatoIntervallEntitet(PERIODE_2), tilDatoIntervallEntitet(PERIODE_3));
+            .containsExactly(tilDatoIntervallEntitet(PERIODE_1));
     }
 
     private LocalDateTimeline<VilkårPeriode> utførOppdatering(Behandling behandling, ManuellVurderingBostedsvilkårDto dto) {
@@ -248,7 +257,14 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
     private Behandling opprettFørstegangsbehandling(VilkårsperiodeData... vilkårsperioder) {
         var behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD).build();
         lagre(behandling, vilkårsperioder);
+        leggTilTriggere(behandling, Arrays.stream(vilkårsperioder)
+            .map(v -> new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, v.periode()))
+            .toArray(Trigger[]::new));
         return behandling;
+    }
+
+    private void leggTilTriggere(Behandling behandling, Trigger... triggere) {
+        new ProsessTriggereRepository(entityManager).leggTil(behandling.getId(), Set.of(triggere));
     }
 
     private Behandling opprettRevurdering(Behandling originalBehandling, BehandlingÅrsakType årsak, VilkårsperiodeData... vilkårsperioder) {
@@ -286,12 +302,12 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
 
     private static VilkårBostedPeriodeVurderingDto oppfylt(Periode periode, String begrunnelse) {
         return new VilkårBostedPeriodeVurderingDto(
-            new ÅpenPeriode(periode.getFom(), periode.getTom()), true, null, begrunnelse, "fritekst " + periode.getFom());
+            periode, true, null, begrunnelse, "fritekst " + periode.getFom());
     }
 
     private static VilkårBostedPeriodeVurderingDto ikkeOppfylt(Periode periode, BostedsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse) {
         return new VilkårBostedPeriodeVurderingDto(
-            new ÅpenPeriode(periode.getFom(), periode.getTom()), false, årsak, begrunnelse, "fritekst " + periode.getFom());
+            periode, false, årsak, begrunnelse, "fritekst " + periode.getFom());
     }
 
     private static VilkårsperiodeData ikkeVurdertVilkårsperiode(Periode periode) {
