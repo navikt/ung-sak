@@ -11,8 +11,6 @@ import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import java.util.Map;
 import java.util.Set;
 
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_UNGDOMSYTELSEGRUNNLAG;
-
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @BehandlingTypeRef(BehandlingType.KLAGE)
