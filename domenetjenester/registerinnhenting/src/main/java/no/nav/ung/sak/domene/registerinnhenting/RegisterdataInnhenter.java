@@ -263,7 +263,10 @@ public class RegisterdataInnhenter {
         log.info("Trigger innhenting i abakus for behandling med id={} og uuid={}, saksnummer={}, opplysningsperiode={}, ytelseType={}",
             behandling.getId(), behandlingUuid, saksnummer, opplysningsperiode, ytelseType);
 
-        var informasjonsElementer = utledBasertPå(behandlingType, fagsakYtelseType);
+        var informasjonsElementer = utledBasertPå(behandling, behandlingType, fagsakYtelseType);
+        if (informasjonsElementer.isEmpty()) {
+            throw new IllegalStateException("Ingen informasjonselementer å innhente for behandling med årsaker " + behandling.getBehandlingÅrsakerTyper());
+        }
         var periode = new Periode(opplysningsperiode.getFom(), opplysningsperiode.getTom());
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
 
@@ -278,8 +281,8 @@ public class RegisterdataInnhenter {
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }
 
-    private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType ytelseType) {
-        return InformasjonselementerUtleder.finnTjeneste(informasjonselementer, ytelseType, behandlingType).utled(behandlingType);
+    private Set<RegisterdataType> utledBasertPå(Behandling behandling, BehandlingType behandlingType, FagsakYtelseType ytelseType) {
+        return InformasjonselementerUtleder.finnTjeneste(informasjonselementer, ytelseType, behandlingType).utled(behandlingType, behandling.getBehandlingÅrsakerTyper());
     }
 
     private boolean hentHistorikkForRelatertePersoner(Behandling behandling) {

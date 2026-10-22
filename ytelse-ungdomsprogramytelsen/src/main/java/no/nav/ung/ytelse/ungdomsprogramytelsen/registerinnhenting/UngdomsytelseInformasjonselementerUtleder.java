@@ -3,11 +3,13 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinnhenting;
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,4 +33,12 @@ public class UngdomsytelseInformasjonselementerUtleder implements Informasjonsel
         return FILTER.get(behandlingType);
     }
 
+    @Override
+    public Set<RegisterdataType> utled(BehandlingType behandlingType, Collection<BehandlingÅrsakType> behandlingÅrsaker) {
+        return erKontrollAvInntekt(behandlingÅrsaker) ? utled(behandlingType) : Set.of();
+    }
+
+    private static boolean erKontrollAvInntekt(Collection<BehandlingÅrsakType> behandlingÅrsaker) {
+        return BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandlingÅrsaker::contains);
+    }
 }
