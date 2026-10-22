@@ -84,6 +84,21 @@ public class PipRepositoryTest {
     }
 
     @Test
+    public void skal_ikke_ta_med_tidligere_steg() {
+        Behandling behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.AKTIVITETSPENGER);
+        new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR, BehandlingStegStatus.STARTET);
+        lagreBehandling(behandling);
+        new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.FORESLÅ_VEDTAK, BehandlingStegStatus.STARTET);
+        lagreBehandling(behandling);
+        entityManager.flush();
+
+        assertThat(pipRepository.hentDataForBehandling(behandling.getId()).orElseThrow().aktivtSteg())
+            .isEqualTo(BehandlingStegType.FORESLÅ_VEDTAK);
+        assertThat(pipRepository.hentDataForBehandlingUuid(behandling.getUuid()).orElseThrow().aktivtSteg())
+            .isEqualTo(BehandlingStegType.FORESLÅ_VEDTAK);
+    }
+
+    @Test
     public void skal_ikke_ta_med_steg_som_er_utført() {
         Behandling behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.AKTIVITETSPENGER);
         new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR, BehandlingStegStatus.UTFØRT);
@@ -91,6 +106,7 @@ public class PipRepositoryTest {
         entityManager.flush();
 
         assertThat(pipRepository.hentDataForBehandling(behandling.getId()).orElseThrow().aktivtSteg()).isNull();
+        assertThat(pipRepository.hentDataForBehandlingUuid(behandling.getUuid()).orElseThrow().aktivtSteg()).isNull();
     }
 
     @Test
