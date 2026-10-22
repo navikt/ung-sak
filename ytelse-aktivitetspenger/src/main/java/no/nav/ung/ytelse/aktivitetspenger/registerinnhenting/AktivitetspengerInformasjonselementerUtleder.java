@@ -11,8 +11,7 @@ import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import java.util.Map;
 import java.util.Set;
 
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_UNGDOMSYTELSEGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.LIGNET_NÆRING;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.*;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -22,11 +21,11 @@ public class AktivitetspengerInformasjonselementerUtleder implements Informasjon
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
         BehandlingType.FØRSTEGANGSSØKNAD,
         Set.of(
-            INNTEKT_UNGDOMSYTELSEGRUNNLAG,
+            INNTEKT_AKTIVITETSPENGERGRUNNLAG,
             LIGNET_NÆRING),
         BehandlingType.REVURDERING,
         Set.of(
-            INNTEKT_UNGDOMSYTELSEGRUNNLAG,
+            INNTEKT_AKTIVITETSPENGERGRUNNLAG,
             LIGNET_NÆRING));
 
     @Override
