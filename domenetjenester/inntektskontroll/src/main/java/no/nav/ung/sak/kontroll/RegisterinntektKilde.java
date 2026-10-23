@@ -1,17 +1,29 @@
 package no.nav.ung.sak.kontroll;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
-public final class RegisterinntektKilde {
+@ApplicationScoped
+public class RegisterinntektKilde {
 
-    private RegisterinntektKilde() {
+    private boolean aktivitetspengerInntektsgrunnlagEnabled;
+
+    RegisterinntektKilde() {
+        // for CDI proxy
     }
 
-    public static InntektsKilde forYtelse(FagsakYtelseType ytelseType) {
+    @Inject
+    public RegisterinntektKilde(@KonfigVerdi(value = "AKTIVITETSPENGER_INNTEKTSGRUNNLAG_ENABLED", required = false, defaultVerdi = "false") boolean aktivitetspengerInntektsgrunnlagEnabled) {
+        this.aktivitetspengerInntektsgrunnlagEnabled = aktivitetspengerInntektsgrunnlagEnabled;
+    }
+
+    public InntektsKilde forYtelse(FagsakYtelseType ytelseType) {
         return switch (ytelseType) {
             case UNGDOMSYTELSE -> InntektsKilde.INNTEKT_UNGDOMSYTELSE;
-            case AKTIVITETSPENGER -> InntektsKilde.INNTEKT_AKTIVITETSPENGER;
+            case AKTIVITETSPENGER -> aktivitetspengerInntektsgrunnlagEnabled ? InntektsKilde.INNTEKT_AKTIVITETSPENGER : InntektsKilde.INNTEKT_UNGDOMSYTELSE;
             default -> throw new IllegalArgumentException("Har ikke inntektskilde for kontroll av registerinntekt for ytelseType=" + ytelseType);
         };
     }
