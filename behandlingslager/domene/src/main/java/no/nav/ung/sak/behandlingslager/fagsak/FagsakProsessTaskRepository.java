@@ -459,6 +459,100 @@ public class FagsakProsessTaskRepository {
 
     }
 
+    public boolean prosessTaskFinnes(Long prosessTaskId) {
+        return (Boolean) em.createNativeQuery("select exists(select 1 from prosess_task where id = :id)")
+            .setParameter("id", prosessTaskId)
+            .getSingleResult();
+    }
+
+    /**
+     * Henter alle koblinger for fagsaken, også foreldreløse koblinger der prosesstasken ikke lenger finnes.
+     */
+    public List<FagsakProsessTaskKobling> hentKoblinger(Long fagsakId) {
+        String sql = """
+            select fpt.id, fpt.prosess_task_id, fpt.behandling_id, fpt.task_type, fpt.gruppe_sekvensnr, fpt.opprettet_tid,
+                   pt.id is not null as prosess_task_finnes, pt.status, pt.blokkert_av
+            from fagsak_prosess_task fpt
+            left join prosess_task pt on pt.id = fpt.prosess_task_id
+            where fpt.fagsak_id = :fagsakId
+            order by fpt.gruppe_sekvensnr nulls last, fpt.id
+            """;
+
+        @SuppressWarnings("unchecked")
+        NativeQuery<Object[]> query = (NativeQuery<Object[]>) em.createNativeQuery(sql);
+        List<Object[]> rader = query
+            .setParameter("fagsakId", fagsakId)
+            .addScalar("id", StandardBasicTypes.LONG)
+            .addScalar("prosess_task_id", StandardBasicTypes.LONG)
+            .addScalar("behandling_id", StandardBasicTypes.STRING)
+            .addScalar("task_type", StandardBasicTypes.STRING)
+            .addScalar("gruppe_sekvensnr", StandardBasicTypes.LONG)
+            .addScalar("opprettet_tid", StandardBasicTypes.LOCAL_DATE_TIME)
+            .addScalar("prosess_task_finnes", StandardBasicTypes.BOOLEAN)
+            .addScalar("status", StandardBasicTypes.STRING)
+            .addScalar("blokkert_av", StandardBasicTypes.LONG)
+            .setHint(HibernateHints.HINT_READ_ONLY, "true")
+            .getResultList();
+
+        return rader.stream()
+            .map(r -> new FagsakProsessTaskKobling(
+                (Long) r[0],
+                (Long) r[1],
+                (String) r[2],
+                (String) r[3],
+                (Long) r[4],
+                (LocalDateTime) r[5],
+                (Boolean) r[6],
+                r[7] == null ? null : ProsessTaskStatus.valueOf((String) r[7]),
+                (Long) r[8]))
+            .toList();
+    }
+
+    /**
+     * Fagsaker som har minst én kobling til en prosesstask som ikke lenger finnes.
+     */
+    public List<Long> finnFagsakerMedForeldreløseKoblinger() {
+        return em.createNativeQuery("""
+                select distinct fpt.fagsak_id
+                from fagsak_prosess_task fpt
+                where not exists (select 1 from prosess_task pt where pt.id = fpt.prosess_task_id)
+                order by fpt.fagsak_id
+                """, Long.class)
+            .setHint(HibernateHints.HINT_READ_ONLY, "true")
+            .getResultList();
+    }
+
+    /**
+     * Fjerner koblinger til prosesstasker som ikke lenger finnes, og frigir tasker som står i VETO blokkert av dem.
+     * Sletter kun rader på angitt fagsak der prosesstasken mangler. Kan ikke alle angitte koblinger fjernes, kastes
+     * exception slik at transaksjonen rulles tilbake og ingenting fjernes.
+     *
+     * @return antall tasker som ble frigitt fra VETO
+     */
+    public int fjernForeldreløseKoblinger(Long fagsakId, Set<Long> prosessTaskIder) {
+        Objects.requireNonNull(fagsakId, "fagsakId");
+        if (prosessTaskIder == null || prosessTaskIder.isEmpty()) {
+            throw new IllegalArgumentException("Må angi minst én prosessTaskId");
+        }
+        int fjernet = em.createNativeQuery("""
+                delete from fagsak_prosess_task fpt
+                where fpt.fagsak_id = :fagsakId
+                  and fpt.prosess_task_id in (:prosessTaskIder)
+                  and not exists (select 1 from prosess_task pt where pt.id = fpt.prosess_task_id)
+                """)
+            .setParameter("fagsakId", fagsakId)
+            .setParameter("prosessTaskIder", prosessTaskIder)
+            .executeUpdate();
+        if (fjernet != prosessTaskIder.size()) {
+            throw new IllegalStateException("Forventet å fjerne " + prosessTaskIder.size() + " foreldreløse koblinger for fagsak[" + fagsakId
+                + "], men fant " + fjernet + ". Avbryter uten å fjerne noe.");
+        }
+        int frigitt = frigiVetoBlokkertAvSlettedeTasker(prosessTaskIder);
+        em.flush();
+        log.info("Fjernet foreldreløse koblinger for fagsak[{}] til prosesstasker {}. Frigitt {} tasker fra VETO.", fagsakId, prosessTaskIder, frigitt);
+        return frigitt;
+    }
+
     /**
      * Frigir tasker i VETO som var blokkert av tasker som er slettet. k9-prosesstask frigir bare når den blokkerende
      * tasken finnes og er ferdig, så uten dette blir de stående i VETO for alltid.
