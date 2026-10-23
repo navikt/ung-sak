@@ -445,12 +445,6 @@ public class FagsakProsessTaskRepository {
                 .setParameter("fagsakId", fagsakId)
                 .setParameter("behandlingId", String.valueOf(behandlingId))
                 .executeUpdate();
-            // Tasker som blokkeres av tasker som slettes, blir ellers stående i VETO for alltid
-            // (prosesstask frigir bare når blokkerende task finnes og er ferdig).
-            int frigitt = frigiVetoBlokkertAv(skalSlettes.stream().map(ProsessTaskData::getId).toList());
-            if (frigitt > 0) {
-                log.info("Frigitt {} tasker som var blokkert av tasker som slettes for fagsak[{}], behandling[{}]", frigitt, fagsakId, behandlingId);
-            }
             em.flush();
             for (var s : skalSlettes) {
                 em.createNativeQuery("delete from prosess_task p where p.id = :pid")
@@ -458,13 +452,35 @@ public class FagsakProsessTaskRepository {
                     .executeUpdate();
                 em.flush();
             }
+            int frigitt = frigiVetoBlokkertAvSlettedeTasker(skalSlettes.stream().map(ProsessTaskData::getId).toList());
+            log.info("Slettet {} uferdige tasker og frigitt {} tasker som var blokkert av dem, for fagsak[{}], behandling[{}]",
+                skalSlettes.size(), frigitt, fagsakId, behandlingId);
         }
 
     }
 
-    private int frigiVetoBlokkertAv(Collection<Long> blokkerendeTaskIder) {
-        if (blokkerendeTaskIder.isEmpty()) {
+    /**
+     * Frigir tasker i VETO som var blokkert av tasker som er slettet. k9-prosesstask frigir bare når den blokkerende
+     * tasken finnes og er ferdig, så uten dette blir de stående i VETO for alltid.
+     * <p>
+     * Omgår optimistisk låsing med vilje, på samme måte som k9-prosesstask gjør i frigiVeto og unblockTasks. Postgres
+     * vurderer where-betingelsen på nytt etter å ha låst raden, så en task som er endret i mellomtiden (frigitt, kjørt
+     * eller vetoet av en annen task) blir ikke truffet. Versjonen økes, så den som eventuelt holder entiteten, får
+     * OptimisticLockException.
+     * <p>
+     * Kaster exception hvis noen av de blokkerende taskene fortsatt finnes, slik at metoden ikke kan brukes til å frigi
+     * tasker som skal vente på en task som fortsatt kan kjøres.
+     */
+    private int frigiVetoBlokkertAvSlettedeTasker(Collection<Long> slettedeTaskIder) {
+        if (slettedeTaskIder.isEmpty()) {
             return 0;
+        }
+        @SuppressWarnings("unchecked")
+        List<Number> finnesFortsatt = em.createNativeQuery("select id from prosess_task where id in (:ider)")
+            .setParameter("ider", slettedeTaskIder)
+            .getResultList();
+        if (!finnesFortsatt.isEmpty()) {
+            throw new IllegalStateException("Kan bare frigi tasker blokkert av slettede tasker, men disse finnes fortsatt: " + finnesFortsatt);
         }
         return em.createNativeQuery("""
                 update prosess_task set status = 'KLAR'
@@ -475,7 +491,7 @@ public class FagsakProsessTaskRepository {
                   , versjon = versjon + 1
                 where status = 'VETO' and blokkert_av in (:ider)
                 """)
-            .setParameter("ider", blokkerendeTaskIder)
+            .setParameter("ider", slettedeTaskIder)
             .executeUpdate();
     }
 
