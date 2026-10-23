@@ -116,6 +116,23 @@ class MaksdatoEtterlysningTjenesteTest {
     }
 
     @Test
+    void skalLagreSporingMedPeriodegrunnlagetSomInput() {
+        // Sporingen svelger serialiseringsfeil (IOException), så vi sjekker eksplisitt at grunnlaget serialiseres
+        var fom = LocalDate.now().minusMonths(6);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(fom, MAKSDATO_INNENFOR_VARSLINGSVINDU)),
+            false, MAKSDATO_INNENFOR_VARSLINGSVINDU);
+
+        tjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(BehandlingReferanse.fra(behandling));
+
+        var sporinger = new BehandingprosessSporingRepository(entityManager)
+            .hentSporinger(behandling.getId(), EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO + "_UTLEDER");
+        assertThat(sporinger).hasSize(1);
+        assertThat(sporinger.get(0).getInput()).contains(MAKSDATO_INNENFOR_VARSLINGSVINDU.toString());
+        assertThat(sporinger.get(0).getResultat()).contains("OPPRETT_ETTERLYSNING");
+    }
+
+    @Test
     void skalHardfeile_nårVarselOpphørÅrsakOgIngenEtterlysningOpprettet() {
         // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO, men maksdato er utenfor varslingsvinduet slik at ingen
         // etterlysning opprettes. Da skal behandlingen hardfeile slik at den ikke går videre til vedtak uten varsel.

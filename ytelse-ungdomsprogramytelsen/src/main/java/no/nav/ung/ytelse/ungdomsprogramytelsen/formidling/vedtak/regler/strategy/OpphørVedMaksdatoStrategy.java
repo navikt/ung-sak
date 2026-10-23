@@ -7,7 +7,6 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
@@ -41,21 +40,15 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
 
         // Opphør ved maksdato gir kun brev når varselet er innenfor varslingsvinduet og tom-dato er etter eller på maksdato.
         // opphørshendelse) — det er nettopp dette varselet skal dekke, så det skal IKKE kreve at
-        // perioden fortsatt er åpen. erRelevantForVarslingOmOpphørVedMaksdato garanterer allerede at
+        // perioden fortsatt er åpen. erRelevantForVarsling garanterer allerede at
         // sluttdatoen ikke er satt tidligere enn maksdato; er den satt pga. et reelt, uavhengig opphør,
         // håndteres det av ProgramPeriodeStrategy (RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM) i tillegg.
-        if (erRelevantForVarslingOmOpphørVedMaksdato(grunnlag)) {
+        if (MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(grunnlag)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
                 "Automatisk brev ved opphør grunnet maksdato."));
         }
         return List.of();
-    }
-
-    private static boolean erRelevantForVarslingOmOpphørVedMaksdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
-        return MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(
-            grunnlag.hentForEksaktEnPeriode().getTomDato(),
-            grunnlag.getPeriodeMaksDato().orElseThrow());
     }
 
 }
