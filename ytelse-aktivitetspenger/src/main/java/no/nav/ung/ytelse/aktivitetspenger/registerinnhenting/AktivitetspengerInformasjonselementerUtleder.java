@@ -33,7 +33,11 @@ public class AktivitetspengerInformasjonselementerUtleder implements Informasjon
 
     @Override
     public Set<RegisterdataType> utled(BehandlingType behandlingType) {
-        return FILTER.get(behandlingType);
+        var informasjonselementer = FILTER.get(behandlingType);
+        if (informasjonselementer == null) {
+            throw new IllegalArgumentException("Har ikke konfigurert informasjonselementer for aktivitetspenger og behandlingType=" + behandlingType);
+        }
+        return informasjonselementer;
     }
 
     @Override
