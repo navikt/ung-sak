@@ -14,6 +14,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 
 public record BehandlingStatusRecord(
     BigDecimal totaltAntall,
@@ -42,5 +43,8 @@ public record BehandlingStatusRecord(
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
+
+    public static final YtelsesTabell<BehandlingStatusRecord> BEHANDLING_STATUS_TABELLER =
+        YtelsesTabell.medAktivitetspengerTabell(BEHANDLING_STATUS_TABELL, "aktivitetspenger_behandling_status");
 }
 

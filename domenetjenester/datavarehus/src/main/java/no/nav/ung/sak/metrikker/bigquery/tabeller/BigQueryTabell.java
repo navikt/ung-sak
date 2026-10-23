@@ -32,6 +32,13 @@ public class BigQueryTabell<T extends BigQueryRecord> {
         this.mapperFunksjon = mapperFunksjon;
     }
 
+    /**
+     * Lager en ny tabelldefinisjon med samme skjema og mapper, men med et annet tabellnavn.
+     */
+    public BigQueryTabell<T> medTabellnavn(String nyttTabellnavn) {
+        return new BigQueryTabell<>(nyttTabellnavn, skjema, dataKlasse, mapperFunksjon);
+    }
+
     public String getTabellnavn() {
         return tabellnavn;
     }

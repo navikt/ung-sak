@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -34,4 +35,7 @@ public record FagsakStatusRecord(
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
+
+    public static final YtelsesTabell<FagsakStatusRecord> FAGSAK_STATUS_TABELLER =
+        YtelsesTabell.medAktivitetspengerTabell(FAGSAK_STATUS_TABELL_V2, "aktivitetspenger_fagsak_status");
 }

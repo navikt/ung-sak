@@ -7,7 +7,10 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.inntektskontroll.KontrollertePerioderRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.YearMonth;
 import java.time.ZoneId;
@@ -15,6 +18,8 @@ import java.util.List;
 
 @ApplicationScoped
 public class KontrollerteInntektPerioderMetrikkPubliserer {
+
+    private static final Logger log = LoggerFactory.getLogger(KontrollerteInntektPerioderMetrikkPubliserer.class);
 
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private BehandlingVedtakRepository vedtakRepository;
@@ -37,6 +42,11 @@ public class KontrollerteInntektPerioderMetrikkPubliserer {
     }
 
     public void publiserKontrollertePerioderMetrikker(BehandlingReferanse behandlingReferanse) {
+        if (!YtelsesTabell.erStøttet(behandlingReferanse.getFagsakYtelseType())) {
+            // Utgåtte fagsaker (OBSOLETE) skal ikke med i statistikken
+            log.info("Publiserer ikke kontrollerte inntektsperioder for sak {} med ytelse {}", behandlingReferanse.getSaksnummer(), behandlingReferanse.getFagsakYtelseType());
+            return;
+        }
         List<KontrollertInntektPeriode> kontrollertInntektPerioder = kontrollerteInntektperioderTjeneste.finnPerioderKontrollertIBehandling(behandlingReferanse.getBehandlingId());
         var behandlingVedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Forventer å finne behandlingVedtak"));
         List<KontrollertePerioderRecord> records = kontrollertInntektPerioder.stream().map(it -> new KontrollertePerioderRecord(
@@ -52,7 +62,8 @@ public class KontrollerteInntektPerioderMetrikkPubliserer {
         )).toList();
 
         if (bigQueryEnabled && !records.isEmpty()) {
-            bigQueryKlient.publish(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, KontrollertePerioderRecord.KONTROLLERTE_PERIODER_TABELL, records);
+            var tabell = KontrollertePerioderRecord.KONTROLLERTE_PERIODER_TABELLER.forYtelse(behandlingReferanse.getFagsakYtelseType());
+            bigQueryKlient.publish(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, tabell, records);
         }
     }
 

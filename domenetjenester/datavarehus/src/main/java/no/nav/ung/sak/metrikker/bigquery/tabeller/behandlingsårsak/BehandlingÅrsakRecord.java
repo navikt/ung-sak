@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -40,5 +41,8 @@ public record BehandlingÅrsakRecord(
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
+
+    public static final YtelsesTabell<BehandlingÅrsakRecord> BEHANDLING_ÅRSAK_TABELLER =
+        YtelsesTabell.medAktivitetspengerTabell(BEHANDLING_ÅRSAK_TABELL, "aktivitetspenger_behandling_årsak");
 }
 

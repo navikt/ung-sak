@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 
 import java.time.format.DateTimeFormatter;
@@ -36,4 +37,7 @@ public record SatsStatistikkRecord(
             "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
         )
     );
+
+    public static final YtelsesTabell<SatsStatistikkRecord> SATS_STATISTIKK_TABELLER =
+        YtelsesTabell.medAktivitetspengerTabell(SATS_STATISTIKK_TABELL, "aktivitetspenger_sats_statistikk");
 }
