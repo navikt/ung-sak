@@ -2,6 +2,7 @@ package no.nav.ung.sak.produksjonsstyring.behandlingenhet;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -25,6 +26,10 @@ import java.util.stream.Collectors;
 
 @Dependent
 public class BehandlendeEnhetTjeneste {
+
+    // TODO TSFF-3237: offisielle behandlingstema-koder for aktivitetspenger er ikke avklart. null gir oppslag uten behandlingstema.
+    private static final String AKTIVITETSPENGER_BEHANDLINGSTEMA_YTELSE = null;
+    private static final String AKTIVITETSPENGER_BEHANDLINGSTEMA_INNGANGSVILKÅR = null;
 
     private EnhetsTjeneste enhetsTjeneste;
     private BehandlingEnhetEventPubliserer eventPubliserer;
@@ -51,13 +56,37 @@ public class BehandlendeEnhetTjeneste {
         return enhetsTjeneste.hentEnhetListe(ytelseType);
     }
 
-    // Brukes ved opprettelse av oppgaver før behandling har startet
+    // Kun SENTRAL. Brukes der behandlingen ikke har NAV_KONTOR-del, f.eks. klage.
     public OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak) {
+        return finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL);
+    }
+
+    public Map<BehandlingDel, OrganisasjonsEnhet> finnBehandlendeEnheterFor(Fagsak fagsak) {
+        if (fagsak.getYtelseType() == FagsakYtelseType.AKTIVITETSPENGER) {
+            return Map.of(
+                BehandlingDel.SENTRAL, finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL),
+                BehandlingDel.NAV_KONTOR, finnBehandlendeEnhetFor(fagsak, BehandlingDel.NAV_KONTOR));
+        }
+        return Map.of(BehandlingDel.SENTRAL, finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL));
+    }
+
+    private OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak, BehandlingDel behandlingDel) {
+        FagsakYtelseType ytelseType = fagsak.getYtelseType();
+        String behandlingstema = behandlingstema(ytelseType, behandlingDel);
         Optional<OrganisasjonsEnhet> forrigeEnhet = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId())
-            .flatMap(b -> behandlingAnsvarligRepository.hentBehandlingAnsvarlig(b.getId()))
-            .filter(ba -> gyldigEnhetNfpNk(fagsak.getYtelseType(), ba.getBehandlendeEnhet()))
+            .flatMap(b -> behandlingAnsvarligRepository.hentBehandlingAnsvarlig(b.getId(), behandlingDel))
+            .filter(ba -> ba.getBehandlendeEnhet() != null && enhetsTjeneste.finnOrganisasjonsEnhet(ytelseType, behandlingstema, ba.getBehandlendeEnhet()).isPresent())
             .map(BehandlingAnsvarlig::getBehandlendeOrganisasjonsEnhet);
-        return forrigeEnhet.orElse(enhetsTjeneste.hentEnhetSjekkKunAktør(fagsak.getAktørId(), fagsak.getYtelseType()));
+        return forrigeEnhet.orElseGet(() -> enhetsTjeneste.hentEnhetSjekkKunAktør(fagsak.getAktørId(), ytelseType, behandlingstema));
+    }
+
+    private static String behandlingstema(FagsakYtelseType ytelseType, BehandlingDel behandlingDel) {
+        if (ytelseType != FagsakYtelseType.AKTIVITETSPENGER) {
+            return null;
+        }
+        return behandlingDel == BehandlingDel.SENTRAL
+            ? AKTIVITETSPENGER_BEHANDLINGSTEMA_YTELSE
+            : AKTIVITETSPENGER_BEHANDLINGSTEMA_INNGANGSVILKÅR;
     }
 
     // Sjekk om angitt journalførende enhet er gyldig for enkelte oppgaver
