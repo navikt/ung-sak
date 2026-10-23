@@ -1,21 +1,8 @@
 package no.nav.ung.sak.produksjonsstyring.behandlingenhet;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
-
+import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
+import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingResponse;
+import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
@@ -27,13 +14,22 @@ import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
-import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingResponse;
-import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
+
+import java.time.LocalDate;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class EnhetsTjenesteTest {
 
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.UNGDOMSYTELSE;
+    private static final String BEHANDLINGSTEMA = "ab0000";
 
     private static AktørId MOR_AKTØR_ID = AktørId.dummy();
     private static PersonIdent MOR_IDENT = new PersonIdent(new FiktiveFnr().nesteKvinneFnr());
@@ -171,6 +167,20 @@ public class EnhetsTjenesteTest {
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
+    }
+
+    @Test
+    public void gyldige_enheter_sjekkes_per_behandlingstema() {
+        settOppTpsStrukturer(false, false, false, true);
+        var navKontor = new ArbeidsfordelingResponse("0219", "Nav Bærum", "Aktiv", "LOKAL");
+        Mockito.doAnswer((Answer<List<ArbeidsfordelingResponse>>) invocation -> {
+            ArbeidsfordelingRequest data = (ArbeidsfordelingRequest) invocation.getArguments()[0];
+            return BEHANDLINGSTEMA.equals(data.getBehandlingstema()) ? List.of(navKontor) : List.of(respNormal);
+        }).when(arbeidsfordelingTjeneste).hentAlleAktiveEnheter(Mockito.any());
+
+        assertThat(enhetsTjeneste.finnOrganisasjonsEnhet(YTELSE_TYPE, BEHANDLINGSTEMA, "0219")).isPresent();
+        assertThat(enhetsTjeneste.finnOrganisasjonsEnhet(YTELSE_TYPE, "0219")).isEmpty();
+        assertThat(enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, BEHANDLINGSTEMA, "0219", MOR_AKTØR_ID, Set.of(MOR_AKTØR_ID))).isEmpty();
     }
 
     private void settOppTpsStrukturer(boolean morKode6, boolean barnKode6, boolean annenPartKode6, boolean foreldreRelatertTps) {
