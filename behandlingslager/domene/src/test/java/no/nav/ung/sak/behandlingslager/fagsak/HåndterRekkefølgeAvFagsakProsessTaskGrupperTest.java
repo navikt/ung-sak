@@ -63,7 +63,7 @@ class HåndterRekkefølgeAvFagsakProsessTaskGrupperTest {
             .hasMessageContaining("prosesstask[" + BLOKKERENDE_TASK_ID + "]")
             .hasMessageContaining("fagsak[" + FAGSAK_ID + "]")
             .hasMessageContaining("gruppe_sekvensnr[100]")
-            .hasMessageContaining("POST /forvaltning/fagsak-prosess-task/fjern");
+            .hasMessageContaining("POST /forvaltning/fagsak-prosess-task/fjern-foreldrelose-koblinger");
         verify(taskTjeneste, never()).finn(BLOKKERENDE_TASK_ID);
     }
 

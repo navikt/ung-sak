@@ -58,13 +58,17 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
  * kan koblingen blokkere alle senere tasker på fagsaken. Disse endepunktene lar oss finne (per sak eller for alle saker) og fjerne
  * slike foreldreløse koblinger.
  */
-@Path("/forvaltning/fagsak-prosess-task")
+@Path(ForvaltningFagsakProsessTaskRestTjeneste.BASE_PATH)
 @ApplicationScoped
 @Transactional
 public class ForvaltningFagsakProsessTaskRestTjeneste {
 
-    static final String HENT_PATH = "/forvaltning/fagsak-prosess-task/hent";
-    static final String FJERN_PATH = "/forvaltning/fagsak-prosess-task/fjern";
+    static final String BASE_PATH = "/forvaltning/fagsak-prosess-task";
+    private static final String HENT_KOBLINGER_FOR_SAK = "/hent-koblinger-for-sak";
+    private static final String HENT_FORELDRELOSE_KOBLINGER = "/foreldrelose";
+    private static final String FJERN_FORELDRELOSE_KOBLINGER = "/fjern-foreldrelose-koblinger";
+    static final String HENT_PATH = BASE_PATH + HENT_KOBLINGER_FOR_SAK;
+    static final String FJERN_PATH = BASE_PATH + FJERN_FORELDRELOSE_KOBLINGER;
 
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
     private static final Logger log = LoggerFactory.getLogger(ForvaltningFagsakProsessTaskRestTjeneste.class);
@@ -87,7 +91,7 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
     }
 
     @POST
-    @Path("/hent")
+    @Path(HENT_KOBLINGER_FOR_SAK)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Henter koblinger mellom fagsak og prosesstask (FAGSAK_PROSESS_TASK), også foreldreløse koblinger der prosesstasken ikke lenger finnes."
         + " Logger hvem som har hatt innsyn i saken, med begrunnelse.",
@@ -111,7 +115,7 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
     }
 
     @GET
-    @Path("/foreldrelose")
+    @Path(HENT_FORELDRELOSE_KOBLINGER)
     @Operation(description = "Henter foreldreløse koblinger i FAGSAK_PROSESS_TASK (prosesstasken finnes ikke lenger) for alle saker.",
         summary = "Henter foreldreløse koblinger mellom fagsak og prosesstask for alle saker",
         tags = "forvaltning",
@@ -136,7 +140,7 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
     }
 
     @POST
-    @Path("/fjern")
+    @Path(FJERN_FORELDRELOSE_KOBLINGER)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Fjerner foreldreløse koblinger i FAGSAK_PROSESS_TASK (prosesstasken finnes ikke lenger) for angitte prosesstasker på fagsaken,"
         + " og frigir tasker som står i VETO blokkert av dem. Avviser hele forespørselen dersom én av prosesstaskene ikke har en foreldreløs kobling på fagsaken.",

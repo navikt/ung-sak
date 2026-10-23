@@ -58,7 +58,7 @@ public class HåndterRekkefølgeAvFagsakProsessTaskGrupper implements ProsessTas
                 throw new IllegalStateException("Prosesstask[" + ptData.getId() + "] av type[" + ptData.getTaskType() + "] for fagsak[" + fagsakId
                     + "] blokkeres av foreldreløs kobling i FAGSAK_PROSESS_TASK: prosesstask[" + prosessTaskId + "] av type[" + blokkerendeTask.get().getTaskType()
                     + "] med gruppe_sekvensnr[" + blokkerendeTask.get().getGruppeSekvensNr() + "] finnes ikke lenger."
-                    + " Fjern koblingen med POST /forvaltning/fagsak-prosess-task/fjern.");
+                    + " Fjern koblingen med POST /forvaltning/fagsak-prosess-task/fjern-foreldrelose-koblinger.");
             }
             ProsessTaskData blokker = taskTjeneste.finn(prosessTaskId);
             log.info("Vetoer kjøring av prosesstask[{}] av type[{}] for fagsak [{}] , er blokkert av prosesstask[{}] av type[{}] for samme fagsak.",

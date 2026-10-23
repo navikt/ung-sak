@@ -6489,7 +6489,7 @@
             "type" : "integer"
           },
           "foreldreløs" : {
-            "description" : "Prosesstasken finnes ikke lenger, men koblingen ligger igjen. Kan fjernes med POST /forvaltning/fagsak-prosess-task/fjern.",
+            "description" : "Prosesstasken finnes ikke lenger, men koblingen ligger igjen. Kan fjernes med POST /forvaltning/fagsak-prosess-task/fjern-foreldrelose-koblinger.",
             "type" : "boolean"
           },
           "gruppeSekvensNr" : {
@@ -9620,7 +9620,7 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/api/forvaltning/fagsak-prosess-task/fjern" : {
+    "/api/forvaltning/fagsak-prosess-task/fjern-foreldrelose-koblinger" : {
       "post" : {
         "description" : "Fjerner foreldreløse koblinger i FAGSAK_PROSESS_TASK (prosesstasken finnes ikke lenger) for angitte prosesstasker på fagsaken, og frigir tasker som står i VETO blokkert av dem. Avviser hele forespørselen dersom én av prosesstaskene ikke har en foreldreløs kobling på fagsaken.",
         "operationId" : "fjernForeldreløseKoblinger",
@@ -9671,7 +9671,7 @@
         "tags" : [ "forvaltning" ]
       }
     },
-    "/api/forvaltning/fagsak-prosess-task/hent" : {
+    "/api/forvaltning/fagsak-prosess-task/hent-koblinger-for-sak" : {
       "post" : {
         "description" : "Henter koblinger mellom fagsak og prosesstask (FAGSAK_PROSESS_TASK), også foreldreløse koblinger der prosesstasken ikke lenger finnes. Logger hvem som har hatt innsyn i saken, med begrunnelse.",
         "operationId" : "hentKoblinger",
