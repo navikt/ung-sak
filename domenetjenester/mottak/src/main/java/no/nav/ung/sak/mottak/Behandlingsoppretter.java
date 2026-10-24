@@ -42,6 +42,7 @@ public class Behandlingsoppretter {
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     private Instance<NyBehandlingOppretter> nyBehandlingOpprettere;
+    private Instance<RevurderingTjeneste> revurderingTjenester;
 
     @Inject
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
@@ -49,7 +50,8 @@ public class Behandlingsoppretter {
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                 BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
-                                @Any Instance<NyBehandlingOppretter> nyBehandlingOpprettere) {
+                                @Any Instance<NyBehandlingOppretter> nyBehandlingOpprettere,
+                                @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
@@ -58,6 +60,7 @@ public class Behandlingsoppretter {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.revurderingRepository = behandlingRepositoryProvider.getBehandlingRevurderingRepository();
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
+        this.revurderingTjenester = revurderingTjenester;
     }
 
     /**
@@ -91,7 +94,7 @@ public class Behandlingsoppretter {
     }
 
     public Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, origBehandling.getFagsakYtelseType()).orElseThrow();
+        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, origBehandling.getFagsakYtelseType()).orElseThrow();
         Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
         return revurdering;
     }
@@ -143,7 +146,7 @@ public class Behandlingsoppretter {
         if (søknad.isPresent()) {
             søknadRepository.lagreOgFlush(behandling, søknad.get());
         }
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
+        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, fagsak.getYtelseType()).orElseThrow();
         revurderingTjeneste.kopierAlleGrunnlagFraTidligereBehandling(behandlingMedSøknad, behandling);
         return behandling;
     }
