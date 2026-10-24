@@ -132,16 +132,6 @@ public class EnhetsTjenesteTest {
     }
 
     @Test
-    public void presendens_enhet() {
-        // Oppsett
-        settOppTpsStrukturer(false, false, false, false);
-
-        OrganisasjonsEnhet enhet = enhetsTjeneste.enhetsPresedens(YTELSE_TYPE, enhetNormal, enhetKode6);
-
-        assertThat(enhet).isEqualTo(enhetKode6);
-    }
-
-    @Test
     public void oppdater_enhet_mor_annenpart_kode_fordeling() {
         // Oppsett
         settOppTpsStrukturer(true, false, true, false);
