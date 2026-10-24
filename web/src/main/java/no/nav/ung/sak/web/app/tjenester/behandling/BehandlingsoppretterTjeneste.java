@@ -49,6 +49,7 @@ public class BehandlingsoppretterTjeneste {
     private KlageVurderingTjeneste klageVurderingTjeneste;
     private PersonopplysningRepository personopplysningRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
+    private Instance<RevurderingTjeneste> revurderingTjenester;
 
 
     BehandlingsoppretterTjeneste() {
@@ -62,7 +63,8 @@ public class BehandlingsoppretterTjeneste {
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                         KlageVurderingTjeneste klageVurderingTjeneste,
                                         PersonopplysningRepository personopplysningRepository,
-                                        HistorikkinnslagRepository historikkinnslagRepository) {
+                                        HistorikkinnslagRepository historikkinnslagRepository,
+                                        @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
@@ -72,6 +74,7 @@ public class BehandlingsoppretterTjeneste {
         this.klageVurderingTjeneste = klageVurderingTjeneste;
         this.personopplysningRepository = personopplysningRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
+        this.revurderingTjenester = revurderingTjenester;
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
@@ -83,7 +86,7 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode, boolean manuell) {
-        var revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
+        var revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, fagsak.getYtelseType()).orElseThrow();
         var kanRevurderingOpprettes = kanOppretteRevurdering(fagsak.getId());
         if (!kanRevurderingOpprettes) {
             throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
@@ -167,7 +170,7 @@ public class BehandlingsoppretterTjeneste {
         if (åpneBehandlinger.size() > 0 || behandling == null) {
             return false;
         }
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, behandling.getFagsakYtelseType()).orElseThrow();
+        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow();
         return revurderingTjeneste.kanRevurderingOpprettes(behandling.getFagsak());
     }
 

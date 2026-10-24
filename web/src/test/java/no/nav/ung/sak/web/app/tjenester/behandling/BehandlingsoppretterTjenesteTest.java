@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
+import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
@@ -90,6 +91,10 @@ class BehandlingsoppretterTjenesteTest {
     @Any
     private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
 
+    @Inject
+    @Any
+    private Instance<RevurderingTjeneste> revurderingTjenester;
+
     private Behandling behandling;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
@@ -97,7 +102,7 @@ class BehandlingsoppretterTjenesteTest {
     void setUp() {
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any())).thenReturn(new OrganisasjonsEnhet("1234", "Nav Test"));
-        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, gyldigePerioderForRevurderingUtledere, behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository);
+        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, gyldigePerioderForRevurderingUtledere, behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository, revurderingTjenester);
     }
 
     @Test

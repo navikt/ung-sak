@@ -7,17 +7,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -25,11 +22,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.*;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt;
@@ -37,8 +30,8 @@ import no.nav.sif.abac.kontrakt.abac.ResourceType;
 import no.nav.sif.abac.kontrakt.abac.dto.OperasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
@@ -51,6 +44,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingOpprettingDto;
@@ -62,7 +56,6 @@ import no.nav.ung.sak.kontrakt.fagsak.MatchFagsak;
 import no.nav.ung.sak.kontrakt.mottak.FinnSak;
 import no.nav.ung.sak.kontrakt.person.PersonDto;
 import no.nav.ung.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -74,12 +67,7 @@ import no.nav.ung.sak.web.server.abac.AbacUtil;
 import no.nav.ung.sak.web.server.abac.SifAbacPdpRestKlient;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -113,6 +101,7 @@ public class FagsakRestTjeneste {
 
     private SifAbacPdpRestKlient abacPdpRestKlient;
     private PipRepository pipRepository;
+    private Instance<RevurderingTjeneste> revurderingTjenester;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
@@ -127,7 +116,8 @@ public class FagsakRestTjeneste {
                               BehandlingRepository behandlingRepository,
                               ProsessTaskTjeneste taskTjeneste,
                               FagsakRepository fagsakRepository,
-                              SifAbacPdpRestKlient abacPdpRestKlient, PipRepository pipRepository) {
+                              SifAbacPdpRestKlient abacPdpRestKlient, PipRepository pipRepository,
+                              @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
@@ -138,6 +128,7 @@ public class FagsakRestTjeneste {
         this.fagsakRepository = fagsakRepository;
         this.abacPdpRestKlient = abacPdpRestKlient;
         this.pipRepository = pipRepository;
+        this.revurderingTjenester = revurderingTjenester;
     }
 
     @GET
@@ -361,7 +352,7 @@ public class FagsakRestTjeneste {
     }
 
     private FagsakDto tilFagsakDto(PersonDto personDto, Fagsak fagsak) {
-        Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow()
+        Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, fagsak.getYtelseType()).orElseThrow()
             .kanRevurderingOpprettes(fagsak);
         var periode = new Periode(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
         return new FagsakDto(
