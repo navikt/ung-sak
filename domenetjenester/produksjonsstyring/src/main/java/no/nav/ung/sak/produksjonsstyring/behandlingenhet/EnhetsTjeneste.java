@@ -58,10 +58,6 @@ public class EnhetsTjeneste {
         return cacheEntry.alleBehandlendeEnheter;
     }
 
-    Optional<OrganisasjonsEnhet> finnEndretEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
-        return finnEndretEnhetSjekkOppgittePersoner(ytelseType, null, enhetId, hovedAktør, alleAktører);
-    }
-
     Optional<OrganisasjonsEnhet> finnEndretEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String behandlingstema, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
         var cacheEntry = oppdaterEnhetCache(ytelseType, behandlingstema);
         if (cacheEntry.enhetKode6.getEnhetId().equals(enhetId) || cacheEntry.enhetKlage.getEnhetId().equals(enhetId)) {
@@ -93,10 +89,6 @@ public class EnhetsTjeneste {
             .collect(Collectors.toList());
     }
 
-    OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType) {
-        return hentEnhetSjekkKunAktør(aktørId, ytelseType, null);
-    }
-
     OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType, String behandlingstema) {
         PersonIdent fnr = tpsTjeneste.hentFnrForAktør(aktørId);
         GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr, ytelseType);
@@ -105,14 +97,6 @@ public class EnhetsTjeneste {
             .orElse(null);
         return hentEnheterFor(geografiskTilknytning.getTilknytning(), diskresjon, ytelseType, behandlingstema)
             .get(0);
-    }
-
-    OrganisasjonsEnhet enhetsPresedens(FagsakYtelseType ytelseType, OrganisasjonsEnhet enhetSak1, OrganisasjonsEnhet enhetSak2) {
-        var cacheEntry = oppdaterEnhetCache(ytelseType, null);
-        if (cacheEntry.enhetKode6.getEnhetId().equals(enhetSak1.getEnhetId()) || cacheEntry.enhetKode6.getEnhetId().equals(enhetSak2.getEnhetId())) {
-            return cacheEntry.enhetKode6;
-        }
-        return enhetSak1;
     }
 
     private boolean harNoenDiskresjonskode6(Collection<AktørId> aktører, FagsakYtelseType ytelseType) {
@@ -137,10 +121,6 @@ public class EnhetsTjeneste {
             }
         }
         return cacheEntry;
-    }
-
-    Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(FagsakYtelseType ytelseType, String enhetId) {
-        return finnOrganisasjonsEnhet(ytelseType, null, enhetId);
     }
 
     Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(FagsakYtelseType ytelseType, String behandlingstema, String enhetId) {

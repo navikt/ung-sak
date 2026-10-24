@@ -1,31 +1,24 @@
 package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.TaskType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OpprettOppgave;
 import no.nav.k9.felles.integrasjon.oppgave.v1.Prioritet;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStatusEvent.BehandlingAvsluttetEvent;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -33,7 +26,12 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTask;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class OppgaveTjeneste {
@@ -72,39 +70,6 @@ public class OppgaveTjeneste {
         this.oppgaveBehandlingKoblingRepository = oppgaveBehandlingKoblingRepository;
         this.restKlient = restKlient;
         this.taskTjeneste = taskTjeneste;
-    }
-
-    public void avslutt(Long behandlingId, OppgaveÅrsak oppgaveÅrsak) {
-        List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandlingId);
-        Optional<OppgaveBehandlingKobling> oppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger);
-        if (oppgave.isPresent()) {
-            avsluttOppgave(oppgave.get());
-        } else {
-            OppgaveFeilmeldinger.FACTORY.oppgaveMedÅrsakIkkeFunnet(oppgaveÅrsak.getKode(), behandlingId).log(logger);
-        }
-    }
-
-    public String opprettVkyOppgaveOverlappendeYtelse(BehandlingReferanse ref, String beskrivelse, String oppgavetema, String behandlingstype, String enhetId) {
-        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        String behandlendeEnhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(ref.getBehandlingId())
-            .map(BehandlingAnsvarlig::getBehandlendeEnhet)
-            .orElse(null);
-        Fagsak fagsak = behandling.getFagsak();
-
-        var request = createRestRequestBuilder(
-            fagsak.getSaksnummer(),
-            fagsak.getAktørId(),
-            behandlendeEnhet,
-            beskrivelse,
-            Prioritet.NORM,
-            DEFAULT_OPPGAVEFRIST_DAGER,
-            oppgavetema
-        ).medTildeltEnhetsnr(enhetId)
-            .medBehandlingstype(behandlingstype)
-            .medOppgavetype(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode());
-
-        var response = restKlient.opprettetOppgave(request.build());
-        return response.getId().toString();
     }
 
     public String opprettOppgaveFeilutbetaling(BehandlingReferanse ref, String beskrivelse) {
