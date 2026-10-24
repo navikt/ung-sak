@@ -29,6 +29,13 @@ class BehandlingStegDelTest {
     }
 
     @Test
+    void utled_gir_tom_for_andre_ytelser_og_uten_aktivt_steg() {
+        assertThat(BehandlingStegDel.utled(FagsakYtelseType.UNGDOMSYTELSE, BehandlingStegType.FORESLÅ_VEDTAK)).isEmpty();
+        assertThat(BehandlingStegDel.utled(FagsakYtelseType.AKTIVITETSPENGER, null)).isEmpty();
+        assertThat(BehandlingStegDel.utled(FagsakYtelseType.AKTIVITETSPENGER, BehandlingStegType.VURDER_BOSTEDVILKÅR)).contains(BehandlingDel.NAV_KONTOR);
+    }
+
+    @Test
     void steg_som_ikke_inngår_i_aktivitetspenger_skal_feile() {
         assertThatThrownBy(() -> BehandlingStegDel.forAktivitetspenger(BehandlingStegType.UNGDOMSYTELSE_BEREGNING))
             .isInstanceOf(IllegalArgumentException.class);

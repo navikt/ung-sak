@@ -8,6 +8,7 @@ import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
@@ -17,7 +18,6 @@ import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
@@ -109,8 +109,8 @@ public class BehandlingsoppretterTjeneste {
             () -> new IllegalStateException("Kan ikke opprette klagebehandling uten tidligere behandling")
         );
 
-        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        var nyBehandling = opprettBehandling(fagsak, BehandlingType.KLAGE, enhet, BehandlingÅrsakType.UDEFINERT);
+        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL);
+        var nyBehandling = opprettKlageBehandling(fagsak, enhet);
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
         klageVurderingTjeneste.opprettKlageUtredning(nyBehandling, enhet);
 
@@ -118,15 +118,11 @@ public class BehandlingsoppretterTjeneste {
         return nyBehandling;
     }
 
-    private Behandling opprettBehandling(Fagsak fagsak, BehandlingType behandlingType, OrganisasjonsEnhet enhet, BehandlingÅrsakType årsak) {
-        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
-            beh -> {
-                if (!BehandlingÅrsakType.UDEFINERT.equals(årsak)) {
-                    BehandlingÅrsak.builder(årsak).buildFor(beh);
-                }
-                beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
-            });
-        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet);
+    private Behandling opprettKlageBehandling(Fagsak fagsak, OrganisasjonsEnhet enhet) {
+        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, BehandlingType.KLAGE,
+            beh -> beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(BehandlingType.KLAGE.getBehandlingstidFristUker())));
+        Long behandlingId = behandling.getId();
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, null);
         return behandling;
     }
 
