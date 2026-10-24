@@ -1,11 +1,20 @@
 package no.nav.ung.kodeverk.behandling;
 
+import java.util.Optional;
+
 public final class BehandlingStegDel {
 
     private BehandlingStegDel() {
     }
 
-    public static BehandlingDel forAktivitetspenger(BehandlingStegType steg) {
+    public static Optional<BehandlingDel> utled(FagsakYtelseType ytelse, BehandlingStegType steg) {
+        if (ytelse != FagsakYtelseType.AKTIVITETSPENGER || steg == null) {
+            return Optional.empty();
+        }
+        return Optional.of(forAktivitetspenger(steg));
+    }
+
+    static BehandlingDel forAktivitetspenger(BehandlingStegType steg) {
         return switch (steg) {
             case START_STEG -> BehandlingDel.SENTRAL;
             case INIT_PERIODER -> BehandlingDel.SENTRAL;

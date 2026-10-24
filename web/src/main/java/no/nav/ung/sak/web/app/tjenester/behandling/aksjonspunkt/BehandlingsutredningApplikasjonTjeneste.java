@@ -9,6 +9,7 @@ import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingStegDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -18,7 +19,6 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarligTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -146,8 +146,9 @@ public class BehandlingsutredningApplikasjonTjeneste {
 
     public void byttBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet, String begrunnelse, HistorikkAktør aktør) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingDel behandlingDel = BehandlingAnsvarligTjeneste.aktivDel(behandling);
-        behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, behandlingDel, enhet, aktør, begrunnelse);
+        BehandlingDel aktivDel = BehandlingStegDel.utled(behandling.getFagsakYtelseType(), behandling.getAktivtBehandlingSteg())
+            .orElse(BehandlingDel.SENTRAL);
+        behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, aktivDel, enhet, aktør, begrunnelse);
     }
 
     public void kanEndreBehandling(Long behandlingId, Long versjon) {
