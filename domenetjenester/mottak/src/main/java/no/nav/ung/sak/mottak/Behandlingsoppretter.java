@@ -9,7 +9,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -41,7 +40,6 @@ public class Behandlingsoppretter {
     private SøknadRepository søknadRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
-    private Instance<NyBehandlingOppretter> nyBehandlingOpprettere;
     private Instance<RevurderingTjeneste> revurderingTjenester;
 
     @Inject
@@ -50,12 +48,10 @@ public class Behandlingsoppretter {
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                 BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
-                                @Any Instance<NyBehandlingOppretter> nyBehandlingOpprettere,
                                 @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
-        this.nyBehandlingOpprettere = nyBehandlingOpprettere;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.revurderingRepository = behandlingRepositoryProvider.getBehandlingRevurderingRepository();
@@ -151,11 +147,6 @@ public class Behandlingsoppretter {
         return behandling;
     }
 
-    public Behandling opprettNyBehandlingFra(Behandling forrigeBehandling, BehandlingÅrsakType behandlingÅrsakType) {
-        Behandling nyBehandling = getNyBehandlingOppretter(forrigeBehandling).opprettNyBehandling(forrigeBehandling, behandlingÅrsakType);
-        return nyBehandling;
-    }
-
     public Optional<Behandling> sisteHenlagteFørstegangsbehandling(Fagsak fagsak) {
         Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandling.isPresent()
@@ -168,11 +159,5 @@ public class Behandlingsoppretter {
         }
 
         return Optional.empty();
-    }
-
-    NyBehandlingOppretter getNyBehandlingOppretter(Behandling forrigeBehandling) {
-        return BehandlingTypeRef.Lookup.find(NyBehandlingOppretter.class, nyBehandlingOpprettere, forrigeBehandling.getFagsakYtelseType(), forrigeBehandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException(
-                "NyBehandlingOppretter ikke implementert for ytelse [" + forrigeBehandling.getFagsakYtelseType() + "], behandlingtype [" + forrigeBehandling.getType() + "]"));
     }
 }
