@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 @Dependent
 public class BehandlendeEnhetTjeneste {
 
-    private EnhetsTjeneste enhetsTjeneste;
-    private BehandlingEnhetEventPubliserer eventPubliserer;
-    private BehandlingRepository behandlingRepository;
-    private HistorikkinnslagRepository historikkinnslagRepository;
-    private PersonopplysningRepository personopplysningRepository;
-    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
+    private final EnhetsTjeneste enhetsTjeneste;
+    private final BehandlingEnhetEventPubliserer eventPubliserer;
+    private final BehandlingRepository behandlingRepository;
+    private final HistorikkinnslagRepository historikkinnslagRepository;
+    private final PersonopplysningRepository personopplysningRepository;
+    private final BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     public BehandlendeEnhetTjeneste(EnhetsTjeneste enhetsTjeneste,
@@ -81,22 +81,6 @@ public class BehandlendeEnhetTjeneste {
             : Collections.singletonMap(BehandlingDel.SENTRAL, null);
     }
 
-    //TODO slett
-    // Sjekk om angitt journalførende enhet er gyldig for enkelte oppgaver
-    public boolean gyldigEnhetNfpNk(FagsakYtelseType ytelseType, String enhetId) {
-        return enhetsTjeneste.finnOrganisasjonsEnhet(ytelseType, enhetId).isPresent();
-    }
-
-    // Brukes for å sjekke om behandling skal flyttes etter endringer i NORG2-oppsett
-    public Optional<OrganisasjonsEnhet> sjekkOppdatertEnhetEtterReallokering(Behandling behandling) {
-        String behandlingensBehandlendeEnhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null);
-        OrganisasjonsEnhet enhet = finnBehandlendeEnhetFor(behandling.getFagsak());
-        if (enhet.getEnhetId().equals(behandlingensBehandlendeEnhet)) {
-            return Optional.empty();
-        }
-        return Optional.of(getOrganisasjonsEnhetEtterEndring(behandling.getFagsak(), enhet, behandling.getAktørId(), new HashSet<>()).orElse(enhet));
-    }
-
 
     // Brukes for å sjekke om det er behov for å flytte eller endre til spesialenheter når saken tas av vent.
     // Returnerer kun deler der enheten skal endres.
@@ -121,11 +105,6 @@ public class BehandlendeEnhetTjeneste {
         return endrede;
     }
 
-
-    private Optional<OrganisasjonsEnhet> getOrganisasjonsEnhetEtterEndring(Fagsak fagsak, OrganisasjonsEnhet enhet, AktørId hovedAktør, Set<AktørId> allePersoner) {
-        allePersoner.add(hovedAktør);
-        return enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(fagsak.getYtelseType(), enhet.getEnhetId(), hovedAktør, allePersoner);
-    }
 
     private Set<AktørId> finnAktørIdFraPersonopplysninger(Behandling behandling) {
         return personopplysningRepository.hentPersonopplysningerHvisEksisterer(behandling.getId())
