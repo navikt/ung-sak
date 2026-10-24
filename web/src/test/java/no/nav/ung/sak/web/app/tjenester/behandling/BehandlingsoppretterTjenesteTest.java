@@ -4,6 +4,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
@@ -11,7 +12,9 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
+import no.nav.ung.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.ung.sak.behandling.revurdering.RevurderingTjenesteFelles;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
@@ -31,6 +34,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -44,6 +48,7 @@ import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -92,8 +97,11 @@ class BehandlingsoppretterTjenesteTest {
     private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
 
     @Inject
+    private RevurderingTjenesteFelles revurderingTjenesteFelles;
+
+    @Inject
     @Any
-    private Instance<RevurderingTjeneste> revurderingTjenester;
+    private Instance<GrunnlagKopierer> grunnlagKopierere;
 
     private Behandling behandling;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
@@ -101,8 +109,11 @@ class BehandlingsoppretterTjenesteTest {
     @BeforeEach
     void setUp() {
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
-        when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any())).thenReturn(new OrganisasjonsEnhet("1234", "Nav Test"));
-        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, gyldigePerioderForRevurderingUtledere, behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository, revurderingTjenester);
+        when(behandlendeEnhetTjeneste.finnBehandlendeEnheterFor(any())).thenReturn(Map.of(BehandlingDel.SENTRAL, new OrganisasjonsEnhet("1234", "Nav Test")));
+        var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste, revurderingTjenesteFelles, grunnlagKopierere, historikkinnslagRepository,
+            prosessTriggereRepository, repositoryProvider.getBehandlingAnsvarligRepository(), behandlendeEnhetTjeneste);
+        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, gyldigePerioderForRevurderingUtledere, behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository,
+            new UnitTestLookupInstanceImpl<>(revurderingTjeneste));
     }
 
     @Test
