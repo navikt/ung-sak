@@ -69,6 +69,8 @@ public class Behandlingsoppretter {
         if (!tidligereBehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(true)) {
             throw new IllegalStateException("Utviklerfeil: Prøver opprette ny behandling når det finnes åpen av samme type: " + fagsak.getId());
         }
+        // Hentes før behandlingen opprettes, ellers finnes ingen forrige behandling å gjenbruke enhet fra
+        var behandlendeEnheter = behandlendeEnhetTjeneste.finnBehandlendeEnheterFor(fagsak);
         Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
             if (!BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
                 BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
@@ -77,7 +79,7 @@ public class Behandlingsoppretter {
 
         });
 
-        behandlingAnsvarligRepository.setBehandlendeEnheter(behandling.getId(), behandlendeEnhetTjeneste.finnBehandlendeEnheterFor(fagsak));
+        behandlingAnsvarligRepository.setBehandlendeEnheter(behandling.getId(), behandlendeEnheter);
 
         return behandling; // NOSONAR
     }
@@ -92,7 +94,7 @@ public class Behandlingsoppretter {
 
     public Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, origBehandling.getFagsakYtelseType()).orElseThrow();
-        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
+        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak);
         return revurdering;
     }
 

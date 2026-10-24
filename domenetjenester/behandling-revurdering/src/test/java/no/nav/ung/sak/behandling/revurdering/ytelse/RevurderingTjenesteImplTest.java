@@ -5,10 +5,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
@@ -23,6 +20,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +29,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -84,11 +86,13 @@ public class RevurderingTjenesteImplTest {
 
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
-        var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste, revurderingTjenesteFelles, grunnlagKopierer, historikkRepository, prosessTriggereRepository, behandlingAnsvarligRepository);
+        var behandlendeEnhetTjeneste = mock(BehandlendeEnhetTjeneste.class);
+        when(behandlendeEnhetTjeneste.finnBehandlendeEnheterFor(any())).thenReturn(Map.of(BehandlingDel.SENTRAL, new OrganisasjonsEnhet("4863", "Nav test")));
+        var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste, revurderingTjenesteFelles, grunnlagKopierer, historikkRepository, prosessTriggereRepository, behandlingAnsvarligRepository, behandlendeEnhetTjeneste);
 
         // Act
         Behandling revurdering = revurderingTjeneste
-            .opprettAutomatiskRevurdering(behandlingSomSkalRevurderes, BehandlingÅrsakType.RE_ANNET, new OrganisasjonsEnhet(null, null));
+            .opprettAutomatiskRevurdering(behandlingSomSkalRevurderes, BehandlingÅrsakType.RE_ANNET);
 
         // Assert
         assertThat(revurdering.getFagsak()).isEqualTo(behandlingSomSkalRevurderes.getFagsak());

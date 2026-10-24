@@ -98,10 +98,9 @@ public class BehandlingsoppretterTjeneste {
         var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsak.getId())
             .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
 
-        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
         return manuell
-            ? revurderingTjeneste.opprettManuellRevurdering(origBehandling, behandlingÅrsakType, enhet, periode)
-            : revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, enhet);
+            ? revurderingTjeneste.opprettManuellRevurdering(origBehandling, behandlingÅrsakType, periode)
+            : revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType);
     }
 
 
