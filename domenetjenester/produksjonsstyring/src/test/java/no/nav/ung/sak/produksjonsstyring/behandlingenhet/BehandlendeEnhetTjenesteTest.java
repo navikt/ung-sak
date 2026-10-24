@@ -9,12 +9,14 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarlig
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.typer.AktørId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -31,6 +33,7 @@ class BehandlendeEnhetTjenesteTest {
     private EnhetsTjeneste enhetsTjeneste;
     private BehandlingRepository behandlingRepository;
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
+    private BehandlendeEnhetOppsett oppsett;
     private BehandlendeEnhetTjeneste tjeneste;
 
     @BeforeEach
@@ -38,13 +41,16 @@ class BehandlendeEnhetTjenesteTest {
         enhetsTjeneste = mock(EnhetsTjeneste.class);
         behandlingRepository = mock(BehandlingRepository.class);
         behandlingAnsvarligRepository = mock(BehandlingAnsvarligRepository.class);
+        oppsett = mock(BehandlendeEnhetOppsett.class);
         var provider = mock(BehandlingRepositoryProvider.class);
         when(provider.getBehandlingRepository()).thenReturn(behandlingRepository);
-        tjeneste = new BehandlendeEnhetTjeneste(enhetsTjeneste, mock(BehandlingEnhetEventPubliserer.class), provider, behandlingAnsvarligRepository);
+        tjeneste = new BehandlendeEnhetTjeneste(enhetsTjeneste, mock(BehandlingEnhetEventPubliserer.class), provider, behandlingAnsvarligRepository,
+            new UnitTestLookupInstanceImpl<>(oppsett));
     }
 
     @Test
     void ungdomsytelse_får_bare_sentral_enhet() {
+        when(oppsett.deler()).thenReturn(Set.of(BehandlingDel.SENTRAL));
         when(enhetsTjeneste.hentEnhetSjekkKunAktør(eq(AKTØR_ID), eq(FagsakYtelseType.UNGDOMSYTELSE), isNull())).thenReturn(SENTRAL_ENHET);
 
         var enheter = tjeneste.finnBehandlendeEnheterFor(fagsak(FagsakYtelseType.UNGDOMSYTELSE));
@@ -53,9 +59,10 @@ class BehandlendeEnhetTjenesteTest {
     }
 
     @Test
-    void aktivitetspenger_får_enhet_for_både_sentral_og_nav_kontor() {
-        when(enhetsTjeneste.hentEnhetSjekkKunAktør(eq(AKTØR_ID), eq(FagsakYtelseType.AKTIVITETSPENGER), any()))
-            .thenReturn(SENTRAL_ENHET, NAV_KONTOR);
+    void aktivitetspenger_slår_opp_hver_del_med_sitt_behandlingstema() {
+        aktivitetspengerOppsett();
+        when(enhetsTjeneste.hentEnhetSjekkKunAktør(AKTØR_ID, FagsakYtelseType.AKTIVITETSPENGER, "ytelse")).thenReturn(SENTRAL_ENHET);
+        when(enhetsTjeneste.hentEnhetSjekkKunAktør(AKTØR_ID, FagsakYtelseType.AKTIVITETSPENGER, "inngangsvilkår")).thenReturn(NAV_KONTOR);
 
         var enheter = tjeneste.finnBehandlendeEnheterFor(fagsak(FagsakYtelseType.AKTIVITETSPENGER));
 
@@ -67,6 +74,7 @@ class BehandlendeEnhetTjenesteTest {
 
     @Test
     void gjenbruker_gyldig_enhet_fra_forrige_behandling_per_del() {
+        aktivitetspengerOppsett();
         forrigeBehandlingHarEnhet(BehandlingDel.NAV_KONTOR, NAV_KONTOR);
         when(enhetsTjeneste.finnOrganisasjonsEnhet(any(), any(), eq(NAV_KONTOR.getEnhetId()))).thenReturn(Optional.of(NAV_KONTOR));
         when(enhetsTjeneste.hentEnhetSjekkKunAktør(any(), any(), any())).thenReturn(SENTRAL_ENHET);
@@ -88,6 +96,12 @@ class BehandlendeEnhetTjenesteTest {
 
         assertThat(enhet).isEqualTo(SENTRAL_ENHET);
         verify(behandlingAnsvarligRepository, never()).hentBehandlingAnsvarlig(FORRIGE_BEHANDLING_ID, BehandlingDel.NAV_KONTOR);
+    }
+
+    private void aktivitetspengerOppsett() {
+        when(oppsett.deler()).thenReturn(Set.of(BehandlingDel.SENTRAL, BehandlingDel.NAV_KONTOR));
+        when(oppsett.behandlingstema(BehandlingDel.SENTRAL)).thenReturn("ytelse");
+        when(oppsett.behandlingstema(BehandlingDel.NAV_KONTOR)).thenReturn("inngangsvilkår");
     }
 
     private static Fagsak fagsak(FagsakYtelseType ytelseType) {

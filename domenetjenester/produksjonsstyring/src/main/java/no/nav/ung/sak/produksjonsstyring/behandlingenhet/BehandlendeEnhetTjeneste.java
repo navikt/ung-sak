@@ -1,11 +1,14 @@
 package no.nav.ung.sak.produksjonsstyring.behandlingenhet;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
@@ -27,28 +30,27 @@ import java.util.stream.Collectors;
 @Dependent
 public class BehandlendeEnhetTjeneste {
 
-    // TODO TSFF-3237: offisielle behandlingstema-koder for aktivitetspenger er ikke avklart. null gir oppslag uten behandlingstema.
-    private static final String AKTIVITETSPENGER_BEHANDLINGSTEMA_YTELSE = null;
-    private static final String AKTIVITETSPENGER_BEHANDLINGSTEMA_INNGANGSVILKÅR = null;
-
     private EnhetsTjeneste enhetsTjeneste;
     private BehandlingEnhetEventPubliserer eventPubliserer;
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private PersonopplysningRepository personopplysningRepository;
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
+    private Instance<BehandlendeEnhetOppsett> oppsett;
 
     @Inject
     public BehandlendeEnhetTjeneste(EnhetsTjeneste enhetsTjeneste,
                                     BehandlingEnhetEventPubliserer eventPubliserer,
                                     BehandlingRepositoryProvider provider,
-                                    BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
+                                    BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+                                    @Any Instance<BehandlendeEnhetOppsett> oppsett) {
         this.enhetsTjeneste = enhetsTjeneste;
         this.eventPubliserer = eventPubliserer;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.historikkinnslagRepository = provider.getHistorikkinnslagRepository();
         this.personopplysningRepository = provider.getPersonopplysningRepository();
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
+        this.oppsett = oppsett;
     }
 
     // Alle aktuelle enheter
@@ -58,21 +60,21 @@ public class BehandlendeEnhetTjeneste {
 
     // Kun SENTRAL. Brukes der behandlingen ikke har NAV_KONTOR-del, f.eks. klage.
     public OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak) {
-        return finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL);
+        var oppsett = oppsettFor(fagsak.getYtelseType());
+        return finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL, oppsett.behandlingstema(BehandlingDel.SENTRAL));
     }
 
     public Map<BehandlingDel, OrganisasjonsEnhet> finnBehandlendeEnheterFor(Fagsak fagsak) {
-        if (fagsak.getYtelseType() == FagsakYtelseType.AKTIVITETSPENGER) {
-            return Map.of(
-                BehandlingDel.SENTRAL, finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL),
-                BehandlingDel.NAV_KONTOR, finnBehandlendeEnhetFor(fagsak, BehandlingDel.NAV_KONTOR));
+        var oppsett = oppsettFor(fagsak.getYtelseType());
+        Map<BehandlingDel, OrganisasjonsEnhet> enheter = new EnumMap<>(BehandlingDel.class);
+        for (BehandlingDel del : oppsett.deler()) {
+            enheter.put(del, finnBehandlendeEnhetFor(fagsak, del, oppsett.behandlingstema(del)));
         }
-        return Map.of(BehandlingDel.SENTRAL, finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL));
+        return enheter;
     }
 
-    private OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak, BehandlingDel behandlingDel) {
+    private OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak, BehandlingDel behandlingDel, String behandlingstema) {
         FagsakYtelseType ytelseType = fagsak.getYtelseType();
-        String behandlingstema = behandlingstema(ytelseType, behandlingDel);
         Optional<OrganisasjonsEnhet> forrigeEnhet = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId())
             .flatMap(b -> behandlingAnsvarligRepository.hentBehandlingAnsvarlig(b.getId(), behandlingDel))
             .filter(ba -> ba.getBehandlendeEnhet() != null && enhetsTjeneste.finnOrganisasjonsEnhet(ytelseType, behandlingstema, ba.getBehandlendeEnhet()).isPresent())
@@ -80,13 +82,9 @@ public class BehandlendeEnhetTjeneste {
         return forrigeEnhet.orElseGet(() -> enhetsTjeneste.hentEnhetSjekkKunAktør(fagsak.getAktørId(), ytelseType, behandlingstema));
     }
 
-    private static String behandlingstema(FagsakYtelseType ytelseType, BehandlingDel behandlingDel) {
-        if (ytelseType != FagsakYtelseType.AKTIVITETSPENGER) {
-            return null;
-        }
-        return behandlingDel == BehandlingDel.SENTRAL
-            ? AKTIVITETSPENGER_BEHANDLINGSTEMA_YTELSE
-            : AKTIVITETSPENGER_BEHANDLINGSTEMA_INNGANGSVILKÅR;
+    private BehandlendeEnhetOppsett oppsettFor(FagsakYtelseType ytelseType) {
+        return FagsakYtelseTypeRef.Lookup.find(oppsett, ytelseType)
+            .orElseThrow(() -> new IllegalStateException("Mangler BehandlendeEnhetOppsett for " + ytelseType));
     }
 
     // Sjekk om angitt journalførende enhet er gyldig for enkelte oppgaver
