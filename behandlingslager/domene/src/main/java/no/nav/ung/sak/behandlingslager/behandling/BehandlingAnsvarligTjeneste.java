@@ -27,13 +27,14 @@ public class BehandlingAnsvarligTjeneste {
             return Optional.empty();
         }
 
-        if (behandling.getFagsakYtelseType() == FagsakYtelseType.UNGDOMSYTELSE) {
-            return Optional.of(ansvarlige.get(BehandlingDel.SENTRAL));
-        }
+        return Optional.ofNullable(ansvarlige.get(aktivDel(behandling)));
+    }
 
+    public static BehandlingDel aktivDel(Behandling behandling) {
         var aktivSteg = behandling.getAktivtBehandlingSteg();
-        BehandlingDel aktivDel = BehandlingStegDel.forAktivitetspenger(aktivSteg);
-        return Optional.of(ansvarlige.get(aktivDel));
-
+        if (behandling.getFagsakYtelseType() != FagsakYtelseType.AKTIVITETSPENGER || aktivSteg == null) {
+            return BehandlingDel.SENTRAL;
+        }
+        return BehandlingStegDel.forAktivitetspenger(aktivSteg);
     }
 }

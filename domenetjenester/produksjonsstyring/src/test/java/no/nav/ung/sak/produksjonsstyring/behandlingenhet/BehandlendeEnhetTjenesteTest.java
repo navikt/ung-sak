@@ -87,7 +87,8 @@ class BehandlendeEnhetTjenesteTest {
         when(enhetsTjeneste.finnOrganisasjonsEnhet(any(), any(), any())).thenReturn(Optional.empty());
         when(enhetsTjeneste.hentEnhetSjekkKunAktør(eq(AKTØR_ID), eq(FagsakYtelseType.UNGDOMSYTELSE), isNull())).thenReturn(SENTRAL_ENHET);
 
-        var enhet = tjeneste.finnBehandlendeEnhetFor(fagsak(FagsakYtelseType.UNGDOMSYTELSE));
+        Fagsak fagsak = fagsak(FagsakYtelseType.UNGDOMSYTELSE);
+        var enhet = tjeneste.finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL);
 
         assertThat(enhet).isEqualTo(SENTRAL_ENHET);
         verify(behandlingAnsvarligRepository, never()).hentBehandlingAnsvarlig(FORRIGE_BEHANDLING_ID, BehandlingDel.NAV_KONTOR);

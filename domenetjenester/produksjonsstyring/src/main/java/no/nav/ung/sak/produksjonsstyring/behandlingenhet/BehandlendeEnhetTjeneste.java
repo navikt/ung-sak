@@ -52,18 +52,17 @@ public class BehandlendeEnhetTjeneste {
         return enhetsTjeneste.hentEnhetListe(ytelseType);
     }
 
-    // Kun SENTRAL. Brukes der behandlingen ikke har NAV_KONTOR-del, f.eks. klage.
-    public OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak) {
-        String behandlingstema = behandlingstemaPerDel(fagsak.getYtelseType()).get(BehandlingDel.SENTRAL);
-        return finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL, behandlingstema);
-    }
-
     public Map<BehandlingDel, OrganisasjonsEnhet> finnBehandlendeEnheterFor(Fagsak fagsak) {
         var behandlingstemaPerDel = behandlingstemaPerDel(fagsak.getYtelseType());
         Map<BehandlingDel, OrganisasjonsEnhet> enheter = new EnumMap<>(BehandlingDel.class);
         behandlingstemaPerDel.forEach((del, behandlingstema) ->
             enheter.put(del, finnBehandlendeEnhetFor(fagsak, del, behandlingstema)));
         return enheter;
+    }
+
+    public OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak, BehandlingDel behandlingDel) {
+        String behandlingstema = behandlingstemaPerDel(fagsak.getYtelseType()).get(behandlingDel);
+        return finnBehandlendeEnhetFor(fagsak, behandlingDel, behandlingstema);
     }
 
     private OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak, BehandlingDel behandlingDel, String behandlingstema) {
@@ -112,10 +111,6 @@ public class BehandlendeEnhetTjeneste {
             .map(PersonInformasjonEntitet::getPersonopplysninger).orElse(Collections.emptyList()).stream()
             .map(PersonopplysningEntitet::getAktørId)
             .collect(Collectors.toSet());
-    }
-
-    public void oppdaterBehandlendeEnhet(Behandling behandling, OrganisasjonsEnhet nyEnhet, HistorikkAktør endretAv, String begrunnelse) {
-        oppdaterBehandlendeEnhet(behandling, BehandlingDel.SENTRAL, nyEnhet, endretAv, begrunnelse);
     }
 
     // Oppdaterer behandlende enhet og sikre at dvh oppdateres (via event)

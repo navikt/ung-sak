@@ -2,6 +2,7 @@ package no.nav.ung.sak.klage.behandlingsprosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
@@ -9,8 +10,8 @@ import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarligTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 
@@ -28,7 +29,7 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private KlageRepository klageRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
-    private BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     public KlageFørsteinstansSteg(){
         // For CDI proxy
@@ -37,11 +38,12 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
     @Inject
     public KlageFørsteinstansSteg(BehandlingRepository behandlingRepository,
                                   KlageRepository klageRepository,
-                                  BehandlendeEnhetTjeneste behandlendeEnhetTjeneste, BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste) {
+                                  BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+                                  BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.klageRepository = klageRepository;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
-        this.behandlingAnsvarligTjeneste = behandlingAnsvarligTjeneste;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     @Override
@@ -59,24 +61,27 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
                                    BehandlingStegType sisteSteg) {
         if(!Objects.equals(BehandlingStegType.FATTE_VEDTAK, sisteSteg)) {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligTjeneste.finnBehandlingAnsvarligFraBehandlingTilstand(behandling).orElse(null);
 
             var klageutredning = klageRepository.hentKlageUtredning(behandling.getId());
             klageutredning.fjernKlageVurdering(KlageVurdertAv.VEDTAKSINSTANS);
 
-            endreAnsvarligEnhetTilFørsteinstansVedTilbakeføringOgLagreHistorikkinnslag(behandling, behandlingAnsvarlig);
+            endreAnsvarligEnhetTilFørsteinstansVedTilbakeføringOgLagreHistorikkinnslag(behandling);
 
             klageRepository.lagre(klageutredning);
         }
     }
 
-    private void endreAnsvarligEnhetTilFørsteinstansVedTilbakeføringOgLagreHistorikkinnslag(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig) {
+    private void endreAnsvarligEnhetTilFørsteinstansVedTilbakeføringOgLagreHistorikkinnslag(Behandling behandling) {
         var opprinneligEnhet = klageRepository.hentKlageUtredning(behandling.getId())
             .getOpprinneligBehandlendeEnhet();
+
+        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.SENTRAL)
+            .orElse(null);
+
         if (behandlingAnsvarlig != null && behandlingAnsvarlig.getBehandlendeEnhet() != null && behandlingAnsvarlig.getBehandlendeEnhet().equals(opprinneligEnhet)) {
             return;
         }
-        var tilEnhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(behandling.getFagsak());
-        behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, tilEnhet, HistorikkAktør.VEDTAKSLØSNINGEN, null);
+        var tilEnhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(behandling.getFagsak(), BehandlingDel.SENTRAL);
+        behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, BehandlingDel.SENTRAL, tilEnhet, HistorikkAktør.VEDTAKSLØSNINGEN, null);
     }
 }

@@ -8,6 +8,7 @@ import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
@@ -109,7 +110,7 @@ public class BehandlingsoppretterTjeneste {
             () -> new IllegalStateException("Kan ikke opprette klagebehandling uten tidligere behandling")
         );
 
-        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
+        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL);
         var nyBehandling = opprettBehandling(fagsak, BehandlingType.KLAGE, enhet, BehandlingÅrsakType.UDEFINERT);
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
         klageVurderingTjeneste.opprettKlageUtredning(nyBehandling, enhet);
