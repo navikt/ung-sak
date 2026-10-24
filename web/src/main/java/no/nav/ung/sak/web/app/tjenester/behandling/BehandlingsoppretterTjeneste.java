@@ -18,7 +18,6 @@ import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
@@ -111,7 +110,7 @@ public class BehandlingsoppretterTjeneste {
         );
 
         var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL);
-        var nyBehandling = opprettBehandling(fagsak, BehandlingType.KLAGE, enhet, BehandlingÅrsakType.UDEFINERT);
+        var nyBehandling = opprettKlageBehandling(fagsak, enhet);
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
         klageVurderingTjeneste.opprettKlageUtredning(nyBehandling, enhet);
 
@@ -119,15 +118,11 @@ public class BehandlingsoppretterTjeneste {
         return nyBehandling;
     }
 
-    private Behandling opprettBehandling(Fagsak fagsak, BehandlingType behandlingType, OrganisasjonsEnhet enhet, BehandlingÅrsakType årsak) {
-        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
-            beh -> {
-                if (!BehandlingÅrsakType.UDEFINERT.equals(årsak)) {
-                    BehandlingÅrsak.builder(årsak).buildFor(beh);
-                }
-                beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
-            });
-        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet);
+    private Behandling opprettKlageBehandling(Fagsak fagsak, OrganisasjonsEnhet enhet) {
+        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, BehandlingType.KLAGE,
+            beh -> beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(BehandlingType.KLAGE.getBehandlingstidFristUker())));
+        Long behandlingId = behandling.getId();
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, null);
         return behandling;
     }
 

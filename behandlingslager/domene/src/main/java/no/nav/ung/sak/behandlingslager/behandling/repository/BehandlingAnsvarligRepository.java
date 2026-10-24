@@ -58,14 +58,6 @@ public class BehandlingAnsvarligRepository {
             .collect(Collectors.groupingBy(BehandlingAnsvarlig::getBehandlingId));
     }
 
-    public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet) {
-        setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, null);
-    }
-
-    public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet, String årsak) {
-        setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, årsak);
-    }
-
     public void setBehandlendeEnheter(Long behandlingId, Map<BehandlingDel, OrganisasjonsEnhet> enheter) {
         enheter.forEach((behandlingDel, enhet) -> setBehandlendeEnhet(behandlingId, behandlingDel, enhet, null));
     }
