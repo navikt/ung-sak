@@ -119,6 +119,23 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
     }
 
     @Test
+    void skal_regne_avklaring_som_overlapper_ny_søknadsperiode_som_avklart() {
+        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
+        leggTilTriggere(behandling,
+            new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_1),
+            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_2));
+        lagreAvklaring(behandling, DatoIntervallEntitet.fraOgMedTilOgMed(PERIODE_1.getFomDato(), PERIODE_2.getTomDato()));
+
+        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
+
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED))
+            .as("overlappen med ny søknadsperiode vurderes både etter avklaring og som ny søknadsperiode")
+            .containsExactly(PERIODE_1.toLocalDateInterval(), PERIODE_2.toLocalDateInterval());
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.NY_SØKT_PERIODE)).containsExactly(PERIODE_2.toLocalDateInterval());
+        assertThat(tjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR)).containsExactly(PERIODE_1, PERIODE_2);
+    }
+
+    @Test
     void utled_skal_gi_søknadsperiodene_når_vilkåret_ikke_finnes() {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad().lagre(entityManager);
 

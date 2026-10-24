@@ -10,10 +10,13 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPer
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 
 import java.time.LocalDateTime;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
- * Per-segment hjelpeobjekt som kombinerer avklaring og etterlysning, og reduserer til et {@link StegUtfall}.
+ * Per-segment hjelpeobjekt som kombinerer avklaring og etterlysning, og reduserer til {@link StegUtfall}.
  */
 class BostedAvklaringOgUttalelseOgResultat {
 
@@ -22,34 +25,53 @@ class BostedAvklaringOgUttalelseOgResultat {
     private final BostedsfaktaOgAvklaring faktaOgAvklaring;
     private final EtterlysningData etterlysning;
     private final BostedsvilkårResultatPeriode resultat;
+    private final boolean nySøknadsperiode;
 
     BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring faktaOgAvklaring) {
-        this(faktaOgAvklaring, null, null);
+        this(faktaOgAvklaring, null, null, false);
     }
 
-    private BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring faktaOgAvklaring, EtterlysningData etterlysning, BostedsvilkårResultatPeriode resultat) {
+    private BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring faktaOgAvklaring, EtterlysningData etterlysning, BostedsvilkårResultatPeriode resultat, boolean nySøknadsperiode) {
         this.faktaOgAvklaring = faktaOgAvklaring;
         this.etterlysning = etterlysning;
         this.resultat = resultat;
+        this.nySøknadsperiode = nySøknadsperiode;
     }
 
     BostedAvklaringOgUttalelseOgResultat medEtterlysning(EtterlysningData etterlysning) {
-        return new BostedAvklaringOgUttalelseOgResultat(this.faktaOgAvklaring, etterlysning, this.resultat);
+        return new BostedAvklaringOgUttalelseOgResultat(this.faktaOgAvklaring, etterlysning, this.resultat, this.nySøknadsperiode);
     }
 
     BostedAvklaringOgUttalelseOgResultat medResultat(BostedsvilkårResultatPeriode resultat) {
-        return new BostedAvklaringOgUttalelseOgResultat(this.faktaOgAvklaring, this.etterlysning, resultat);
+        return new BostedAvklaringOgUttalelseOgResultat(this.faktaOgAvklaring, this.etterlysning, resultat, this.nySøknadsperiode);
     }
 
-    StegUtfall utledUtfall() {
-        if (erVentende()) {
-            return StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
-        } else if (erKildeSøknad() || harMottattSvarMedUttalelse() || erÅrsakAnnet() || erValgtÅIkkeVarsleNårIkkeOppfylt()) {
-            return StegUtfall.VILKÅR_VURDERES_MANUELT;
-        } else if (!faktaOgAvklaring.isErBosattITrondheim()) {
-            return StegUtfall.OPPHØR_AUTOMATISK;
+    BostedAvklaringOgUttalelseOgResultat medNySøknadsperiode() {
+        return new BostedAvklaringOgUttalelseOgResultat(this.faktaOgAvklaring, this.etterlysning, this.resultat, true);
+    }
+
+    // Avklaringen og en ny søknadsperiode gir hvert sitt utfall, siden de vurderes i hvert sitt aksjonspunkt.
+    Set<StegUtfall> utledUtfall() {
+        var utfall = EnumSet.noneOf(StegUtfall.class);
+        utledUtfallForAvklaring().ifPresent(utfall::add);
+        if (nySøknadsperiode) {
+            utfall.add(StegUtfall.VURDERES_MANUELT_NY_PERIODE);
         }
-        return StegUtfall.BOSATT_HELE_PERIODEN;
+        return utfall;
+    }
+
+    // Bostedsfakta fra en avklaring gir aldri bosatt i Trondheim, så en avklaring som ikke vurderes manuelt, gir opphør.
+    private Optional<StegUtfall> utledUtfallForAvklaring() {
+        if (erVentende()) {
+            return Optional.of(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER);
+        }
+        if (faktaOgAvklaring.getForeslåttAvklaring() == null) {
+            return Optional.empty();
+        }
+        if (harMottattSvarMedUttalelse() || erÅrsakAnnet() || erValgtÅIkkeVarsleNårIkkeOppfylt()) {
+            return Optional.of(StegUtfall.VURDERES_MANUELT_ETTER_AVKLARING);
+        }
+        return Optional.of(StegUtfall.OPPHØR_AUTOMATISK);
     }
 
     Regelsporing tilRegelsporing() {
@@ -67,7 +89,8 @@ class BostedAvklaringOgUttalelseOgResultat {
             foreslått != null && foreslått.skalSendeVarsel(),
             etterlysning != null ? etterlysning.status() : null,
             uttalelse != null ? uttalelse.harUttalelse() : null,
-            getFrist());
+            getFrist(),
+            nySøknadsperiode);
     }
 
     LocalDateTime getFrist() {
@@ -80,10 +103,6 @@ class BostedAvklaringOgUttalelseOgResultat {
 
     EtterlysningData getEtterlysning() {
         return etterlysning;
-    }
-
-    private boolean erKildeSøknad() {
-        return faktaOgAvklaring.getKilde() == Kilde.SØKNAD;
     }
 
     private boolean erValgtÅIkkeVarsleNårIkkeOppfylt() {
@@ -115,17 +134,18 @@ class BostedAvklaringOgUttalelseOgResultat {
                       boolean skalSendeVarsel,
                       EtterlysningStatus etterlysningStatus,
                       Boolean harUttalelse,
-                      LocalDateTime frist) {
+                      LocalDateTime frist,
+                      boolean nySøknadsperiode) {
     }
 
-    record RegelEvaluering(StegUtfall utfall) {
+    record RegelEvaluering(Set<StegUtfall> utfall) {
     }
 
     enum StegUtfall {
         OPPHØR_AUTOMATISK,
-        VILKÅR_VURDERES_MANUELT,
+        VURDERES_MANUELT_ETTER_AVKLARING,
         VENTER_PÅ_UTTALELSE_FRA_BRUKER,
-        BOSATT_HELE_PERIODEN
+        VURDERES_MANUELT_NY_PERIODE
     }
 }
 

@@ -5,16 +5,16 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -36,6 +36,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.UttalelseData;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
@@ -43,19 +44,20 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall;
 import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfallUtleder;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -71,6 +73,14 @@ class BistandsvilkårStegTest {
 
     @Inject
     private EntityManager entityManager;
+
+    @Inject
+    @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
+
+    @Inject
+    @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
+    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
 
     @Inject
     private @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
@@ -119,7 +129,7 @@ class BistandsvilkårStegTest {
 
     @Test
     void skal_avslå_automatisk_nar_kommer_i_arbeid_og_bruker_ikke_har_uttalelse() {
-        var behandling = opprettBehandlingMedVilkårOgPeriode();
+        var behandling = opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV);
         var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
 
         var etterlysningUtenUttalelse = new EtterlysningData(
@@ -148,7 +158,7 @@ class BistandsvilkårStegTest {
         assertThat(input.avklaringReferanse()).isEqualTo(avklaring.getReferanse());
         assertThat(input.etterlysningStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
         assertThat(input.harUttalelse()).isFalse();
-        assertThat(evaluering.utfall()).isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+        assertThat(evaluering.utfall()).containsExactly(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
 
         var vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BISTANDSVILKÅR).orElseThrow().getPerioder();
         assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
@@ -163,7 +173,7 @@ class BistandsvilkårStegTest {
 
     @Test
     void skal_ikke_avslå_automatisk_nar_bruker_har_uttalelse() {
-        var behandling = opprettBehandlingMedVilkårOgPeriode();
+        var behandling = opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV);
         var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
 
         var etterlysningMedUttalelse = new EtterlysningData(
@@ -184,7 +194,7 @@ class BistandsvilkårStegTest {
 
     @Test
     void skal_ikke_avslå_automatisk_nar_det_er_valgt_a_ikke_varsle() {
-        var behandling = opprettBehandlingMedVilkårOgPeriode();
+        var behandling = opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV);
         lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false);
 
         var resultat = utførSteg(behandling);
@@ -282,9 +292,8 @@ class BistandsvilkårStegTest {
         assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_VURDERT);
     }
 
-    @Disabled
     @Test
-    void skal_avgrense_hele_tidslinjen_nar_kun_en_av_to_perioder_har_foreslatt_avklaring() {
+    void skal_vurdere_ny_soknadsperiode_selv_om_annen_periode_har_foreslatt_avklaring() {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
@@ -302,19 +311,16 @@ class BistandsvilkårStegTest {
 
         var resultat = utførSteg(behandling);
 
-        assertThat(resultat.getAksjonspunktListe())
-            .as("perioden uten foreslått avklaring faller stille ut av vurderingen")
-            .isEmpty();
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR);
 
         var vurderinger = hentVurderinger(behandling);
         assertThat(vurderinger).hasSize(1);
         assertThat(vurderinger.iterator().next().getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
 
+        // Vilkårsresultatet settes først når den nye søknadsperioden er vurdert i 5141. Vilkårsperiodene ligger kant i kant
+        // med likt utfall og er slått sammen, så de sjekkes samlet.
         var vilkårPerioder = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BISTANDSVILKÅR).orElseThrow().getPerioder();
-        var vilkårForAvklartPeriode = vilkårPerioder.stream().filter(p -> p.getPeriode().equals(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))).findFirst().orElseThrow();
-        var vilkårForUavklartPeriode = vilkårPerioder.stream().filter(p -> p.getPeriode().equals(DatoIntervallEntitet.fraOgMedTilOgMed(fom2, tom2))).findFirst().orElseThrow();
-        assertThat(vilkårForAvklartPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(vilkårForUavklartPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
+        assertThat(vilkårPerioder).allMatch(p -> p.getGjeldendeUtfall() == Utfall.IKKE_VURDERT);
     }
 
     private VilkårPeriodeAvklaring hentEnesteAvklaring(long behandlingId) {
@@ -344,7 +350,7 @@ class BistandsvilkårStegTest {
     void skal_gi_opphørsaksjonspunkt_nar_hele_den_manuelle_tidslinjen_har_foreslatt_avklaring() {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
-        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV);
         vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BISTANDSVILKÅR, Set.of(
             lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false),
             lagAvklaring(fom2, tom2, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false)
@@ -369,18 +375,85 @@ class BistandsvilkårStegTest {
     }
 
     @Test
-    void skal_ikke_regne_delvis_dekket_tidslinje_som_dekket_av_foreslatt_avklaring() {
+    void skal_vurdere_avklart_periode_for_ny_soknadsperiode_nar_begge_vurderes_manuelt() {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
-        var avklaring = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, BehandlingÅrsakType.NY_SØKT_PERIODE);
+        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
+        steg = lagSteg(List.of(mottattUttalelse(avklaring.getReferanse())));
 
-        var blandetTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(FOM, TOM, new VilkårsavklaringUtfallUtleder(VilkårType.BISTANDSVILKÅR, avklaring)),
-            new LocalDateSegment<>(fom2, tom2, new VilkårsavklaringUtfallUtleder(VilkårType.BISTANDSVILKÅR, null))));
+        assertThat(utførSteg(behandling).getAksjonspunktListe())
+            .as("avklart periode vurderes først, alene")
+            .containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR);
+    }
 
-        assertThat(BistandsvilkårSteg.erDekketAvForeslåttAvklaring(blandetTidslinje)).isFalse();
-        assertThat(BistandsvilkårSteg.erDekketAvForeslåttAvklaring(
-            blandetTidslinje.intersection(new LocalDateTimeline<>(FOM, TOM, Boolean.TRUE)))).isTrue();
+    @Test
+    void skal_gi_avslagsaksjonspunkt_nar_automatisk_avslag_dekker_hele_ny_soknadsperiode() {
+        var behandling = opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType.NY_SØKT_PERIODE);
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
+        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
+        steg = lagSteg(List.of(new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            LocalDateTime.of(2026, 2, 15, 12, 0),
+            avklaring.getReferanse(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(false, null, new JournalpostId("jp-uttalelse-1")))));
+
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe())
+            .as("den nye søknadsperioden skal vurderes selv om avklaringen ga automatisk avslag")
+            .containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR);
+        assertThat(hentVurderinger(behandling)).hasSize(1);
+        var vurdering = hentVurderinger(behandling).stream().findFirst().orElseThrow();
+        assertThat(vurdering.erManuellVurdering()).isFalse();
+        var evaluering = new VilkårJsonObjectMapper().readValue(vurdering.getRegelsporing().orElseThrow().evaluering(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class);
+        assertThat(evaluering.utfall())
+            .as("begge utfallene skal spores, uten at det ene overskriver det andre")
+            .containsExactlyInAnyOrder(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK, VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE);
+    }
+
+    @Test
+    void skal_ikke_vurdere_periode_uten_avklaring_nar_bare_avklaringsarsaken_er_trigger() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV);
+        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
+
+        steg = lagSteg(List.of(new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            LocalDateTime.of(2026, 2, 15, 12, 0),
+            avklaring.getReferanse(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(false, null, new JournalpostId("jp-uttalelse-1")))));
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe()).isEmpty();
+        assertThat(hentVurderinger(behandling)).extracting(v -> v.getPeriode())
+            .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
+    }
+
+    @Test
+    void skal_vurdere_avklaring_utenfor_triggerperioden() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2, null, BehandlingÅrsakType.NY_SØKT_PERIODE);
+        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
+
+        steg = lagSteg(List.of(new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            LocalDateTime.of(2026, 2, 15, 12, 0),
+            avklaring.getReferanse(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(false, null, new JournalpostId("jp-uttalelse-1")))));
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR);
+        assertThat(hentVurderinger(behandling)).extracting(v -> v.getPeriode())
+            .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
     }
 
     private UUID finnReferanse(Set<VilkårPeriodeAvklaring> lagrede, LocalDate fom) {
@@ -421,6 +494,10 @@ class BistandsvilkårStegTest {
     }
 
     private Behandling opprettBehandlingMedVilkårOgPeriode() {
+        return opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType.NY_SØKT_PERIODE);
+    }
+
+    private Behandling opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType årsak) {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_VURDERT, new Periode(FOM, TOM))
             .leggTilVilkår(VilkårType.ALDERSVILKÅR, Utfall.OPPFYLT, new Periode(FOM, TOM))
@@ -432,11 +509,16 @@ class BistandsvilkårStegTest {
         startdatoRepository.lagre(behandling.getId(), List.of(søktStartdato));
         startdatoRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(List.of(søktStartdato)));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
-            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode)));
+            new Trigger(årsak, periode)));
         return behandling;
     }
 
     private Behandling opprettBehandlingMedToVilkårsperioder(LocalDate fom2, LocalDate tom2) {
+        return opprettBehandlingMedToVilkårsperioder(fom2, tom2, BehandlingÅrsakType.NY_SØKT_PERIODE, BehandlingÅrsakType.NY_SØKT_PERIODE);
+    }
+
+    // Årsak null gir perioden ingen prosesstrigger.
+    private Behandling opprettBehandlingMedToVilkårsperioder(LocalDate fom2, LocalDate tom2, BehandlingÅrsakType årsakPeriode1, BehandlingÅrsakType årsakPeriode2) {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_VURDERT, new Periode(FOM, TOM))
             .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_VURDERT, new Periode(fom2, tom2))
@@ -452,10 +534,25 @@ class BistandsvilkårStegTest {
         var søktStartdato2 = new SøktStartdato(fom2, new JournalpostId("jp-vilkår-2"));
         startdatoRepository.lagre(behandling.getId(), List.of(søktStartdato1, søktStartdato2));
         startdatoRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(List.of(søktStartdato1, søktStartdato2)));
-        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
-            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode1),
-            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode2)));
+        var triggere = new HashSet<Trigger>();
+        if (årsakPeriode1 != null) {
+            triggere.add(new Trigger(årsakPeriode1, periode1));
+        }
+        if (årsakPeriode2 != null) {
+            triggere.add(new Trigger(årsakPeriode2, periode2));
+        }
+        prosessTriggereRepository.leggTil(behandling.getId(), triggere);
         return behandling;
+    }
+
+    private static EtterlysningData mottattUttalelse(UUID avklaringReferanse) {
+        return new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            LocalDateTime.of(2026, 2, 15, 12, 0),
+            avklaringReferanse,
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(true, "Jeg er ikke i arbeid", new JournalpostId("jp-uttalelse-1")));
     }
 
     private BistandsvilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
@@ -478,7 +575,8 @@ class BistandsvilkårStegTest {
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
             vilkårsutfallsporing,
-            vilkårsvurderingHistorikkinnslagTjeneste
+            vilkårsvurderingHistorikkinnslagTjeneste,
+            aktivitetspengerVilkårsPerioderTilVurderingTjeneste
         );
     }
 

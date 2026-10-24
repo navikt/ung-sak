@@ -5,11 +5,14 @@ import jakarta.inject.Inject;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -20,6 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 
 import java.time.LocalDateTime;
 import java.util.*;

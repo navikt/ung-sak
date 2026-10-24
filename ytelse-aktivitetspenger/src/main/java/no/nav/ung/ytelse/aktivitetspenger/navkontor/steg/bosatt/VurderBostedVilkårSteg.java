@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -35,6 +36,7 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedAvklaringOgUttalelseOgResultat.StegUtfall;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
@@ -67,6 +69,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private BehandingprosessSporingRepository behandingprosessSporingRepository;
     private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
 
     VurderBostedVilkårSteg() {
@@ -85,7 +88,8 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                                   InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                   InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
                                   BehandingprosessSporingRepository behandingprosessSporingRepository,
-                                  VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste) {
+                                  VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste,
+                                  @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
@@ -95,6 +99,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.behandingprosessSporingRepository = behandingprosessSporingRepository;
         this.vilkårsvurderingHistorikkinnslagTjeneste = vilkårsvurderingHistorikkinnslagTjeneste;
+        this.aktivitetspengerVilkårsPerioderTilVurderingTjeneste = aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
@@ -135,25 +140,28 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             .orElse(new LocalDateTimeline<>(List.of()));
         HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, getAktuellVilkårType());
 
-        var avklaringTidslinje = avgrensTilForeslåtteAvklaringerHvisFinnes(
-            BostedsfaktaOgAvklaringFletter.flettMedForeslåtteAvklaringer(
+        var avklaringTidslinje = BostedsfaktaOgAvklaringFletter.flettMedForeslåtteAvklaringer(
                 søknadsfaktaGrunnlag.hentSøknadsfaktaSomTidslinje(), foreslåtteAvklaringer)
-                .intersection(tidslinjeTilVurdering)
-        );
+            .intersection(tidslinjeTilVurdering);
+
+        var nyeSøknadsperioder = aktivitetspengerVilkårsPerioderTilVurderingTjeneste.utledPerÅrsak(behandlingId, getAktuellVilkårType())
+            .getOrDefault(BehandlingÅrsakType.NY_SØKT_PERIODE, LocalDateTimeline.empty())
+            .intersection(tidslinjeTilVurdering);
 
         LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
             .mapValue(BostedAvklaringOgUttalelseOgResultat::new)
             .combine(etterlysningTidslinje, leggTilEtterlysning(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .combine(tidligereVilkårVurderingResultat, leggTilResultat(), LocalDateTimeline.JoinStyle.LEFT_JOIN);
+            .combine(tidligereVilkårVurderingResultat, leggTilResultat(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .combine(nyeSøknadsperioder, leggTilNySøknadsperiode(), LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        LocalDateTimeline<StegUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::utledUtfall);
+        LocalDateTimeline<Set<StegUtfall>> stegutfallTidslinje = vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::utledUtfall);
         lagreBehandlingprosessSporing(behandlingId, vurderingTidslinje, stegutfallTidslinje);
 
-        if (!stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
+        if (!stegutfallTidslinje.filterValue(u -> u.contains(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)).isEmpty()) {
             return settPåVent(vurderingTidslinje);
         }
 
-        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals))
+        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(u -> u.contains(StegUtfall.OPPHØR_AUTOMATISK)))
             .segmenter()
             .stream().map(s -> {
                 if (s.getValue().getEtterlysning() != null) {
@@ -179,13 +187,11 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, vurderingResultat);
 
-        var manuellVurderingTidslinje = vurderingTidslinje.intersection(
-            stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals));
-        if (!manuellVurderingTidslinje.isEmpty()) {
-            var aksjonspunkt = erDekketAvForeslåttAvklaring(manuellVurderingTidslinje)
-                ? AksjonspunktDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR
-                : AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR;
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunkt));
+        if (!stegutfallTidslinje.filterValue(u -> u.contains(StegUtfall.VURDERES_MANUELT_ETTER_AVKLARING)).isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR));
+        }
+        if (!stegutfallTidslinje.filterValue(u -> u.contains(StegUtfall.VURDERES_MANUELT_NY_PERIODE)).isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
         }
 
         // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
@@ -200,22 +206,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    static boolean erDekketAvForeslåttAvklaring(LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> manuellTidslinje) {
-        return manuellTidslinje.segmenter().stream()
-            .allMatch(s -> s.getValue().getForeslåttAvklaring() != null);
-    }
-
-    /**
-     * Avgrenser avklaringstidslinjen til kun periodene med foreslått avklaring, dersom minst én slik periode
-     * finnes til vurdering. Perioder som kun har oppgitt fakta fra søknad ikke vurderes i dette steget.
-     */
-    private static LocalDateTimeline<BostedsfaktaOgAvklaring> avgrensTilForeslåtteAvklaringerHvisFinnes(
-        LocalDateTimeline<BostedsfaktaOgAvklaring> avklaringTidslinje) {
-        var medForeslåttAvklaring = avklaringTidslinje.filterValue(BostedsfaktaOgAvklaring::harForeslåttAvklaring);
-        return medForeslåttAvklaring.isEmpty() ? avklaringTidslinje : medForeslåttAvklaring;
-    }
-
-    private void lagreBehandlingprosessSporing(long behandlingId, LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje, LocalDateTimeline<StegUtfall> stegutfallTidslinje) {
+    private void lagreBehandlingprosessSporing(long behandlingId, LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje, LocalDateTimeline<Set<StegUtfall>> stegutfallTidslinje) {
         try {
             behandingprosessSporingRepository.lagreSporing(new BehandlingprosessSporing(
                 behandlingId,
@@ -242,9 +233,16 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         };
     }
 
+    private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, Boolean, BostedAvklaringOgUttalelseOgResultat> leggTilNySøknadsperiode() {
+        return (di, lhs, rhs) -> {
+            var vurdering = rhs != null ? lhs.getValue().medNySøknadsperiode() : lhs.getValue();
+            return new LocalDateSegment<>(di, vurdering);
+        };
+    }
+
     private static BehandleStegResultat settPåVent(LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje) {
         LocalDateTime frist = vurderingTidslinje
-            .filterValue(v -> v.utledUtfall() == StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)
+            .filterValue(v -> v.utledUtfall().contains(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER))
             .segmenter().stream()
             .map(seg -> seg.getValue().getFrist())
             .filter(Objects::nonNull)
