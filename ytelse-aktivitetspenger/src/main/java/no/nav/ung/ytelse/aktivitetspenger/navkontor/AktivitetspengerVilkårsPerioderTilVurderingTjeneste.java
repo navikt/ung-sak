@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.aktivitetspenger.navkontor;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -11,11 +12,14 @@ import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.IngenVurdering;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
@@ -36,6 +40,7 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     private VilkårResultatRepository vilkårResultatRepository;
     private VilkårUtleder inngangsvilkårUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
 
     AktivitetspengerVilkårsPerioderTilVurderingTjeneste() {
         // for CDI proxy
@@ -46,39 +51,82 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
         AktivitetspengerSøknadsperiodeTjeneste aktivitetspengerSøknadsperiodeTjeneste,
         VilkårResultatRepository vilkårResultatRepository,
         @FagsakYtelseTypeRef(AKTIVITETSPENGER) @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD) VilkårUtleder inngangsvilkårUtleder,
-        @FagsakYtelseTypeRef(AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
+        @FagsakYtelseTypeRef(AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
+        VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository) {
         this.aktivitetspengerSøknadsperiodeTjeneste = aktivitetspengerSøknadsperiodeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
     }
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
-        if (vilkårene.isPresent()) {
-            LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
-
-            Set<BehandlingÅrsakType> relevanteÅrsaker = hentRelevanteÅrsaker(vilkårType);
-            LocalDateTimeline<Boolean> relevantePerioderTidslinje = prosesstriggerTidslinje
-                .filterValue(årsaker -> årsaker.stream().anyMatch(relevanteÅrsaker::contains))
-                .mapValue(årsaker -> Boolean.TRUE);
-
-            return vilkårene.filter(it -> it.getVilkårType().equals(vilkårType))
-                .map(Vilkår::getPerioder)
-                .stream()
-                .flatMap(Collection::stream)
-                .map(VilkårPeriode::getPeriode)
-                .filter(it -> !relevantePerioderTidslinje.intersection(it.toLocalDateInterval()).isEmpty())
-                .collect(Collectors.toCollection(TreeSet::new));
+        var vilkårsperioder = hentVilkårsperioder(behandlingId, vilkårType);
+        if (vilkårsperioder.isEmpty()) {
+            return aktivitetspengerSøknadsperiodeTjeneste.utledPeriode(behandlingId);
         }
-        return aktivitetspengerSøknadsperiodeTjeneste.utledPeriode(behandlingId);
+
+        LocalDateTimeline<Boolean> tilVurdering = utledPerÅrsak(behandlingId, hentRelevanteÅrsaker(vilkårType), vilkårsperioder.get()).values().stream()
+            .reduce(LocalDateTimeline.empty(), (a, b) -> a.crossJoin(b, StandardCombinators::alwaysTrueForMatch));
+
+        // Komprimeres for hver vilkårsperiode for seg: knekkpunkter fra crossJoin og overlapp mot avklaringer fjernes
+        return vilkårsperioder.get().stream()
+            .flatMap(vilkårsperiode -> tilVurdering.intersection(vilkårsperiode.toLocalDateInterval()).compress().getLocalDateIntervals().stream())
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private Set<BehandlingÅrsakType> hentRelevanteÅrsaker(VilkårType vilkårType) {
-        EnumSet<BehandlingÅrsakType> årsaker = EnumSet.of(BehandlingÅrsakType.NY_SØKT_PERIODE);
+    public Map<BehandlingÅrsakType, LocalDateTimeline<Boolean>> utledPerÅrsak(Long behandlingId, VilkårType vilkårType) {
+        return utledPerÅrsak(behandlingId, hentRelevanteÅrsaker(vilkårType), hentVilkårsperioder(behandlingId, vilkårType).orElse(List.of()));
+    }
+
+    private static Set<BehandlingÅrsakType> hentRelevanteÅrsaker(VilkårType vilkårType) {
+        var årsaker = EnumSet.of(BehandlingÅrsakType.NY_SØKT_PERIODE);
         VilkårsavklaringÅrsaker.avklaringsårsakFor(vilkårType).ifPresent(årsaker::add);
         return årsaker;
+    }
+
+    private Map<BehandlingÅrsakType, LocalDateTimeline<Boolean>> utledPerÅrsak(Long behandlingId,
+                                                                               Set<BehandlingÅrsakType> relevanteÅrsaker,
+                                                                               List<DatoIntervallEntitet> vilkårsperioder) {
+        var prosesstriggere = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
+        var perioderPerÅrsak = new EnumMap<BehandlingÅrsakType, LocalDateTimeline<Boolean>>(BehandlingÅrsakType.class);
+        relevanteÅrsaker.stream()
+            .filter(årsak -> !VilkårsavklaringÅrsaker.alleÅrsaker().contains(årsak))
+            .forEach(årsak -> perioderPerÅrsak.put(årsak, hentVilkårsperiodeSomBerøresAvBehandlingstrigger(prosesstriggere, årsak, vilkårsperioder)));
+
+        VilkårsavklaringÅrsaker.alle().forEach((vilkårType, årsak) -> {
+            if (relevanteÅrsaker.contains(årsak)) {
+                perioderPerÅrsak.put(årsak, avklartePerioder(behandlingId, vilkårType, vilkårsperioder));
+            }
+        });
+        perioderPerÅrsak.values().removeIf(LocalDateTimeline::isEmpty);
+        return perioderPerÅrsak;
+    }
+
+    private static LocalDateTimeline<Boolean> hentVilkårsperiodeSomBerøresAvBehandlingstrigger(LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggere,
+                                                                                               BehandlingÅrsakType årsak,
+                                                                                               List<DatoIntervallEntitet> vilkårsperioder) {
+        var triggere = prosesstriggere.filterValue(årsakerPåSegment -> årsakerPåSegment.contains(årsak));
+        return TidslinjeUtil.tilTidslinje(vilkårsperioder.stream()
+            .filter(vilkårperiode -> !triggere.intersection(vilkårperiode.toLocalDateInterval()).isEmpty())
+            .toList());
+    }
+
+    // Foreslåtte avklaringer gjelder ett vilkår og kopieres ikke til nye behandlinger, så de trenger ingen trigger.
+    private LocalDateTimeline<Boolean> avklartePerioder(Long behandlingId, VilkårType vilkårType, List<DatoIntervallEntitet> vilkårsperioder) {
+        var foreslåtteAvklaringer = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId, vilkårType)
+            .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)
+            .orElse(Set.of());
+        return TidslinjeUtil.tilTidslinje(foreslåtteAvklaringer.stream().map(VilkårPeriodeAvklaring::getPeriode).toList())
+            .intersection(TidslinjeUtil.tilTidslinje(vilkårsperioder));
+    }
+
+    private Optional<List<DatoIntervallEntitet>> hentVilkårsperioder(Long behandlingId, VilkårType vilkårType) {
+        return vilkårResultatRepository.hentHvisEksisterer(behandlingId)
+            .flatMap(it -> it.getVilkår(vilkårType))
+            .map(vilkår -> vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).toList());
     }
 
     @Override

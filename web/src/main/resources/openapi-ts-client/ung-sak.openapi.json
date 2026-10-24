@@ -2738,9 +2738,12 @@
           },
           "utfall" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
+          },
+          "vurderesIBehandlingen" : {
+            "type" : "boolean"
           }
         },
-        "required" : [ "periode", "utfall" ],
+        "required" : [ "periode", "utfall", "vurderesIBehandlingen" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandAvklaringIkkeOppfyltDto" : {
