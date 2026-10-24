@@ -20,6 +20,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.k9.prosesstask.impl.ProsessTaskEntitet;
 import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.k9.prosesstask.impl.TaskManager;
@@ -405,5 +406,33 @@ class FagsakProsessTaskRepositoryTest {
 
         assertThrows(IllegalStateException.class, () ->
             fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
+    }
+
+    @Test
+    void ryddProsessTasks_skal_fjerne_koblinger_og_frigi_tasker_blokkert_av_slettede_tasker() {
+        ProsessTaskData blokkerende = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        fagsakProsessTaskRepository.lagreNyGruppe(blokkerende);
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, behandlingId.toString(), blokkerende.getId(), 100L, blokkerende.getTaskType()));
+
+        // Task på annen behandling i samme fagsak, blokkert av tasken som slettes
+        Long annenBehandlingId = behandlingId + 1;
+        ProsessTaskData vetoet = ProsessTaskData.forTaskType(taskTypeB);
+        vetoet.setBehandling(fagsakId, annenBehandlingId);
+        vetoet.setStatus(ProsessTaskStatus.VETO);
+        vetoet.setBlokkertAvProsessTaskId(blokkerende.getId());
+        fagsakProsessTaskRepository.lagreNyGruppe(vetoet);
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, annenBehandlingId.toString(), vetoet.getId(), 200L, vetoet.getTaskType()));
+        entityManager.flush();
+
+        fagsakProsessTaskRepository.ryddProsessTasks(fagsakId, behandlingId);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(fagsakProsessTaskRepository.hent(blokkerende.getId(), false)).isEmpty();
+        assertThat(entityManager.find(ProsessTaskEntitet.class, blokkerende.getId())).isNull();
+        assertThat(fagsakProsessTaskRepository.hent(vetoet.getId(), false)).isPresent();
+        ProsessTaskEntitet frigitt = entityManager.find(ProsessTaskEntitet.class, vetoet.getId());
+        assertThat(frigitt.getStatus()).isEqualTo(ProsessTaskStatus.KLAR);
+        assertThat(frigitt.getBlokkertAvProsessTaskId()).isNull();
     }
 }

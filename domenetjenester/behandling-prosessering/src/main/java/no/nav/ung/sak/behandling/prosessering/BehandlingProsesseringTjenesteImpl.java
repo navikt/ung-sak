@@ -4,7 +4,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -20,7 +19,6 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.registerinnhenting.*;
@@ -369,13 +367,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private boolean skalInnhenteInntektOgYtelser(Behandling behandling) {
-        boolean harÅrsakForInnhenting = BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
-        if (behandling.getFagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER || harÅrsakForInnhenting) {
-            var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
-            Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
-            return registerdata != null && !(registerdata.isEmpty());
-        }
-        return false;
+        return !finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType())
+            .utled(behandling.getType(), behandling.getBehandlingÅrsakerTyper())
+            .isEmpty();
     }
 
     private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {

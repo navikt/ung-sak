@@ -1,4 +1,5 @@
 package no.nav.ung.sak.kontrakt.abac;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -14,8 +15,8 @@ public record PipDtoV6(
     Set<AktørId> aktørIderForSporingslogg,
     BehandlingStatus behandlingStatus,
     FagsakStatus fagsakStatus,
-    Set<String> ansvarligSaksbehandlere
-) {
+    Set<String> ansvarligSaksbehandlere,
+    BehandlingDel behandlingDel) {
 
     public PipDtoV6 {
         if (!aktørIder.containsAll(aktørIderForSporingslogg)){
