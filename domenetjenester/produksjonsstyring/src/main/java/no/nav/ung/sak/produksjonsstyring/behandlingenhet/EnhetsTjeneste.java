@@ -22,8 +22,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
-
 @ApplicationScoped
 public class EnhetsTjeneste {
 
@@ -60,11 +58,11 @@ public class EnhetsTjeneste {
         return cacheEntry.alleBehandlendeEnheter;
     }
 
-    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
-        return oppdaterEnhetSjekkOppgittePersoner(ytelseType, null, enhetId, hovedAktør, alleAktører);
+    Optional<OrganisasjonsEnhet> finnEndretEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
+        return finnEndretEnhetSjekkOppgittePersoner(ytelseType, null, enhetId, hovedAktør, alleAktører);
     }
 
-    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String behandlingstema, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
+    Optional<OrganisasjonsEnhet> finnEndretEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String behandlingstema, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
         var cacheEntry = oppdaterEnhetCache(ytelseType, behandlingstema);
         if (cacheEntry.enhetKode6.getEnhetId().equals(enhetId) || cacheEntry.enhetKlage.getEnhetId().equals(enhetId)) {
             return Optional.empty();
@@ -83,7 +81,7 @@ public class EnhetsTjeneste {
         var request = ArbeidsfordelingRequest.ny()
             .medTema(tema.getOffisiellKode())
             .medBehandlingstema(behandlingsTema == null ? null : behandlingsTema.getOffisiellKode())
-            .medDiskresjonskode(ofNullable(geo.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null))
+            .medDiskresjonskode(Optional.ofNullable(geo.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null))
             .medGeografiskOmraade(geo.getTilknytning())
             .build();
 
@@ -102,7 +100,11 @@ public class EnhetsTjeneste {
     OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType, String behandlingstema) {
         PersonIdent fnr = tpsTjeneste.hentFnrForAktør(aktørId);
         GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr, ytelseType);
-        return hentEnheterFor(geografiskTilknytning.getTilknytning(), ofNullable(geografiskTilknytning.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null), ytelseType, behandlingstema).get(0);
+        String diskresjon = Optional.ofNullable(geografiskTilknytning.getDiskresjonskode())
+            .map(Diskresjonskode::getKode)
+            .orElse(null);
+        return hentEnheterFor(geografiskTilknytning.getTilknytning(), diskresjon, ytelseType, behandlingstema)
+            .get(0);
     }
 
     OrganisasjonsEnhet enhetsPresedens(FagsakYtelseType ytelseType, OrganisasjonsEnhet enhetSak1, OrganisasjonsEnhet enhetSak2) {
@@ -135,10 +137,6 @@ public class EnhetsTjeneste {
             }
         }
         return cacheEntry;
-    }
-
-    OrganisasjonsEnhet getEnhetKlage() {
-        return KLAGE_ENHET;
     }
 
     Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(FagsakYtelseType ytelseType, String enhetId) {

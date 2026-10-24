@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-@Deprecated(forRemoval = true) //Ikke i bruk
+//Ikke i bruk, men kan være nyttig for manuell kjøring etter endringer i Norg
 @ApplicationScoped
 @ProsessTask(OppdaterBehandlendeEnhetTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
