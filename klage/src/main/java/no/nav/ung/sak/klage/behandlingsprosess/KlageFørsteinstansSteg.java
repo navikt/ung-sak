@@ -1,10 +1,5 @@
 package no.nav.ung.sak.klage.behandlingsprosess;
 
-import static java.util.Collections.singletonList;
-
-import java.util.List;
-import java.util.Objects;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
@@ -14,11 +9,15 @@ import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarligTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+
+import java.util.List;
+import java.util.Objects;
+
+import static java.util.Collections.singletonList;
 
 @BehandlingStegRef(BehandlingStegType.VURDER_KLAGE_FØRSTEINSTANS)
 @BehandlingTypeRef
@@ -27,22 +26,22 @@ import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjenest
 public class KlageFørsteinstansSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
-    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private KlageRepository klageRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
+    private BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste;
 
     public KlageFørsteinstansSteg(){
         // For CDI proxy
     }
 
     @Inject
-    public KlageFørsteinstansSteg(BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+    public KlageFørsteinstansSteg(BehandlingRepository behandlingRepository,
                                   KlageRepository klageRepository,
-                                  BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
+                                  BehandlendeEnhetTjeneste behandlendeEnhetTjeneste, BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.klageRepository = klageRepository;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
+        this.behandlingAnsvarligTjeneste = behandlingAnsvarligTjeneste;
     }
 
     @Override
@@ -60,7 +59,7 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
                                    BehandlingStegType sisteSteg) {
         if(!Objects.equals(BehandlingStegType.FATTE_VEDTAK, sisteSteg)) {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).orElse(null);
+            BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligTjeneste.finnBehandlingAnsvarligFraBehandlingTilstand(behandling).orElse(null);
 
             var klageutredning = klageRepository.hentKlageUtredning(behandling.getId());
             klageutredning.fjernKlageVurdering(KlageVurdertAv.VEDTAKSINSTANS);

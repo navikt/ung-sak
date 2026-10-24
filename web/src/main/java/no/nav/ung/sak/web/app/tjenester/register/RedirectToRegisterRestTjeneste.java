@@ -20,7 +20,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarligTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -51,9 +51,9 @@ public class RedirectToRegisterRestTjeneste {
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
-    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private NoAuthRestClient restClient;
     private String arbeidOgInntektBaseURL;
+    private BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste;
 
     RedirectToRegisterRestTjeneste() {
         // CDI
@@ -62,15 +62,15 @@ public class RedirectToRegisterRestTjeneste {
     @Inject
     public RedirectToRegisterRestTjeneste(
         TpsTjeneste tpsTjeneste,
-        FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+        FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository,
         NoAuthRestClient restClient,
-        @KonfigVerdi(value = "arbeid.og.inntekt.base.url", required = false, defaultVerdi = "https://arbeid-og-inntekt.nais.adeo.no") String arbeidOgInntektBaseURL) {
+        @KonfigVerdi(value = "arbeid.og.inntekt.base.url", required = false, defaultVerdi = "https://arbeid-og-inntekt.nais.adeo.no") String arbeidOgInntektBaseURL, BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste) {
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.restClient = restClient;
         this.arbeidOgInntektBaseURL = arbeidOgInntektBaseURL;
+        this.behandlingAnsvarligTjeneste = behandlingAnsvarligTjeneste;
     }
 
     @GET
@@ -136,7 +136,7 @@ public class RedirectToRegisterRestTjeneste {
     }
 
     private String hentBehandlendeEnhet(Behandling behandling){
-        return behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId())
+        return behandlingAnsvarligTjeneste.finnBehandlingAnsvarligFraBehandlingTilstand(behandling)
             .map(BehandlingAnsvarlig::getBehandlendeEnhet)
             .orElse(null);
     }

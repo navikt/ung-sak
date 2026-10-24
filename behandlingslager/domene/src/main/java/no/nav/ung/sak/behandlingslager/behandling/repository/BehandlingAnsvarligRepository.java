@@ -27,10 +27,6 @@ public class BehandlingAnsvarligRepository {
         this.behandlingRepository = behandlingRepository;
     }
 
-    public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId) {
-        return hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL);
-    }
-
     public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(behandlingDel, "behandlingDel");
