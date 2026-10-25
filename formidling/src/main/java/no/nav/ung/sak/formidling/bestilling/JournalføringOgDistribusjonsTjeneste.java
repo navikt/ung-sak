@@ -114,7 +114,7 @@ public class JournalføringOgDistribusjonsTjeneste {
             .journalpostType(JournalpostType.UTGAAENDE)
             .avsenderMottaker(avsenderMottaker)
             .bruker(bruker)
-            .tema(OmrådeTema.UNG.getKode())
+            .tema(utledTema(behandling.getFagsakYtelseType()).getKode())
             .tittel(tittel)
             .kanal(null)
             .journalfoerendeEnhet("9999")
@@ -123,6 +123,13 @@ public class JournalføringOgDistribusjonsTjeneste {
             .sak(sak)
             .dokumenter(List.of(dokument))
             .build();
+    }
+
+    private static OmrådeTema utledTema(FagsakYtelseType fagsakYtelseType) {
+        return switch (fagsakYtelseType) {
+            case AKTIVITETSPENGER -> OmrådeTema.AVP;
+            default -> OmrådeTema.UNG;
+        };
     }
 
     private String utledTittel(DokumentMalType dokumentMalType, FagsakYtelseType fagsakYtelseType) {
