@@ -1,7 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -15,6 +13,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -45,7 +44,6 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeri
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
@@ -84,9 +82,6 @@ class VurderFaktaOmBostedOppdatererTest {
 
     @Inject
     private EntityManager entityManager;
-
-    @Inject
-    private @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
     private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
@@ -127,7 +122,6 @@ class VurderFaktaOmBostedOppdatererTest {
             behandlingRepository,
             historikkinnslagRepository,
             vilkårsavklaringEtterlysningTjeneste,
-            vilkårsPerioderTilVurderingTjenester,
             bostedAvklaringTjeneste,
             inngangsvilkårVurderingTjeneste
         );
@@ -212,6 +206,28 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     @Test
+    void apen_tom_skal_lukkes_for_avkortet_del_av_vilkarsperioden() {
+        var avkortetFom = LocalDate.of(2026, 7, 1);
+        settVilkårsperiodenFra(avkortetFom, Utfall.IKKE_OPPFYLT, Avslagsårsak.AVKORTET);
+
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BostedsvilkårIkkeOppfyltÅrsak.ANNET));
+
+        assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
+            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), avkortetFom.minusDays(1)));
+    }
+
+    @Test
+    void apen_tom_skal_lukkes_for_ikke_relevant_del_av_vilkarsperioden() {
+        var ikkeRelevantFom = LocalDate.of(2026, 7, 1);
+        settVilkårsperiodenFra(ikkeRelevantFom, Utfall.IKKE_RELEVANT, null);
+
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BostedsvilkårIkkeOppfyltÅrsak.ANNET));
+
+        assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
+            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), ikkeRelevantFom.minusDays(1)));
+    }
+
+    @Test
     void endret_avklaring_som_ikke_dekker_hele_tidligere_avklaring_skal_gjenopprette_resten_fra_forrige_behandling() {
         var heleperioden = new Periode(FOM, TOM);
         var originalBehandling = opprettOriginalBehandling(vilkårsperiode(heleperioden, Utfall.OPPFYLT));
@@ -286,6 +302,16 @@ class VurderFaktaOmBostedOppdatererTest {
 
     private void oppdater(VurderFaktaOmBostedDto dto) {
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+    }
+
+    private void settVilkårsperiodenFra(LocalDate fom, Utfall utfall, Avslagsårsak avslagsårsak) {
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandling.getId()));
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, TOM)
+            .medUtfall(utfall)
+            .medAvslagsårsak(avslagsårsak));
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
     }
 
     private LocalDateTimeline<VilkårPeriode> oppdater(Behandling behandling, VurderFaktaOmBostedDto dto) {
