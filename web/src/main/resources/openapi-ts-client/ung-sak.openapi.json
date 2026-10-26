@@ -2937,7 +2937,7 @@
             "type" : "boolean"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
         "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
