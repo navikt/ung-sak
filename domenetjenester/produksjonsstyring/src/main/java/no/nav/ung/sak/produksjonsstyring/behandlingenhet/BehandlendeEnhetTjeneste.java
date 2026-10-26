@@ -3,6 +3,7 @@ package no.nav.ung.sak.produksjonsstyring.behandlingenhet;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -27,10 +28,9 @@ import java.util.stream.Collectors;
 @Dependent
 public class BehandlendeEnhetTjeneste {
 
-    public static final String YTELSE_TEMA = "ab0575";
-    public static final String INNGANGSVILKÅR_TEMA = "ab0574";
+    public static final String YTELSE_TEMA = BehandlingTema.AKTIVITESTPENGER_YTELSE.getOffisiellKode();
+    public static final String INNGANGSVILKÅR_TEMA = BehandlingTema.AKTIVITESTPENGER_VILKÅR.getOffisiellKode();
 
-    //TODO erstatt med verdi fra BehandlingTema enum
     private static final Map<BehandlingDel, String> AVP_BEHANDLINGSTEMA_PER_DEL = Map.of(
         BehandlingDel.SENTRAL, YTELSE_TEMA,
         BehandlingDel.NAV_KONTOR, INNGANGSVILKÅR_TEMA

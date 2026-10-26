@@ -3,10 +3,14 @@ package no.nav.ung.kodeverk.behandling;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public enum BehandlingTema implements Kodeverdi {
     UNGDOMSPROGRAMYTELSEN("UNGDOMSPROGRAMYTELSEN", "Ungdomsprogramytelsen", "ab0564", FagsakYtelseType.UNGDOMSYTELSE),
+    AKTIVITESTPENGER_YTELSE("AVP_YTELSE", "Aktivitetspenger Ytelse", "ab0575", FagsakYtelseType.AKTIVITETSPENGER),
+    AKTIVITESTPENGER_VILKÅR("AVP_VILKÅR", "Aktivitetspenger Inngangsvilkår", "ab0574", FagsakYtelseType.AKTIVITETSPENGER),
     UDEFINERT("-", "Ikke definert", null, FagsakYtelseType.UDEFINERT),
 
     ;
@@ -14,7 +18,6 @@ public enum BehandlingTema implements Kodeverdi {
     public static final String KODEVERK = "BEHANDLING_TEMA";
     private static final Map<String, BehandlingTema> KODER = new LinkedHashMap<>();
     private static final Map<String, BehandlingTema> OFFISIELLE_KODER = new LinkedHashMap<>();
-    private static final Map<FagsakYtelseType, BehandlingTema> YTELSE_TYPE_TIL_TEMA = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -23,9 +26,6 @@ public enum BehandlingTema implements Kodeverdi {
             }
             if (v.offisiellKode != null) {
                 OFFISIELLE_KODER.putIfAbsent(v.offisiellKode, v);
-            }
-            if (YTELSE_TYPE_TIL_TEMA.putIfAbsent(v.fagsakYtelseType, v) != null) {
-                throw new IllegalArgumentException("Duplikat ytelseType -> tema: " + v);
             }
         }
     }
@@ -69,14 +69,6 @@ public enum BehandlingTema implements Kodeverdi {
 
     public static Map<String, BehandlingTema> kodeMap() {
         return Collections.unmodifiableMap(KODER);
-    }
-
-    public static BehandlingTema finnForKodeverkEiersKode(String offisiellDokumentType) {
-        return List.of(values()).stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst().orElse(UDEFINERT);
-    }
-
-    public static BehandlingTema finnForFagsakYtelseType(FagsakYtelseType ytelseType) {
-        return YTELSE_TYPE_TIL_TEMA.getOrDefault(ytelseType, BehandlingTema.UDEFINERT);
     }
 
     public static BehandlingTema fromString(String kode) {
