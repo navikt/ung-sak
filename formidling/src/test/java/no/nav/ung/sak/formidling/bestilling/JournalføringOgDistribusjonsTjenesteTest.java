@@ -8,6 +8,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
@@ -161,6 +162,34 @@ class JournalføringOgDistribusjonsTjenesteTest {
         assertThat(disttask.getGruppe()).doesNotContain(bestilling.getFagsakId().toString());
         assertThat(disttask.getSekvens()).doesNotEndWith("-0");
 
+    }
+
+    @Test
+    void skalJournalføreMedTemaAvpForAktivitetspenger() {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderUtenSøknad(FagsakYtelseType.AKTIVITETSPENGER);
+        scenarioBuilder.lagre(repositoryProvider);
+        var behandling = scenarioBuilder.getBehandling();
+
+        var dokument = "et dokument";
+        PdlPerson testBruker = new PdlPerson(fnr, behandling.getAktørId(), "Test Bruker", null);
+        var generertBrev = new GenerertBrev(
+            new PdfGenDokument(dokument.getBytes(StandardCharsets.UTF_8), dokument),
+            testBruker,
+            testBruker,
+            DokumentMalType.GENERELT_FRITEKSTBREV,
+            TemplateType.GENERELT_FRITEKSTBREV
+        );
+
+        var bestillingReq = BrevbestillingEntitet.nyBrevbestilling(
+            behandling.getFagsakId(),
+            behandling.getId(),
+            generertBrev.malType()
+        );
+
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestillingReq, generertBrev);
+
+        assertThat(dokArkivKlient.getRequests()).hasSize(1);
+        assertThat(dokArkivKlient.getRequests().getFirst().tema()).isEqualTo("AVP");
     }
 
     private static void assertBrevbestilling(BrevbestillingEntitet bestilling, Behandling behandling) {

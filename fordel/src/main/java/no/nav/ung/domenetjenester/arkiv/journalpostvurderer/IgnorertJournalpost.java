@@ -20,7 +20,7 @@ public class IgnorertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(IgnorertJournalpost.class);
 
-    private static final List<Tema> RELEVANTE_TEMAER = List.of(Tema.UNG);
+    private static final List<Tema> RELEVANTE_TEMAER = List.of(Tema.UNG, Tema.AVP);
 
     @Inject
     public IgnorertJournalpost() {
