@@ -11,7 +11,6 @@ import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.*;
 import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
 import no.nav.ung.kodeverk.behandling.BehandlingStegDel;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
@@ -88,21 +87,12 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
                 .ifPresent(it -> pdpRequest.setFagsakStatusEksternKode(it.getEksternKode()));
             pdpRequest.setAnsvarligSaksbehandlere(behandlingData.ansvarligSaksbehandlere());
 
-            if (behandlingData.fagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER) {
-                mapBehandlingDel(behandlingData, pdpRequest);
-            }
-
+            BehandlingStegDel.utled(behandlingData.fagsakYtelseType(), behandlingData.aktivtSteg())
+                .map(AbacUtil::oversettBehandlingDel)
+                .ifPresent(pdpRequest::setBehandlingDel);
         }
         pdpRequest.setFagsakYtelseTyper(utledYtelsetyper(attributter, saksnumre, behandlingData));
         return pdpRequest;
-    }
-
-    private static void mapBehandlingDel(PipBehandlingsData behandlingData, UngSakPdpRequest pdpRequest) {
-        if (behandlingData.fagsakYtelseType() != FagsakYtelseType.AKTIVITETSPENGER || behandlingData.aktivtSteg() == null) {
-            return;
-        }
-        var behandlingDel = BehandlingStegDel.forAktivitetspenger(behandlingData.aktivtSteg());
-        pdpRequest.setBehandlingDel(AbacUtil.oversettBehandlingDel(behandlingDel));
     }
 
     private Set<String> utledYtelsetyper(AbacAttributtSamling attributter, Set<Saksnummer> saksnumre, PipBehandlingsData behandlingData) {

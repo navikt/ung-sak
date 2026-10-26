@@ -3,10 +3,10 @@ package no.nav.ung.sak.behandlingslager.behandling.repository;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.kodeverk.behandling.BehandlingDel;
 
 import java.util.List;
 import java.util.Map;
@@ -25,10 +25,6 @@ public class BehandlingAnsvarligRepository {
     public BehandlingAnsvarligRepository(EntityManager entityManager, BehandlingRepository behandlingRepository) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
-    }
-
-    public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId) {
-        return hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL);
     }
 
     public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
@@ -62,15 +58,11 @@ public class BehandlingAnsvarligRepository {
             .collect(Collectors.groupingBy(BehandlingAnsvarlig::getBehandlingId));
     }
 
-    public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet) {
-        setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, null);
+    public void setBehandlendeEnheter(Long behandlingId, Map<BehandlingDel, OrganisasjonsEnhet> enheter) {
+        enheter.forEach((behandlingDel, enhet) -> setBehandlendeEnhet(behandlingId, behandlingDel, enhet, null));
     }
 
-    public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet, String årsak) {
-        setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, årsak);
-    }
-
-    private void setBehandlendeEnhet(Long behandlingId, BehandlingDel behandlingDel, OrganisasjonsEnhet enhet, String årsak) {
+    public void setBehandlendeEnhet(Long behandlingId, BehandlingDel behandlingDel, OrganisasjonsEnhet enhet, String årsak) {
         BehandlingAnsvarlig behandlingAnsvarlig = hentEllerOpprett(behandlingId, behandlingDel);
         behandlingAnsvarlig.setBehandlendeEnhet(enhet);
         behandlingAnsvarlig.setBehandlendeEnhetÅrsak(årsak);

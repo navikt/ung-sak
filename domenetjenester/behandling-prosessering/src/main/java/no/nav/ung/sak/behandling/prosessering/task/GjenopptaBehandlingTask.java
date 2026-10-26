@@ -2,7 +2,8 @@ package no.nav.ung.sak.behandling.prosessering.task;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -12,8 +13,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 /**
  * Utfører automatisk gjenopptagelse av en behandling som har
@@ -53,8 +52,7 @@ public class GjenopptaBehandlingTask extends UnderBehandlingProsessTask {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
         }
 
-        behandlendeEnhetTjeneste.sjekkEnhetEtterEndring(behandling).ifPresent(organisasjonsEnhet -> {
-            behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, organisasjonsEnhet, HistorikkAktør.VEDTAKSLØSNINGEN, "");
-        });
+        behandlendeEnhetTjeneste.sjekkEnheterEtterEndring(behandling).forEach((del, nyEnhet) ->
+            behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, del, nyEnhet, HistorikkAktør.VEDTAKSLØSNINGEN, ""));
     }
 }

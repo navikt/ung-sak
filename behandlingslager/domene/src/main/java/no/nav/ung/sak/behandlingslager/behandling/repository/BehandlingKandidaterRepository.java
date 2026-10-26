@@ -3,7 +3,6 @@ package no.nav.ung.sak.behandlingslager.behandling.repository;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -68,21 +67,6 @@ public class BehandlingKandidaterRepository {
             .setParameter("autopunktKoder", autopunktKoder.stream().map(a -> a.getKode()).collect(Collectors.toList()))
             .setParameter("naa", naa);
 
-        return query.getResultList();
-    }
-
-    public List<Behandling> finnBehandlingerIkkeAvsluttetPåAngittEnhet(String enhetId) {
-
-        TypedQuery<Behandling> query = entityManager.createQuery(
-            "FROM Behandling behandling " +
-                "WHERE behandling.status NOT IN (:avsluttetOgIverksetterStatus) " +
-                "   AND b.fagsak.ytelseType != 'OBSOLETE'" +
-                "  AND behandling.behandlendeEnhet = :enhet ",
-            Behandling.class);
-
-        query.setParameter("enhet", enhetId);
-        query.setParameter(AVSLUTTENDE_KEY, AVSLUTTENDE_STATUS);
-        query.setHint(QueryHints.HINT_READONLY, "true");
         return query.getResultList();
     }
 

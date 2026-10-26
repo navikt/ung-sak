@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -19,6 +18,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 
@@ -36,6 +36,7 @@ public class RevurderingTjeneste {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
+    private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
     public RevurderingTjeneste() {
         // for CDI proxy
@@ -47,18 +48,20 @@ public class RevurderingTjeneste {
                                @Any Instance<GrunnlagKopierer> grunnlagKopierere,
                                HistorikkinnslagRepository historikkinnslagRepository,
                                ProsessTriggereRepository prosessTriggereRepository,
-                               BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
+                               BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+                               BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.grunnlagKopierere = grunnlagKopierere;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
+        this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
     }
 
-    public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet, Optional<DatoIntervallEntitet> periode) {
+    public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, Optional<DatoIntervallEntitet> periode) {
         validerTilstand(origBehandling);
-        Behandling revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, true, enhet);
+        Behandling revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, true);
 
         DatoIntervallEntitet revurderingPeriode = periode.orElse(revurdering.getFagsak().getPeriode());
         prosessTriggereRepository.leggTil(revurdering.getId(), Set.of(new Trigger(revurderingsÅrsak, revurderingPeriode)));
@@ -69,9 +72,9 @@ public class RevurderingTjeneste {
         return revurdering;
     }
 
-    public Behandling opprettAutomatiskRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+    public Behandling opprettAutomatiskRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         validerTilstand(origBehandling);
-        var revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, false, enhet);
+        var revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, false);
 
         var grunnlagKopierer = getGrunnlagKopierer(origBehandling.getFagsakYtelseType());
         grunnlagKopierer.kopierGrunnlagVedAutomatiskOpprettelse(origBehandling, revurdering);
@@ -79,15 +82,17 @@ public class RevurderingTjeneste {
         return revurdering;
     }
 
-    private Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, boolean manueltOpprettet, OrganisasjonsEnhet enhet) {
+    private Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, boolean manueltOpprettet) {
         behandlingskontrollTjeneste.initBehandlingskontroll(origBehandling);
+        // Hentes før revurderingen opprettes, ellers finnes ingen forrige behandling å gjenbruke enhet fra
+        var behandlendeEnheter = behandlendeEnhetTjeneste.finnBehandlendeEnheterFor(origBehandling.getFagsak());
 
         // Opprett revurderingsbehandling
         Behandling revurdering = revurderingTjenesteFelles.opprettNyBehandling(BehandlingType.REVURDERING, revurderingsÅrsak, origBehandling, manueltOpprettet);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
         behandlingskontrollTjeneste.opprettBehandling(kontekst, revurdering);
 
-        behandlingAnsvarligRepository.setBehandlendeEnhet(revurdering.getId(), enhet);
+        behandlingAnsvarligRepository.setBehandlendeEnheter(revurdering.getId(), behandlendeEnheter);
 
         // Kopier vilkår (samme vilkår vurderes i Revurdering)
         revurderingTjenesteFelles.kopierVilkårsresultat(origBehandling, revurdering, kontekst);

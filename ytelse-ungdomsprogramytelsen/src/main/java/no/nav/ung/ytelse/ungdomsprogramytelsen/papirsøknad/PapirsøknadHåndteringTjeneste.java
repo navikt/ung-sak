@@ -13,6 +13,7 @@ import no.nav.ung.brukerdialog.kontrakt.AktørIdDto;
 import no.nav.ung.domenetjenester.arkiv.ArkivTjeneste;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
 import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
@@ -126,7 +127,8 @@ public class PapirsøknadHåndteringTjeneste {
 
         Fagsak fagsak = validerFagsakEksisterer(aktørId);
 
-        OrganisasjonsEnhet behandlendeEnhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
+        // Ungdomsprogramytelsen har bare SENTRAL
+        OrganisasjonsEnhet behandlendeEnhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL);
 
         byte[] pdfDokument = lagPdfDokument(deltakerIdent, startdato, deltakerNavn);
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
