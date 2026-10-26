@@ -1,17 +1,13 @@
 package no.nav.ung.sak.web.app.tasks;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
@@ -22,6 +18,11 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class OpprettRevurderingService {
@@ -33,6 +34,7 @@ public class OpprettRevurderingService {
     private FagsakTjeneste fagsakTjeneste;
     private ProsessTaskTjeneste taskTjeneste;
     private BehandlingRepository behandlingRepository;
+    private Instance<RevurderingTjeneste> revurderingTjenester;
 
     protected OpprettRevurderingService() {
 
@@ -43,12 +45,14 @@ public class OpprettRevurderingService {
                                      BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
                                      FagsakTjeneste fagsakTjeneste,
                                      ProsessTaskTjeneste taskTjeneste,
-                                     BehandlingRepository behandlingRepository) {
+                                     BehandlingRepository behandlingRepository,
+                                     @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.taskTjeneste = taskTjeneste;
         this.behandlingRepository = behandlingRepository;
+        this.revurderingTjenester = revurderingTjenester;
     }
 
     public void opprettManuellRevurdering(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType, BehandlingStegType startStegVedÅpenBehandling) {
@@ -63,7 +67,7 @@ public class OpprettRevurderingService {
         final Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         final Fagsak fagsak = funnetFagsak.get();
 
-        final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
+        final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, fagsak.getYtelseType()).orElseThrow();
         if (revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
             final Behandling behandling = manuell
                 ? behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType, Optional.empty())

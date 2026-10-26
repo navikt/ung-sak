@@ -1,6 +1,8 @@
 package no.nav.ung.sak.behandling.revurdering;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -61,6 +63,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private Instance<RevurderingTjeneste> revurderingTjenester;
 
     OpprettRevurderingEllerOpprettDiffTask() {
         // for CDI proxy
@@ -73,7 +76,8 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                                                   ProsessTriggereRepository prosessTriggereRepository,
                                                   FagsakLåsRepository fagsakLåsRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
-                                                  BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
+                                                  BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, ProsessTaskTjeneste prosessTaskTjeneste,
+                                                  @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         super(fagsakLåsRepository, behandlingLåsRepository);
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
@@ -82,6 +86,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.revurderingTjenester = revurderingTjenester;
     }
 
     @Override
@@ -104,7 +109,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                 return;
             }
 
-            final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
+            final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
                 var origBehandling = sisteVedtak.get();
                 BehandlingÅrsakType behandlingÅrsakType = perioderOgÅrsaker.getFirst().behandlingÅrsak();// Velger første årsak som behandlingsårsak, burde vurdere om vi skal legge til alle
