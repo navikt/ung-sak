@@ -95,14 +95,6 @@ public class EnhetsTjeneste {
         return hentEnheterFor(geografiskTilknytning.getTilknytning(), ofNullable(geografiskTilknytning.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null), ytelseType).get(0);
     }
 
-    OrganisasjonsEnhet enhetsPresedens(FagsakYtelseType ytelseType, OrganisasjonsEnhet enhetSak1, OrganisasjonsEnhet enhetSak2) {
-        var cacheEntry = oppdaterEnhetCache(ytelseType);
-        if (cacheEntry.enhetKode6.getEnhetId().equals(enhetSak1.getEnhetId()) || cacheEntry.enhetKode6.getEnhetId().equals(enhetSak2.getEnhetId())) {
-            return cacheEntry.enhetKode6;
-        }
-        return enhetSak1;
-    }
-
     private boolean harNoenDiskresjonskode6(Collection<AktørId> aktører, FagsakYtelseType ytelseType) {
         return aktører.stream()
             .map(tpsTjeneste::hentFnrForAktør)

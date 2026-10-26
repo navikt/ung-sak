@@ -65,16 +65,6 @@ public class BehandlendeEnhetTjeneste {
         return enhetsTjeneste.finnOrganisasjonsEnhet(ytelseType, enhetId).isPresent();
     }
 
-    // Brukes for å sjekke om behandling skal flyttes etter endringer i NORG2-oppsett
-    public Optional<OrganisasjonsEnhet> sjekkOppdatertEnhetEtterReallokering(Behandling behandling) {
-        String behandlingensBehandlendeEnhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null);
-        OrganisasjonsEnhet enhet = finnBehandlendeEnhetFor(behandling.getFagsak());
-        if (enhet.getEnhetId().equals(behandlingensBehandlendeEnhet)) {
-            return Optional.empty();
-        }
-        return Optional.of(getOrganisasjonsEnhetEtterEndring(behandling.getFagsak(), enhet, behandling.getAktørId(), new HashSet<>()).orElse(enhet));
-    }
-
 
     // Brukes for å sjekke om det er behov for å flytte eller endre til spesialenheter når saken tas av vent.
     public Optional<OrganisasjonsEnhet> sjekkEnhetEtterEndring(Behandling behandling) {

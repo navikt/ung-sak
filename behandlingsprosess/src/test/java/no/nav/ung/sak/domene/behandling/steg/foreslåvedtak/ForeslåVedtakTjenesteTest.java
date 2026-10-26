@@ -35,7 +35,6 @@ import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -113,7 +112,6 @@ public class ForeslåVedtakTjenesteTest {
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
         kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
-        when(oppgaveTjeneste.harÅpneOppgaverAvType(any(AktørId.class), any(), any())).thenReturn(false);
         when(sjekkMotTilbakekreving.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any(Behandling.class))).thenReturn(List.of());
 
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
