@@ -114,7 +114,6 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
             .toList());
     }
 
-    // Foreslåtte avklaringer gjelder ett vilkår og kopieres ikke til nye behandlinger, så de trenger ingen trigger.
     private LocalDateTimeline<Boolean> avklartePerioder(Long behandlingId, VilkårType vilkårType, List<DatoIntervallEntitet> vilkårsperioder) {
         var foreslåtteAvklaringer = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId, vilkårType)
             .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)

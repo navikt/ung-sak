@@ -72,7 +72,7 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
     }
 
     @Test
-    void skal_vurdere_ny_søknadsperiode() {
+    void utled_skal_vurdere_ny_søknadsperiode() {
         var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
         leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1));
 
@@ -80,7 +80,7 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
     }
 
     @Test
-    void skal_kun_vurdere_avklart_del_av_triggerperioden_for_avklaringsårsak() {
+    void utled_skal_kun_vurdere_avklart_periode_selv_om_avklaringsårsak_trigger_hele_vilkårsperioden() {
         var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
         leggTilTriggere(behandling,
             new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_1),
@@ -92,7 +92,7 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
     }
 
     @Test
-    void skal_ikke_vurdere_noe_for_avklaringsårsak_uten_avklaring() {
+    void utled_skal_ikke_vurdere_noe_for_avklaringsårsak_uten_avklaring() {
         var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
         leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_1));
 
@@ -100,81 +100,7 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
     }
 
     @Test
-    void skal_vurdere_ny_søknadsperiode_med_avklaringsårsak_når_avklaring_finnes_et_annet_sted() {
-        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
-        leggTilTriggere(behandling,
-            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1),
-            new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_1));
-        lagreAvklaring(behandling, PERIODE_2);
-
-        assertThat(tjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR)).containsExactly(PERIODE_1, PERIODE_2);
-    }
-
-    @Test
-    void skal_utlede_perioder_per_trigger() {
-        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
-        leggTilTriggere(behandling,
-            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1),
-            new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_2));
-        var avklartPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 31));
-        lagreAvklaring(behandling, avklartPeriode);
-
-        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
-
-        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.NY_SØKT_PERIODE))
-            .containsExactly(PERIODE_1.toLocalDateInterval());
-        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED))
-            .containsExactly(avklartPeriode.toLocalDateInterval());
-        assertThat(tjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR)).containsExactly(PERIODE_1);
-    }
-
-    @Test
-    void skal_kun_gi_vilkårsvurderende_årsaker_og_avklaringsårsak_per_årsak_til_vurdering() {
-        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
-        leggTilTriggere(behandling,
-            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1),
-            new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, PERIODE_2));
-        lagreAvklaring(behandling, PERIODE_2);
-
-        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
-
-        assertThat(perioderPerÅrsak).containsOnlyKeys(BehandlingÅrsakType.NY_SØKT_PERIODE, BehandlingÅrsakType.ENDRET_BOSTED);
-        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.NY_SØKT_PERIODE)).containsExactly(PERIODE_1.toLocalDateInterval());
-        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED)).containsExactly(PERIODE_2.toLocalDateInterval());
-    }
-
-    @Test
-    void skal_utvide_ny_søknadsperiode_med_avklart_periode_uten_trigger() {
-        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
-        leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1));
-        lagreAvklaring(behandling, PERIODE_2);
-
-        assertThat(tjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR)).containsExactly(PERIODE_1, PERIODE_2);
-    }
-
-    @Test
-    void skal_gi_avklaringsårsak_per_trigger_uten_trigger_for_avklaringsårsaken() {
-        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
-        leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1));
-        lagreAvklaring(behandling, PERIODE_2);
-
-        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
-
-        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED))
-            .containsExactly(PERIODE_2.toLocalDateInterval());
-    }
-
-    @Test
-    void skal_ikke_gi_avklaringsårsak_per_trigger_når_avklaring_mangler() {
-        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
-        leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_1));
-
-        assertThat(aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR))
-            .doesNotContainKey(BehandlingÅrsakType.ENDRET_BOSTED);
-    }
-
-    @Test
-    void skal_ikke_vurdere_trigger_som_ikke_vurderer_vilkår() {
+    void utled_skal_ikke_vurdere_trigger_som_ikke_vurderer_vilkår() {
         var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
         leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, PERIODE_1));
 
@@ -182,7 +108,7 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
     }
 
     @Test
-    void skal_tåle_overlappende_foreslåtte_avklaringer() {
+    void utled_skal_tåle_overlappende_foreslåtte_avklaringer() {
         var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
         lagreAvklaringer(behandling,
             DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 20)),
@@ -192,16 +118,8 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
             .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 25)));
     }
 
-    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerTjeneste() {
-        return (AktivitetspengerVilkårsPerioderTilVurderingTjeneste) tjeneste;
-    }
-
-    private static List<LocalDateInterval> perioderFor(Map<BehandlingÅrsakType, LocalDateTimeline<Boolean>> perioderPerÅrsak, BehandlingÅrsakType årsak) {
-        return List.copyOf(perioderPerÅrsak.get(årsak).getLocalDateIntervals());
-    }
-
     @Test
-    void skal_gi_søknadsperiodene_når_vilkåret_ikke_finnes() {
+    void utled_skal_gi_søknadsperiodene_når_vilkåret_ikke_finnes() {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad().lagre(entityManager);
 
         var søktStartdato = new SøktStartdato(PERIODE_1.getFomDato(), new JournalpostId("jp-søknad"));
@@ -214,7 +132,7 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
     }
 
     @Test
-    void skal_vurdere_hele_søknadsperioden_når_avklaringen_dekker_deler_av_den() {
+    void utled_skal_ikke_splitte_vilkårsperioden_når_avklaring_overlapper_deler_av_den() {
         var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
         leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1));
         lagreAvklaring(behandling, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 31)));
@@ -223,12 +141,80 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
     }
 
     @Test
-    void skal_ikke_utvide_annet_vilkår_med_avklaring_for_bosted() {
-        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.ALDERSVILKÅR, PERIODE_1);
+    void utled_skal_vurdere_hele_vilkårsperioden_når_søknadstrigger_overlapper_deler_av_den() {
+        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
+        leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE,
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 20))));
+
+        assertThat(tjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR)).containsExactly(PERIODE_1);
+    }
+
+    // For å kunne vurdere perioden for alle vilkår, må stegene for vilkårvurdering kunne kjøre utledning fra VilkårresultatGrunnlag automatisk hvis periode endres fra ikke-relevant.
+    // hvis ikke må alle vilkårene vurderes på nytt hvis avklart periode endres.
+    @Test
+    void utled_skal_ikke_utvide_annet_vilkår_med_avklaring_for_bosted() {
+        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.ALDERSVILKÅR, PERIODE_1, PERIODE_2);
         leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1));
         lagreAvklaring(behandling, PERIODE_2);
 
         assertThat(tjeneste.utled(behandling.getId(), VilkårType.ALDERSVILKÅR)).containsExactly(PERIODE_1);
+    }
+
+    @Test
+    void utled_skal_kutte_avklaring_mot_vilkårsperiodene() {
+        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1);
+        lagreAvklaring(behandling, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 2, 15)));
+
+        assertThat(tjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR))
+            .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 31)));
+    }
+
+    @Test
+    void utledPerÅrsak_skal_utlede_perioder_per_årsak() {
+        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
+        leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1));
+        var avklartPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 31));
+        lagreAvklaring(behandling, avklartPeriode);
+
+        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
+
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.NY_SØKT_PERIODE))
+            .containsExactly(PERIODE_1.toLocalDateInterval());
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED))
+            .containsExactly(avklartPeriode.toLocalDateInterval());
+    }
+
+    @Test
+    void utledPerÅrsak_skal_utelate_årsaker_som_ikke_vurderer_vilkåret() {
+        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
+        leggTilTriggere(behandling,
+            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, PERIODE_1),
+            new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_2),
+            new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, PERIODE_2));
+        lagreAvklaring(behandling, PERIODE_2);
+
+        var perioderPerÅrsak = aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
+
+        assertThat(perioderPerÅrsak).containsOnlyKeys(BehandlingÅrsakType.NY_SØKT_PERIODE, BehandlingÅrsakType.ENDRET_BOSTED);
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.NY_SØKT_PERIODE)).containsExactly(PERIODE_1.toLocalDateInterval());
+        assertThat(perioderFor(perioderPerÅrsak, BehandlingÅrsakType.ENDRET_BOSTED)).containsExactly(PERIODE_2.toLocalDateInterval());
+    }
+
+    @Test
+    void utledPerÅrsak_skal_ikke_gi_avklaringsårsak_per_årsak_når_avklaring_mangler() {
+        var behandling = opprettBehandlingMedVilkårsperioder(VilkårType.BOSTEDSVILKÅR, PERIODE_1, PERIODE_2);
+        leggTilTriggere(behandling, new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, PERIODE_1));
+
+        assertThat(aktivitetspengerTjeneste().utledPerÅrsak(behandling.getId(), VilkårType.BOSTEDSVILKÅR))
+            .doesNotContainKey(BehandlingÅrsakType.ENDRET_BOSTED);
+    }
+
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerTjeneste() {
+        return (AktivitetspengerVilkårsPerioderTilVurderingTjeneste) tjeneste;
+    }
+
+    private static List<LocalDateInterval> perioderFor(Map<BehandlingÅrsakType, LocalDateTimeline<Boolean>> perioderPerÅrsak, BehandlingÅrsakType årsak) {
+        return List.copyOf(perioderPerÅrsak.get(årsak).getLocalDateIntervals());
     }
 
     private Behandling opprettBehandlingMedVilkårsperioder(VilkårType vilkårType, DatoIntervallEntitet... perioder) {
