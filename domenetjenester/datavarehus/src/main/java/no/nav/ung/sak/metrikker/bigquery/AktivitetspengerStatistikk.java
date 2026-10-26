@@ -46,27 +46,29 @@ import static no.nav.ung.sak.metrikker.bigquery.YtelseStatistikk.metrikk;
 public class AktivitetspengerStatistikk implements YtelseStatistikk {
 
     private static final FagsakYtelseType YTELSE = FagsakYtelseType.AKTIVITETSPENGER;
+    private static final String AKTIVITETSPENGER_PREFIX = "aktivitetspenger_";
+
 
     static final BigQueryTabell<FagsakStatusRecord> FAGSAK_STATUS_TABELL =
-        FagsakStatusRecord.FAGSAK_STATUS_TABELL_V2.medTabellnavn("aktivitetspenger_fagsak_status");
+        FagsakStatusRecord.FAGSAK_STATUS_TABELL_V2.medTabellnavn(AKTIVITETSPENGER_PREFIX + "fagsak_status");
     static final BigQueryTabell<BehandlingStatusRecord> BEHANDLING_STATUS_TABELL =
-        BehandlingStatusRecord.BEHANDLING_STATUS_TABELL.medTabellnavn("aktivitetspenger_behandling_status");
+        BehandlingStatusRecord.BEHANDLING_STATUS_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "behandling_status");
     static final BigQueryTabell<AksjonspunktRecord> AKSJONSPUNKT_TABELL =
-        AksjonspunktRecord.AKSJONSPUNKT_TABELL.medTabellnavn("aktivitetspenger_aksjonspunkter_status");
+        AksjonspunktRecord.AKSJONSPUNKT_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "aksjonspunkter_status");
     static final BigQueryTabell<SatsStatistikkRecord> SATS_STATISTIKK_TABELL =
-        SatsStatistikkRecord.SATS_STATISTIKK_TABELL.medTabellnavn("aktivitetspenger_sats_statistikk");
+        SatsStatistikkRecord.SATS_STATISTIKK_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "sats_statistikk");
     static final BigQueryTabell<BehandslingsresultatStatistikkRecord> BEHANDLINGSRESULTAT_STATISTIKK_TABELL =
-        BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL.medTabellnavn("aktivitetspenger_behandlingsresultat_statistikk");
+        BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "behandlingsresultat_statistikk");
     static final BigQueryTabell<EtterlysningRecord> ETTERLYSNING_TABELL =
-        EtterlysningRecord.ETTERLYSNING_TABELL.medTabellnavn("aktivitetspenger_etterlysning");
+        EtterlysningRecord.ETTERLYSNING_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "etterlysning");
     static final BigQueryTabell<UttalelseRecord> UTTALELSE_TABELL =
-        UttalelseRecord.UTTALELSE_TABELL.medTabellnavn("aktivitetspenger_uttalelse");
+        UttalelseRecord.UTTALELSE_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "uttalelse");
     static final BigQueryTabell<BehandlingÅrsakRecord> BEHANDLING_ÅRSAK_TABELL =
-        BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL.medTabellnavn("aktivitetspenger_behandling_årsak");
+        BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "behandling_årsak");
     static final BigQueryTabell<AlderOgKjønnRecord> ALDER_OG_KJØNN_TABELL =
-        AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL.medTabellnavn("aktivitetspenger_alder_og_kjønn");
+        AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "alder_og_kjønn");
     static final BigQueryTabell<KontrollertePerioderRecord> KONTROLLERTE_PERIODER_TABELL =
-        KontrollertePerioderRecord.KONTROLLERTE_PERIODER_TABELL.medTabellnavn("aktivitetspenger_kontrollerte_inntekt_perioder");
+        KontrollertePerioderRecord.KONTROLLERTE_PERIODER_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "kontrollerte_inntekt_perioder");
 
     private BigQueryStatistikkRepository statistikkRepository;
     private EntityManager entityManager;
