@@ -9,6 +9,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
@@ -27,10 +28,12 @@ public class RapportertInntektMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RapportertInntektMapper.class);
 
     private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private final BehandlingRepository behandlingRepository;
 
     @Inject
-    public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
+    public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, BehandlingRepository behandlingRepository) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public LocalDateTimeline<RapporterteInntekter> mapAlleGjeldendeRegisterOgBrukersInntekter(Long behandlingId, LocalDateTimeline<Boolean> relevantTidslinje) {
@@ -43,7 +46,7 @@ public class RapportertInntektMapper {
         final var brukersRapporterteInntekter = finnBrukersRapporterteInntekter(iayGrunnlag.get(), relevantTidslinje);
         validerBrukersRapporterteInntekterTidslinje(brukersRapporterteInntekter, relevantTidslinje);
 
-        final var grupperteInntekter = grupperInntekter(iayGrunnlag.get());
+        final var grupperteInntekter = grupperInntekter(iayGrunnlag.get(), finnRegisterinntektKilde(behandlingId));
 
         final var registerTidslinje = finnRegisterInntektTidslinje(relevantTidslinje, grupperteInntekter);
         return kombinerTidslinjer(brukersRapporterteInntekter, registerTidslinje);
@@ -54,18 +57,23 @@ public class RapportertInntektMapper {
         Long behandlingId,
         List<InntektskontrollEtterlysningsPeriode> etterlysningsperioder) {
 
+        final var inntektsKilde = finnRegisterinntektKilde(behandlingId);
         return etterlysningsperioder.stream()
             .filter(it -> !it.inntektskontrollEtterlysningInfo().etterlysningStatus().equals(EtterlysningStatus.AVBRUTT) && !it.inntektskontrollEtterlysningInfo().etterlysningStatus().equals(EtterlysningStatus.SKAL_AVBRYTES))
-            .map(it -> finnRegisterinntekterVurdertIUttalelse(behandlingId, it))
+            .map(it -> finnRegisterinntekterVurdertIUttalelse(behandlingId, inntektsKilde, it))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
 
     }
 
-    private List<InntekterForKilde> grupperInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag) {
+    private InntektsKilde finnRegisterinntektKilde(Long behandlingId) {
+        return RegisterinntektKilde.forYtelse(behandlingRepository.hentBehandling(behandlingId).getFagsakYtelseType());
+    }
+
+    private List<InntekterForKilde> grupperInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, InntektsKilde inntektsKilde) {
         final var inntekter = iayGrunnlag.getRegisterVersjon().map(InntektArbeidYtelseAggregat::getInntekter);
         return new InntektFilter(inntekter)
-            .getAlleInntekter(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
+            .getAlleInntekter(inntektsKilde)
             .stream()
             .filter(it -> !it.getAlleInntektsposter().isEmpty())
             .map(it -> {
@@ -83,8 +91,8 @@ public class RapportertInntektMapper {
     }
 
 
-    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(Long behandlingId, InntektskontrollEtterlysningsPeriode it) {
-        final var registerinntekter = finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, it.iayGrunnlagUUID(), it.periode());
+    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(Long behandlingId, InntektsKilde inntektsKilde, InntektskontrollEtterlysningsPeriode it) {
+        final var registerinntekter = finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, inntektsKilde, it.iayGrunnlagUUID(), it.periode());
         Set<RapportertInntekt> rapportertInntekter = mapTilRapporterteInntekterPrType(registerinntekter);
         return new LocalDateTimeline<>(it.periode(), new EtterlysningOgRegisterinntekt(rapportertInntekter, it.inntektskontrollEtterlysningInfo()));
     }
@@ -98,8 +106,12 @@ public class RapportertInntektMapper {
      * @return
      */
     public List<InntekterForKilde> finnRegisterinntekterForPeriodeOgGrunnlag(Long behandlingId, UUID grunnlagUuid, LocalDateInterval periode) {
+        return finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, finnRegisterinntektKilde(behandlingId), grunnlagUuid, periode);
+    }
+
+    private List<InntekterForKilde> finnRegisterinntekterForPeriodeOgGrunnlag(Long behandlingId, InntektsKilde inntektsKilde, UUID grunnlagUuid, LocalDateInterval periode) {
         final var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, grunnlagUuid);
-        final var grupperteInntekter = grupperInntekter(iayGrunnlag);
+        final var grupperteInntekter = grupperInntekter(iayGrunnlag, inntektsKilde);
         final var registerinntekter = finnOverlappendeInntekter(periode, grupperteInntekter);
         return registerinntekter;
     }
