@@ -23,34 +23,18 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.*;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
-import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
-import no.nav.ung.sak.mottak.dokumentmottak.DokumentmottakMidlertidigFeil;
-import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
-import no.nav.ung.sak.mottak.dokumentmottak.InnhentDokumentTjeneste;
-import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
+import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -197,7 +181,7 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
                     return BehandlingMedOpprettelseResultat.nyBehandling(nyFørstegangsbehandling);
                 } else {
                     // oppretter ny behandling fra forrige (førstegangsbehandling eller revurdering)
-                    var nyBehandling = behandlingsoppretter.opprettNyBehandlingFra(sisteBehandling, triggere.getFirst().behandlingÅrsak());
+                    var nyBehandling = behandlingsoppretter.opprettRevurdering(sisteBehandling, triggere.getFirst().behandlingÅrsak());
                     return BehandlingMedOpprettelseResultat.nyBehandling(nyBehandling);
                 }
             } else {

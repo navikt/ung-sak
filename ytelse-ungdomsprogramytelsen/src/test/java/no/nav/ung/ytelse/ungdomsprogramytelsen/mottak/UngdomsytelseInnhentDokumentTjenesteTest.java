@@ -4,10 +4,11 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.SøknadId;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -23,6 +24,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
@@ -30,7 +32,6 @@ import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -53,10 +54,7 @@ import static java.time.LocalDate.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -112,7 +110,7 @@ public class UngdomsytelseInnhentDokumentTjenesteTest {
             søknadParser));
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
-        when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
+        when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class), eq(BehandlingDel.SENTRAL))).thenReturn(enhet);
         when(behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(any(Behandling.class), anyBoolean(), anyBoolean())).thenReturn(new ProsessTaskGruppe());
 
         when(dokumentmottaker.getTriggere(ArgumentMatchers.anyList())).thenReturn(List.of(new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)));
@@ -153,7 +151,7 @@ public class UngdomsytelseInnhentDokumentTjenesteTest {
         when(revurdering.getAktørId()).thenReturn(behandling.getAktørId());
 
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING);
-        when(behandlingsoppretter.opprettNyBehandlingFra(behandling, BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)).thenReturn(revurdering);
+        when(behandlingsoppretter.opprettRevurdering(behandling, BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)).thenReturn(revurdering);
 
         // Act
         innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
@@ -195,7 +193,7 @@ public class UngdomsytelseInnhentDokumentTjenesteTest {
 
         assertThat(duplikat.getStatus()).isEqualTo(DokumentStatus.UGYLDIG);
         assertThat(duplikat.getFeilmelding()).contains("søknad-1");
-        verify(behandlingsoppretter, never()).opprettNyBehandlingFra(any(), any());
+        verify(behandlingsoppretter, never()).opprettRevurdering(any(), any());
         verify(dokumentmottaker, never()).lagreDokumentinnhold(any(), any());
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }

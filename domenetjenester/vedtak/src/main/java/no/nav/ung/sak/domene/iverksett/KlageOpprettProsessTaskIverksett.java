@@ -12,9 +12,9 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarligTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -36,22 +36,23 @@ public class KlageOpprettProsessTaskIverksett implements OpprettProsessTaskIverk
     private static final Logger LOGGER = LoggerFactory.getLogger(KlageOpprettProsessTaskIverksett.class);
 
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
-    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private OppgaveTjeneste oppgaveTjeneste;
     private KlageRepository klageRepository;
+    private BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste;
 
     KlageOpprettProsessTaskIverksett() {
         // for CDI proxy
     }
 
     @Inject
-    public KlageOpprettProsessTaskIverksett(FagsakProsessTaskRepository fagsakProsessTaskRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+    public KlageOpprettProsessTaskIverksett(FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                             KlageRepository klageRepository,
-                                            OppgaveTjeneste oppgaveTjeneste) {
+                                            OppgaveTjeneste oppgaveTjeneste,
+                                            BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
-        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.klageRepository = klageRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
+        this.behandlingAnsvarligTjeneste = behandlingAnsvarligTjeneste;
     }
 
     @Override
@@ -71,7 +72,8 @@ public class KlageOpprettProsessTaskIverksett implements OpprettProsessTaskIverk
         taskGruppe.addNesteParallell(taskerFørAvsluttBehandling);
         taskGruppe.addNesteSekvensiell(avsluttBehandling);
 
-        OrganisasjonsEnhet enhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId())
+
+        OrganisasjonsEnhet enhet = behandlingAnsvarligTjeneste.finnBehandlingAnsvarligFraBehandlingTilstand(behandling)
             .map(BehandlingAnsvarlig::getBehandlendeOrganisasjonsEnhet)
             .orElse(null);
 
