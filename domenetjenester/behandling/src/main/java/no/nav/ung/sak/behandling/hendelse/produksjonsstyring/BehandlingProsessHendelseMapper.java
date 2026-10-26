@@ -9,9 +9,8 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.hendelse.EventHendelse;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -88,22 +87,9 @@ public class BehandlingProsessHendelseMapper {
     }
 
     private Boolean uledOmBaehandlingErHosNavKontor(Behandling behandling) {
-        if (behandling.getFagsakYtelseType() != FagsakYtelseType.AKTIVITETSPENGER) {
-            return null;
-        }
-        BehandlingStegType aktivtSteg = behandling.getAktivtBehandlingSteg();
-        if (aktivtSteg == null) {
-            return false; //behandlinen er avsluttet eller ikke startet
-        }
-        Set<BehandlingDel> muligeDeler = Arrays.stream(AksjonspunktDefinisjon.values())
-            .filter(ap -> ap.getBehandlingSteg().equals(aktivtSteg))
-            .map(AksjonspunktDefinisjon::getBehandlingDel)
-            .collect(Collectors.toSet());
-
-        if (muligeDeler.size() > 1) {
-            throw new IllegalStateException("Steget behandlingen står i har aksjonspunkt for både DEL1 og DEL2. Dette er ikke støttet i modell mot LOS. Enten flytt ett av aksjonspunktene, eller endre utledningen her");
-        }
-        return muligeDeler.contains(BehandlingDel.LOKAL);
+        return BehandlingStegDel.utled(behandling.getFagsakYtelseType(), behandling.getAktivtBehandlingSteg())
+            .map(BehandlingDel.NAV_KONTOR::equals)
+            .orElse(null);
     }
 
     public LocalDateTime finnEldsteMottattdato(Behandling behandling) {
