@@ -9,7 +9,6 @@ import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.prosesstask.api.*;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,7 @@ public class BigQueryMetrikkTask implements BatchProsessTaskHandler {
         log.info("Sist kjørt tidspunkt for BigQueryMetrikkTask: {}", sistKjørtTidspunkt);
 
         try {
-            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = YtelsesTabell.STØTTEDE_YTELSER.stream()
+            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = YtelseStatistikk.STØTTEDE_YTELSER.stream()
                 .flatMap(ytelse -> YtelseStatistikk.finn(ytelseStatistikk, ytelse).hentHyppigRapporterte(sistKjørtTidspunkt).stream())
                 .toList();
 

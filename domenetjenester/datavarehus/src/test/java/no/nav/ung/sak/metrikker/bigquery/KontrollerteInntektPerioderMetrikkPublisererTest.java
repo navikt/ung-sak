@@ -1,5 +1,6 @@
 package no.nav.ung.sak.metrikker.bigquery;
 
+import jakarta.enterprise.inject.Instance;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -23,16 +24,18 @@ class KontrollerteInntektPerioderMetrikkPublisererTest {
     private final KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste = mock(KontrollerteInntektperioderTjeneste.class);
     private final BehandlingVedtakRepository vedtakRepository = mock(BehandlingVedtakRepository.class);
     private final BigQueryKlient bigQueryKlient = mock(BigQueryKlient.class);
+    @SuppressWarnings("unchecked")
+    private final Instance<YtelseStatistikk> ytelseStatistikk = mock(Instance.class);
 
     private final KontrollerteInntektPerioderMetrikkPubliserer publiserer =
-        new KontrollerteInntektPerioderMetrikkPubliserer(kontrollerteInntektperioderTjeneste, vedtakRepository, bigQueryKlient, true);
+        new KontrollerteInntektPerioderMetrikkPubliserer(kontrollerteInntektperioderTjeneste, vedtakRepository, bigQueryKlient, ytelseStatistikk, true);
 
     @ParameterizedTest
     @EnumSource(value = FagsakYtelseType.class, names = {"OBSOLETE", "UDEFINERT"})
     void skal_ikke_publisere_for_ytelse_som_ikke_er_støttet(FagsakYtelseType ytelse) {
         publiserer.publiserKontrollertePerioderMetrikker(behandlingReferanse(ytelse));
 
-        verifyNoInteractions(kontrollerteInntektperioderTjeneste, vedtakRepository, bigQueryKlient);
+        verifyNoInteractions(kontrollerteInntektperioderTjeneste, vedtakRepository, bigQueryKlient, ytelseStatistikk);
     }
 
     private static BehandlingReferanse behandlingReferanse(FagsakYtelseType ytelse) {

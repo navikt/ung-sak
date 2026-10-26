@@ -11,7 +11,6 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +58,7 @@ public class BigQueryMetrikkDagligTask implements BatchProsessTaskHandler {
         long startTime = System.nanoTime();
 
         try {
-            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = YtelsesTabell.STØTTEDE_YTELSER.stream()
+            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = YtelseStatistikk.STØTTEDE_YTELSER.stream()
                 .flatMap(ytelse -> YtelseStatistikk.finn(ytelseStatistikk, ytelse).hentDagligRapporterte().stream())
                 .toList();
 

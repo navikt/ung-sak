@@ -6,7 +6,6 @@ import com.google.cloud.bigquery.StandardSQLTypeName;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import no.nav.ung.sak.typer.Saksnummer;
 
 import java.math.BigDecimal;
@@ -53,7 +52,4 @@ public record KontrollertePerioderRecord(
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
-
-    public static final YtelsesTabell<KontrollertePerioderRecord> KONTROLLERTE_PERIODER_TABELLER =
-        YtelsesTabell.medAktivitetspengerTabell(KONTROLLERTE_PERIODER_TABELL, "aktivitetspenger_kontrollerte_inntekt_perioder");
 }

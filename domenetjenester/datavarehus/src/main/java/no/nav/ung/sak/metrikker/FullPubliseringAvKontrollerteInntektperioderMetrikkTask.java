@@ -8,7 +8,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
+import no.nav.ung.sak.metrikker.bigquery.YtelseStatistikk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class FullPubliseringAvKontrollerteInntektperioderMetrikkTask implements 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         String ytelseTypeKode = prosessTaskData.getPropertyValue(YTELSE_TYPE);
-        FagsakYtelseType ytelseType = YtelsesTabell.validerStøttet(ytelseTypeKode == null || ytelseTypeKode.isBlank()
+        FagsakYtelseType ytelseType = YtelseStatistikk.validerStøttet(ytelseTypeKode == null || ytelseTypeKode.isBlank()
             ? FagsakYtelseType.UNGDOMSYTELSE
             : FagsakYtelseType.fraKode(ytelseTypeKode));
 

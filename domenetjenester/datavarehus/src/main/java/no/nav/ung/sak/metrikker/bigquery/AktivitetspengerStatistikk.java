@@ -17,6 +17,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.inntektskontroll.KontrollertePerioderRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.soknad.SøknadStatistikkRecord;
@@ -34,13 +35,38 @@ import java.util.stream.Collectors;
 import static no.nav.ung.sak.metrikker.bigquery.YtelseStatistikk.metrikk;
 
 /**
- * Metrikker for aktivitetspenger. Publiseres til egne tabeller med prefiks <code>aktivitetspenger_</code> i BigQuery.
+ * Metrikker for aktivitetspenger. Publiseres til egne tabeller med prefiks <code>aktivitetspenger_</code> i BigQuery,
+ * slik at tilgang kan styres per ytelse på Datamarkedsplassen.
+ * <p>
+ * Tabellene har samme skjema som tabellene for ungdomsprogramytelsen, men eget navn. Navnene oppgis eksplisitt
+ * fordi flere av tabellene for ungdomsprogramytelsen har versjonssuffiks (<code>_v2</code>) som ikke skal arves.
  */
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class AktivitetspengerStatistikk implements YtelseStatistikk {
 
     private static final FagsakYtelseType YTELSE = FagsakYtelseType.AKTIVITETSPENGER;
+
+    static final BigQueryTabell<FagsakStatusRecord> FAGSAK_STATUS_TABELL =
+        FagsakStatusRecord.FAGSAK_STATUS_TABELL_V2.medTabellnavn("aktivitetspenger_fagsak_status");
+    static final BigQueryTabell<BehandlingStatusRecord> BEHANDLING_STATUS_TABELL =
+        BehandlingStatusRecord.BEHANDLING_STATUS_TABELL.medTabellnavn("aktivitetspenger_behandling_status");
+    static final BigQueryTabell<AksjonspunktRecord> AKSJONSPUNKT_TABELL =
+        AksjonspunktRecord.AKSJONSPUNKT_TABELL.medTabellnavn("aktivitetspenger_aksjonspunkter_status");
+    static final BigQueryTabell<SatsStatistikkRecord> SATS_STATISTIKK_TABELL =
+        SatsStatistikkRecord.SATS_STATISTIKK_TABELL.medTabellnavn("aktivitetspenger_sats_statistikk");
+    static final BigQueryTabell<BehandslingsresultatStatistikkRecord> BEHANDLINGSRESULTAT_STATISTIKK_TABELL =
+        BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL.medTabellnavn("aktivitetspenger_behandlingsresultat_statistikk");
+    static final BigQueryTabell<EtterlysningRecord> ETTERLYSNING_TABELL =
+        EtterlysningRecord.ETTERLYSNING_TABELL.medTabellnavn("aktivitetspenger_etterlysning");
+    static final BigQueryTabell<UttalelseRecord> UTTALELSE_TABELL =
+        UttalelseRecord.UTTALELSE_TABELL.medTabellnavn("aktivitetspenger_uttalelse");
+    static final BigQueryTabell<BehandlingÅrsakRecord> BEHANDLING_ÅRSAK_TABELL =
+        BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL.medTabellnavn("aktivitetspenger_behandling_årsak");
+    static final BigQueryTabell<AlderOgKjønnRecord> ALDER_OG_KJØNN_TABELL =
+        AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL.medTabellnavn("aktivitetspenger_alder_og_kjønn");
+    static final BigQueryTabell<KontrollertePerioderRecord> KONTROLLERTE_PERIODER_TABELL =
+        KontrollertePerioderRecord.KONTROLLERTE_PERIODER_TABELL.medTabellnavn("aktivitetspenger_kontrollerte_inntekt_perioder");
 
     private BigQueryStatistikkRepository statistikkRepository;
     private EntityManager entityManager;
@@ -58,14 +84,14 @@ public class AktivitetspengerStatistikk implements YtelseStatistikk {
     @Override
     public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
         return List.of(
-            metrikk(FagsakStatusRecord.FAGSAK_STATUS_TABELLER.aktivitetspenger(), statistikkRepository.fagsakStatusStatistikk(YTELSE)),
-            metrikk(BehandlingStatusRecord.BEHANDLING_STATUS_TABELLER.aktivitetspenger(), statistikkRepository.behandlingStatusStatistikk(YTELSE)),
-            metrikk(AksjonspunktRecord.AKSJONSPUNKT_TABELLER.aktivitetspenger(), statistikkRepository.aksjonspunktStatistikk(YTELSE)),
-            metrikk(SatsStatistikkRecord.SATS_STATISTIKK_TABELLER.aktivitetspenger(), satsStatistikk()),
-            metrikk(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELLER.aktivitetspenger(), statistikkRepository.behandlingResultatStatistikk(YTELSE)),
-            metrikk(EtterlysningRecord.ETTERLYSNING_TABELLER.aktivitetspenger(), statistikkRepository.etterlysningData(YTELSE, sistKjørtTidspunkt)),
-            metrikk(UttalelseRecord.UTTALELSE_TABELLER.aktivitetspenger(), statistikkRepository.uttalelseData(YTELSE, sistKjørtTidspunkt, null)),
-            metrikk(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELLER.aktivitetspenger(), statistikkRepository.behandlingÅrsakStatistikk(YTELSE)),
+            metrikk(FAGSAK_STATUS_TABELL, statistikkRepository.fagsakStatusStatistikk(YTELSE)),
+            metrikk(BEHANDLING_STATUS_TABELL, statistikkRepository.behandlingStatusStatistikk(YTELSE)),
+            metrikk(AKSJONSPUNKT_TABELL, statistikkRepository.aksjonspunktStatistikk(YTELSE)),
+            metrikk(SATS_STATISTIKK_TABELL, satsStatistikk()),
+            metrikk(BEHANDLINGSRESULTAT_STATISTIKK_TABELL, statistikkRepository.behandlingResultatStatistikk(YTELSE)),
+            metrikk(ETTERLYSNING_TABELL, statistikkRepository.etterlysningData(YTELSE, sistKjørtTidspunkt)),
+            metrikk(UTTALELSE_TABELL, statistikkRepository.uttalelseData(YTELSE, sistKjørtTidspunkt, null)),
+            metrikk(BEHANDLING_ÅRSAK_TABELL, statistikkRepository.behandlingÅrsakStatistikk(YTELSE)),
             metrikk(SøknadStatistikkRecord.AKTIVITETSPENGER_SØKNAD_TABELL, søknadStatistikk())
         );
     }
@@ -73,8 +99,18 @@ public class AktivitetspengerStatistikk implements YtelseStatistikk {
     @Override
     public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentDagligRapporterte() {
         return List.of(
-            metrikk(AlderOgKjønnRecord.ALDER_OG_KJØNN_TABELLER.aktivitetspenger(), statistikkRepository.alderOgKjønnStatistikk(YTELSE))
+            metrikk(ALDER_OG_KJØNN_TABELL, statistikkRepository.alderOgKjønnStatistikk(YTELSE))
         );
+    }
+
+    @Override
+    public BigQueryTabell<UttalelseRecord> uttalelseTabell() {
+        return UTTALELSE_TABELL;
+    }
+
+    @Override
+    public BigQueryTabell<KontrollertePerioderRecord> kontrollertePerioderTabell() {
+        return KONTROLLERTE_PERIODER_TABELL;
     }
 
     /**

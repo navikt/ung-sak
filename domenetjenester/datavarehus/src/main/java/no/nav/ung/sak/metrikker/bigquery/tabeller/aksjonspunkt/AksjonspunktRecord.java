@@ -10,7 +10,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,7 +47,4 @@ public record AksjonspunktRecord(
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
-
-    public static final YtelsesTabell<AksjonspunktRecord> AKSJONSPUNKT_TABELLER =
-        YtelsesTabell.medAktivitetspengerTabell(AKSJONSPUNKT_TABELL, "aktivitetspenger_aksjonspunkter_status");
 }

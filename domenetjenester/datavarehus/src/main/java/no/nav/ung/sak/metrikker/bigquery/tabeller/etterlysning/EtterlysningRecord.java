@@ -9,7 +9,6 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import no.nav.ung.sak.typer.Saksnummer;
 
 import java.time.ZoneId;
@@ -52,7 +51,4 @@ public record EtterlysningRecord(
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
-
-    public static final YtelsesTabell<EtterlysningRecord> ETTERLYSNING_TABELLER =
-        YtelsesTabell.medAktivitetspengerTabell(ETTERLYSNING_TABELL, "aktivitetspenger_etterlysning");
 }

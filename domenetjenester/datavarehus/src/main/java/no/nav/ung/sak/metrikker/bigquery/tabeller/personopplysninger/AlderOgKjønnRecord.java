@@ -9,7 +9,6 @@ import no.nav.ung.sak.behandlingslager.kodeverk.KjønnKodeverdiConverter;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -40,7 +39,4 @@ public record AlderOgKjønnRecord(
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
-
-    public static final YtelsesTabell<AlderOgKjønnRecord> ALDER_OG_KJØNN_TABELLER =
-        YtelsesTabell.medAktivitetspengerTabell(ALDER_OG_KJØNN_BIG_QUERY_TABELL, "aktivitetspenger_alder_og_kjønn");
 }

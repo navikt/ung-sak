@@ -18,6 +18,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.inntektskontroll.KontrollertePerioderRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
@@ -34,7 +35,8 @@ import java.util.stream.Collectors;
 import static no.nav.ung.sak.metrikker.bigquery.YtelseStatistikk.metrikk;
 
 /**
- * Metrikker for ungdomsprogramytelsen. Publiseres til de opprinnelige tabellene i BigQuery.
+ * Metrikker for ungdomsprogramytelsen. Publiseres til de opprinnelige tabellene i BigQuery, som Metabase leser fra.
+ * Tabellnavnene må derfor ikke endres.
  */
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -60,23 +62,33 @@ public class UngdomsprogramytelseStatistikk implements YtelseStatistikk {
     @Override
     public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
         return List.of(
-            metrikk(FagsakStatusRecord.FAGSAK_STATUS_TABELLER.ungdomsytelse(), statistikkRepository.fagsakStatusStatistikk(YTELSE)),
-            metrikk(BehandlingStatusRecord.BEHANDLING_STATUS_TABELLER.ungdomsytelse(), statistikkRepository.behandlingStatusStatistikk(YTELSE)),
-            metrikk(AksjonspunktRecord.AKSJONSPUNKT_TABELLER.ungdomsytelse(), statistikkRepository.aksjonspunktStatistikk(YTELSE)),
-            metrikk(SatsStatistikkRecord.SATS_STATISTIKK_TABELLER.ungdomsytelse(), satsStatistikk()),
-            metrikk(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELLER.ungdomsytelse(), statistikkRepository.behandlingResultatStatistikk(YTELSE)),
-            metrikk(EtterlysningRecord.ETTERLYSNING_TABELLER.ungdomsytelse(), statistikkRepository.etterlysningData(YTELSE, sistKjørtTidspunkt)),
-            metrikk(UttalelseRecord.UTTALELSE_TABELLER.ungdomsytelse(), statistikkRepository.uttalelseData(YTELSE, sistKjørtTidspunkt, null)),
-            metrikk(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELLER.ungdomsytelse(), statistikkRepository.behandlingÅrsakStatistikk(YTELSE))
+            metrikk(FagsakStatusRecord.FAGSAK_STATUS_TABELL_V2, statistikkRepository.fagsakStatusStatistikk(YTELSE)),
+            metrikk(BehandlingStatusRecord.BEHANDLING_STATUS_TABELL, statistikkRepository.behandlingStatusStatistikk(YTELSE)),
+            metrikk(AksjonspunktRecord.AKSJONSPUNKT_TABELL, statistikkRepository.aksjonspunktStatistikk(YTELSE)),
+            metrikk(SatsStatistikkRecord.SATS_STATISTIKK_TABELL, satsStatistikk()),
+            metrikk(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL, statistikkRepository.behandlingResultatStatistikk(YTELSE)),
+            metrikk(EtterlysningRecord.ETTERLYSNING_TABELL, statistikkRepository.etterlysningData(YTELSE, sistKjørtTidspunkt)),
+            metrikk(UttalelseRecord.UTTALELSE_TABELL, statistikkRepository.uttalelseData(YTELSE, sistKjørtTidspunkt, null)),
+            metrikk(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, statistikkRepository.behandlingÅrsakStatistikk(YTELSE))
         );
     }
 
     @Override
     public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentDagligRapporterte() {
         return List.of(
-            metrikk(AlderOgKjønnRecord.ALDER_OG_KJØNN_TABELLER.ungdomsytelse(), statistikkRepository.alderOgKjønnStatistikk(YTELSE)),
+            metrikk(AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL, statistikkRepository.alderOgKjønnStatistikk(YTELSE)),
             metrikk(DagerIProgrammetRecord.DAGER_I_PROGRAMMET_LØPENDE_BIG_QUERY_TABELL, antallDagerStatistikk.dagerIProgrammet())
         );
+    }
+
+    @Override
+    public BigQueryTabell<UttalelseRecord> uttalelseTabell() {
+        return UttalelseRecord.UTTALELSE_TABELL;
+    }
+
+    @Override
+    public BigQueryTabell<KontrollertePerioderRecord> kontrollertePerioderTabell() {
+        return KontrollertePerioderRecord.KONTROLLERTE_PERIODER_TABELL;
     }
 
     /**

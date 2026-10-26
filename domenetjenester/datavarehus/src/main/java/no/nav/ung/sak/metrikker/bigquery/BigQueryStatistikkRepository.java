@@ -14,7 +14,6 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.MetrikkUtils;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.YtelsesTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
@@ -44,7 +43,7 @@ import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
  * <p>
  * Alle spørringer er parametrisert på ytelse og filtrerer eksplisitt på én ytelse. Hvilke metrikker som publiseres
  * for hver ytelse, og til hvilke tabeller, bestemmes av implementasjonene av {@link YtelseStatistikk}.
- * Kun {@link YtelsesTabell#STØTTEDE_YTELSER} er tillatt, slik at utgåtte fagsaker ({@link FagsakYtelseType#OBSOLETE})
+ * Kun {@link YtelseStatistikk#STØTTEDE_YTELSER} er tillatt, slik at utgåtte fagsaker ({@link FagsakYtelseType#OBSOLETE})
  * aldri kommer med i statistikken.
  */
 @Dependent
@@ -58,7 +57,7 @@ public class BigQueryStatistikkRepository {
     }
 
     private static String ytelseKode(FagsakYtelseType ytelse) {
-        return YtelsesTabell.validerStøttet(ytelse).getKode();
+        return YtelseStatistikk.validerStøttet(ytelse).getKode();
     }
 
     /**
