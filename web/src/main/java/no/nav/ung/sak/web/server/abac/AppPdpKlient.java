@@ -34,7 +34,10 @@ public class AppPdpKlient implements PdpKlient {
     public Tilgangsbeslutning forespørTilgang(PdpRequest pdpRequest) {
         TilgangType tilgangType = TilgangType.INTERNBRUKER; //resterende tilgangtyper er håntdert i PepImpl
 
-        SaksinformasjonOgPersonerTilgangskontrollInputDto tilgangskontrollInput = PdpRequestMapper.map(pdpRequest);
+        if (!(pdpRequest instanceof UngSakPdpRequest ungSakPdpRequest)) {
+            throw new IllegalArgumentException("Forventet UngSakPdpRequest, men fikk " + pdpRequest.getClass().getName());
+        }
+        SaksinformasjonOgPersonerTilgangskontrollInputDto tilgangskontrollInput = PdpRequestMapper.map(ungSakPdpRequest);
 
         if (tilgangskontrollInput.operasjon().resource() == ResourceType.APPLIKASJON) {
             //håndtert av azure.application.allowAllUsers=true som bare tillater kall for brukere som har rettighet til å kalle applikasjonen

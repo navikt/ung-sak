@@ -15,7 +15,6 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -28,6 +27,7 @@ import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.kontroll.KontrollerInntektDto;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
+import no.nav.ung.sak.kontroll.RegisterinntektKilde;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -94,7 +94,7 @@ public class KontrollerInntektRestTjeneste {
         final var inntekter = iayGrunnlag.get().getRegisterVersjon()
             .map(InntektArbeidYtelseAggregat::getInntekter);
         final var registerinntekter = new InntektFilter(inntekter)
-            .getAlleInntekter(InntektsKilde.INNTEKT_UNGDOMSYTELSE);
+            .getAlleInntekter(RegisterinntektKilde.forYtelse(behandling.getFagsakYtelseType()));
 
         return KontrollerInntektMapper.map(kontrollertInntektPerioder,
             rapporterteInntekter,

@@ -96,7 +96,7 @@ class UngdomsytelseFastsettInntektOppdatererTest {
     @BeforeEach
     void setUp() {
         inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        final var rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste);
+        final var rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, behandlingRepository);
         oppdaterer = new FastsettInntektOppdaterer(
             kontrollerteInntektperioderTjeneste,
             rapportertInntektMapper,
