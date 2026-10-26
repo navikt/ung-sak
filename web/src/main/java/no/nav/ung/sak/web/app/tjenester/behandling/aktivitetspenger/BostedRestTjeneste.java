@@ -39,6 +39,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDt
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedsfaktaOgAvklaringFletter;
 
@@ -120,7 +121,7 @@ public class BostedRestTjeneste {
         var faktaOgResultat = lagFaktaOgResultatTidslinje(søknadsfaktaGrunnlag.get(), behandling);
 
         var relevanteVilkårsperioder = vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
-            .map(v -> VurderingAvVilkårEtterAvklaringTjeneste.relevanteVilkårsperioder(v, VilkårType.BOSTEDSVILKÅR))
+            .map(v -> InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(v, VilkårType.BOSTEDSVILKÅR))
             .orElse(LocalDateTimeline.empty());
 
         // Søknadsfakta uten avklaring eller vurdering vises kun innenfor vilkårsperiodene
