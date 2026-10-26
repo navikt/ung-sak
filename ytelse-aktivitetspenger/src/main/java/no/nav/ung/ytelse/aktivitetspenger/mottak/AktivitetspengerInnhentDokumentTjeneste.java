@@ -132,7 +132,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
                     return BehandlingMedOpprettelseResultat.nyBehandling(nyFørstegangsbehandling);
                 } else {
                     // oppretter ny behandling fra forrige (førstegangsbehandling eller revurdering)
-                    var nyBehandling = behandlingsoppretter.opprettNyBehandlingFra(sisteBehandling, triggere.getFirst().behandlingÅrsak());
+                    var nyBehandling = behandlingsoppretter.opprettRevurdering(sisteBehandling, triggere.getFirst().behandlingÅrsak());
                     return BehandlingMedOpprettelseResultat.nyBehandling(nyBehandling);
                 }
             } else {

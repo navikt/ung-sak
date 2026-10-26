@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.papirsøknad;
 import no.nav.ung.brukerdialog.kontrakt.AktørIdDto;
 import no.nav.ung.domenetjenester.arkiv.ArkivTjeneste;
 import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
@@ -34,14 +35,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class PapirsøknadHåndteringTjenesteTest {
 
@@ -106,7 +101,7 @@ class PapirsøknadHåndteringTjenesteTest {
             .thenReturn(Optional.of(fagsak));
 
         OrganisasjonsEnhet organisasjonsEnhet = new OrganisasjonsEnhet("0100", "NAV");
-        when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak)).thenReturn(organisasjonsEnhet);
+        when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL)).thenReturn(organisasjonsEnhet);
 
         when(pdfGenKlient.lagDokument(anyString(), anyString(), any(), anyBoolean()))
             .thenReturn(new PdfGenDokument(new byte[0], "<html/>"));

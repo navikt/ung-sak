@@ -8,6 +8,7 @@ import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
@@ -17,7 +18,6 @@ import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
@@ -49,6 +49,7 @@ public class BehandlingsoppretterTjeneste {
     private KlageVurderingTjeneste klageVurderingTjeneste;
     private PersonopplysningRepository personopplysningRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
+    private Instance<RevurderingTjeneste> revurderingTjenester;
 
 
     BehandlingsoppretterTjeneste() {
@@ -62,7 +63,8 @@ public class BehandlingsoppretterTjeneste {
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                         KlageVurderingTjeneste klageVurderingTjeneste,
                                         PersonopplysningRepository personopplysningRepository,
-                                        HistorikkinnslagRepository historikkinnslagRepository) {
+                                        HistorikkinnslagRepository historikkinnslagRepository,
+                                        @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
@@ -72,6 +74,7 @@ public class BehandlingsoppretterTjeneste {
         this.klageVurderingTjeneste = klageVurderingTjeneste;
         this.personopplysningRepository = personopplysningRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
+        this.revurderingTjenester = revurderingTjenester;
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
@@ -83,7 +86,7 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode, boolean manuell) {
-        var revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
+        var revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, fagsak.getYtelseType()).orElseThrow();
         var kanRevurderingOpprettes = kanOppretteRevurdering(fagsak.getId());
         if (!kanRevurderingOpprettes) {
             throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
@@ -95,10 +98,9 @@ public class BehandlingsoppretterTjeneste {
         var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsak.getId())
             .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
 
-        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
         return manuell
-            ? revurderingTjeneste.opprettManuellRevurdering(origBehandling, behandlingÅrsakType, enhet, periode)
-            : revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, enhet);
+            ? revurderingTjeneste.opprettManuellRevurdering(origBehandling, behandlingÅrsakType, periode)
+            : revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType);
     }
 
 
@@ -107,8 +109,8 @@ public class BehandlingsoppretterTjeneste {
             () -> new IllegalStateException("Kan ikke opprette klagebehandling uten tidligere behandling")
         );
 
-        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        var nyBehandling = opprettBehandling(fagsak, BehandlingType.KLAGE, enhet, BehandlingÅrsakType.UDEFINERT);
+        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak, BehandlingDel.SENTRAL);
+        var nyBehandling = opprettKlageBehandling(fagsak, enhet);
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
         klageVurderingTjeneste.opprettKlageUtredning(nyBehandling, enhet);
 
@@ -116,15 +118,11 @@ public class BehandlingsoppretterTjeneste {
         return nyBehandling;
     }
 
-    private Behandling opprettBehandling(Fagsak fagsak, BehandlingType behandlingType, OrganisasjonsEnhet enhet, BehandlingÅrsakType årsak) {
-        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
-            beh -> {
-                if (!BehandlingÅrsakType.UDEFINERT.equals(årsak)) {
-                    BehandlingÅrsak.builder(årsak).buildFor(beh);
-                }
-                beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
-            });
-        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet);
+    private Behandling opprettKlageBehandling(Fagsak fagsak, OrganisasjonsEnhet enhet) {
+        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, BehandlingType.KLAGE,
+            beh -> beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(BehandlingType.KLAGE.getBehandlingstidFristUker())));
+        Long behandlingId = behandling.getId();
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, null);
         return behandling;
     }
 
@@ -167,7 +165,7 @@ public class BehandlingsoppretterTjeneste {
         if (åpneBehandlinger.size() > 0 || behandling == null) {
             return false;
         }
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, behandling.getFagsakYtelseType()).orElseThrow();
+        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow();
         return revurderingTjeneste.kanRevurderingOpprettes(behandling.getFagsak());
     }
 

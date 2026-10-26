@@ -1,31 +1,23 @@
 package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.TaskType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OpprettOppgave;
 import no.nav.k9.felles.integrasjon.oppgave.v1.Prioritet;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStatusEvent.BehandlingAvsluttetEvent;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarligTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -33,28 +25,28 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTask;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class OppgaveTjeneste {
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjeneste.class);
     private static final int DEFAULT_OPPGAVEFRIST_DAGER = 1;
 
-    private static final String SAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Sak må flyttes til Infotrygd";
     private static final String DEFAULT_OPPGAVEBESKRIVELSE = "Må behandle sak i VL";
     private static final String OPPGAVEBESKRIVELSE_ANKE = "Anke er ferdigbehandlet med utfall ";
-
-    private static final String NØS_ANSVARLIG_ENHETID = "4151";
-    private static final String NØS_BEH_TEMA = "ab0271";
-    private static final String NØS_TEMA = "STO";
 
     private FagsakRepository fagsakRepository;
 
     private BehandlingRepository behandlingRepository;
-    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
     private ProsessTaskTjeneste taskTjeneste;
     private OppgaveRestKlient restKlient;
+    private BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste;
 
 
     OppgaveTjeneste() {
@@ -65,60 +57,13 @@ public class OppgaveTjeneste {
     public OppgaveTjeneste(BehandlingRepositoryProvider repositoryProvider,
                            OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository,
                            OppgaveRestKlient restKlient,
-                           ProsessTaskTjeneste taskTjeneste) {
+                           ProsessTaskTjeneste taskTjeneste, BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.behandlingAnsvarligRepository = repositoryProvider.getBehandlingAnsvarligRepository();
         this.oppgaveBehandlingKoblingRepository = oppgaveBehandlingKoblingRepository;
         this.restKlient = restKlient;
         this.taskTjeneste = taskTjeneste;
-    }
-
-    public void avslutt(Long behandlingId, OppgaveÅrsak oppgaveÅrsak) {
-        List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandlingId);
-        Optional<OppgaveBehandlingKobling> oppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger);
-        if (oppgave.isPresent()) {
-            avsluttOppgave(oppgave.get());
-        } else {
-            OppgaveFeilmeldinger.FACTORY.oppgaveMedÅrsakIkkeFunnet(oppgaveÅrsak.getKode(), behandlingId).log(logger);
-        }
-    }
-
-    public String opprettVkyOppgaveOverlappendeYtelse(BehandlingReferanse ref, String beskrivelse, String oppgavetema, String behandlingstype, String enhetId) {
-        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        String behandlendeEnhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(ref.getBehandlingId())
-            .map(BehandlingAnsvarlig::getBehandlendeEnhet)
-            .orElse(null);
-        Fagsak fagsak = behandling.getFagsak();
-
-        var request = createRestRequestBuilder(
-            fagsak.getSaksnummer(),
-            fagsak.getAktørId(),
-            behandlendeEnhet,
-            beskrivelse,
-            Prioritet.NORM,
-            DEFAULT_OPPGAVEFRIST_DAGER,
-            oppgavetema
-        ).medTildeltEnhetsnr(enhetId)
-            .medBehandlingstype(behandlingstype)
-            .medOppgavetype(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode());
-
-        var response = restKlient.opprettetOppgave(request.build());
-        return response.getId().toString();
-    }
-
-    public String opprettOppgaveFeilutbetaling(BehandlingReferanse ref, String beskrivelse) {
-        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        Fagsak fagsak = behandling.getFagsak();
-        String behandlendeEnhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(ref.getBehandlingId())
-            .map(BehandlingAnsvarlig::getBehandlendeEnhet)
-            .orElse(null);
-
-        var request = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandlendeEnhet, beskrivelse, Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER,
-            mapYtelseTypeTilTema(fagsak.getYtelseType()))
-                .medOppgavetype(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode());
-        var response = restKlient.opprettetOppgave(request.build());
-        return response.getId().toString();
+        this.behandlingAnsvarligTjeneste = behandlingAnsvarligTjeneste;
     }
 
     public void avslutt(Long behandlingId, String oppgaveId) {
@@ -174,11 +119,11 @@ public class OppgaveTjeneste {
         }
     }
 
-    public Optional<ProsessTaskData> opprettTaskAvsluttOppgave(Behandling behandling, OppgaveÅrsak oppgaveÅrsak) {
+    private Optional<ProsessTaskData> opprettTaskAvsluttOppgave(Behandling behandling, OppgaveÅrsak oppgaveÅrsak) {
         return opprettTaskAvsluttOppgave(behandling, oppgaveÅrsak, true);
     }
 
-    public Optional<ProsessTaskData> opprettTaskAvsluttOppgave(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, boolean skalLagres) {
+    private Optional<ProsessTaskData> opprettTaskAvsluttOppgave(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, boolean skalLagres) {
         List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandling.getId());
         Optional<OppgaveBehandlingKobling> oppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger);
         if (oppgave.isPresent()) {
@@ -216,19 +161,6 @@ public class OppgaveTjeneste {
             .medPrioritet(prioritet);
     }
 
-    /**
-     * Supplerende oppgaver: Vurder Dokument og Konsekvens for Ytelse
-     */
-    public boolean harÅpneOppgaverAvType(AktørId aktørId, OppgaveÅrsak oppgavetype, FagsakYtelseType ytelseType) {
-        try {
-            var oppgaver = restKlient.finnÅpneOppgaver(aktørId.getId(), mapYtelseTypeTilTema(ytelseType), List.of(oppgavetype.getKode()));
-            logger.info("GOSYS fant {} oppgaver av type {}, for ytelse {}", oppgaver.size(), oppgavetype, ytelseType);
-            return !oppgaver.isEmpty();
-        } catch (Exception e) {
-            throw OppgaveFeilmeldinger.FACTORY.feilVedHentingAvOppgaver(ytelseType, oppgavetype, e).toException();
-        }
-    }
-
     public String opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(Long fagsakId, OppgaveÅrsak oppgaveÅrsak, String enhetsId, String beskrivelse, boolean høyPrioritet) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
 
@@ -262,7 +194,7 @@ public class OppgaveTjeneste {
             return null;
         }
         Fagsak fagsak = behandling.getFagsak();
-        String behandlendeEnhet = hentBehandlendeEnhet(behandling.getId());
+        String behandlendeEnhet = hentBehandlendeEnhet(behandling);
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandlendeEnhet, beskrivelse, prioritet, fristDager,
             mapYtelseTypeTilTema(fagsak.getYtelseType()))
             .medOppgavetype(oppgaveÅrsak.getKode());
@@ -285,32 +217,9 @@ public class OppgaveTjeneste {
         opprettTaskAvsluttOppgave(behandling);
     }
 
-    public String opprettOppgaveStopUtbetalingAvARENAYtelse(long behandlingId, LocalDate førsteUttaksdato) {
-        final String BESKRIVELSE = "Samordning arenaytelse. Vedtak i K9 (Omsorgspenger, Pleiepenger og opplæringspenger) fra %s";
-        var beskrivelse = String.format(BESKRIVELSE, førsteUttaksdato);
-
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return opprettOkonomiSettPåVent(beskrivelse, behandling);
-    }
-
-    private String opprettOkonomiSettPåVent(String beskrivelse, Behandling behandling) {
-        var fagsak = behandling.getFagsak();
-        String behandlendeEnhet = hentBehandlendeEnhet(behandling.getId());
-        var request = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandlendeEnhet, beskrivelse, Prioritet.HOY, DEFAULT_OPPGAVEFRIST_DAGER,
-            mapYtelseTypeTilTema(fagsak.getYtelseType()))
-                .medTildeltEnhetsnr(NØS_ANSVARLIG_ENHETID)
-                .medTemagruppe(null)
-                .medTema(NØS_TEMA)
-                .medBehandlingstema(NØS_BEH_TEMA)
-                .medOppgavetype(OppgaveÅrsak.SETTVENT.getKode());
-        var oppgave = restKlient.opprettetOppgave(request.build());
-        logger.info("GOSYS opprettet NØS oppgave {}", oppgave);
-        return oppgave.getId().toString();
-    }
-
     public String opprettOppgaveOmAnke(String behandlingId, OppgaveÅrsak oppgaveÅrsak, String utfall) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        String behandlendeEnhet = hentBehandlendeEnhet(behandling.getId());
+        String behandlendeEnhet = hentBehandlendeEnhet(behandling);
         var fagsak = behandling.getFagsak();
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandlendeEnhet,
             OPPGAVEBESKRIVELSE_ANKE + utfall, Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER,
@@ -329,8 +238,8 @@ public class OppgaveTjeneste {
         return oppgaveId;
     }
 
-    private String hentBehandlendeEnhet(Long behandlingId) {
-        return behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId)
+    private String hentBehandlendeEnhet(Behandling behandling) {
+        return behandlingAnsvarligTjeneste.finnBehandlingAnsvarligFraBehandlingTilstand(behandling)
             .map(BehandlingAnsvarlig::getBehandlendeEnhet)
             .orElse(null);
     }

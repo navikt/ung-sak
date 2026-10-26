@@ -138,9 +138,7 @@ public class PipRestTjeneste {
     }
 
     private static BehandlingDel utledBehandlingDel(PipBehandlingsData pipData) {
-        return pipData.fagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER && pipData.aktivtSteg() != null ?
-            BehandlingStegDel.forAktivitetspenger(pipData.aktivtSteg()) :
-            null;
+        return BehandlingStegDel.utled(pipData.fagsakYtelseType(), pipData.aktivtSteg()).orElse(null);
     }
 
     private Set<AktørId> hentAktørIder(PipBehandlingsData pipBehandlingsData) {
