@@ -1,21 +1,8 @@
 package no.nav.ung.sak.behandling.prosessering.task;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
-import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -25,6 +12,15 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 public class GjenopptaBehandlingTaskTest {
 
@@ -53,7 +49,7 @@ public class GjenopptaBehandlingTaskTest {
             .medBehandlendeEnhet(organisasjonsEnhet.getEnhetId());
         Behandling behandling = scenario.lagMocked();
         when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
-        when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.empty());
+        when(mockEnhetsTjeneste.sjekkEnheterEtterEndring(any())).thenReturn(Map.of());
 
         ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(GjenopptaBehandlingTask.class);
         prosessTaskData.setBehandling(0L, behandlingId, AktørId.dummy().getId());
@@ -77,16 +73,14 @@ public class GjenopptaBehandlingTaskTest {
         when(mockBehandlingRepository.lagre(any(Behandling.class), any())).thenReturn(0L);
         when(mockBehandlingskontrollTjeneste.initBehandlingskontroll(Mockito.anyLong())).thenReturn(kontekst);
         when(kontekst.getSkriveLås()).thenReturn(lås);
-        when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.of(enhet));
+        when(mockEnhetsTjeneste.sjekkEnheterEtterEndring(any())).thenReturn(Map.of(BehandlingDel.NAV_KONTOR, enhet));
 
         ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(GjenopptaBehandlingTask.class);
         prosessTaskData.setBehandling(0L, behandlingId, "0");
 
         task.doTask(prosessTaskData);
 
-        ArgumentCaptor<OrganisasjonsEnhet> enhetArgumentCaptor = ArgumentCaptor.forClass(OrganisasjonsEnhet.class);
-        verify(mockEnhetsTjeneste).oppdaterBehandlendeEnhet(any(), enhetArgumentCaptor.capture(), any(), any());
-        assertThat(enhetArgumentCaptor.getValue()).isEqualTo(enhet);
+        verify(mockEnhetsTjeneste).oppdaterBehandlendeEnhet(any(), eq(BehandlingDel.NAV_KONTOR), eq(enhet), any(), any());
     }
 }
 

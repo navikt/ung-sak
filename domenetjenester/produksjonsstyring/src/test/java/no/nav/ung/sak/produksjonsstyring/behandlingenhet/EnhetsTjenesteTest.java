@@ -1,21 +1,8 @@
 package no.nav.ung.sak.produksjonsstyring.behandlingenhet;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
-
+import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
+import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingResponse;
+import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
@@ -27,13 +14,22 @@ import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
-import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingResponse;
-import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
+
+import java.time.LocalDate;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class EnhetsTjenesteTest {
 
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.UNGDOMSYTELSE;
+    private static final String BEHANDLINGSTEMA = "ab0000";
 
     private static AktørId MOR_AKTØR_ID = AktørId.dummy();
     private static PersonIdent MOR_IDENT = new PersonIdent(new FiktiveFnr().nesteKvinneFnr());
@@ -79,7 +75,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE, null);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet).isEqualTo(enhetNormal);
@@ -90,7 +86,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(true, false, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE, null);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet).isEqualTo(enhetKode6);
@@ -101,8 +97,8 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, true, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE);
-        OrganisasjonsEnhet enhet1 = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhet.getEnhetId(), MOR_AKTØR_ID, FAMILIE).orElse(enhet);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE, null);
+        OrganisasjonsEnhet enhet1 = enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(YTELSE_TYPE, null, enhet.getEnhetId(), MOR_AKTØR_ID, FAMILIE).orElse(enhet);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet1).isEqualTo(enhetKode6);
@@ -113,8 +109,8 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, true, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE);
-        OrganisasjonsEnhet enhet1 = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhet.getEnhetId(), MOR_AKTØR_ID, FAMILIE).orElse(enhet);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE, null);
+        OrganisasjonsEnhet enhet1 = enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(YTELSE_TYPE, null, enhet.getEnhetId(), MOR_AKTØR_ID, FAMILIE).orElse(enhet);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet1).isEqualTo(enhetKode6);
@@ -124,8 +120,7 @@ public class EnhetsTjenesteTest {
     public void oppdater_enhet_annenpart_kode_fordeling() {
         // Oppsett
         settOppTpsStrukturer(false, false, true, false);
-
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(YTELSE_TYPE, null, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
@@ -135,8 +130,7 @@ public class EnhetsTjenesteTest {
     public void oppdater_enhet_mor_annenpart_kode_fordeling() {
         // Oppsett
         settOppTpsStrukturer(true, false, true, false);
-
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhetKode6.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(YTELSE_TYPE, null, enhetKode6.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
 
         assertThat(enhet).isNotPresent();
     }
@@ -145,8 +139,7 @@ public class EnhetsTjenesteTest {
     public void oppdater_etter_vent_barn_fått_kode6() {
         // Oppsett
         settOppTpsStrukturer(false, true, false, true);
-
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(YTELSE_TYPE, null, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
@@ -156,11 +149,24 @@ public class EnhetsTjenesteTest {
     public void oppdater_etter_vent_far_fått_kode6() {
         // Oppsett
         settOppTpsStrukturer(false, false, true, false);
-
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(YTELSE_TYPE, null, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
+    }
+
+    @Test
+    public void gyldige_enheter_sjekkes_per_behandlingstema() {
+        settOppTpsStrukturer(false, false, false, true);
+        var navKontor = new ArbeidsfordelingResponse("0219", "Nav Bærum", "Aktiv", "LOKAL");
+        Mockito.doAnswer((Answer<List<ArbeidsfordelingResponse>>) invocation -> {
+            ArbeidsfordelingRequest data = (ArbeidsfordelingRequest) invocation.getArguments()[0];
+            return BEHANDLINGSTEMA.equals(data.getBehandlingstema()) ? List.of(navKontor) : List.of(respNormal);
+        }).when(arbeidsfordelingTjeneste).hentAlleAktiveEnheter(Mockito.any());
+
+        assertThat(enhetsTjeneste.finnOrganisasjonsEnhet(YTELSE_TYPE, BEHANDLINGSTEMA, "0219")).isPresent();
+        assertThat(enhetsTjeneste.finnOrganisasjonsEnhet(YTELSE_TYPE, null, "0219")).isEmpty();
+        assertThat(enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(YTELSE_TYPE, BEHANDLINGSTEMA, "0219", MOR_AKTØR_ID, Set.of(MOR_AKTØR_ID))).isEmpty();
     }
 
     private void settOppTpsStrukturer(boolean morKode6, boolean barnKode6, boolean annenPartKode6, boolean foreldreRelatertTps) {

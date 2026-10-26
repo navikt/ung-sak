@@ -19,9 +19,8 @@ import no.nav.ung.sak.typer.PersonIdent;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
 
 @ApplicationScoped
 public class EnhetsTjeneste {
@@ -39,9 +38,10 @@ public class EnhetsTjeneste {
     private TpsTjeneste tpsTjeneste;
     private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;
 
-    private final Map<FagsakYtelseType, EnhetsTjenesteData> cache =
-        Arrays.stream(FagsakYtelseType.values())
-            .collect(Collectors.toMap(v -> v, v -> new EnhetsTjenesteData()));
+    private record CacheNøkkel(FagsakYtelseType ytelseType, String behandlingstema) {
+    }
+
+    private final Map<CacheNøkkel, EnhetsTjenesteData> cache = new ConcurrentHashMap<>();
 
     public EnhetsTjeneste() {
         // For CDI proxy
@@ -54,12 +54,12 @@ public class EnhetsTjeneste {
     }
 
     List<OrganisasjonsEnhet> hentEnhetListe(FagsakYtelseType ytelseType) {
-        var cacheEntry = oppdaterEnhetCache(ytelseType);
+        var cacheEntry = oppdaterEnhetCache(ytelseType, null);
         return cacheEntry.alleBehandlendeEnheter;
     }
 
-    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
-        var cacheEntry = oppdaterEnhetCache(ytelseType);
+    Optional<OrganisasjonsEnhet> finnEndretEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String behandlingstema, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
+        var cacheEntry = oppdaterEnhetCache(ytelseType, behandlingstema);
         if (cacheEntry.enhetKode6.getEnhetId().equals(enhetId) || cacheEntry.enhetKlage.getEnhetId().equals(enhetId)) {
             return Optional.empty();
         }
@@ -67,8 +67,8 @@ public class EnhetsTjeneste {
         if (harNoenDiskresjonskode6(alleAktører, ytelseType)) {
             return Optional.of(cacheEntry.enhetKode6);
         }
-        if (finnOrganisasjonsEnhet(ytelseType, enhetId).isEmpty()) {
-            return Optional.of(hentEnhetSjekkKunAktør(hovedAktør, ytelseType));
+        if (finnOrganisasjonsEnhet(ytelseType, behandlingstema, enhetId).isEmpty()) {
+            return Optional.of(hentEnhetSjekkKunAktør(hovedAktør, ytelseType, behandlingstema));
         }
         return Optional.empty();
     }
@@ -77,7 +77,7 @@ public class EnhetsTjeneste {
         var request = ArbeidsfordelingRequest.ny()
             .medTema(tema.getOffisiellKode())
             .medBehandlingstema(behandlingsTema == null ? null : behandlingsTema.getOffisiellKode())
-            .medDiskresjonskode(ofNullable(geo.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null))
+            .medDiskresjonskode(Optional.ofNullable(geo.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null))
             .medGeografiskOmraade(geo.getTilknytning())
             .build();
 
@@ -89,10 +89,14 @@ public class EnhetsTjeneste {
             .collect(Collectors.toList());
     }
 
-    OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType) {
+    OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType, String behandlingstema) {
         PersonIdent fnr = tpsTjeneste.hentFnrForAktør(aktørId);
         GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr, ytelseType);
-        return hentEnheterFor(geografiskTilknytning.getTilknytning(), ofNullable(geografiskTilknytning.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null), ytelseType).get(0);
+        String diskresjon = Optional.ofNullable(geografiskTilknytning.getDiskresjonskode())
+            .map(Diskresjonskode::getKode)
+            .orElse(null);
+        return hentEnheterFor(geografiskTilknytning.getTilknytning(), diskresjon, ytelseType, behandlingstema)
+            .get(0);
     }
 
     private boolean harNoenDiskresjonskode6(Collection<AktørId> aktører, FagsakYtelseType ytelseType) {
@@ -104,14 +108,14 @@ public class EnhetsTjeneste {
             .anyMatch(Diskresjonskode.KODE6::equals);
     }
 
-    private EnhetsTjenesteData oppdaterEnhetCache(FagsakYtelseType ytelseType) {
-        var cacheEntry = cache.get(ytelseType);
+    private EnhetsTjenesteData oppdaterEnhetCache(FagsakYtelseType ytelseType, String behandlingstema) {
+        var cacheEntry = cache.computeIfAbsent(new CacheNøkkel(ytelseType, behandlingstema), k -> new EnhetsTjenesteData());
         if (cacheEntry.sisteInnhenting.isBefore(LocalDate.now())) {
             synchronized (cacheEntry) {
                 if (cacheEntry.sisteInnhenting.isBefore(LocalDate.now())) {
-                    cacheEntry.enhetKode6 = hentEnheterFor(null, Diskresjonskode.KODE6.getKode(), ytelseType).get(0);
+                    cacheEntry.enhetKode6 = hentEnheterFor(null, Diskresjonskode.KODE6.getKode(), ytelseType, behandlingstema).get(0);
                     cacheEntry.enhetKlage = KLAGE_ENHET;
-                    cacheEntry.alleBehandlendeEnheter = hentEnheterFor(null, null, ytelseType);
+                    cacheEntry.alleBehandlendeEnheter = hentEnheterFor(null, null, ytelseType, behandlingstema);
                     cacheEntry.sisteInnhenting = LocalDate.now();
                 }
             }
@@ -119,19 +123,16 @@ public class EnhetsTjeneste {
         return cacheEntry;
     }
 
-    OrganisasjonsEnhet getEnhetKlage() {
-        return KLAGE_ENHET;
-    }
-
-    Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(FagsakYtelseType ytelseType, String enhetId) {
-        var cacheEntry = oppdaterEnhetCache(ytelseType);
+    Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(FagsakYtelseType ytelseType, String behandlingstema, String enhetId) {
+        var cacheEntry = oppdaterEnhetCache(ytelseType, behandlingstema);
         return cacheEntry.alleBehandlendeEnheter.stream().filter(e -> enhetId.equals(e.getEnhetId())).findFirst();
     }
 
-    private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType) {
+    private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType, String behandlingstema) {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
-            .medTema(FagsakYtelseType.UNGDOMSYTELSE.getOppgavetema()) //FIXME aktivitetspenger
+            .medTema(ytelseType.getOppgavetema())
+            .medBehandlingstema(behandlingstema)
             .medOppgavetype(OppgaveÅrsak.BEHANDLE_SAK.getKode()) // fra Oppgavetype offisielt kodeverk)
             .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
             .medDiskresjonskode(diskresjon)
