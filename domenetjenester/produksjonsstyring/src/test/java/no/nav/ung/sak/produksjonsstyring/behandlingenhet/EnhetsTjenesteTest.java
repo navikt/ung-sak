@@ -15,7 +15,6 @@ import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -157,7 +156,6 @@ public class EnhetsTjenesteTest {
     }
 
     @Test
-    @Disabled
     public void gyldige_enheter_sjekkes_per_behandlingstema() {
         settOppTpsStrukturer(false, false, false, true);
         var navKontor = new ArbeidsfordelingResponse("0219", "Nav Bærum", "Aktiv", "LOKAL");
