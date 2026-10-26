@@ -27,6 +27,15 @@ import java.util.stream.Collectors;
 @Dependent
 public class BehandlendeEnhetTjeneste {
 
+    public static final String YTELSE_TEMA = "ab0575";
+    public static final String INNGANGSVILKÅR_TEMA = "ab0574";
+
+    //TODO erstatt med verdi fra BehandlingTema enum
+    private static final Map<BehandlingDel, String> AVP_BEHANDLINGSTEMA_PER_DEL = Map.of(
+        BehandlingDel.SENTRAL, YTELSE_TEMA,
+        BehandlingDel.NAV_KONTOR, INNGANGSVILKÅR_TEMA
+    );
+
     private final EnhetsTjeneste enhetsTjeneste;
     private final BehandlingEnhetEventPubliserer eventPubliserer;
     private final BehandlingRepository behandlingRepository;
@@ -76,7 +85,7 @@ public class BehandlendeEnhetTjeneste {
 
     private static Map<BehandlingDel, String> behandlingstemaPerDel(FagsakYtelseType ytelseType) {
         return ytelseType == FagsakYtelseType.AKTIVITETSPENGER
-            ? Map.of(BehandlingDel.SENTRAL, "YTELSE", BehandlingDel.NAV_KONTOR, "INNGANGSVILKÅR")
+            ? AVP_BEHANDLINGSTEMA_PER_DEL
             : Collections.singletonMap(BehandlingDel.SENTRAL, null);
     }
 
