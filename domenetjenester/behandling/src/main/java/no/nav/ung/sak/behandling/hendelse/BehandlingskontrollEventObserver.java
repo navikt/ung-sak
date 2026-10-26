@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingStegDel;
+import no.nav.ung.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,8 +79,30 @@ public class BehandlingskontrollEventObserver {
             throw new RuntimeException("Publisering av StoppetEvent feilet", ex);
         }
     }
-    // Lytter på AksjonspunkterFunnetEvent, filtrer ut når behandling er satt manuelt på vent og legger melding på kafka
 
+    public void observerNavKontorBesluttet(@Observes BehandlingStegOvergangEvent event) {
+        if (event.getFraStegType() == null || event.getTilStegType() == null) {
+            return;
+        }
+        var ytelseType = behandlingRepository.hentBehandling(event.getBehandlingId()).getFagsakYtelseType();
+        var fraDel = BehandlingStegDel.utled(ytelseType, event.getFraStegType()).orElse(null);
+        var tilDel = BehandlingStegDel.utled(ytelseType, event.getTilStegType()).orElse(null);
+        boolean navKontorTilSentral = fraDel == BehandlingDel.NAV_KONTOR && tilDel == BehandlingDel.SENTRAL;
+        boolean sentralTilNavKontor = fraDel == BehandlingDel.SENTRAL && tilDel == BehandlingDel.NAV_KONTOR;
+        if (!navKontorTilSentral && !sentralTilNavKontor) {
+            return;
+        }
+        var eventHendelse = event instanceof BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent
+            ? EventHendelse.AKSJONSPUNKT_TILBAKEFØR
+            : EventHendelse.AKSJONSPUNKT_UTFØRT;
+        try {
+            prosessTaskRepository.lagre(opprettProsessTaskBehandlingprosess(event.getBehandlingId(), eventHendelse));
+        } catch (IOException ex) {
+            throw new RuntimeException("Publisering av overgang mellom behandlingsdeler feilet", ex);
+        }
+    }
+
+    // Lytter på AksjonspunkterFunnetEvent, filtrer ut når behandling er satt manuelt på vent og legger melding på kafka
     public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
         if (event.getAksjonspunkter().stream().anyMatch(e -> e.erOpprettet() && AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT.equals(e.getAksjonspunktDefinisjon()))) {
             try {
