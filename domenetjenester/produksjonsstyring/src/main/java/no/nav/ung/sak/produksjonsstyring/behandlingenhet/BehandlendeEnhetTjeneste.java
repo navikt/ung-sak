@@ -3,6 +3,7 @@ package no.nav.ung.sak.produksjonsstyring.behandlingenhet;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -26,6 +27,14 @@ import java.util.stream.Collectors;
 
 @Dependent
 public class BehandlendeEnhetTjeneste {
+
+    public static final String YTELSE_TEMA = BehandlingTema.AKTIVITESTPENGER_YTELSE.getOffisiellKode();
+    public static final String INNGANGSVILKÅR_TEMA = BehandlingTema.AKTIVITESTPENGER_VILKÅR.getOffisiellKode();
+
+    private static final Map<BehandlingDel, String> AVP_BEHANDLINGSTEMA_PER_DEL = Map.of(
+        BehandlingDel.SENTRAL, YTELSE_TEMA,
+        BehandlingDel.NAV_KONTOR, INNGANGSVILKÅR_TEMA
+    );
 
     private final EnhetsTjeneste enhetsTjeneste;
     private final BehandlingEnhetEventPubliserer eventPubliserer;
@@ -76,7 +85,7 @@ public class BehandlendeEnhetTjeneste {
 
     private static Map<BehandlingDel, String> behandlingstemaPerDel(FagsakYtelseType ytelseType) {
         return ytelseType == FagsakYtelseType.AKTIVITETSPENGER
-            ? Map.of(BehandlingDel.SENTRAL, "YTELSE", BehandlingDel.NAV_KONTOR, "INNGANGSVILKÅR")
+            ? AVP_BEHANDLINGSTEMA_PER_DEL
             : Collections.singletonMap(BehandlingDel.SENTRAL, null);
     }
 

@@ -9,7 +9,7 @@ import java.util.Map;
 public enum OmrådeTema implements Kodeverdi {
 
     UNG("UNG", "UNG", "Ungdomsytelse"), // Ungdomsytelse
-    //TODO legge til tema for aktivitetspenger
+    AVP("AVP", "AVP", "Aktivitetspenger"),
     UDEFINERT("-", null, null),
     ;
 

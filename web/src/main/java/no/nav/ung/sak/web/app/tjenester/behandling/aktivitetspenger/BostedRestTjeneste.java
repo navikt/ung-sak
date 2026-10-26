@@ -24,6 +24,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.*;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
@@ -64,6 +65,7 @@ public class BostedRestTjeneste {
     private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
     private UttalelseRepository uttalelseRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     public BostedRestTjeneste() {
         // for CDI proxy
@@ -73,12 +75,14 @@ public class BostedRestTjeneste {
     public BostedRestTjeneste(BehandlingRepository behandlingRepository,
                               VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
                               BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository,
-                              UttalelseRepository uttalelseRepository, InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
+                              UttalelseRepository uttalelseRepository, InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
+                              VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
         this.bostedSøknadsfaktaGrunnlagRepository = bostedSøknadsfaktaGrunnlagRepository;
         this.uttalelseRepository = uttalelseRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @GET
@@ -115,12 +119,22 @@ public class BostedRestTjeneste {
 
         var faktaOgResultat = lagFaktaOgResultatTidslinje(søknadsfaktaGrunnlag.get(), behandling);
 
+        var relevanteVilkårsperioder = vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
+            .map(v -> VurderingAvVilkårEtterAvklaringTjeneste.relevanteVilkårsperioder(v, VilkårType.BOSTEDSVILKÅR))
+            .orElse(LocalDateTimeline.empty());
+
+        // Søknadsfakta uten avklaring eller vurdering vises kun innenfor vilkårsperiodene
+        var søknadsfaktaUtenforVilkårsperiode = faktaOgResultat
+        .filterValue(it -> !it.harAvklaringEllerVilkårsVurdering())
+        .disjoint(relevanteVilkårsperioder);
+
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
         var uttalelseByReferanse = uttalelser.stream()
             .collect(Collectors.toMap(UttalelseV2::getGrunnlagsreferanse, u -> u, (a, _) -> a));
 
-        var perioder = faktaOgResultat.stream()
-            .filter(it -> it.getValue().harAvklaringEllerVilkårsVurdering())
+        var perioder = faktaOgResultat
+            .disjoint(søknadsfaktaUtenforVilkårsperiode)
+            .stream()
             .map(segment -> {
 
                 var verdi = segment.getValue();
@@ -133,13 +147,12 @@ public class BostedRestTjeneste {
                 var avklaringDto = verdi.byggAvklaringDtoHvisFinnes();
                 var resultatDto = verdi.byggResultatDtoHvisFinnes();
 
-                var erBosatt = resultatDto != null ? resultatDto.erBosatt() : null;
                 var erIkkeOppfyltÅrsak = resultatDto != null ? resultatDto.ikkeOppfyltÅrsak() : null;
 
                 return new BostedGrunnlagPeriodeDto(
                     segment.getFom(),
                     segment.getTom(),
-                    erBosatt,
+                    faktaOgAvklaring.isErBosattITrondheim(),
                     erIkkeOppfyltÅrsak,
                     faktaOgAvklaring.getKilde(),
                     søknadsinformasjon.isErBosattITrondheim(),
