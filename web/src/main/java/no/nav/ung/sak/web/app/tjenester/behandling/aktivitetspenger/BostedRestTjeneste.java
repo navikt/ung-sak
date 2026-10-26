@@ -133,13 +133,12 @@ public class BostedRestTjeneste {
                 var avklaringDto = verdi.byggAvklaringDtoHvisFinnes();
                 var resultatDto = verdi.byggResultatDtoHvisFinnes();
 
-                var erBosatt = resultatDto != null ? resultatDto.erBosatt() : null;
                 var erIkkeOppfyltÅrsak = resultatDto != null ? resultatDto.ikkeOppfyltÅrsak() : null;
 
                 return new BostedGrunnlagPeriodeDto(
                     segment.getFom(),
                     segment.getTom(),
-                    erBosatt,
+                    faktaOgAvklaring.isErBosattITrondheim(),
                     erIkkeOppfyltÅrsak,
                     faktaOgAvklaring.getKilde(),
                     søknadsinformasjon.isErBosattITrondheim(),
