@@ -17,7 +17,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStatusEvent.BehandlingAvsluttetEvent;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarligTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -43,10 +43,10 @@ public class OppgaveTjeneste {
     private FagsakRepository fagsakRepository;
 
     private BehandlingRepository behandlingRepository;
-    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
     private ProsessTaskTjeneste taskTjeneste;
     private OppgaveRestKlient restKlient;
+    private BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste;
 
 
     OppgaveTjeneste() {
@@ -57,13 +57,13 @@ public class OppgaveTjeneste {
     public OppgaveTjeneste(BehandlingRepositoryProvider repositoryProvider,
                            OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository,
                            OppgaveRestKlient restKlient,
-                           ProsessTaskTjeneste taskTjeneste) {
+                           ProsessTaskTjeneste taskTjeneste, BehandlingAnsvarligTjeneste behandlingAnsvarligTjeneste) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.behandlingAnsvarligRepository = repositoryProvider.getBehandlingAnsvarligRepository();
         this.oppgaveBehandlingKoblingRepository = oppgaveBehandlingKoblingRepository;
         this.restKlient = restKlient;
         this.taskTjeneste = taskTjeneste;
+        this.behandlingAnsvarligTjeneste = behandlingAnsvarligTjeneste;
     }
 
     public void avslutt(Long behandlingId, String oppgaveId) {
@@ -194,7 +194,7 @@ public class OppgaveTjeneste {
             return null;
         }
         Fagsak fagsak = behandling.getFagsak();
-        String behandlendeEnhet = hentBehandlendeEnhet(behandling.getId());
+        String behandlendeEnhet = hentBehandlendeEnhet(behandling);
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandlendeEnhet, beskrivelse, prioritet, fristDager,
             mapYtelseTypeTilTema(fagsak.getYtelseType()))
             .medOppgavetype(oppgaveÅrsak.getKode());
@@ -219,7 +219,7 @@ public class OppgaveTjeneste {
 
     public String opprettOppgaveOmAnke(String behandlingId, OppgaveÅrsak oppgaveÅrsak, String utfall) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        String behandlendeEnhet = hentBehandlendeEnhet(behandling.getId());
+        String behandlendeEnhet = hentBehandlendeEnhet(behandling);
         var fagsak = behandling.getFagsak();
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandlendeEnhet,
             OPPGAVEBESKRIVELSE_ANKE + utfall, Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER,
@@ -238,8 +238,8 @@ public class OppgaveTjeneste {
         return oppgaveId;
     }
 
-    private String hentBehandlendeEnhet(Long behandlingId) {
-        return behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId)
+    private String hentBehandlendeEnhet(Behandling behandling) {
+        return behandlingAnsvarligTjeneste.finnBehandlingAnsvarligFraBehandlingTilstand(behandling)
             .map(BehandlingAnsvarlig::getBehandlendeEnhet)
             .orElse(null);
     }

@@ -5,9 +5,11 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.integrasjon.oppgave.v1.*;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarligTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -54,14 +56,15 @@ public class OppgaveTjenesteTest {
         taskTjeneste = mock(ProsessTaskTjeneste.class);
         oppgaveRestKlient = Mockito.mock(OppgaveRestKlient.class);
         oppgaveBehandlingKoblingRepository = spy(new OppgaveBehandlingKoblingRepository(entityManager));
-        tjeneste = new OppgaveTjeneste(repositoryProvider, oppgaveBehandlingKoblingRepository, oppgaveRestKlient, taskTjeneste);
+        tjeneste = new OppgaveTjeneste(repositoryProvider, oppgaveBehandlingKoblingRepository, oppgaveRestKlient, taskTjeneste,
+            new BehandlingAnsvarligTjeneste(behandlingAnsvarligRepository));
         lagBehandling();
     }
 
     private void lagBehandling() {
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
-        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), new OrganisasjonsEnhet("4802", null));
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), BehandlingDel.SENTRAL, new OrganisasjonsEnhet("4802", null), null);
     }
 
     @Test

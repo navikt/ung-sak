@@ -27,10 +27,6 @@ public class BehandlingAnsvarligRepository {
         this.behandlingRepository = behandlingRepository;
     }
 
-    public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId) {
-        return hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL);
-    }
-
     public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(behandlingDel, "behandlingDel");
@@ -60,14 +56,6 @@ public class BehandlingAnsvarligRepository {
             .getResultList()
             .stream()
             .collect(Collectors.groupingBy(BehandlingAnsvarlig::getBehandlingId));
-    }
-
-    public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet) {
-        setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, null);
-    }
-
-    public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet, String årsak) {
-        setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, årsak);
     }
 
     public void setBehandlendeEnheter(Long behandlingId, Map<BehandlingDel, OrganisasjonsEnhet> enheter) {
