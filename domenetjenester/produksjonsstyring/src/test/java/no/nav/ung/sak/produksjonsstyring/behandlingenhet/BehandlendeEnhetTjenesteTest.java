@@ -57,8 +57,8 @@ class BehandlendeEnhetTjenesteTest {
 
     @Test
     void aktivitetspenger_slår_opp_hver_del_med_sitt_behandlingstema() {
-        when(enhetsTjeneste.hentEnhetSjekkKunAktør(AKTØR_ID, FagsakYtelseType.AKTIVITETSPENGER, "YTELSE")).thenReturn(SENTRAL_ENHET);
-        when(enhetsTjeneste.hentEnhetSjekkKunAktør(AKTØR_ID, FagsakYtelseType.AKTIVITETSPENGER, "INNGANGSVILKÅR")).thenReturn(NAV_KONTOR);
+        when(enhetsTjeneste.hentEnhetSjekkKunAktør(AKTØR_ID, FagsakYtelseType.AKTIVITETSPENGER, BehandlendeEnhetTjeneste.YTELSE_TEMA)).thenReturn(SENTRAL_ENHET);
+        when(enhetsTjeneste.hentEnhetSjekkKunAktør(AKTØR_ID, FagsakYtelseType.AKTIVITETSPENGER,  BehandlendeEnhetTjeneste.INNGANGSVILKÅR_TEMA)).thenReturn(NAV_KONTOR);
 
         var enheter = tjeneste.finnBehandlendeEnheterFor(fagsak(FagsakYtelseType.AKTIVITETSPENGER));
 
@@ -104,9 +104,9 @@ class BehandlendeEnhetTjenesteTest {
             BehandlingDel.SENTRAL, ansvarlig(BehandlingDel.SENTRAL, SENTRAL_ENHET),
             BehandlingDel.NAV_KONTOR, ansvarlig(BehandlingDel.NAV_KONTOR, NAV_KONTOR)));
         var nyttNavKontor = new OrganisasjonsEnhet("0301", "Nav Oslo");
-        when(enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(eq(FagsakYtelseType.AKTIVITETSPENGER), eq("YTELSE"), eq(SENTRAL_ENHET.getEnhetId()), eq(AKTØR_ID), any()))
+        when(enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(eq(FagsakYtelseType.AKTIVITETSPENGER), eq( BehandlendeEnhetTjeneste.YTELSE_TEMA), eq(SENTRAL_ENHET.getEnhetId()), eq(AKTØR_ID), any()))
             .thenReturn(Optional.empty());
-        when(enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(eq(FagsakYtelseType.AKTIVITETSPENGER), eq("INNGANGSVILKÅR"), eq(NAV_KONTOR.getEnhetId()), eq(AKTØR_ID), any()))
+        when(enhetsTjeneste.finnEndretEnhetSjekkOppgittePersoner(eq(FagsakYtelseType.AKTIVITETSPENGER), eq( BehandlendeEnhetTjeneste.INNGANGSVILKÅR_TEMA), eq(NAV_KONTOR.getEnhetId()), eq(AKTØR_ID), any()))
             .thenReturn(Optional.of(nyttNavKontor));
 
         var endrede = tjeneste.sjekkEnheterEtterEndring(behandling);

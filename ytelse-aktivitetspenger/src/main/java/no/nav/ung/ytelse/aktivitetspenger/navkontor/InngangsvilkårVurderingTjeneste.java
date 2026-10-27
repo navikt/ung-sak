@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -45,6 +46,18 @@ public class InngangsvilkårVurderingTjeneste {
         this.vilkårVurderingRepository = vilkårVurderingRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+    }
+
+    public LocalDateTimeline<VilkårPeriode> hentRelevanteVilkårsperioder(Long behandlingId, VilkårType vilkårType) {
+        return alleRelevanteVilkårsperioder(vilkårResultatRepository.hent(behandlingId), vilkårType);
+    }
+
+    // Ikke-relevante og avkortede perioder vurderes aldri. Avklaring, vurdering og visning må bruke samme utvalg,
+    // ellers kan en avklaring dekke perioder som ikke vises, eller en vurdering mangle avklaring.
+    public static LocalDateTimeline<VilkårPeriode> alleRelevanteVilkårsperioder(Vilkårene vilkårene, VilkårType vilkårType) {
+        return vilkårene.getVilkårTimeline(vilkårType)
+            .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT)
+            .filterValue(v -> v.getAvslagsårsak() != Avslagsårsak.AVKORTET);
     }
 
     public void settBistandsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
