@@ -6481,7 +6481,8 @@
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FagsakProsessTaskKoblingDto" : {
         "properties" : {
           "behandlingId" : {
-            "type" : "string"
+            "format" : "int64",
+            "type" : "integer"
           },
           "blokkererAndreTasker" : {
             "description" : "Koblingen har laveste gruppe_sekvensnr på fagsaken, og blokkerer tasker i senere grupper til prosesstasken er ferdig.",
@@ -6490,10 +6491,6 @@
           "blokkertAv" : {
             "format" : "int64",
             "type" : "integer"
-          },
-          "foreldreløs" : {
-            "description" : "Prosesstasken finnes ikke lenger, men koblingen ligger igjen. Kan fjernes med POST /forvaltning/fagsak-prosess-task/fjern-foreldrelose-koblinger.",
-            "type" : "boolean"
           },
           "gruppeSekvensNr" : {
             "format" : "int64",
@@ -6506,6 +6503,10 @@
           "prosessTaskId" : {
             "format" : "int64",
             "type" : "integer"
+          },
+          "prosessTaskMangler" : {
+            "description" : "Prosesstasken finnes ikke lenger, men koblingen ligger igjen. Kan fjernes med POST /forvaltning/fagsak-prosess-task/fjern-koblinger-uten-prosesstask.",
+            "type" : "boolean"
           },
           "prosessTaskStatus" : {
             "$ref" : "#/components/schemas/k9.prosesstask.api.ProsessTaskStatus"
@@ -6541,35 +6542,23 @@
       },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FjernFagsakProsessTaskKoblingerResultat" : {
         "properties" : {
+          "antallTaskerFrigittFraVeto" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
           "fjernedeProsessTaskIder" : {
             "items" : {
               "format" : "int64",
               "type" : "integer"
             },
             "type" : "array"
-          },
-          "frigittFraVeto" : {
-            "format" : "int32",
-            "type" : "integer"
           }
         },
         "type" : "object"
       },
-      "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.HentFagsakProsessTaskKoblingerRequest" : {
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.SakMedKoblingerUtenProsessTaskDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "type" : "string"
-          },
-          "saksnummer" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "begrunnelse", "saksnummer" ],
-        "type" : "object"
-      },
-      "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.SakMedForeldreløseKoblingerDto" : {
-        "properties" : {
-          "foreldreløseKoblinger" : {
+          "koblingerUtenProsessTask" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FagsakProsessTaskKoblingDto"
             },
@@ -9623,10 +9612,10 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/api/forvaltning/fagsak-prosess-task/fjern-foreldrelose-koblinger" : {
+    "/api/forvaltning/fagsak-prosess-task/fjern-koblinger-uten-prosesstask" : {
       "post" : {
-        "description" : "Fjerner foreldreløse koblinger i FAGSAK_PROSESS_TASK (prosesstasken finnes ikke lenger) for angitte prosesstasker på fagsaken, og frigir tasker som står i VETO blokkert av dem. Avviser hele forespørselen dersom én av prosesstaskene ikke har en foreldreløs kobling på fagsaken.",
-        "operationId" : "fjernForeldreløseKoblinger",
+        "description" : "Fjerner koblinger i FAGSAK_PROSESS_TASK der prosesstasken ikke lenger finnes, for angitte prosesstasker på fagsaken, og frigir tasker som står i VETO blokkert av dem. Avviser hele forespørselen dersom én av prosesstaskene finnes eller ikke har kobling på fagsaken.",
+        "operationId" : "fjernKoblingerUtenProsessTask",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -9638,60 +9627,37 @@
           "required" : true
         },
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
-              "application/json" : {
+              "application/json; charset=UTF-8" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FjernFagsakProsessTaskKoblingerResultat"
                 }
               }
-            }
+            },
+            "description" : "default response"
           }
         },
-        "summary" : "Fjerner foreldreløse koblinger mellom fagsak og prosesstask",
-        "tags" : [ "forvaltning" ]
-      }
-    },
-    "/api/forvaltning/fagsak-prosess-task/foreldrelose" : {
-      "get" : {
-        "description" : "Henter foreldreløse koblinger i FAGSAK_PROSESS_TASK (prosesstasken finnes ikke lenger) for alle saker.",
-        "operationId" : "hentForeldreløseKoblinger",
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.SakMedForeldreløseKoblingerDto"
-                  },
-                  "type" : "array"
-                }
-              }
-            }
-          }
-        },
-        "summary" : "Henter foreldreløse koblinger mellom fagsak og prosesstask for alle saker",
+        "summary" : "Fjerner koblinger uten prosesstask",
         "tags" : [ "forvaltning" ]
       }
     },
     "/api/forvaltning/fagsak-prosess-task/hent-koblinger-for-sak" : {
-      "post" : {
-        "description" : "Henter koblinger mellom fagsak og prosesstask (FAGSAK_PROSESS_TASK), også foreldreløse koblinger der prosesstasken ikke lenger finnes. Logger hvem som har hatt innsyn i saken, med begrunnelse.",
+      "get" : {
+        "description" : "Henter koblinger mellom fagsak og prosesstask (FAGSAK_PROSESS_TASK), også koblinger der prosesstasken ikke lenger finnes.",
         "operationId" : "hentKoblinger",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.HentFagsakProsessTaskKoblingerRequest"
-              }
-            }
-          },
-          "required" : true
-        },
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
+          }
+        } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
-              "application/json" : {
+              "application/json; charset=UTF-8" : {
                 "schema" : {
                   "items" : {
                     "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FagsakProsessTaskKoblingDto"
@@ -9699,10 +9665,34 @@
                   "type" : "array"
                 }
               }
-            }
+            },
+            "description" : "default response"
           }
         },
         "summary" : "Henter koblinger mellom fagsak og prosesstask",
+        "tags" : [ "forvaltning" ]
+      }
+    },
+    "/api/forvaltning/fagsak-prosess-task/koblinger-uten-prosesstask" : {
+      "get" : {
+        "description" : "Henter koblinger i FAGSAK_PROSESS_TASK der prosesstasken ikke lenger finnes, for alle saker.",
+        "operationId" : "hentKoblingerUtenProsessTask",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.SakMedKoblingerUtenProsessTaskDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter koblinger uten prosesstask for alle saker",
         "tags" : [ "forvaltning" ]
       }
     },

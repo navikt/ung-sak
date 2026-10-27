@@ -54,8 +54,8 @@ class HåndterRekkefølgeAvFagsakProsessTaskGrupperTest {
 
     @Test
     void skal_feile_med_tydelig_melding_når_blokkerende_task_ikke_finnes() {
-        var foreldreløs = new FagsakProsessTask(FAGSAK_ID, "20", BLOKKERENDE_TASK_ID, 100L, "behandlingskontroll.fortsettBehandling");
-        when(repository.sjekkTillattKjøreFagsakProsessTask(task)).thenReturn(Optional.of(foreldreløs));
+        var koblingUtenProsessTask = new FagsakProsessTask(FAGSAK_ID, "20", BLOKKERENDE_TASK_ID, 100L, "behandlingskontroll.fortsettBehandling");
+        when(repository.sjekkTillattKjøreFagsakProsessTask(task)).thenReturn(Optional.of(koblingUtenProsessTask));
         when(repository.prosessTaskFinnes(BLOKKERENDE_TASK_ID)).thenReturn(false);
 
         assertThatThrownBy(() -> håndterer.vetoKjøring(task))
@@ -63,7 +63,7 @@ class HåndterRekkefølgeAvFagsakProsessTaskGrupperTest {
             .hasMessageContaining("prosesstask[" + BLOKKERENDE_TASK_ID + "]")
             .hasMessageContaining("fagsak[" + FAGSAK_ID + "]")
             .hasMessageContaining("gruppe_sekvensnr[100]")
-            .hasMessageContaining("POST /forvaltning/fagsak-prosess-task/fjern-foreldrelose-koblinger");
+            .hasMessageContaining("POST /forvaltning/fagsak-prosess-task/fjern-koblinger-uten-prosesstask");
         verify(taskTjeneste, never()).finn(BLOKKERENDE_TASK_ID);
     }
 

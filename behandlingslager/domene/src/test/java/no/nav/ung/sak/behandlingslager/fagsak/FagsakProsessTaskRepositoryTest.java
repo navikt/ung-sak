@@ -438,39 +438,39 @@ class FagsakProsessTaskRepositoryTest {
     }
 
     @Test
-    void hentKoblinger_skal_inkludere_foreldreløse_koblinger() {
+    void hentKoblinger_skal_inkludere_koblinger_uten_prosesstask() {
         ProsessTaskData task = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
         fagsakProsessTaskRepository.lagreNyGruppe(task);
         fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, behandlingId.toString(), task.getId(), 200L, task.getTaskType()));
-        Long foreldreløsId = lagForeldreløsKobling(100L);
+        Long slettetTaskId = lagKoblingUtenProsessTask(100L);
         entityManager.flush();
 
         var koblinger = fagsakProsessTaskRepository.hentKoblinger(fagsakId);
 
-        assertThat(koblinger).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(foreldreløsId, task.getId());
-        var foreldreløs = koblinger.get(0);
-        assertThat(foreldreløs.erForeldreløs()).isTrue();
-        assertThat(foreldreløs.prosessTaskStatus()).isNull();
-        assertThat(foreldreløs.gruppeSekvensNr()).isEqualTo(100L);
-        assertThat(foreldreløs.behandlingId()).isEqualTo(behandlingId.toString());
-        assertThat(foreldreløs.opprettetTid()).isNotNull();
+        assertThat(koblinger).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(slettetTaskId, task.getId());
+        var utenProsessTask = koblinger.get(0);
+        assertThat(utenProsessTask.prosessTaskMangler()).isTrue();
+        assertThat(utenProsessTask.prosessTaskStatus()).isNull();
+        assertThat(utenProsessTask.gruppeSekvensNr()).isEqualTo(100L);
+        assertThat(utenProsessTask.behandlingId()).isEqualTo(behandlingId);
+        assertThat(utenProsessTask.opprettetTid()).isNotNull();
         var vanlig = koblinger.get(1);
-        assertThat(vanlig.erForeldreløs()).isFalse();
+        assertThat(vanlig.prosessTaskMangler()).isFalse();
         assertThat(vanlig.prosessTaskStatus()).isEqualTo(ProsessTaskStatus.KLAR);
         assertThat(fagsakProsessTaskRepository.prosessTaskFinnes(task.getId())).isTrue();
-        assertThat(fagsakProsessTaskRepository.prosessTaskFinnes(foreldreløsId)).isFalse();
+        assertThat(fagsakProsessTaskRepository.prosessTaskFinnes(slettetTaskId)).isFalse();
     }
 
     @Test
-    void fjernForeldreløseKoblinger_skal_fjerne_kobling_og_frigi_vetoede_tasker() {
-        Long foreldreløsId = lagForeldreløsKobling(100L);
+    void fjernKoblingerUtenProsessTask_skal_fjerne_kobling_og_frigi_vetoede_tasker() {
+        Long slettetTaskId = lagKoblingUtenProsessTask(100L);
         ProsessTaskData vetoet = lagTask(taskTypeB, ProsessTaskStatus.VETO);
-        vetoet.setBlokkertAvProsessTaskId(foreldreløsId);
+        vetoet.setBlokkertAvProsessTaskId(slettetTaskId);
         fagsakProsessTaskRepository.lagreNyGruppe(vetoet);
         fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoet.getId(), 200L, vetoet.getTaskType()));
         entityManager.flush();
 
-        int frigitt = fagsakProsessTaskRepository.fjernForeldreløseKoblinger(fagsakId, Set.of(foreldreløsId));
+        int frigitt = fagsakProsessTaskRepository.fjernKoblingerUtenProsessTask(fagsakId, Set.of(slettetTaskId));
         entityManager.clear();
 
         assertThat(frigitt).isEqualTo(1);
@@ -481,33 +481,33 @@ class FagsakProsessTaskRepositoryTest {
     }
 
     @Test
-    void fjernForeldreløseKoblinger_skal_ikke_fjerne_kobling_til_task_som_finnes() {
+    void fjernKoblingerUtenProsessTask_skal_ikke_fjerne_kobling_til_task_som_finnes() {
         ProsessTaskData task = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
         fagsakProsessTaskRepository.lagreNyGruppe(task);
         fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, behandlingId.toString(), task.getId(), 100L, task.getTaskType()));
-        Long foreldreløsId = lagForeldreløsKobling(200L);
+        Long slettetTaskId = lagKoblingUtenProsessTask(200L);
         entityManager.flush();
 
         assertThrows(IllegalStateException.class, () ->
-            fagsakProsessTaskRepository.fjernForeldreløseKoblinger(fagsakId, Set.of(task.getId(), foreldreløsId)));
+            fagsakProsessTaskRepository.fjernKoblingerUtenProsessTask(fagsakId, Set.of(task.getId(), slettetTaskId)));
     }
 
     @Test
-    void fjernForeldreløseKoblinger_skal_ikke_fjerne_kobling_på_annen_fagsak() {
-        Long foreldreløsId = lagForeldreløsKobling(100L);
+    void fjernKoblingerUtenProsessTask_skal_ikke_fjerne_kobling_på_annen_fagsak() {
+        Long slettetTaskId = lagKoblingUtenProsessTask(100L);
         Fagsak annenFagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), mock(Saksnummer.class), LocalDate.now(), null);
         Long annenFagsakId = fagsakRepository.opprettNy(annenFagsak);
         entityManager.flush();
 
         assertThrows(IllegalStateException.class, () ->
-            fagsakProsessTaskRepository.fjernForeldreløseKoblinger(annenFagsakId, Set.of(foreldreløsId)));
-        assertThat(fagsakProsessTaskRepository.hentKoblinger(fagsakId)).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(foreldreløsId);
+            fagsakProsessTaskRepository.fjernKoblingerUtenProsessTask(annenFagsakId, Set.of(slettetTaskId)));
+        assertThat(fagsakProsessTaskRepository.hentKoblinger(fagsakId)).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(slettetTaskId);
     }
 
     @Test
-    void finnFagsakerMedForeldreløseKoblinger_skal_kun_finne_fagsaker_med_foreldreløse_koblinger() {
-        lagForeldreløsKobling(100L);
-        lagForeldreløsKobling(null);
+    void finnFagsakerMedKoblingerUtenProsessTask_skal_kun_finne_fagsaker_med_koblinger_uten_prosesstask() {
+        lagKoblingUtenProsessTask(100L);
+        lagKoblingUtenProsessTask(null);
         Fagsak annenFagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), mock(Saksnummer.class), LocalDate.now(), null);
         Long annenFagsakId = fagsakRepository.opprettNy(annenFagsak);
         ProsessTaskData task = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
@@ -516,13 +516,13 @@ class FagsakProsessTaskRepositoryTest {
         fagsakProsessTaskRepository.lagre(new FagsakProsessTask(annenFagsakId, behandlingId.toString(), task.getId(), 100L, task.getTaskType()));
         entityManager.flush();
 
-        var fagsakIder = fagsakProsessTaskRepository.finnFagsakerMedForeldreløseKoblinger();
+        var fagsakIder = fagsakProsessTaskRepository.finnFagsakerMedKoblingerUtenProsessTask();
 
         assertThat(fagsakIder).containsOnlyOnce(fagsakId).doesNotContain(annenFagsakId);
     }
 
     /** Kobling til en prosesstask som ikke lenger finnes, slik ryddProsessTasks har etterlatt i prod. */
-    private Long lagForeldreløsKobling(Long gruppeSekvensNr) {
+    private Long lagKoblingUtenProsessTask(Long gruppeSekvensNr) {
         ProsessTaskData task = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
         fagsakProsessTaskRepository.lagreNyGruppe(task);
         Long prosessTaskId = task.getId();

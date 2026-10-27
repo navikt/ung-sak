@@ -6,11 +6,11 @@ import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 /**
  * En rad i FAGSAK_PROSESS_TASK, med status fra PROSESS_TASK dersom prosesstasken finnes.
- * Koblingen er foreldreløs når prosesstasken ikke lenger finnes.
+ * Prosesstasken mangler når den er slettet uten at koblingen er fjernet.
  */
 public record FagsakProsessTaskKobling(Long id,
                                        Long prosessTaskId,
-                                       String behandlingId,
+                                       Long behandlingId,
                                        String taskType,
                                        Long gruppeSekvensNr,
                                        LocalDateTime opprettetTid,
@@ -18,7 +18,7 @@ public record FagsakProsessTaskKobling(Long id,
                                        ProsessTaskStatus prosessTaskStatus,
                                        Long blokkertAv) {
 
-    public boolean erForeldreløs() {
+    public boolean prosessTaskMangler() {
         return !prosessTaskFinnes;
     }
 }

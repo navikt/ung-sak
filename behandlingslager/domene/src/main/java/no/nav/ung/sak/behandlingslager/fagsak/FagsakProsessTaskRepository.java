@@ -466,7 +466,7 @@ public class FagsakProsessTaskRepository {
     }
 
     /**
-     * Henter alle koblinger for fagsaken, også foreldreløse koblinger der prosesstasken ikke lenger finnes.
+     * Henter alle koblinger for fagsaken, også koblinger der prosesstasken ikke lenger finnes.
      */
     public List<FagsakProsessTaskKobling> hentKoblinger(Long fagsakId) {
         String sql = """
@@ -498,7 +498,7 @@ public class FagsakProsessTaskRepository {
             .map(r -> new FagsakProsessTaskKobling(
                 (Long) r[0],
                 (Long) r[1],
-                (String) r[2],
+                r[2] == null ? null : Long.valueOf((String) r[2]),
                 (String) r[3],
                 (Long) r[4],
                 (LocalDateTime) r[5],
@@ -511,7 +511,7 @@ public class FagsakProsessTaskRepository {
     /**
      * Fagsaker som har minst én kobling til en prosesstask som ikke lenger finnes.
      */
-    public List<Long> finnFagsakerMedForeldreløseKoblinger() {
+    public List<Long> finnFagsakerMedKoblingerUtenProsessTask() {
         return em.createNativeQuery("""
                 select distinct fpt.fagsak_id
                 from fagsak_prosess_task fpt
@@ -529,7 +529,7 @@ public class FagsakProsessTaskRepository {
      *
      * @return antall tasker som ble frigitt fra VETO
      */
-    public int fjernForeldreløseKoblinger(Long fagsakId, Set<Long> prosessTaskIder) {
+    public int fjernKoblingerUtenProsessTask(Long fagsakId, Set<Long> prosessTaskIder) {
         Objects.requireNonNull(fagsakId, "fagsakId");
         if (prosessTaskIder == null || prosessTaskIder.isEmpty()) {
             throw new IllegalArgumentException("Må angi minst én prosessTaskId");
@@ -544,12 +544,11 @@ public class FagsakProsessTaskRepository {
             .setParameter("prosessTaskIder", prosessTaskIder)
             .executeUpdate();
         if (fjernet != prosessTaskIder.size()) {
-            throw new IllegalStateException("Forventet å fjerne " + prosessTaskIder.size() + " foreldreløse koblinger for fagsak[" + fagsakId
+            throw new IllegalStateException("Forventet å fjerne " + prosessTaskIder.size() + " koblinger uten prosesstask for fagsak[" + fagsakId
                 + "], men fant " + fjernet + ". Avbryter uten å fjerne noe.");
         }
         int frigitt = frigiVetoBlokkertAvSlettedeTasker(prosessTaskIder);
-        em.flush();
-        log.info("Fjernet foreldreløse koblinger for fagsak[{}] til prosesstasker {}. Frigitt {} tasker fra VETO.", fagsakId, prosessTaskIder, frigitt);
+        log.info("Fjernet koblinger uten prosesstask for fagsak[{}] til prosesstasker {}. Frigitt {} tasker fra VETO.", fagsakId, prosessTaskIder, frigitt);
         return frigitt;
     }
 
