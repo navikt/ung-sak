@@ -64,7 +64,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Fordi du får én dagsats når du er under 25 år og en annen dagsats når du er over 25 år, har vi gjort to ulike beregninger. \
                 Slik har vi regnet ut satsen som du får før du fylte 25 år. \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger før du fylte 25 år, har vi brukt årsinntekten din for 2024 på 300 000 kroner. \
-                Det er fordi denne inntekten er høyere enn minstesatsen for deg som er under 25 år, og høyere enn gjennomsnittet av årsinntekten din for de tre siste ferdiglignede årene. Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger. \
+                Det er fordi denne inntekten er høyere enn minstesatsen for deg som er under 25 år, og høyere enn gjennomsnittet av årsinntekten din for de tre siste ferdiglignede årene. Vi bruker den høyeste summen i beregningen slik at du får mer i aktivitetspenger. \
                 For å finne dagsatsen din, har vi regnet ut hva 66 prosent av 300 000 kroner er. Denne summen deler vi på antall dager i et år, men fordi du ikke får penger for lørdager og søndager, deler vi summen på 260 dager. \
                 Det vil si at du har rett på 762 kroner per dag. \
                 Slik har vi regnet ut satsen du får etter at du fylte 25 år. \
@@ -304,7 +304,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 Hvorfor får du aktivitetspenger? \
-                Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp, sykepenger og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
+                Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
                 Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 31. oktober 2025. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("1–14 og § 18") + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
@@ -349,7 +349,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 Hvorfor får du aktivitetspenger? \
-                Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp, sykepenger og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
+                Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
                 Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025. \
                 Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("1–14 og § 18") + """
@@ -395,7 +395,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
     static String hvorforFårDuPengerAvsnitt() {
         return """
             Hvorfor får du aktivitetspenger? \
-            Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp, sykepenger og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
+            Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
             Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år. \
             """;
     }

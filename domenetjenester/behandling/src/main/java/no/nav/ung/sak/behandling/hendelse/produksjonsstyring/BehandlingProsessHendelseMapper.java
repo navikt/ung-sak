@@ -9,6 +9,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingStegDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.hendelse.EventHendelse;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -29,13 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -57,6 +52,7 @@ public class BehandlingProsessHendelseMapper {
 
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
 
+
         Optional<BehandlingAnsvarlig> behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.SENTRAL);
         Optional<BehandlingAnsvarlig> behandlingAnsvarligNavKontor = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.NAV_KONTOR);
 
@@ -71,6 +67,7 @@ public class BehandlingProsessHendelseMapper {
             .medEventHendelse(eventHendelse)
             .medBehandlingStatus(behandling.getStatus().getKode())
             .medBehandlingSteg(behandling.getAktivtBehandlingSteg() == null ? null : behandling.getAktivtBehandlingSteg().getKode())
+            .medBehandlingenErHosNavKontor(uledOmBaehandlingErHosNavKontor(behandling))
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())
             .medOpprettetBehandling(behandling.getOpprettetDato())
@@ -78,14 +75,21 @@ public class BehandlingProsessHendelseMapper {
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medBehandlendeEnhet(behandlingAnsvarlig.map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null))
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
-            .medAnsvarligSaksbehandlerForTotrinn( behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
+            .medAnsvarligSaksbehandlerForTotrinn(behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
             .medAnsvarligBeslutterForTotrinn(behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
+            .medNavKontorBehandlendeEnhet(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null))
             .medNavKontorAnsvarligSaksbehandler(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
             .medNavKontorBeslutter(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)
             .medBehandlingsårsaker(behandling.getBehandlingÅrsaker().stream().map(årsak -> årsak.getBehandlingÅrsakType().getKode()).distinct().toList())
             .build();
+    }
+
+    private Boolean uledOmBaehandlingErHosNavKontor(Behandling behandling) {
+        return BehandlingStegDel.utled(behandling.getFagsakYtelseType(), behandling.getAktivtBehandlingSteg())
+            .map(BehandlingDel.NAV_KONTOR::equals)
+            .orElse(null);
     }
 
     public LocalDateTime finnEldsteMottattdato(Behandling behandling) {

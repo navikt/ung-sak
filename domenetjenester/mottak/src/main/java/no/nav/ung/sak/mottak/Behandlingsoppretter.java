@@ -7,14 +7,11 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -41,7 +38,7 @@ public class Behandlingsoppretter {
     private SøknadRepository søknadRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
-    private Instance<NyBehandlingOppretter> nyBehandlingOpprettere;
+    private Instance<RevurderingTjeneste> revurderingTjenester;
 
     @Inject
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
@@ -49,15 +46,15 @@ public class Behandlingsoppretter {
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                 BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
-                                @Any Instance<NyBehandlingOppretter> nyBehandlingOpprettere) {
+                                @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
-        this.nyBehandlingOpprettere = nyBehandlingOpprettere;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.revurderingRepository = behandlingRepositoryProvider.getBehandlingRevurderingRepository();
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
+        this.revurderingTjenester = revurderingTjenester;
     }
 
     /**
@@ -68,6 +65,8 @@ public class Behandlingsoppretter {
         if (!tidligereBehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(true)) {
             throw new IllegalStateException("Utviklerfeil: Prøver opprette ny behandling når det finnes åpen av samme type: " + fagsak.getId());
         }
+        // Hentes før behandlingen opprettes, ellers finnes ingen forrige behandling å gjenbruke enhet fra
+        var behandlendeEnheter = behandlendeEnhetTjeneste.finnBehandlendeEnheterFor(fagsak);
         Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
             if (!BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
                 BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
@@ -76,8 +75,7 @@ public class Behandlingsoppretter {
 
         });
 
-        OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet);
+        behandlingAnsvarligRepository.setBehandlendeEnheter(behandling.getId(), behandlendeEnheter);
 
         return behandling; // NOSONAR
     }
@@ -91,8 +89,8 @@ public class Behandlingsoppretter {
     }
 
     public Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, origBehandling.getFagsakYtelseType()).orElseThrow();
-        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
+        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, origBehandling.getFagsakYtelseType()).orElseThrow();
+        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak);
         return revurdering;
     }
 
@@ -143,14 +141,9 @@ public class Behandlingsoppretter {
         if (søknad.isPresent()) {
             søknadRepository.lagreOgFlush(behandling, søknad.get());
         }
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
+        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, fagsak.getYtelseType()).orElseThrow();
         revurderingTjeneste.kopierAlleGrunnlagFraTidligereBehandling(behandlingMedSøknad, behandling);
         return behandling;
-    }
-
-    public Behandling opprettNyBehandlingFra(Behandling forrigeBehandling, BehandlingÅrsakType behandlingÅrsakType) {
-        Behandling nyBehandling = getNyBehandlingOppretter(forrigeBehandling).opprettNyBehandling(forrigeBehandling, behandlingÅrsakType);
-        return nyBehandling;
     }
 
     public Optional<Behandling> sisteHenlagteFørstegangsbehandling(Fagsak fagsak) {
@@ -165,11 +158,5 @@ public class Behandlingsoppretter {
         }
 
         return Optional.empty();
-    }
-
-    NyBehandlingOppretter getNyBehandlingOppretter(Behandling forrigeBehandling) {
-        return BehandlingTypeRef.Lookup.find(NyBehandlingOppretter.class, nyBehandlingOpprettere, forrigeBehandling.getFagsakYtelseType(), forrigeBehandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException(
-                "NyBehandlingOppretter ikke implementert for ytelse [" + forrigeBehandling.getFagsakYtelseType() + "], behandlingtype [" + forrigeBehandling.getType() + "]"));
     }
 }
