@@ -74,7 +74,8 @@ public class BehandlingskontrollEventObserver {
         }
     }
 
-    public void observerOvergangDel1Del2(@Observes BehandlingStegOvergangEvent event) {
+    public void observerOvergangDel1Del2(
+        @Observes @jakarta.annotation.Priority(jakarta.enterprise.inject.spi.ObserverMethod.DEFAULT_PRIORITY + 1) BehandlingStegOvergangEvent event) {
         if (event.getFraStegType() == null || event.getTilStegType() == null) {
             return;
         }
