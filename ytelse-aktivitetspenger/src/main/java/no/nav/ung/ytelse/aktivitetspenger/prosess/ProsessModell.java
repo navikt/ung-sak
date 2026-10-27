@@ -65,6 +65,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_BOSTEDVILKÅR)
             .medSteg(BehandlingStegType.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER)
             .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
+            .medSteg(BehandlingStegType.VURDER_FAKTA_OM_BISTAND)
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
             .medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR)
             .medSteg(BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR)
