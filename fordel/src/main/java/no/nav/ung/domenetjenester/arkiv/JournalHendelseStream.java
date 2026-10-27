@@ -63,8 +63,7 @@ public class JournalHendelseStream implements KafkaIntegration {
         Serde<JournalfoeringHendelseRecord> serdeValue = topic.getSerdeValue();
 
 
-        //FIXME AKT legge til tema for aktivitetspenger
-        Set<String> aktuelleTemaOffisielleKoder = Set.of(OmrådeTema.UNG.getOffisiellKode());
+        Set<String> aktuelleTemaOffisielleKoder = Set.of(OmrådeTema.UNG.getOffisiellKode(), OmrådeTema.AVP.getOffisiellKode());
 
         final Consumed<String, JournalfoeringHendelseRecord> consumed = Consumed
             // Ved tap av offset spilles på nytt, 7 dager retention - anses som akseptabelt

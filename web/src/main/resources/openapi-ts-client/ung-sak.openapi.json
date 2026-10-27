@@ -130,7 +130,7 @@
         "x-enum-varnames" : [ "DAG", "DAG7", "UKE", "MND", "ÅR", "ENGANG", "AKTO", "UDEFINERT" ]
       },
       "k9.oppdrag.kontrakt.kodeverk.YtelseType" : {
-        "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AKT", "-" ],
+        "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AVP", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "AKTIVITETSPENGER", "UDEFINERT" ]
       },
@@ -1289,7 +1289,7 @@
         "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
       },
       "ung.kodeverk.behandling.FagsakYtelseType" : {
-        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AKT", "OBSOLETE", "-" ],
+        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AVP", "OBSOLETE", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "AKTIVITETSPENGER", "OBSOLETE", "UDEFINERT" ]
       },
@@ -2743,9 +2743,12 @@
           },
           "utfall" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
+          },
+          "vurderesIBehandlingen" : {
+            "type" : "boolean"
           }
         },
-        "required" : [ "periode", "utfall" ],
+        "required" : [ "periode", "utfall", "vurderesIBehandlingen" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandAvklaringIkkeOppfyltDto" : {
@@ -2939,7 +2942,7 @@
             "type" : "boolean"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
         "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],

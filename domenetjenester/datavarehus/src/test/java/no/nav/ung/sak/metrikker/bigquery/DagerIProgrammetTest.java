@@ -142,8 +142,21 @@ class DagerIProgrammetTest {
         assertThat(e2.antall()).isEqualByComparingTo(BigDecimal.valueOf(1));
     }
 
+    @Test
+    void skal_ikke_telle_programperioder_for_aktivitetspenger() {
+        lagFagsakOgBehandlingMedProgramperiode(FagsakYtelseType.AKTIVITETSPENGER, fraOgMedTilOgMed(DAGENS_DATO.minusDays(10), TIDENES_ENDE));
+
+        var dagerIProgrammet = statistikkRepository.dagerIProgrammet(DAGENS_DATO);
+
+        assertThat(dagerIProgrammet).isEmpty();
+    }
+
     private void lagFagsakOgBehandlingMedUngdomsprogram(DatoIntervallEntitet... perioder) {
-        var fagsak = byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.LØPENDE);
+        lagFagsakOgBehandlingMedProgramperiode(FagsakYtelseType.UNGDOMSYTELSE, perioder);
+    }
+
+    private void lagFagsakOgBehandlingMedProgramperiode(FagsakYtelseType ytelseType, DatoIntervallEntitet... perioder) {
+        var fagsak = byggFagsak(ytelseType, FagsakStatus.LØPENDE);
         lagreFagsaker(List.of(fagsak));
 
         var behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD).build();

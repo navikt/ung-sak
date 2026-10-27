@@ -53,7 +53,7 @@ public enum FagsakYtelseType implements Kodeverdi {
         }
     },
 
-    AKTIVITETSPENGER("AKT", "Aktivitetspenger", null, "AKT"){
+    AKTIVITETSPENGER("AVP", "Aktivitetspenger", null, "AVP"){
         @Override
         public boolean vurderÅpneOppgaverFørVedtak() {
             return false;
