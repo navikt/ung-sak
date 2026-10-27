@@ -29,9 +29,11 @@ public class RapportertInntektMapper {
 
     private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private final BehandlingRepository behandlingRepository;
+    private final RegisterinntektKilde registerinntektKilde;
 
     @Inject
-    public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, BehandlingRepository behandlingRepository) {
+    public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, BehandlingRepository behandlingRepository, RegisterinntektKilde registerinntektKilde) {
+        this.registerinntektKilde = registerinntektKilde;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingRepository = behandlingRepository;
     }
@@ -67,7 +69,7 @@ public class RapportertInntektMapper {
     }
 
     private InntektsKilde finnRegisterinntektKilde(Long behandlingId) {
-        return RegisterinntektKilde.forYtelse(behandlingRepository.hentBehandling(behandlingId).getFagsakYtelseType());
+        return registerinntektKilde.forYtelse(behandlingRepository.hentBehandling(behandlingId).getFagsakYtelseType());
     }
 
     private List<InntekterForKilde> grupperInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, InntektsKilde inntektsKilde) {

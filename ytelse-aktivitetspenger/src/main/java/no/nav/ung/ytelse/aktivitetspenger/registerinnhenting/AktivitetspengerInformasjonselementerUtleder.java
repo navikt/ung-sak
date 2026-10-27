@@ -1,6 +1,8 @@
 package no.nav.ung.ytelse.aktivitetspenger.registerinnhenting;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -31,18 +33,34 @@ public class AktivitetspengerInformasjonselementerUtleder implements Informasjon
             INNTEKT_AKTIVITETSPENGERGRUNNLAG,
             LIGNET_NÆRING));
 
+    private boolean aktivitetspengerInntektsgrunnlagEnabled;
+
+    AktivitetspengerInformasjonselementerUtleder() {
+        // for CDI proxy
+    }
+
+    @Inject
+    public AktivitetspengerInformasjonselementerUtleder(@KonfigVerdi(value = "AKTIVITETSPENGER_INNTEKTSGRUNNLAG_ENABLED", required = false, defaultVerdi = "true") boolean aktivitetspengerInntektsgrunnlagEnabled) {
+        this.aktivitetspengerInntektsgrunnlagEnabled = aktivitetspengerInntektsgrunnlagEnabled;
+    }
+
     @Override
     public Set<RegisterdataType> utled(BehandlingType behandlingType) {
         var informasjonselementer = FILTER.get(behandlingType);
         if (informasjonselementer == null) {
             throw new IllegalArgumentException("Har ikke konfigurert informasjonselementer for aktivitetspenger og behandlingType=" + behandlingType);
         }
-        return informasjonselementer;
+        if (aktivitetspengerInntektsgrunnlagEnabled) {
+            return informasjonselementer;
+        }
+        return informasjonselementer.stream()
+            .map(it -> it == INNTEKT_AKTIVITETSPENGERGRUNNLAG ? INNTEKT_UNGDOMSYTELSEGRUNNLAG : it)
+            .collect(Collectors.toSet());
     }
 
     @Override
     public Set<RegisterdataType> utled(BehandlingType behandlingType, Collection<BehandlingÅrsakType> behandlingÅrsaker) {
-        if (erKontrollAvInntekt(behandlingÅrsaker)) {
+        if (!aktivitetspengerInntektsgrunnlagEnabled || erKontrollAvInntekt(behandlingÅrsaker)) {
             return utled(behandlingType);
         }
         return utled(behandlingType).stream()

@@ -51,6 +51,7 @@ public class KontrollerInntektRestTjeneste {
     private EtterlysningTjeneste etterlysningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
+    private RegisterinntektKilde registerinntektKilde;
 
 
     public KontrollerInntektRestTjeneste() {
@@ -62,7 +63,9 @@ public class KontrollerInntektRestTjeneste {
                                          TilkjentYtelseRepository tilkjentYtelseRepository,
                                          RapportertInntektMapper rapportertInntektMapper,
                                          EtterlysningTjeneste etterlysningTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                         RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
+                                         RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder,
+                                         RegisterinntektKilde registerinntektKilde) {
+        this.registerinntektKilde = registerinntektKilde;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.rapportertInntektMapper = rapportertInntektMapper;
@@ -94,7 +97,7 @@ public class KontrollerInntektRestTjeneste {
         final var inntekter = iayGrunnlag.get().getRegisterVersjon()
             .map(InntektArbeidYtelseAggregat::getInntekter);
         final var registerinntekter = new InntektFilter(inntekter)
-            .getAlleInntekter(RegisterinntektKilde.forYtelse(behandling.getFagsakYtelseType()));
+            .getAlleInntekter(registerinntektKilde.forYtelse(behandling.getFagsakYtelseType()));
 
         return KontrollerInntektMapper.map(kontrollertInntektPerioder,
             rapporterteInntekter,
