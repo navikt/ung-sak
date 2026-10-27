@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
@@ -14,13 +16,16 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.VurderAktivitetDto;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.avkort.AvkortTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
@@ -38,6 +43,7 @@ public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderA
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private AvkortTjeneste avkortTjeneste;
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
 
     VurderAktivitetOppdaterer() {
@@ -49,11 +55,13 @@ public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderA
                                      InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                      InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
                                      AvkortTjeneste avkortTjeneste,
+                                     @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) AktivitetspengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                      VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.avkortTjeneste = avkortTjeneste;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.vilkårsvurderingHistorikkinnslagTjeneste = vilkårsvurderingHistorikkinnslagTjeneste;
     }
 
@@ -61,8 +69,12 @@ public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderA
     public OppdateringResultat oppdater(VurderAktivitetDto dto, AksjonspunktOppdaterParameter param) {
         HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(param.getBehandlingId(), AKTUELT_VILKÅR);
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(AKTUELT_VILKÅR)
+        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(AKTUELT_VILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
+
+        var vilkårsPerioderTilVurderingForNySøknad = vilkårsPerioderTilVurderingTjeneste.utledPerÅrsak(param.getBehandlingId(), AKTUELT_VILKÅR)
+            .getOrDefault(BehandlingÅrsakType.NY_SØKT_PERIODE, LocalDateTimeline.empty());
+        LocalDateTimeline<Boolean> perioderTilVurdering = TidslinjeUtil.toBooleanTimeline(eksisterendeVilkårperioder).intersection(vilkårsPerioderTilVurderingForNySøknad);
 
         LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
 

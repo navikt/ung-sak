@@ -16,9 +16,11 @@ Det har blitt opprettet en ny prosesstask for å kjøre full publisering av kont
 
 **Kriterier for behandlinger:**
 - Behandlingsstatus er `AVSLUTTET` eller `IVERKSATT`
-- Fagsak er av type `UNGDOMSYTELSE`
+- Fagsak er av oppgitt ytelsetype (task-parameter `ytelseType`, standard `UNG`). Kun `UNG` og `AKT` er tillatt; utgåtte fagsaker (`OBSOLETE`) tas aldri med.
 - Behandlingsårsak er `RE_KONTROLL_REGISTER_INNTEKT`
 - Vedtak har status `IVERKSATT`
+
+Data publiseres til tabellen for ytelsen: `kontrollerte_inntekt_perioder_v2` for ungdomsytelsen og `aktivitetspenger_kontrollerte_inntekt_perioder` for aktivitetspenger.
 
 ### 2. FullPubliseringAvKontrollerteInntektperioderMetrikkTaskTest.java
 **Plassering:** `domenetjenester/datavarehus/src/test/java/no/nav/ung/sak/metrikker/`
@@ -45,6 +47,8 @@ VALUES (nextval('seq_prosess_task'),
         '');
 ```
 
+For aktivitetspenger, sett `task_parametere` til `'ytelseType=AKT'`.
+
 ### Programmatisk kjøring
 
 ```java
@@ -55,6 +59,8 @@ public void startFullPublisering() {
     ProsessTaskData taskData = ProsessTaskData.forProsessTask(
         FullPubliseringAvKontrollerteInntektperioderMetrikkTask.class
     );
+    // Valgfritt, standard er UNG
+    taskData.setProperty(FullPubliseringAvKontrollerteInntektperioderMetrikkTask.YTELSE_TYPE, FagsakYtelseType.AKTIVITETSPENGER.getKode());
     prosessTaskTjeneste.lagre(taskData);
 }
 ```
