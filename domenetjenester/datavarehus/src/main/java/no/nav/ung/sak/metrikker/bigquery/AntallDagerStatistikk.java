@@ -30,8 +30,8 @@ import java.util.stream.Stream;
 @Dependent
 public class AntallDagerStatistikk {
 
-    /** Kode for utdaterte ytelse-typer som skal ekskluderes fra statistikken */
-    private static final String OBSOLETE_KODE = FagsakYtelseType.OBSOLETE.getKode();
+    /** Dager i programmet er kun relevant for ungdomsprogramytelsen */
+    private static final String YTELSE_KODE = FagsakYtelseType.UNGDOMSYTELSE.getKode();
 
     /** EntityManager for databasetilgang */
     private final EntityManager entityManager;
@@ -103,7 +103,7 @@ public class AntallDagerStatistikk {
                 INNER JOIN UNG_GR_UNGDOMSPROGRAMPERIODE gr ON gr.behandling_id = b.id
                 INNER JOIN UNG_UNGDOMSPROGRAMPERIODER perioder ON perioder.id = gr.ung_ungdomsprogramperioder_id
                 INNER JOIN UNG_UNGDOMSPROGRAMPERIODE periode ON periode.ung_ungdomsprogramperioder_id = perioder.id
-                WHERE f.ytelse_type <> :obsoleteKode  -- Ekskluder obsolete ytelse-typer
+                WHERE f.ytelse_type = :ytelseType
                   AND gr.aktiv = true                 -- Kun aktive grunnlag
                   AND b.opprettet_tid = (SELECT max(b2.opprettet_tid) FROM behandling b2 WHERE b2.fagsak_id = f.id)  -- Siste behandling
                   AND periode.fom <= CAST(:dagensDato AS date) - INTERVAL '1 day'  -- Periode har startet
@@ -126,7 +126,7 @@ public class AntallDagerStatistikk {
         // Opprett og kjør SQL-spørringen
         NativeQuery<Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<Tuple> stream = query
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("ytelseType", YTELSE_KODE)
             .setParameter("dagensDato", dagensDato)
             .getResultStream();
 
