@@ -131,8 +131,8 @@ public class EnhetsTjeneste {
     private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType, String behandlingstema) {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
-            .medTema(FagsakYtelseType.UNGDOMSYTELSE.getOppgavetema())
-            //.medBehandlingstema(behandlingstema)
+            .medTema(ytelseType.getOppgavetema())
+            .medBehandlingstema(behandlingstema)
             .medOppgavetype(OppgaveÅrsak.BEHANDLE_SAK.getKode()) // fra Oppgavetype offisielt kodeverk)
             .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
             .medDiskresjonskode(diskresjon)

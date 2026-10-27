@@ -47,6 +47,7 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -148,7 +149,7 @@ public class VilkårsavklaringRestTjeneste {
         var perioderDekketAvAvklaring = TidslinjeUtil.tilTidslinje(Stream.concat(foreslåtte.stream(), ferdigstilte.stream()).map(VilkårPeriodeAvklaring::getPeriode).toList());
 
         var relevanteVilkårsperioder = vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
-            .map(v -> VurderingAvVilkårEtterAvklaringTjeneste.relevanteVilkårsperioder(v, vilkårType))
+            .map(v -> InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(v, vilkårType))
             .orElse(LocalDateTimeline.empty());
         var vilkårsrader = relevanteVilkårsperioder.disjoint(perioderDekketAvAvklaring).stream()
             .map(s -> new VilkårsavklaringOgUtfallPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), null));
@@ -167,7 +168,7 @@ public class VilkårsavklaringRestTjeneste {
             .orElse(Set.of());
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         LocalDateTimeline<VilkårPeriode> relevanteVilkårsperioder = vilkårene
-            .map(v -> VurderingAvVilkårEtterAvklaringTjeneste.relevanteVilkårsperioder(v, vilkårType))
+            .map(v -> InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(v, vilkårType))
             .orElse(LocalDateTimeline.empty());
         var vurderinger = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandling.getId(), vilkårType);
         var uttalelser = hentUttalelserPerReferanse(behandling);
@@ -186,16 +187,18 @@ public class VilkårsavklaringRestTjeneste {
                     .max(Comparator.comparing(VilkårsvurderingResultat::vurdertTidspunkt, Comparator.nullsFirst(Comparator.naturalOrder())))
                     .map(VilkårsavklaringRestTjeneste::tilVurderingDto)
                     .orElse(null);
+                var avklaringDto = tilAvklaringDto(avklaring, true, uttalelser);
                 return new VilkårsvurderingOgAvklaringPeriodeDto(
                     avklaring.getPeriode().tilPeriode(),
                     utfall,
-                    new VilkårsavklaringVurderingDto(tilAvklaringDto(avklaring, true, uttalelser), vurdering));
+                    avklaringDto.foreslåttIBehandlingen(),
+                    new VilkårsavklaringVurderingDto(avklaringDto, vurdering));
             });
 
         // tilTidslinje tåler overlapp, i tilfelle eldre data har flere foreslåtte avklaringer
         var foreslåtteTidslinje = TidslinjeUtil.tilTidslinje(foreslåtte.stream().map(VilkårPeriodeAvklaring::getPeriode).toList());
         var raderUtenAvklaring = relevanteVilkårsperioder.disjoint(foreslåtteTidslinje).stream()
-            .map(s -> new VilkårsvurderingOgAvklaringPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), null));
+            .map(s -> new VilkårsvurderingOgAvklaringPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), false, null));
 
         var perioder = Stream.concat(raderMedAvklaring, raderUtenAvklaring)
             .sorted(Comparator.comparing((VilkårsvurderingOgAvklaringPeriodeDto vurderingPeriode) -> vurderingPeriode.periode().getFom()).reversed())
