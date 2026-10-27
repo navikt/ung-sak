@@ -62,6 +62,7 @@ spec:
       enabled: true
       replyURLs:
         - "https://ung.intern.nav.no/ung/sak/cb"
+        - "https://aktivitetspenger.intern.nav.no/ung/sak/cb"
       claims:
         groups:
           # 0000-CA-ung-saksbehandler
@@ -111,6 +112,7 @@ spec:
         - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
+        - application: aktivitetspenger-sak-web
         - application: ung-tilbake
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
@@ -179,6 +181,8 @@ spec:
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
       value: https://ung.intern.nav.no
+    - name: LOADBALANCER_ALTERNATIVE_URL
+      value: https://aktivitetspenger.intern.nav.no
 
     # PDL
     - name: PDL_TEMA
