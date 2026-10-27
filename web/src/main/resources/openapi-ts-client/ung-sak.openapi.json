@@ -506,11 +506,6 @@
         "required" : [ "andeler", "periode" ],
         "type" : "object"
       },
-      "k9.prosesstask.api.ProsessTaskStatus" : {
-        "enum" : [ "KLAR", "KJOERT", "FERDIG", "VENTER_SVAR", "VETO", "SUSPENDERT", "FEILET" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "KLAR", "KJOERT", "FERDIG", "VENTER_SVAR", "VETO", "SUSPENDERT", "FEILET" ]
-      },
       "k9.prosesstask.rest.dto.ProsessTaskDataDto" : {
         "properties" : {
           "gruppe" : {
@@ -6478,45 +6473,6 @@
         },
         "type" : "object"
       },
-      "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FagsakProsessTaskKoblingDto" : {
-        "properties" : {
-          "behandlingId" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
-          "blokkererAndreTasker" : {
-            "description" : "Koblingen har laveste gruppe_sekvensnr på fagsaken, og blokkerer tasker i senere grupper til prosesstasken er ferdig.",
-            "type" : "boolean"
-          },
-          "blokkertAv" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
-          "gruppeSekvensNr" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
-          "opprettetTid" : {
-            "format" : "date-time",
-            "type" : "string"
-          },
-          "prosessTaskId" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
-          "prosessTaskMangler" : {
-            "description" : "Prosesstasken finnes ikke lenger, men koblingen ligger igjen. Kan fjernes med POST /forvaltning/fagsak-prosess-task/fjern-koblinger-uten-prosesstask.",
-            "type" : "boolean"
-          },
-          "prosessTaskStatus" : {
-            "$ref" : "#/components/schemas/k9.prosesstask.api.ProsessTaskStatus"
-          },
-          "taskType" : {
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FjernFagsakProsessTaskKoblingerRequest" : {
         "properties" : {
           "begrunnelse" : {
@@ -6556,11 +6512,39 @@
         },
         "type" : "object"
       },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.KoblingUtenProsessTaskDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "blokkererAndreTasker" : {
+            "description" : "Koblingen har laveste gruppe_sekvensnr på fagsaken, og blokkerer tasker i senere grupper til prosesstasken er ferdig.",
+            "type" : "boolean"
+          },
+          "gruppeSekvensNr" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "opprettetTid" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "prosessTaskId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "taskType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.SakMedKoblingerUtenProsessTaskDto" : {
         "properties" : {
           "koblingerUtenProsessTask" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FagsakProsessTaskKoblingDto"
+              "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.KoblingUtenProsessTaskDto"
             },
             "type" : "array"
           },
@@ -9642,40 +9626,9 @@
         "tags" : [ "forvaltning" ]
       }
     },
-    "/api/forvaltning/fagsak-prosess-task/hent-koblinger-for-sak" : {
-      "get" : {
-        "description" : "Henter koblinger mellom fagsak og prosesstask (FAGSAK_PROSESS_TASK), også koblinger der prosesstasken ikke lenger finnes.",
-        "operationId" : "hentKoblinger",
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "saksnummer",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FagsakProsessTaskKoblingDto"
-                  },
-                  "type" : "array"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Henter koblinger mellom fagsak og prosesstask",
-        "tags" : [ "forvaltning" ]
-      }
-    },
     "/api/forvaltning/fagsak-prosess-task/koblinger-uten-prosesstask" : {
       "get" : {
-        "description" : "Henter koblinger i FAGSAK_PROSESS_TASK der prosesstasken ikke lenger finnes, for alle saker.",
+        "description" : "Henter koblinger i FAGSAK_PROSESS_TASK der prosesstasken ikke lenger finnes, for alle saker. Koblingene kan fjernes med POST /forvaltning/fagsak-prosess-task/fjern-koblinger-uten-prosesstask.",
         "operationId" : "hentKoblingerUtenProsessTask",
         "responses" : {
           "default" : {

@@ -22,14 +22,13 @@ import no.nav.k9.prosesstask.impl.TaskManager;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTask;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskKobling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontrakt.KortTekst;
-import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FagsakProsessTaskKoblingDto;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FjernFagsakProsessTaskKoblingerRequest;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.SakMedKoblingerUtenProsessTaskDto;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningFagsakProsessTaskRestTjeneste.FjernFagsakProsessTaskKoblingerResultat;
@@ -62,37 +61,6 @@ class ForvaltningFagsakProsessTaskRestTjenesteTest {
     }
 
     @Test
-    void hent_skal_vise_kobling_uten_prosesstask_som_blokkerer_andre_tasker() {
-        Long slettetTaskId = lagKoblingUtenProsessTask(100L);
-        ProsessTaskData vetoet = lagVetoetTask(slettetTaskId);
-        Long utenSekvensId = lagKoblingUtenProsessTask(null);
-
-        List<FagsakProsessTaskKoblingDto> koblinger = hent();
-
-        assertThat(koblinger).extracting(FagsakProsessTaskKoblingDto::prosessTaskId).containsExactly(slettetTaskId, vetoet.getId(), utenSekvensId);
-        var blokkerende = koblinger.get(0);
-        assertThat(blokkerende.prosessTaskMangler()).isTrue();
-        assertThat(blokkerende.behandlingId()).isEqualTo(fagsak.getId() + 1);
-        assertThat(blokkerende.blokkererAndreTasker()).isTrue();
-        assertThat(blokkerende.prosessTaskStatus()).isNull();
-        var vetoetDto = koblinger.get(1);
-        assertThat(vetoetDto.prosessTaskMangler()).isFalse();
-        assertThat(vetoetDto.blokkererAndreTasker()).isFalse();
-        assertThat(vetoetDto.prosessTaskStatus()).isEqualTo(ProsessTaskStatus.VETO);
-        assertThat(vetoetDto.blokkertAv()).isEqualTo(slettetTaskId);
-        var utenSekvens = koblinger.get(2);
-        assertThat(utenSekvens.prosessTaskMangler()).isTrue();
-        assertThat(utenSekvens.blokkererAndreTasker()).isFalse();
-    }
-
-    @Test
-    void hent_skal_feile_for_ukjent_saksnummer() {
-        var ukjent = new SaksnummerDto("UKJENT");
-
-        assertThrows(IllegalArgumentException.class, () -> tjeneste.hentKoblinger(ukjent));
-    }
-
-    @Test
     void uten_prosesstask_skal_vise_koblinger_uten_prosesstask_for_alle_saker() {
         Long blokkerendeId = lagKoblingUtenProsessTask(100L);
         lagVetoetTask(blokkerendeId);
@@ -108,6 +76,7 @@ class ForvaltningFagsakProsessTaskRestTjenesteTest {
             .doesNotContain(sakMedProsessTask.getSaksnummer());
         assertThat(finn(saker, SAKSNUMMER).koblingerUtenProsessTask()).singleElement().satisfies(k -> {
             assertThat(k.prosessTaskId()).isEqualTo(blokkerendeId);
+            assertThat(k.behandlingId()).isEqualTo(fagsak.getId() + 1);
             assertThat(k.blokkererAndreTasker()).isTrue();
         });
         assertThat(finn(saker, annenSak.getSaksnummer()).koblingerUtenProsessTask()).singleElement().satisfies(k -> {
@@ -132,8 +101,8 @@ class ForvaltningFagsakProsessTaskRestTjenesteTest {
         });
 
         entityManager.clear();
-        var koblinger = hent();
-        assertThat(koblinger).extracting(FagsakProsessTaskKoblingDto::prosessTaskId).containsExactly(vetoet.getId());
+        var koblinger = koblinger();
+        assertThat(koblinger).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(vetoet.getId());
         assertThat(koblinger.getFirst().prosessTaskStatus()).isEqualTo(ProsessTaskStatus.KLAR);
     }
 
@@ -147,7 +116,7 @@ class ForvaltningFagsakProsessTaskRestTjenesteTest {
         var feil = assertThrows(IllegalArgumentException.class, () -> tjeneste.fjernKoblingerUtenProsessTask(request));
         assertThat(feil.getMessage()).contains(vetoet.getId() + " finnes (status VETO)");
         assertThat(diagnostikklogg()).isEmpty();
-        assertThat(hent()).extracting(FagsakProsessTaskKoblingDto::prosessTaskId).containsExactly(slettetTaskId, vetoet.getId());
+        assertThat(koblinger()).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(slettetTaskId, vetoet.getId());
     }
 
     @Test
@@ -158,7 +127,7 @@ class ForvaltningFagsakProsessTaskRestTjenesteTest {
 
         var feil = assertThrows(IllegalArgumentException.class, () -> tjeneste.fjernKoblingerUtenProsessTask(request));
         assertThat(feil.getMessage()).contains("999999999 har ingen kobling på fagsaken");
-        assertThat(hent()).extracting(FagsakProsessTaskKoblingDto::prosessTaskId).containsExactly(slettetTaskId);
+        assertThat(koblinger()).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(slettetTaskId);
     }
 
     @Test
@@ -168,7 +137,7 @@ class ForvaltningFagsakProsessTaskRestTjenesteTest {
         var request = new FjernFagsakProsessTaskKoblingerRequest(SAKSNUMMER, List.of(slettetTaskId, slettetTaskId), BEGRUNNELSE);
 
         assertThrows(IllegalArgumentException.class, () -> tjeneste.fjernKoblingerUtenProsessTask(request));
-        assertThat(hent()).extracting(FagsakProsessTaskKoblingDto::prosessTaskId).containsExactly(slettetTaskId);
+        assertThat(koblinger()).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(slettetTaskId);
     }
 
     @Test
@@ -177,11 +146,11 @@ class ForvaltningFagsakProsessTaskRestTjenesteTest {
         var request = new FjernFagsakProsessTaskKoblingerRequest(new Saksnummer("UKJENT"), List.of(slettetTaskId), BEGRUNNELSE);
 
         assertThrows(IllegalArgumentException.class, () -> tjeneste.fjernKoblingerUtenProsessTask(request));
-        assertThat(hent()).extracting(FagsakProsessTaskKoblingDto::prosessTaskId).containsExactly(slettetTaskId);
+        assertThat(koblinger()).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(slettetTaskId);
     }
 
-    private List<FagsakProsessTaskKoblingDto> hent() {
-        return tjeneste.hentKoblinger(new SaksnummerDto(SAKSNUMMER));
+    private List<FagsakProsessTaskKobling> koblinger() {
+        return fagsakProsessTaskRepository.hentKoblinger(fagsak.getId());
     }
 
     private static SakMedKoblingerUtenProsessTaskDto finn(List<SakMedKoblingerUtenProsessTaskDto> saker, Saksnummer saksnummer) {

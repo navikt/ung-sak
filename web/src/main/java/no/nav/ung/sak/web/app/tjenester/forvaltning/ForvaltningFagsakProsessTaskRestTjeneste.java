@@ -32,16 +32,13 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskKobling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.kontrakt.KortTekst;
-import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
@@ -50,8 +47,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
  * Forvaltning av koblinger mellom fagsak og prosesstask (FAGSAK_PROSESS_TASK).
  * <p>
  * Koblingene styrer rekkefølgen prosesstasker kjøres i per fagsak. Blir en prosesstask slettet uten at koblingen fjernes,
- * kan koblingen blokkere alle senere tasker på fagsaken. Disse endepunktene lar oss finne (per sak eller for alle saker) og fjerne
- * slike koblinger uten prosesstask.
+ * kan koblingen blokkere alle senere tasker på fagsaken. Disse endepunktene lar oss finne og fjerne slike koblinger uten prosesstask.
  */
 @Path(ForvaltningFagsakProsessTaskRestTjeneste.BASE_PATH)
 @ApplicationScoped
@@ -59,7 +55,6 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 public class ForvaltningFagsakProsessTaskRestTjeneste {
 
     static final String BASE_PATH = "/forvaltning/fagsak-prosess-task";
-    private static final String HENT_KOBLINGER_FOR_SAK = "/hent-koblinger-for-sak";
     private static final String HENT_KOBLINGER_UTEN_PROSESSTASK = "/koblinger-uten-prosesstask";
     private static final String FJERN_KOBLINGER_UTEN_PROSESSTASK = "/fjern-koblinger-uten-prosesstask";
     static final String FJERN_PATH = BASE_PATH + FJERN_KOBLINGER_UTEN_PROSESSTASK;
@@ -85,19 +80,8 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
     }
 
     @GET
-    @Path(HENT_KOBLINGER_FOR_SAK)
-    @Operation(description = "Henter koblinger mellom fagsak og prosesstask (FAGSAK_PROSESS_TASK), også koblinger der prosesstasken ikke lenger finnes.",
-        summary = "Henter koblinger mellom fagsak og prosesstask",
-        tags = "forvaltning")
-    @Produces(JSON_UTF8)
-    @BeskyttetRessurs(action = READ, resource = DRIFT)
-    public List<FagsakProsessTaskKoblingDto> hentKoblinger(@NotNull @QueryParam(SaksnummerDto.NAME) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) SaksnummerDto saksnummerDto) {
-        return tilDto(fagsakProsessTaskRepository.hentKoblinger(hentFagsakId(saksnummerDto.getVerdi())));
-    }
-
-    @GET
     @Path(HENT_KOBLINGER_UTEN_PROSESSTASK)
-    @Operation(description = "Henter koblinger i FAGSAK_PROSESS_TASK der prosesstasken ikke lenger finnes, for alle saker.",
+    @Operation(description = "Henter koblinger i FAGSAK_PROSESS_TASK der prosesstasken ikke lenger finnes, for alle saker. Koblingene kan fjernes med POST " + FJERN_PATH + ".",
         summary = "Henter koblinger uten prosesstask for alle saker",
         tags = "forvaltning")
     @Produces(JSON_UTF8)
@@ -106,9 +90,7 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
         var saker = fagsakProsessTaskRepository.finnFagsakerMedKoblingerUtenProsessTask().stream()
             .map(fagsakId -> {
                 var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-                var utenProsessTask = tilDto(fagsakProsessTaskRepository.hentKoblinger(fagsakId)).stream()
-                    .filter(FagsakProsessTaskKoblingDto::prosessTaskMangler)
-                    .toList();
+                var utenProsessTask = tilKoblingerUtenProsessTask(fagsakProsessTaskRepository.hentKoblinger(fagsakId));
                 return new SakMedKoblingerUtenProsessTaskDto(fagsak.getSaksnummer(), utenProsessTask);
             })
             .toList();
@@ -169,7 +151,7 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
             .getId();
     }
 
-    static List<FagsakProsessTaskKoblingDto> tilDto(List<FagsakProsessTaskKobling> koblinger) {
+    private static List<KoblingUtenProsessTaskDto> tilKoblingerUtenProsessTask(List<FagsakProsessTaskKobling> koblinger) {
         TreeSet<Long> sekvensnumre = koblinger.stream()
             .map(FagsakProsessTaskKobling::gruppeSekvensNr)
             .filter(Objects::nonNull)
@@ -180,15 +162,13 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
         Long lavesteSekvensnr = sekvensnumre.isEmpty() ? null : sekvensnumre.first();
 
         return koblinger.stream()
-            .map(k -> new FagsakProsessTaskKoblingDto(
+            .filter(FagsakProsessTaskKobling::prosessTaskMangler)
+            .map(k -> new KoblingUtenProsessTaskDto(
                 k.prosessTaskId(),
                 k.behandlingId(),
                 k.taskType(),
                 k.gruppeSekvensNr(),
                 k.opprettetTid(),
-                k.prosessTaskStatus(),
-                k.blokkertAv(),
-                k.prosessTaskMangler(),
                 finnesSenereGrupper && Objects.equals(k.gruppeSekvensNr(), lavesteSekvensnr)))
             .toList();
     }
@@ -208,16 +188,12 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
     ) {
     }
 
-    public record FagsakProsessTaskKoblingDto(
+    public record KoblingUtenProsessTaskDto(
         Long prosessTaskId,
         Long behandlingId,
         String taskType,
         Long gruppeSekvensNr,
         LocalDateTime opprettetTid,
-        ProsessTaskStatus prosessTaskStatus,
-        Long blokkertAv,
-        @Schema(description = "Prosesstasken finnes ikke lenger, men koblingen ligger igjen. Kan fjernes med POST " + FJERN_PATH + ".")
-        boolean prosessTaskMangler,
         @Schema(description = "Koblingen har laveste gruppe_sekvensnr på fagsaken, og blokkerer tasker i senere grupper til prosesstasken er ferdig.")
         boolean blokkererAndreTasker
     ) {
@@ -225,7 +201,7 @@ public class ForvaltningFagsakProsessTaskRestTjeneste {
 
     public record SakMedKoblingerUtenProsessTaskDto(
         Saksnummer saksnummer,
-        List<FagsakProsessTaskKoblingDto> koblingerUtenProsessTask
+        List<KoblingUtenProsessTaskDto> koblingerUtenProsessTask
     ) {
     }
 
