@@ -46,7 +46,8 @@ import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedAvklaringOgUttalelseOgResultat.StegUtfall;
+import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall;
+import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfallUtleder;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -416,10 +417,10 @@ class VurderBostedVilkårStegTest {
         assertThat(hentBostedsvurderinger(behandling)).hasSize(1);
         var vurdering = hentBostedsvurderinger(behandling).stream().findFirst().orElseThrow();
         assertThat(vurdering.erManuellVurdering()).isFalse();
-        var evaluering = new VilkårJsonObjectMapper().readValue(vurdering.getRegelsporing().orElseThrow().evaluering(), BostedAvklaringOgUttalelseOgResultat.RegelEvaluering.class);
+        var evaluering = new VilkårJsonObjectMapper().readValue(vurdering.getRegelsporing().orElseThrow().evaluering(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class);
         assertThat(evaluering.utfall())
             .as("begge utfallene skal spores, uten at det ene overskriver det andre")
-            .containsExactlyInAnyOrder(StegUtfall.OPPHØR_AUTOMATISK, StegUtfall.VURDERES_MANUELT_NY_PERIODE);
+            .containsExactlyInAnyOrder(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK, VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE);
     }
 
     @Test
@@ -551,7 +552,6 @@ class VurderBostedVilkårStegTest {
             vilkårTjeneste,
             behandlingRepository,
             vilkårsavklaringGrunnlagRepository,
-            bostedSøknadsfaktaGrunnlagRepository,
             vilkårsPerioderTilVurderingTjenester,
             etterlysningTjeneste,
             inngangsvilkårVurderingRepository,
