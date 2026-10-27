@@ -40,7 +40,7 @@ public class AktivitetspengerInformasjonselementerUtleder implements Informasjon
     }
 
     @Inject
-    public AktivitetspengerInformasjonselementerUtleder(@KonfigVerdi(value = "AKTIVITETSPENGER_INNTEKTSGRUNNLAG_ENABLED", required = false, defaultVerdi = "false") boolean aktivitetspengerInntektsgrunnlagEnabled) {
+    public AktivitetspengerInformasjonselementerUtleder(@KonfigVerdi(value = "AKTIVITETSPENGER_INNTEKTSGRUNNLAG_ENABLED", required = false, defaultVerdi = "true") boolean aktivitetspengerInntektsgrunnlagEnabled) {
         this.aktivitetspengerInntektsgrunnlagEnabled = aktivitetspengerInntektsgrunnlagEnabled;
     }
 

@@ -284,7 +284,7 @@ spec:
     - name: AKTIVITETSPENGER_ENABLED
       value: "true"
     - name: AKTIVITETSPENGER_INNTEKTSGRUNNLAG_ENABLED
-      value: "true"
+      value: "false"
     - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
       value: "true"
     - name: HISTORIKKINNSLAG_FOR_OPPGAVE_ENABLED
