@@ -36,6 +36,7 @@ import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
 import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
+import no.nav.ung.sak.kontroll.RegisterinntektKilde;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -96,7 +97,7 @@ class UngdomsytelseFastsettInntektOppdatererTest {
     @BeforeEach
     void setUp() {
         inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        final var rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, behandlingRepository);
+        final var rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, behandlingRepository, new RegisterinntektKilde(false));
         oppdaterer = new FastsettInntektOppdaterer(
             kontrollerteInntektperioderTjeneste,
             rapportertInntektMapper,

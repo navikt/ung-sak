@@ -155,8 +155,6 @@ spec:
       value: k9saksbehandling.ung-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-ung-stonadstatistikk-v1
-    - name: KAFKA_PRODUKSJONSSTYRING_TOPIC
-      value: k9saksbehandling.privat-k9-produksjonsstyring-sak-v1
     - name: HENDELSE_PERSON_LEESAH_TOPIC
       value: pdl.leesah-v1
     - name: KAFKA_JOURNAL_TOPIC
@@ -285,6 +283,8 @@ spec:
       value: "true"
     - name: AKTIVITETSPENGER_ENABLED
       value: "true"
+    - name: AKTIVITETSPENGER_INNTEKTSGRUNNLAG_ENABLED
+      value: "false"
     - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
       value: "true"
     - name: HISTORIKKINNSLAG_FOR_OPPGAVE_ENABLED
