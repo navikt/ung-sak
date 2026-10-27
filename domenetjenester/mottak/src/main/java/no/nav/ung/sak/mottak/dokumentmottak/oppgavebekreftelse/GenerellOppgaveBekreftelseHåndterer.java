@@ -28,6 +28,7 @@ import java.util.UUID;
 @OppgaveTypeRef(Bekreftelse.Type.UNG_AVVIK_REGISTERINNTEKT)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_PERIODE)
 @OppgaveTypeRef(Bekreftelse.Type.AVP_BOSTED_AVKLARING)
+@OppgaveTypeRef(Bekreftelse.Type.AVP_BISTANDSBEHOV_AVKLARING)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_OPPHOR_VED_MAKSDATO)
 @OppgaveTypeRef(Bekreftelse.Type.AVP_ANDRE_LIVSOPPHOLDSYTELSER_AVKLARING)
 public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndterer {

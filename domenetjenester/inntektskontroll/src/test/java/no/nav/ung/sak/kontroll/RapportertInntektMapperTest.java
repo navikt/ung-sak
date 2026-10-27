@@ -50,7 +50,7 @@ class RapportertInntektMapperTest {
     @BeforeEach
     void setUp() {
         mockBehandling(FagsakYtelseType.UNGDOMSYTELSE);
-        rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, behandlingRepository);
+        rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, behandlingRepository, new RegisterinntektKilde(true));
     }
 
     @Test
