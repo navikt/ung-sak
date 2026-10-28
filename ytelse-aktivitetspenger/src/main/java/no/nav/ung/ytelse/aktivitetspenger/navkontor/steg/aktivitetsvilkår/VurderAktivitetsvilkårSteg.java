@@ -6,6 +6,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -21,11 +22,13 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_AKTIVITETSVILKÅR;
@@ -40,6 +43,7 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
     VurderAktivitetsvilkårSteg() {
         //for CDI proxy
@@ -53,11 +57,13 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
                                       @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                       VilkårResultatRepository vilkårResultatRepository1,
                                       InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
-                                      InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
+                                      InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
+                                      @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository1;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.aktivitetspengerVilkårsPerioderTilVurderingTjeneste = aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
@@ -77,9 +83,13 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
 
     @Override
     public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
-        boolean erFørstegangsbehandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId()).getType() == BehandlingType.FØRSTEGANGSSØKNAD;
-        if (erFørstegangsbehandling) {
-            automatiskInnvilgAktivitetsvilkåret(kontekst);
+        LocalDateTimeline<Boolean> nyeSøknadsperioder = aktivitetspengerVilkårsPerioderTilVurderingTjeneste.utledPerÅrsak(kontekst.getBehandlingId(), VilkårType.AKTIVITETSVILKÅR).entrySet().stream()
+            .filter(årsaker -> årsaker.getKey() == BehandlingÅrsakType.NY_SØKT_PERIODE)
+            .map(Map.Entry::getValue).findFirst()
+            .orElse(LocalDateTimeline.empty());
+
+        if (!nyeSøknadsperioder.isEmpty()) {
+            automatiskInnvilgAktivitetsvilkåret(kontekst.getBehandlingId(), nyeSøknadsperioder);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -91,10 +101,12 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
         }
     }
 
-    private void automatiskInnvilgAktivitetsvilkåret(BehandlingskontrollKontekst kontekst) {
-        LocalDateTimeline<Boolean> tidslinjeTilVurdering = finnPerioderSomSkalVurderes(kontekst);
+    private void automatiskInnvilgAktivitetsvilkåret(long behandlingId, LocalDateTimeline<Boolean> nyeSøknadsperioder) {
+        var eksisterendeVurderingerAvAktivitetsvilkår = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, VilkårType.AKTIVITETSVILKÅR);
 
-        List<AktivitetsvilkårResultatPeriode> automatiskVurdering = tidslinjeTilVurdering.getLocalDateIntervals().stream()
+        List<AktivitetsvilkårResultatPeriode> automatiskVurdering =
+            nyeSøknadsperioder.disjoint(eksisterendeVurderingerAvAktivitetsvilkår)
+            .getLocalDateIntervals().stream()
             .map(periode -> new AktivitetsvilkårResultatPeriode(
                 DatoIntervallEntitet.fra(periode),
                 true,
@@ -108,12 +120,12 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
             ))
             .toList();
 
-        var vilkåreneOptional = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
+        var vilkåreneOptional = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         VilkårResultatBuilder vilkårBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
 
-        inngangsvilkårVurderingRepository.lagreAktivitetVurderinger(kontekst.getBehandlingId(), automatiskVurdering);
-        inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(kontekst.getBehandlingId(), vilkårBuilder);
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårBuilder.build());
+        inngangsvilkårVurderingRepository.lagreAktivitetVurderinger(behandlingId, automatiskVurdering);
+        inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(behandlingId, vilkårBuilder);
+        vilkårResultatRepository.lagre(behandlingId, vilkårBuilder.build());
     }
 
 }
