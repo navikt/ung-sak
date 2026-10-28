@@ -15,13 +15,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -37,9 +34,6 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
-    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
-    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
     VurderAktivitetsvilkårSteg() {
         //for CDI proxy
@@ -51,16 +45,10 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
                                       VilkårTjeneste vilkårTjeneste,
                                       BehandlingRepository behandlingRepository,
                                       @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                      VilkårResultatRepository vilkårResultatRepository1,
-                                      InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
-                                      InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
-                                      @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste) {
+                                      VilkårResultatRepository vilkårResultatRepository1) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository1;
-        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
-        this.aktivitetspengerVilkårsPerioderTilVurderingTjeneste = aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
-        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
     @Override
@@ -81,7 +69,7 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
     public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = finnPerioderSomSkalVurderes(kontekst);
         if (førstegangsbehandlingEllerForrigeErAvslåttFørstegangsbehandling(kontekst.getBehandlingId())) {
-            automatiskMarkereAktivitetsvilkåretIkkeRelevantHvisIkkeVurderingEksisterer(kontekst.getBehandlingId(), tidslinjeTilVurdering);
+            automatiskMarkereAktivitetsvilkåretIkkeRelevant(kontekst.getBehandlingId(), tidslinjeTilVurdering);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -113,12 +101,12 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
             .isEmpty();
     }
 
-    private void automatiskMarkereAktivitetsvilkåretIkkeRelevantHvisIkkeVurderingEksisterer(Long behandlingId, LocalDateTimeline<Boolean> nyeSøknadsperioder) {
+    private void automatiskMarkereAktivitetsvilkåretIkkeRelevant(Long behandlingId, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         var vilkåreneOptional = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         VilkårResultatBuilder vilkårResultatBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.AKTIVITETSVILKÅR);
 
-        nyeSøknadsperioder.segmenter()
+        tidslinjeTilVurdering.segmenter()
             .forEach(segment -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(segment.getFom(), segment.getTom())
                 .medUtfall(Utfall.IKKE_RELEVANT)
                 .medBegrunnelse("Automatisk vurdering: Ingen vurdering av aktivitetsvilkår for ny søkt periode")));
