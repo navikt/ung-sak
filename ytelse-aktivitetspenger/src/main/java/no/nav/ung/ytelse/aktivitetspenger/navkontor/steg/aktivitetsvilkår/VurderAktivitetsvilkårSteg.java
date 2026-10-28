@@ -9,15 +9,14 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
@@ -25,7 +24,6 @@ import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 
-import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +87,7 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
             .orElse(LocalDateTimeline.empty());
 
         if (!nyeSøknadsperioder.isEmpty()) {
-            automatiskInnvilgAktivitetsvilkåret(kontekst.getBehandlingId(), nyeSøknadsperioder);
+            automatiskMarkereAktivitetsvilkåretIkkeRelevantHvisIkkeVurderingEksisterer(kontekst.getBehandlingId(), nyeSøknadsperioder);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -101,31 +99,18 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
         }
     }
 
-    private void automatiskInnvilgAktivitetsvilkåret(long behandlingId, LocalDateTimeline<Boolean> nyeSøknadsperioder) {
-        var eksisterendeVurderingerAvAktivitetsvilkår = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, VilkårType.AKTIVITETSVILKÅR);
-
-        List<AktivitetsvilkårResultatPeriode> automatiskVurdering =
-            nyeSøknadsperioder.disjoint(eksisterendeVurderingerAvAktivitetsvilkår)
-            .getLocalDateIntervals().stream()
-            .map(periode -> new AktivitetsvilkårResultatPeriode(
-                DatoIntervallEntitet.fra(periode),
-                true,
-                null,
-                false,
-                null,
-                null,
-                "ung-sak",
-                LocalDateTime.now(),
-                null
-            ))
-            .toList();
-
+    private void automatiskMarkereAktivitetsvilkåretIkkeRelevantHvisIkkeVurderingEksisterer(long behandlingId, LocalDateTimeline<Boolean> nyeSøknadsperioder) {
         var vilkåreneOptional = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        VilkårResultatBuilder vilkårBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
+        VilkårResultatBuilder vilkårResultatBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.AKTIVITETSVILKÅR);
 
-        inngangsvilkårVurderingRepository.lagreAktivitetVurderinger(behandlingId, automatiskVurdering);
-        inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(behandlingId, vilkårBuilder);
-        vilkårResultatRepository.lagre(behandlingId, vilkårBuilder.build());
+        var eksisterendeVurderingerAvAktivitetsvilkår = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, VilkårType.AKTIVITETSVILKÅR);
+        nyeSøknadsperioder.disjoint(eksisterendeVurderingerAvAktivitetsvilkår).segmenter()
+            .forEach(segment -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(segment.getFom(), segment.getTom())
+                .medUtfall(Utfall.IKKE_RELEVANT)
+                .medBegrunnelse("Automatisk vurdering: Ingen vurdering av aktivitetsvilkår for ny søkt periode")));
+
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
     }
-
 }
