@@ -52,6 +52,14 @@ public class HåndterRekkefølgeAvFagsakProsessTaskGrupper implements ProsessTas
         boolean vetoed = blokkerendeTask.isPresent();
         if (vetoed) {
             Long prosessTaskId = blokkerendeTask.get().getProsessTaskId();
+            if (!repository.prosessTaskFinnes(prosessTaskId)) {
+                // Uten dette kaster finn() NoResultException, som prosesstask-rammeverket ikke prøver på nytt (PT-876627).
+                // Veto er heller ikke et alternativ: tasken frigis aldri når blokkerende task ikke finnes.
+                throw new IllegalStateException("Prosesstask[" + ptData.getId() + "] av type[" + ptData.getTaskType() + "] for fagsak[" + fagsakId
+                    + "] blokkeres av kobling i FAGSAK_PROSESS_TASK til prosesstask[" + prosessTaskId + "] av type[" + blokkerendeTask.get().getTaskType()
+                    + "] med gruppe_sekvensnr[" + blokkerendeTask.get().getGruppeSekvensNr() + "], som ikke lenger finnes."
+                    + " Fjern koblingen med POST /forvaltning/fagsak-prosess-task/fjern-koblinger-uten-prosesstask.");
+            }
             ProsessTaskData blokker = taskTjeneste.finn(prosessTaskId);
             log.info("Vetoer kjøring av prosesstask[{}] av type[{}] for fagsak [{}] , er blokkert av prosesstask[{}] av type[{}] for samme fagsak.",
                 ptData.getId(), ptData.getTaskType(), ptData.getFagsakId(), blokker.getId(), blokker.getTaskType());
