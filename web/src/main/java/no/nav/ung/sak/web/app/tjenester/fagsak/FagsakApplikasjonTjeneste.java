@@ -98,10 +98,6 @@ public class FagsakApplikasjonTjeneste {
 
     }
 
-    public static boolean erFnr(String søkestreng) {
-        return søkestreng.matches("\\d{11}");
-    }
-
     public FagsakSamlingForBruker hentFagsakForSaksnummer(Saksnummer saksnummer) {
         Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
         return tilFagsakSamling(fagsak);

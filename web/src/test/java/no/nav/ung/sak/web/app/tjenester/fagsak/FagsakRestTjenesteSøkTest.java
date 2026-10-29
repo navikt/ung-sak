@@ -54,7 +54,8 @@ class FagsakRestTjenesteSøkTest {
         when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR), FagsakYtelseType.UNGDOMSYTELSE)).thenReturn(Optional.of(personinfo));
         when(abacPdpRestKlient.sjekkTilgangTilPersonerForInnloggetBrukerUngOgAktivitetspenger(any())).thenReturn(new Tilgangsbeslutning(false, Set.of()));
 
-        assertThatThrownBy(() -> tjeneste.søkFagsaker(new SøkeSakEllerBrukerDto(FNR))).isInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> tjeneste.søkFagsaker(new SøkeSakEllerBrukerDto(FNR))).isInstanceOf(ManglerTilgangException.class)
+            .hasMessageContaining("UNG-452972");
 
         verifyNoInteractions(fagsakApplikasjonTjeneste);
     }

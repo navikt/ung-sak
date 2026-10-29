@@ -71,6 +71,7 @@ import no.nav.ung.sak.web.server.abac.SifAbacPdpRestKlient;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -91,6 +92,8 @@ public class FagsakRestTjeneste {
     public static final String RETTIGHETER_PATH = PATH + "/rettigheter";
 
     public static final String FJERN_IKKEDIGITAL_FLAGG = PATH + "/fjern-ikkedigital-flagg";
+
+    private static final Predicate<String> predikatErFnr = søkestreng -> søkestreng.matches("\\d{11}");
 
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;
@@ -267,14 +270,13 @@ public class FagsakRestTjeneste {
     public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) SøkeSakEllerBrukerDto søkestreng) {
         String søk = søkestreng.getSearchString();
         FagsakSamlingForBruker view;
-        if (FagsakApplikasjonTjeneste.erFnr(søk)) {
+        if (predikatErFnr.test(søk)) {
             //her vet vi ikke hvilket ytelsestype som er riktig å sende inn, velger en
             Optional<Personinfo> bruker = tpsTjeneste.hentBrukerForFnr(new PersonIdent(søk), FagsakYtelseType.UNGDOMSYTELSE);
             if (bruker.isEmpty()) {
                 return List.of();
             }
-            // Tilgang til personen sjekkes før sakene hentes, slik at svaret blir likt uansett om personen har sak eller ikke.
-            // Ellers avslører "mangler tilgang" at f.eks. en person med strengt fortrolig adresse har sak.
+            // Tilgang til personen sjekkes før sakene hentes.
             sjekkTilgangTilPerson(bruker.get().getAktørId());
             view = fagsakApplikasjonTjeneste.hentSakerForBruker(bruker.get());
         } else {
@@ -284,7 +286,7 @@ public class FagsakRestTjeneste {
 
         if (!view.getFagsakInfoer().isEmpty() && resultat.isEmpty()) {
             //for å gi melding til saksbehandler/veileder om det finnes sak, men at man ikke har tilgang
-            throw manglerTilgangTilSøkeresultat();
+            throw new ManglerTilgangException("UNG-452971", "Mangler til gang til alle saker som passet med søket");
         }
         return resultat;
     }
@@ -293,12 +295,8 @@ public class FagsakRestTjeneste {
         OperasjonDto operasjon = new OperasjonDto(ResourceType.FAGSAK, BeskyttetRessursActionAttributt.READ, Set.of());
         PersonerOperasjonDto input = new PersonerOperasjonDto(List.of(new no.nav.sif.abac.kontrakt.person.AktørId(aktørId.getAktørId())), List.of(), operasjon);
         if (!abacPdpRestKlient.sjekkTilgangTilPersonerForInnloggetBrukerUngOgAktivitetspenger(input).harTilgang()) {
-            throw manglerTilgangTilSøkeresultat();
+            throw new ManglerTilgangException("UNG-452972", "Mangler tilgang til personen");
         }
-    }
-
-    private static ManglerTilgangException manglerTilgangTilSøkeresultat() {
-        return new ManglerTilgangException("UNG-452971", "Mangler til gang til alle saker som passet med søket");
     }
 
     private boolean skalVises(Fagsak fagsak) {

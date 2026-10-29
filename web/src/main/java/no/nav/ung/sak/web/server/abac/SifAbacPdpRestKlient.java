@@ -37,9 +37,6 @@ public class SifAbacPdpRestKlient {
         this.uriTilgangskontrollUngOgAktivitetspengerPersoner = tilUri(urlSifAbacPdpUngOgAktivitetspengerUrl, "personer", "sif.abac.pdp.ung-og-aktivitetspenger.url");
     }
 
-    /**
-     * Sjekker tilgang til personene uten å se på sak. Gir tilgang hvis innlogget bruker har tilgang i UNG- eller AKTIVITETSPENGER-domenet.
-     */
     public Tilgangsbeslutning sjekkTilgangTilPersonerForInnloggetBrukerUngOgAktivitetspenger(PersonerOperasjonDto input) {
         return restClient.post(uriTilgangskontrollUngOgAktivitetspengerPersoner, input, Tilgangsbeslutning.class);
     }
