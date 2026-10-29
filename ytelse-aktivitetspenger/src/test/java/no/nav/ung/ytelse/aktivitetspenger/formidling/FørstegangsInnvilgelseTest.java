@@ -409,8 +409,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
             Likevel får du til sammen mer penger når du både har en inntekt og får aktivitetspenger enn hvis du bare får aktivitetspenger. \
             Du må melde fra om endringer \
             Hvis det skjer endringer som kan ha noe å si for saken din om aktivitetspenger, må du gi beskjed til oss om det så fort som mulig. \
-            På nav.no/aktivitetspenger#melde finner du en oversikt over hvilke endringer du må gi beskjed om, og hvordan du gjør det. \
-            Hvis du trenger mer veiledning, kan du ringe 55 55 33 33. \
+            På nav.no/person/kontakt-oss/skriv-til-oss-innbokser/skriv-til-oss-arbeid finner du en oversikt over hvilke endringer du må gi beskjed om, og hvordan du gjør det. \
             """;
     }
 
