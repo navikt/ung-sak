@@ -32,6 +32,10 @@ public class PgiKalkulator {
         input = new PgiKalkulatorInput(årsinntektMap, oppjusteringsfaktorTidsserie, gsnittTidsserie, grunnbeløpVedStp);
     }
 
+    public BigDecimal getGrunnbeløpVedSkjæringstidspunkt() {
+        return input.grunnbeløpVedStp();
+    }
+
     public Map<String, LocalDateTimeline<?>> getRegelSporingsmap() {
         var map = new LinkedHashMap<String, LocalDateTimeline<?>>();
         map.put("gsnittTidsserie", input.gsnittTidsserie().mapValue(Grunnbeløp::verdi));

@@ -31,7 +31,7 @@ class MånedsvisningDtoMapperTest {
     private static AktivitetspengerSatser lagSatser(BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor, UngdomsytelseSatsType satsType, int antallBarn, int dagsatsBarnetillegg, BigDecimal beregnetRedusertPrAar) {
         var satsGrunnlag = new AktivitetspengerSatsGrunnlag(dagsats, grunnbeløp, grunnbeløpFaktor, grunnbeløpFaktor.multiply(grunnbeløp), satsType, antallBarn, dagsatsBarnetillegg);
         var beregningInput = new BeregningInput(new Beløp(0), new Beløp(0), new Beløp(0), LocalDate.now(), Year.of(2024));
-        var beregningsgrunnlag = new Beregningsgrunnlag(beregningInput, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, beregnetRedusertPrAar, "");
+        var beregningsgrunnlag = new Beregningsgrunnlag(beregningInput, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, beregnetRedusertPrAar, grunnbeløp, "");
         return new AktivitetspengerSatser(satsGrunnlag, beregningsgrunnlag);
     }
 

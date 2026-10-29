@@ -66,7 +66,7 @@ public class BeregningTjeneste {
 
         String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(pgiKalkulator.getRegelSporingsmap());
 
-        return new BesteberegningResultat(input, årsinntektSisteÅr, årsinntektSisteTreÅr, beregningsgrunnlag, regelSporing);
+        return new BesteberegningResultat(input, årsinntektSisteÅr, årsinntektSisteTreÅr, beregningsgrunnlag, pgiKalkulator.getGrunnbeløpVedSkjæringstidspunkt(), regelSporing);
     }
 
     private static BigDecimal hentSnittTreSisteÅr(Map<Year, BigDecimal> oppjustertOgAvgrensetÅrsinntekt) {
