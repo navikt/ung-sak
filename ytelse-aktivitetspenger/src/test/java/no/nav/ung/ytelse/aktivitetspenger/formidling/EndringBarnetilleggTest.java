@@ -1,9 +1,15 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.formidling.vedtak.resultat.DefaultDetaljertResultatTidslinjeUtleder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringBarnetilleggDto;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringBarnetilleggInnholdBygger;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerEndringBarnetilleggScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
@@ -18,6 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
 
     private static final LocalDate FOM = LocalDate.of(2025, 8, 1);
+
+    @Inject
+    @Any
+    private DefaultDetaljertResultatTidslinjeUtleder detaljertResultatTidslinjeUtleder;
 
     EndringBarnetilleggTest() {
         super(1, "Du får mer i aktivitetspenger");
@@ -67,6 +77,37 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får mer i aktivitetspenger fordi du har fått barn</h1>"
             );
+    }
+
+    @DisplayName("Barn født før startdato gir startdato som dato for barnetillegg når toggle er på")
+    @Test
+    void barnFødtFørStartdatoMedToggle() {
+        var behandling = lagScenario(AktivitetspengerEndringBarnetilleggScenarioer.fødselFørStartdato(FOM));
+
+        var dto = byggMedToggleForFødselFørStartdato(behandling);
+
+        assertThat(dto.fom()).isEqualTo(FOM);
+        assertThat(dto.barnetillegg()).isEqualTo(37L);
+    }
+
+    @DisplayName("Barn født etter startdato gir fødselsdato som dato for barnetillegg når toggle er på")
+    @Test
+    void barnFødtEtterStartdatoMedToggle() {
+        var behandling = lagScenario(AktivitetspengerEndringBarnetilleggScenarioer.fødselMedEttBarn(FOM));
+
+        var dto = byggMedToggleForFødselFørStartdato(behandling);
+
+        assertThat(dto.fom()).isEqualTo(LocalDate.of(2025, 8, 16));
+        assertThat(dto.barnetillegg()).isEqualTo(37L);
+    }
+
+    private EndringBarnetilleggDto byggMedToggleForFødselFørStartdato(Behandling behandling) {
+        var bygger = new EndringBarnetilleggInnholdBygger(new AktivitetspengerGrunnlagRepository(entityManager), true);
+
+        var resultat = bygger.bygg(behandling, detaljertResultatTidslinjeUtleder.utledDetaljertResultat(behandling));
+
+        assertThat(resultat.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_BARNETILLEGG);
+        return (EndringBarnetilleggDto) resultat.templateInnholdDto();
     }
 
     private Behandling lagScenario(AktivitetspengerTestScenario testScenario) {

@@ -289,6 +289,8 @@ spec:
       value: "true"
     - name: HISTORIKKINNSLAG_FOR_OPPGAVE_ENABLED
       value: "true"
+    - name: BARNETILLEGG_BREV_FODSEL_FOR_STARTDATO_ENABLED
+      value: "true"
 
       # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

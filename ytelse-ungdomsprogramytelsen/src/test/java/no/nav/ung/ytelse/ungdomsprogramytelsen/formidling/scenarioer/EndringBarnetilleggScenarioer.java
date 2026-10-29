@@ -74,6 +74,31 @@ public class EndringBarnetilleggScenarioer {
     }
 
     /**
+     * Endring barnetillegg. Fødselshendelsen kommer etter programstart, men barnet er født før programstart.
+     */
+    public static UngTestScenario endringBarnetilleggBarnFødtFørStartdato(LocalDate fom, LocalDate barnFødselsdato) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+        var satser = new LocalDateTimeline<>(p, BrevScenarioerUtils.lavSatsMedBarnBuilder(fom, 1).build());
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(p),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))),
+                List.of(
+                BrevScenarioerUtils.lagBarn(barnFødselsdato)
+            ), null, null, null, false);
+    }
+
+    /**
      * Endring pga dødsfall av barn.
      */
     public static UngTestScenario endringDødsfall(LocalDate fom, LocalDate barnDødsdato) {

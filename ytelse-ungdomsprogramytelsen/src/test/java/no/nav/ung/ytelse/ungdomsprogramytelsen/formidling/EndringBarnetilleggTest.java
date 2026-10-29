@@ -1,10 +1,16 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.formidling.vedtak.resultat.DefaultDetaljertResultatTidslinjeUtleder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringBarnetilleggDto;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringBarnetilleggInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringBarnetilleggScenarioer;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
@@ -17,6 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EndringBarnetilleggTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
 
+    @Inject
+    @Any
+    private DefaultDetaljertResultatTidslinjeUtleder detaljertResultatTidslinjeUtleder;
 
     EndringBarnetilleggTest() {
         super(1, "Du får mer i ungdomsprogramytelse fordi du har fått barn");
@@ -83,6 +92,39 @@ class EndringBarnetilleggTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
                 "<h1>Du får mer i ungdomsprogramytelse fordi du har fått barn</h1>"
             );
 
+    }
+
+    @Test
+    void barnFødtFørStartdato_girStartdatoSomDatoForBarnetilleggMedToggle() {
+        LocalDate startdato = LocalDate.of(2025, 5, 3);
+        LocalDate barnFødselsdato = LocalDate.of(2025, 4, 10);
+        var behandling = lagStandardScenario(EndringBarnetilleggScenarioer.endringBarnetilleggBarnFødtFørStartdato(startdato, barnFødselsdato));
+
+        var dto = byggMedToggleForFødselFørStartdato(behandling);
+
+        assertThat(dto.fom()).isEqualTo(startdato);
+        assertThat(dto.barnetillegg()).isEqualTo(37L);
+    }
+
+    @Test
+    void barnFødtEtterStartdato_girFødselsdatoSomDatoForBarnetilleggMedToggle() {
+        LocalDate startdato = LocalDate.of(2025, 5, 3);
+        LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
+        var behandling = lagStandardScenario(EndringBarnetilleggScenarioer.endringBarnetillegg(startdato, barnFødselsdato));
+
+        var dto = byggMedToggleForFødselFørStartdato(behandling);
+
+        assertThat(dto.fom()).isEqualTo(barnFødselsdato);
+        assertThat(dto.barnetillegg()).isEqualTo(37L);
+    }
+
+    private EndringBarnetilleggDto byggMedToggleForFødselFørStartdato(Behandling behandling) {
+        var bygger = new EndringBarnetilleggInnholdBygger(new UngdomsytelseGrunnlagRepository(entityManager), true);
+
+        var resultat = bygger.bygg(behandling, detaljertResultatTidslinjeUtleder.utledDetaljertResultat(behandling));
+
+        assertThat(resultat.templateType()).isEqualTo(TemplateType.ENDRING_BARNETILLEGG);
+        return (EndringBarnetilleggDto) resultat.templateInnholdDto();
     }
 
     private Behandling lagStandardScenario(UngTestScenario ungTestscenario) {
