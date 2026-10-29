@@ -108,6 +108,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningStatistikkRestTjeneste.class);
         classes.add(ForvaltningProduksjonsstyringRestTjeneste.class);
         classes.add(ForvaltningMottattDokumentRestTjeneste.class);
+        classes.add(ForvaltningFagsakProsessTaskRestTjeneste.class);
         classes.add(ForvaltningUngdomsprogramRegisterRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
