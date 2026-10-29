@@ -13,10 +13,10 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
@@ -90,7 +90,6 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
             Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør, aktuellDato);
 
             fagsak.ifPresent(f -> {
-                //FIXME AKT. Er man på aktivitetspenger vil man ikke også være i ungdomsprogrammet, så dette fungerer ikke for AKT
                     if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktørIdBarn.get(), aktuellDato, hendelseId)) {
                         ÅrsakOgPerioder årsakOgPerioder = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsak.get().getPeriode().getTomDato()));
                         fagsakÅrsakMap.put(f,

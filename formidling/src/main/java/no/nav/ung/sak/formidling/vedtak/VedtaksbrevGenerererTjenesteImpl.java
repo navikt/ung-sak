@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
@@ -43,7 +44,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
     private MicrosoftGraphTjeneste microsoftGraphTjeneste;
-    private boolean enableBrevAnsvarlig;
+    private boolean enableBrevAnsvarligUng;
 
     public VedtaksbrevGenerererTjenesteImpl() {
     }
@@ -55,14 +56,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger,
         BrevMottakerTjeneste brevMottakerTjeneste,
         MicrosoftGraphTjeneste microsoftGraphTjeneste,
-        @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG", defaultVerdi = "true") boolean enableBrevAnsvarlig) {
+        @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG_UNG", defaultVerdi = "true") boolean enableBrevAnsvarligUng) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.pdfGen = pdfGen;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
         this.microsoftGraphTjeneste = microsoftGraphTjeneste;
-        this.enableBrevAnsvarlig = enableBrevAnsvarlig;
+        this.enableBrevAnsvarligUng = enableBrevAnsvarligUng;
     }
 
 
@@ -77,7 +78,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
 
 
-        var signatur = bestemSignatur(behandlingId);
+        var signatur = bestemSignatur(behandlingId, behandling.getFagsakYtelseType());
 
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
@@ -100,18 +101,18 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    private BrevSignaturDto bestemSignatur(Long behandlingId) {
+    private BrevSignaturDto bestemSignatur(Long behandlingId, FagsakYtelseType ytelseType) {
         Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige = behandlingAnsvarligRepository.hentBehandlingAnsvarlige(behandlingId);
 
         boolean varAutomatisk = behandlingAnsvarlige.values().stream().allMatch(ba -> ba.getAnsvarligSaksbehandler() == null);
 
         return varAutomatisk
             ? BrevSignaturDto.automatisk()
-            : lagManuellSignatur(behandlingAnsvarlige);
+            : lagManuellSignatur(behandlingAnsvarlige, ytelseType);
     }
 
-    private BrevSignaturDto lagManuellSignatur(Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige) {
-        if (!enableBrevAnsvarlig) {
+    private BrevSignaturDto lagManuellSignatur(Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, FagsakYtelseType ytelseType) {
+        if (!enableBrevAnsvarligUng && ytelseType != FagsakYtelseType.AKTIVITETSPENGER) {
             return new BrevSignaturDto(false, List.of());
         }
         var ansvarlige = REKKEFØLGE_I_BREV.stream()
@@ -139,7 +140,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
                 FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()),
-                    lagManuellSignatur(behandlingAnsvarlig),
+                    lagManuellSignatur(behandlingAnsvarlig, behandling.getFagsakYtelseType()),
                     behandling.getFagsakYtelseType()
                 ),
                 resultat.templateInnholdDto()

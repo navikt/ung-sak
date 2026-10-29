@@ -4,7 +4,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
@@ -12,10 +13,10 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
@@ -78,7 +79,6 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
         // Sjekker om det gjelder dødshendelse for søker
         var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør, aktuellDato);
         if (fagsakForAktør.isPresent()) {
-            //FIXME AKT. Er man på aktivitetspenger vil man ikke også være i ungdomsprogrammet, så dette fungerer ikke for AKT
             if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
                 fagsakÅrsakMap.put(fagsakForAktør.get(),
                     List.of(

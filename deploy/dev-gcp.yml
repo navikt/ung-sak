@@ -265,8 +265,6 @@ spec:
     # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
-    - name: PUBLISER_PRODUKSJONSSTYRING_HENDELSE
-      value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
     - name: KLAGE_AVP_ENABLED
@@ -277,17 +275,13 @@ spec:
       value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
-    - name: ENABLE_BREV_ANSVARLIG
+    - name: ENABLE_BREV_ANSVARLIG_UNG
       value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
-      value: "true"
-    - name: AKTIVITETSPENGER_ENABLED
       value: "true"
     - name: AKTIVITETSPENGER_INNTEKTSGRUNNLAG_ENABLED
       value: "false"
     - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
-      value: "true"
-    - name: HISTORIKKINNSLAG_FOR_OPPGAVE_ENABLED
       value: "true"
 
       # Konfigurasjoner

@@ -41,7 +41,6 @@ public class OpprettOppgaveTjeneste {
     private final EtterlysningRepository etterlysningRepository;
     private final HistorikkinnslagRepository historikkinnslagRepository;
     private final Duration ventePeriode;
-    private final Boolean historikkinnslagEnabled;
 
     @Inject
     public OpprettOppgaveTjeneste(
@@ -55,8 +54,7 @@ public class OpprettOppgaveTjeneste {
         BistandOppgaveOppretter bistandOppgaveOppretter,
         EtterlysningRepository etterlysningRepository,
         HistorikkinnslagRepository historikkinnslagRepository,
-        @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
-        @KonfigVerdi(value = "HISTORIKKINNSLAG_FOR_OPPGAVE_ENABLED", defaultVerdi = "false") Boolean historikkinnslagEnabled
+        @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode
     ) {
         this.inntektkontrollOppgaveOppretter = inntektkontrollOppgaveOppretter;
         this.endretSluttdatoOppgaveOppretter = endretSluttdatoOppgaveOppretter;
@@ -69,7 +67,6 @@ public class OpprettOppgaveTjeneste {
         this.etterlysningRepository = etterlysningRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.ventePeriode = Duration.parse(ventePeriode);
-        this.historikkinnslagEnabled = historikkinnslagEnabled;
     }
 
     public List<Etterlysning> opprett(Behandling behandling, EtterlysningType etterlysningType) {
@@ -78,9 +75,7 @@ public class OpprettOppgaveTjeneste {
         etterlysninger.forEach(e -> e.vent(getFrist()));
         etterlysningRepository.lagre(etterlysninger);
 
-        if (historikkinnslagEnabled) {
-            opprettHistorikkinnslag(behandling, etterlysningType, etterlysninger);
-        }
+        opprettHistorikkinnslag(behandling, etterlysningType, etterlysninger);
 
         // REST-kall for å opprette oppgave, gjør dette til slutt
         switch (etterlysningType) {
