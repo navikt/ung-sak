@@ -223,6 +223,8 @@ spec:
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
     - name: SIF_ABAC_PDP_AKTIVITETSPENGER_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/aktivitetspenger
+    - name: SIF_ABAC_PDP_UNG_OG_AKTIVITETSPENGER_URL
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung-og-aktivitetspenger
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
     - name: KABAL_URL

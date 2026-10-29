@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.sif.abac.kontrakt.abac.dto.PersonerOperasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
 import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning;
 
@@ -18,6 +19,7 @@ public class SifAbacPdpRestKlient {
     private OidcRestClient restClient;
     private URI uriTilgangskontrollUngMedSaksinformasjon;
     private URI uriTilgangskontrollAktivitetspengerMedSaksinformasjon;
+    private URI uriTilgangskontrollUngOgAktivitetspengerPersoner;
 
     SifAbacPdpRestKlient() {
         // for CDI proxy
@@ -26,11 +28,20 @@ public class SifAbacPdpRestKlient {
     @Inject
     public SifAbacPdpRestKlient(OidcRestClient restClient,
                                 @KonfigVerdi(value = "sif.abac.pdp.ung.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung") String urlSifAbacPdpUngUrl,
-                                @KonfigVerdi(value = "sif.abac.pdp.aktivitetspenger.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/aktivitetspenger") String urlSifAbacPdpAktivitetspengerUrl
+                                @KonfigVerdi(value = "sif.abac.pdp.aktivitetspenger.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/aktivitetspenger") String urlSifAbacPdpAktivitetspengerUrl,
+                                @KonfigVerdi(value = "sif.abac.pdp.ung-og-aktivitetspenger.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung-og-aktivitetspenger") String urlSifAbacPdpUngOgAktivitetspengerUrl
     ) {
         this.restClient = restClient;
         this.uriTilgangskontrollUngMedSaksinformasjon = tilUri(urlSifAbacPdpUngUrl, "saksinformasjon", "sif.abac.pdp.ung.url");
         this.uriTilgangskontrollAktivitetspengerMedSaksinformasjon = tilUri(urlSifAbacPdpAktivitetspengerUrl, "saksinformasjon", "sif.abac.pdp.aktivitetspenger.url");
+        this.uriTilgangskontrollUngOgAktivitetspengerPersoner = tilUri(urlSifAbacPdpUngOgAktivitetspengerUrl, "personer", "sif.abac.pdp.ung-og-aktivitetspenger.url");
+    }
+
+    /**
+     * Sjekker tilgang til personene uten å se på sak. Gir tilgang hvis innlogget bruker har tilgang i UNG- eller AKTIVITETSPENGER-domenet.
+     */
+    public Tilgangsbeslutning sjekkTilgangTilPersonerForInnloggetBrukerUngOgAktivitetspenger(PersonerOperasjonDto input) {
+        return restClient.post(uriTilgangskontrollUngOgAktivitetspengerPersoner, input, Tilgangsbeslutning.class);
     }
 
     public Tilgangsbeslutning sjekkTilgangForInnloggetBrukerUng(SaksinformasjonOgPersonerTilgangskontrollInputDto input) {

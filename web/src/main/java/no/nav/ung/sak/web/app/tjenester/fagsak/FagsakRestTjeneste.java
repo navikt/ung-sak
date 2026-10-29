@@ -28,6 +28,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt;
 import no.nav.sif.abac.kontrakt.abac.ResourceType;
 import no.nav.sif.abac.kontrakt.abac.dto.OperasjonDto;
+import no.nav.sif.abac.kontrakt.abac.dto.PersonerOperasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
 import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
@@ -44,6 +45,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
+import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
@@ -101,6 +103,7 @@ public class FagsakRestTjeneste {
 
     private SifAbacPdpRestKlient abacPdpRestKlient;
     private PipRepository pipRepository;
+    private TpsTjeneste tpsTjeneste;
     private Instance<RevurderingTjeneste> revurderingTjenester;
 
     public FagsakRestTjeneste() {
@@ -117,6 +120,7 @@ public class FagsakRestTjeneste {
                               ProsessTaskTjeneste taskTjeneste,
                               FagsakRepository fagsakRepository,
                               SifAbacPdpRestKlient abacPdpRestKlient, PipRepository pipRepository,
+                              TpsTjeneste tpsTjeneste,
                               @Any Instance<RevurderingTjeneste> revurderingTjenester) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -128,6 +132,7 @@ public class FagsakRestTjeneste {
         this.fagsakRepository = fagsakRepository;
         this.abacPdpRestKlient = abacPdpRestKlient;
         this.pipRepository = pipRepository;
+        this.tpsTjeneste = tpsTjeneste;
         this.revurderingTjenester = revurderingTjenester;
     }
 
@@ -260,14 +265,40 @@ public class FagsakRestTjeneste {
     // HAXX årsak til annerledes tilgangskontroll her, er at en en person kan ha tilgang til saker med UNG og ikke Aktivitetspenger og motsatt
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) SøkeSakEllerBrukerDto søkestreng) {
-        FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentSaker(søkestreng.getSearchString());
+        String søk = søkestreng.getSearchString();
+        FagsakSamlingForBruker view;
+        if (FagsakApplikasjonTjeneste.erFnr(søk)) {
+            //her vet vi ikke hvilket ytelsestype som er riktig å sende inn, velger en
+            Optional<Personinfo> bruker = tpsTjeneste.hentBrukerForFnr(new PersonIdent(søk), FagsakYtelseType.UNGDOMSYTELSE);
+            if (bruker.isEmpty()) {
+                return List.of();
+            }
+            // Tilgang til personen sjekkes før sakene hentes, slik at svaret blir likt uansett om personen har sak eller ikke.
+            // Ellers avslører "mangler tilgang" at f.eks. en person med strengt fortrolig adresse har sak.
+            sjekkTilgangTilPerson(bruker.get().getAktørId());
+            view = fagsakApplikasjonTjeneste.hentSakerForBruker(bruker.get());
+        } else {
+            view = fagsakApplikasjonTjeneste.hentFagsakForSaksnummer(new Saksnummer(søk));
+        }
         List<FagsakDto> resultat = tilDtoer(view, this::skalVises);
 
         if (!view.getFagsakInfoer().isEmpty() && resultat.isEmpty()) {
             //for å gi melding til saksbehandler/veileder om det finnes sak, men at man ikke har tilgang
-            throw new ManglerTilgangException("UNG-452971", "Mangler til gang til alle saker som passet med søket");
+            throw manglerTilgangTilSøkeresultat();
         }
         return resultat;
+    }
+
+    private void sjekkTilgangTilPerson(AktørId aktørId) {
+        OperasjonDto operasjon = new OperasjonDto(ResourceType.FAGSAK, BeskyttetRessursActionAttributt.READ, Set.of());
+        PersonerOperasjonDto input = new PersonerOperasjonDto(List.of(new no.nav.sif.abac.kontrakt.person.AktørId(aktørId.getAktørId())), List.of(), operasjon);
+        if (!abacPdpRestKlient.sjekkTilgangTilPersonerForInnloggetBrukerUngOgAktivitetspenger(input).harTilgang()) {
+            throw manglerTilgangTilSøkeresultat();
+        }
+    }
+
+    private static ManglerTilgangException manglerTilgangTilSøkeresultat() {
+        return new ManglerTilgangException("UNG-452971", "Mangler til gang til alle saker som passet med søket");
     }
 
     private boolean skalVises(Fagsak fagsak) {

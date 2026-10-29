@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -37,8 +36,6 @@ public class FagsakApplikasjonTjeneste {
     private TpsTjeneste tpsTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
-
-    private Predicate<String> predikatErFnr = søkestreng -> søkestreng.matches("\\d{11}");
 
     protected FagsakApplikasjonTjeneste() {
         //
@@ -101,12 +98,8 @@ public class FagsakApplikasjonTjeneste {
 
     }
 
-    public FagsakSamlingForBruker hentSaker(String søkestreng) {
-        if (predikatErFnr.test(søkestreng)) {
-            return hentSakerForFnr( new PersonIdent(søkestreng));
-        } else {
-            return hentFagsakForSaksnummer( new Saksnummer(søkestreng));
-        }
+    public static boolean erFnr(String søkestreng) {
+        return søkestreng.matches("\\d{11}");
     }
 
     public FagsakSamlingForBruker hentFagsakForSaksnummer(Saksnummer saksnummer) {
@@ -129,14 +122,9 @@ public class FagsakApplikasjonTjeneste {
         return tilFagsakView(fagsaker, funnetNavBruker.get());
     }
 
-    private FagsakSamlingForBruker hentSakerForFnr( PersonIdent fnr) {
-        //her vet vi ikke hvilket ytelsestype som er riktig å sende inn, velger en
-        Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForFnr(fnr, FagsakYtelseType.UNGDOMSYTELSE);
-        if (funnetNavBruker.isEmpty()) {
-            return FagsakSamlingForBruker.emptyView();
-        }
-        List<Fagsak> fagsaker = fagsakRepository.hentForBruker(funnetNavBruker.get().getAktørId());
-        return tilFagsakView(fagsaker, funnetNavBruker.get());
+    public FagsakSamlingForBruker hentSakerForBruker(Personinfo bruker) {
+        List<Fagsak> fagsaker = fagsakRepository.hentForBruker(bruker.getAktørId());
+        return tilFagsakView(fagsaker, bruker);
     }
 
     private FagsakSamlingForBruker tilFagsakView(List<Fagsak> fagsaker, Personinfo personinfo) {
