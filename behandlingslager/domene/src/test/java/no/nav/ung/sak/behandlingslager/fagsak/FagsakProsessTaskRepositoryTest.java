@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -434,5 +435,101 @@ class FagsakProsessTaskRepositoryTest {
         ProsessTaskEntitet frigitt = entityManager.find(ProsessTaskEntitet.class, vetoet.getId());
         assertThat(frigitt.getStatus()).isEqualTo(ProsessTaskStatus.KLAR);
         assertThat(frigitt.getBlokkertAvProsessTaskId()).isNull();
+    }
+
+    @Test
+    void hentKoblinger_skal_inkludere_koblinger_uten_prosesstask() {
+        ProsessTaskData task = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        fagsakProsessTaskRepository.lagreNyGruppe(task);
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, behandlingId.toString(), task.getId(), 200L, task.getTaskType()));
+        Long slettetTaskId = lagKoblingUtenProsessTask(100L);
+        entityManager.flush();
+
+        var koblinger = fagsakProsessTaskRepository.hentKoblinger(fagsakId);
+
+        assertThat(koblinger).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(slettetTaskId, task.getId());
+        var utenProsessTask = koblinger.get(0);
+        assertThat(utenProsessTask.prosessTaskMangler()).isTrue();
+        assertThat(utenProsessTask.prosessTaskStatus()).isNull();
+        assertThat(utenProsessTask.gruppeSekvensNr()).isEqualTo(100L);
+        assertThat(utenProsessTask.behandlingId()).isEqualTo(behandlingId);
+        assertThat(utenProsessTask.opprettetTid()).isNotNull();
+        var vanlig = koblinger.get(1);
+        assertThat(vanlig.prosessTaskMangler()).isFalse();
+        assertThat(vanlig.prosessTaskStatus()).isEqualTo(ProsessTaskStatus.KLAR);
+        assertThat(fagsakProsessTaskRepository.prosessTaskFinnes(task.getId())).isTrue();
+        assertThat(fagsakProsessTaskRepository.prosessTaskFinnes(slettetTaskId)).isFalse();
+    }
+
+    @Test
+    void fjernKoblingerUtenProsessTask_skal_fjerne_kobling_og_frigi_vetoede_tasker() {
+        Long slettetTaskId = lagKoblingUtenProsessTask(100L);
+        ProsessTaskData vetoet = lagTask(taskTypeB, ProsessTaskStatus.VETO);
+        vetoet.setBlokkertAvProsessTaskId(slettetTaskId);
+        fagsakProsessTaskRepository.lagreNyGruppe(vetoet);
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoet.getId(), 200L, vetoet.getTaskType()));
+        entityManager.flush();
+
+        int frigitt = fagsakProsessTaskRepository.fjernKoblingerUtenProsessTask(fagsakId, Set.of(slettetTaskId));
+        entityManager.clear();
+
+        assertThat(frigitt).isEqualTo(1);
+        var koblinger = fagsakProsessTaskRepository.hentKoblinger(fagsakId);
+        assertThat(koblinger).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(vetoet.getId());
+        assertThat(koblinger.getFirst().prosessTaskStatus()).isEqualTo(ProsessTaskStatus.KLAR);
+        assertThat(koblinger.getFirst().blokkertAv()).isNull();
+    }
+
+    @Test
+    void fjernKoblingerUtenProsessTask_skal_ikke_fjerne_kobling_til_task_som_finnes() {
+        ProsessTaskData task = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        fagsakProsessTaskRepository.lagreNyGruppe(task);
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, behandlingId.toString(), task.getId(), 100L, task.getTaskType()));
+        Long slettetTaskId = lagKoblingUtenProsessTask(200L);
+        entityManager.flush();
+
+        assertThrows(IllegalStateException.class, () ->
+            fagsakProsessTaskRepository.fjernKoblingerUtenProsessTask(fagsakId, Set.of(task.getId(), slettetTaskId)));
+    }
+
+    @Test
+    void fjernKoblingerUtenProsessTask_skal_ikke_fjerne_kobling_på_annen_fagsak() {
+        Long slettetTaskId = lagKoblingUtenProsessTask(100L);
+        Fagsak annenFagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), mock(Saksnummer.class), LocalDate.now(), null);
+        Long annenFagsakId = fagsakRepository.opprettNy(annenFagsak);
+        entityManager.flush();
+
+        assertThrows(IllegalStateException.class, () ->
+            fagsakProsessTaskRepository.fjernKoblingerUtenProsessTask(annenFagsakId, Set.of(slettetTaskId)));
+        assertThat(fagsakProsessTaskRepository.hentKoblinger(fagsakId)).extracting(FagsakProsessTaskKobling::prosessTaskId).containsExactly(slettetTaskId);
+    }
+
+    @Test
+    void finnFagsakerMedKoblingerUtenProsessTask_skal_kun_finne_fagsaker_med_koblinger_uten_prosesstask() {
+        lagKoblingUtenProsessTask(100L);
+        lagKoblingUtenProsessTask(null);
+        Fagsak annenFagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), mock(Saksnummer.class), LocalDate.now(), null);
+        Long annenFagsakId = fagsakRepository.opprettNy(annenFagsak);
+        ProsessTaskData task = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        task.setBehandling(annenFagsakId, behandlingId);
+        fagsakProsessTaskRepository.lagreNyGruppe(task);
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(annenFagsakId, behandlingId.toString(), task.getId(), 100L, task.getTaskType()));
+        entityManager.flush();
+
+        var fagsakIder = fagsakProsessTaskRepository.finnFagsakerMedKoblingerUtenProsessTask();
+
+        assertThat(fagsakIder).containsOnlyOnce(fagsakId).doesNotContain(annenFagsakId);
+    }
+
+    /** Kobling til en prosesstask som ikke lenger finnes, slik ryddProsessTasks har etterlatt i prod. */
+    private Long lagKoblingUtenProsessTask(Long gruppeSekvensNr) {
+        ProsessTaskData task = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
+        fagsakProsessTaskRepository.lagreNyGruppe(task);
+        Long prosessTaskId = task.getId();
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, behandlingId.toString(), prosessTaskId, gruppeSekvensNr, task.getTaskType()));
+        entityManager.flush();
+        entityManager.clear();
+        entityManager.createNativeQuery("delete from prosess_task where id = :id").setParameter("id", prosessTaskId).executeUpdate();
+        return prosessTaskId;
     }
 }
