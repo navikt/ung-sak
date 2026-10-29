@@ -275,7 +275,7 @@ spec:
       value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
-    - name: ENABLE_BREV_ANSVARLIG
+    - name: ENABLE_BREV_ANSVARLIG_UNG
       value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "true"
