@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -31,6 +32,7 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
@@ -60,6 +62,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private Vilkårsutfallsporing vilkårsutfallsporing;
     private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
     BistandsvilkårSteg() {
         //for CDI proxy
@@ -76,7 +79,8 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
                               InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                               InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
                               Vilkårsutfallsporing vilkårsutfallsporing,
-                              VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste) {
+                              VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste,
+                              @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -86,6 +90,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.vilkårsutfallsporing = vilkårsutfallsporing;
         this.vilkårsvurderingHistorikkinnslagTjeneste = vilkårsvurderingHistorikkinnslagTjeneste;
+        this.aktivitetspengerVilkårsPerioderTilVurderingTjeneste = aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
@@ -122,9 +127,11 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         ).intersection(tidslinjeTilVurdering);
 
         var avklaringTidslinje = hentForeslåttAvklaringTidslinje(behandlingId).intersection(tidslinjeTilVurdering);
-        var perioderTilVurderingAvgrenset = avgrensTilForeslåtteAvklaringerHvisFinnes(tidslinjeTilVurdering, avklaringTidslinje);
+        var nyeSøknadsperioder = aktivitetspengerVilkårsPerioderTilVurderingTjeneste.utledPerÅrsak(behandlingId, getAktuellVilkårType())
+            .getOrDefault(BehandlingÅrsakType.NY_SØKT_PERIODE, LocalDateTimeline.empty())
+            .intersection(tidslinjeTilVurdering);
 
-        LocalDateTimeline<VilkårsavklaringUtfallUtleder> vurderingTidslinje = perioderTilVurderingAvgrenset
+        LocalDateTimeline<VilkårsavklaringUtfallUtleder> vurderingTidslinje = tidslinjeTilVurdering
             .combine(
                 avklaringTidslinje,
                 opprettUtfallUtleder(),
@@ -132,16 +139,20 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
             .combine(
                 etterlysningTidslinje,
                 leggTilEtterlysning(),
+                LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .combine(
+                nyeSøknadsperioder,
+                leggTilNySøknadsperiode(),
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        LocalDateTimeline<VilkårsavklaringUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(VilkårsavklaringUtfallUtleder::utledUtfall);
+        LocalDateTimeline<Set<VilkårsavklaringUtfall>> stegutfallTidslinje = vurderingTidslinje.mapValue(VilkårsavklaringUtfallUtleder::utledUtfall);
         vilkårsutfallsporing.lagreSporing(behandlingId, vurderingTidslinje.mapValue(VilkårsavklaringUtfallUtleder::tilRegelInput), stegutfallTidslinje, VURDER_BISTANDSVILKÅR);
 
-        if (!stegutfallTidslinje.filterValue(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
+        if (!stegutfallTidslinje.filterValue(u -> u.contains(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)).isEmpty()) {
             return settPåVent(vurderingTidslinje);
         }
 
-        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK::equals))
+        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(u -> u.contains(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK)))
             .segmenter()
             .stream().map(s -> {
                 var foreslåttAvklaring = s.getValue().getForeslåttAvklaring();
@@ -171,12 +182,16 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
 
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, vurderingResultat);
 
-        var manuellVurderingTidslinje = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(v -> v == VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT));
-        if (!manuellVurderingTidslinje.isEmpty()) {
-            var aksjonspunkt = erDekketAvForeslåttAvklaring(manuellVurderingTidslinje)
-                ? AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR
-                : AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR;
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunkt));
+        boolean vurderesEtterAvklaring = !stegutfallTidslinje.filterValue(u -> u.contains(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING)).isEmpty();
+        boolean vurderesNyPeriode = !stegutfallTidslinje.filterValue(u -> u.contains(VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE)).isEmpty();
+        if (vurderesEtterAvklaring && vurderesNyPeriode) {
+            throw new UnsupportedOperationException("Har ikke støtte for å vurdere både opphør og ny periode i samme behandling " + behandlingId);
+        }
+        if (vurderesEtterAvklaring) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR));
+        }
+        if (vurderesNyPeriode) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR));
         }
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandlingId));
@@ -189,16 +204,6 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
-
-    static boolean erDekketAvForeslåttAvklaring(LocalDateTimeline<VilkårsavklaringUtfallUtleder> manuellTidslinje) {
-        return !manuellTidslinje.isEmpty() && manuellTidslinje.segmenter().stream()
-            .allMatch(s -> s.getValue().getForeslåttAvklaring() != null);
-    }
-
-     private static LocalDateTimeline<Boolean> avgrensTilForeslåtteAvklaringerHvisFinnes(
-        LocalDateTimeline<Boolean> tidslinjeTilVurdering, LocalDateTimeline<VilkårPeriodeAvklaring> avklaringTidslinje) {
-        return avklaringTidslinje.isEmpty() ? tidslinjeTilVurdering : tidslinjeTilVurdering.intersection(avklaringTidslinje);
     }
 
     private LocalDateTimeline<VilkårPeriodeAvklaring> hentForeslåttAvklaringTidslinje(long behandlingId) {
@@ -223,9 +228,16 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         };
     }
 
+    private static LocalDateSegmentCombinator<VilkårsavklaringUtfallUtleder, Boolean, VilkårsavklaringUtfallUtleder> leggTilNySøknadsperiode() {
+        return (di, lhs, rhs) -> {
+            var vurdering = rhs != null ? lhs.getValue().medNySøknadsperiode() : lhs.getValue();
+            return new LocalDateSegment<>(di, vurdering);
+        };
+    }
+
     private static BehandleStegResultat settPåVent(LocalDateTimeline<VilkårsavklaringUtfallUtleder> vurderingTidslinje) {
         LocalDateTime frist = vurderingTidslinje
-            .filterValue(v -> v.utledUtfall() == VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)
+            .filterValue(v -> v.utledUtfall().contains(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER))
             .segmenter().stream()
             .map(seg -> seg.getValue().getFrist())
             .filter(Objects::nonNull)
