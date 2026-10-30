@@ -11,9 +11,13 @@ import no.nav.ung.sak.etterlysning.EtterlysningData;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import static no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK;
+import static no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
+import static no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING;
+import static no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE;
 
 public class VilkårsavklaringUtfallUtleder {
 
@@ -46,23 +50,15 @@ public class VilkårsavklaringUtfallUtleder {
     // Avklaringen og en ny søknadsperiode gir hvert sitt utfall, siden de vurderes i hvert sitt aksjonspunkt.
     public Set<VilkårsavklaringUtfall> utledUtfall() {
         var utfall = EnumSet.noneOf(VilkårsavklaringUtfall.class);
-        utledUtfallForAvklaring().ifPresent(utfall::add);
+        if (erVentende()) {
+            utfall.add(VENTER_PÅ_UTTALELSE_FRA_BRUKER);
+        } else if (foreslåttAvklaring != null) {
+            utfall.add(kanAvslåsAutomatisk() ? AVSLÅS_AUTOMATISK : VURDERES_MANUELT_ETTER_AVKLARING);
+        }
         if (nySøknadsperiode) {
-            utfall.add(VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE);
+            utfall.add(VURDERES_MANUELT_NY_PERIODE);
         }
         return utfall;
-    }
-
-    private Optional<VilkårsavklaringUtfall> utledUtfallForAvklaring() {
-        if (erVentende()) {
-            return Optional.of(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER);
-        }
-        if (foreslåttAvklaring == null) {
-            return Optional.empty();
-        }
-        return Optional.of(kanAvslåsAutomatisk()
-            ? VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK
-            : VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING);
     }
 
     public LocalDateTime getFrist() {
