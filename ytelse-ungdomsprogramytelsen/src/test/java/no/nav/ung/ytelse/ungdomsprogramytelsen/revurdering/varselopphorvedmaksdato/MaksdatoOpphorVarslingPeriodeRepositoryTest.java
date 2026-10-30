@@ -6,6 +6,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
@@ -58,9 +59,9 @@ class MaksdatoOpphorVarslingPeriodeRepositoryTest {
     void should_give_same_result_as_repository_method_for_other_ytelse_type() {
         var maksdato = LocalDate.now().plusWeeks(2);
         var behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER).lagre(entityManager);
-        lagreUngdomsprogramGrunnlag(behandling, maksdato, maksdato);
+        var grunnlag = lagreUngdomsprogramGrunnlag(behandling, maksdato, maksdato);
 
-        var relevantForVarsling = MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(maksdato, maksdato);
+        var relevantForVarsling = MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(grunnlag);
         var expected = relevantForVarsling && behandling.getFagsak().getYtelseType() == FagsakYtelseType.UNGDOMSYTELSE;
         var actual = isFagsakRelevantForVarselet(behandling);
 
@@ -69,9 +70,9 @@ class MaksdatoOpphorVarslingPeriodeRepositoryTest {
 
     private void assertSameResultForScenario(LocalDate tom, LocalDate maksdato) {
         var behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
-        lagreUngdomsprogramGrunnlag(behandling, tom, maksdato);
+        var grunnlag = lagreUngdomsprogramGrunnlag(behandling, tom, maksdato);
 
-        var expected = MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(tom, maksdato);
+        var expected = MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(grunnlag);
         var actual = isFagsakRelevantForVarselet(behandling);
 
         assertThat(actual).isEqualTo(expected);
@@ -82,13 +83,14 @@ class MaksdatoOpphorVarslingPeriodeRepositoryTest {
             .anyMatch(f -> f.getId().equals(behandling.getFagsak().getId()));
     }
 
-    private void lagreUngdomsprogramGrunnlag(Behandling behandling, LocalDate tom, LocalDate maksdato) {
+    private UngdomsprogramPeriodeGrunnlag lagreUngdomsprogramGrunnlag(Behandling behandling, LocalDate tom, LocalDate maksdato) {
         ungdomsprogramPeriodeRepository.lagre(
             behandling.getId(),
             List.of(new UngdomsprogramPeriode(FOM, tom)),
             false,
             maksdato
         );
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
     }
 }
 
