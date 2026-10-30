@@ -63,6 +63,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -375,16 +376,15 @@ class BistandsvilkårStegTest {
     }
 
     @Test
-    void skal_vurdere_avklart_periode_for_ny_soknadsperiode_nar_begge_vurderes_manuelt() {
+    void skal_feile_nar_bade_avklart_periode_og_ny_soknadsperiode_vurderes_manuelt() {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, BehandlingÅrsakType.NY_SØKT_PERIODE);
         var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
         steg = lagSteg(List.of(mottattUttalelse(avklaring.getReferanse())));
 
-        assertThat(utførSteg(behandling).getAksjonspunktListe())
-            .as("avklart periode vurderes først, alene")
-            .containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR);
+        assertThatThrownBy(() -> utførSteg(behandling))
+            .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test

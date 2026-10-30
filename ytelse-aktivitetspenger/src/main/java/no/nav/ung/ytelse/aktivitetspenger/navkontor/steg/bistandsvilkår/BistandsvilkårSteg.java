@@ -182,10 +182,15 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
 
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, vurderingResultat);
 
-        if (!stegutfallTidslinje.filterValue(u -> u.contains(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING)).isEmpty()) {
+        boolean vurderesEtterAvklaring = !stegutfallTidslinje.filterValue(u -> u.contains(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING)).isEmpty();
+        boolean vurderesNyPeriode = !stegutfallTidslinje.filterValue(u -> u.contains(VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE)).isEmpty();
+        if (vurderesEtterAvklaring && vurderesNyPeriode) {
+            throw new UnsupportedOperationException("Har ikke støtte for å vurdere både opphør og ny periode i samme behandling " + behandlingId);
+        }
+        if (vurderesEtterAvklaring) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR));
         }
-        if (!stegutfallTidslinje.filterValue(u -> u.contains(VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE)).isEmpty()) {
+        if (vurderesNyPeriode) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR));
         }
 

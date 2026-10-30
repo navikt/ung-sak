@@ -63,6 +63,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -357,7 +358,7 @@ class VurderBostedVilkårStegTest {
 
     @Test
     void skal_ikke_lagre_uttalelsestekst_i_sporing() {
-        var behandling = opprettBehandlingMedVilkårOgPeriode();
+        var behandling = opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType.ENDRET_BOSTED);
         bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
         var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
         vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(avklaring));
@@ -380,7 +381,7 @@ class VurderBostedVilkårStegTest {
     }
 
     @Test
-    void skal_vurdere_avklart_periode_før_ny_søknadsperiode_når_begge_vurderes_manuelt() {
+    void skal_feile_når_både_avklart_periode_og_ny_søknadsperiode_vurderes_manuelt() {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2, BehandlingÅrsakType.ENDRET_BOSTED, BehandlingÅrsakType.NY_SØKT_PERIODE);
@@ -389,9 +390,8 @@ class VurderBostedVilkårStegTest {
         vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(avklaring));
         steg = lagSteg(List.of(mottattUttalelse(avklaring.getReferanse())));
 
-        assertThat(utførSteg(behandling).getAksjonspunktListe())
-            .as("avklart periode vurderes først, alene")
-            .containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR);
+        assertThatThrownBy(() -> utførSteg(behandling))
+            .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test

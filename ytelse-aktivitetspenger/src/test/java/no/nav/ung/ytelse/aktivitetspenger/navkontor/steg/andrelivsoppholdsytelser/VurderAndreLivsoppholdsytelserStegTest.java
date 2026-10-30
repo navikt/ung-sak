@@ -307,16 +307,15 @@ class VurderAndreLivsoppholdsytelserStegTest {
     }
 
     @Test
-    void skal_vurdere_avklart_periode_for_ny_soknadsperiode_nar_begge_vurderes_manuelt() {
+    void skal_feile_nar_bade_avklart_periode_og_ny_soknadsperiode_vurderes_manuelt() {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2, BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE, BehandlingÅrsakType.NY_SØKT_PERIODE);
         var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, AUTOMATISERBAR_ÅRSAK, true);
         steg = lagSteg(List.of(mottattUttalelse(avklaring.getReferanse())));
 
-        assertThat(utførSteg(behandling).getAksjonspunktListe())
-            .as("avklart periode vurderes først, alene")
-            .containsExactly(AksjonspunktDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_OPPHØR);
+        assertThatThrownBy(() -> utførSteg(behandling))
+            .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
