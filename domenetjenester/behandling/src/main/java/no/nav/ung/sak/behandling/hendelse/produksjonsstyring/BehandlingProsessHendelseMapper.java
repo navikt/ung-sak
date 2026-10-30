@@ -10,6 +10,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStegDel;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.hendelse.EventHendelse;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -48,7 +49,13 @@ public class BehandlingProsessHendelseMapper {
     }
 
     public BehandlingProsessHendelse getProduksjonstyringEventDto(LocalDateTime eventTid, EventHendelse eventHendelse, Behandling behandling, LocalDate vedtaksdato) {
+        return getProduksjonstyringEventDto(eventTid, eventHendelse, behandling, vedtaksdato, null);
+    }
+
+    public BehandlingProsessHendelse getProduksjonstyringEventDto(LocalDateTime eventTid, EventHendelse eventHendelse, Behandling behandling,
+                                                               LocalDate vedtaksdato, BehandlingStegType overstyrtBehandlingSteg) {
         var fagsak = behandling.getFagsak();
+        var behandlingSteg = overstyrtBehandlingSteg != null ? overstyrtBehandlingSteg : behandling.getAktivtBehandlingSteg();
 
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
 
@@ -66,7 +73,7 @@ public class BehandlingProsessHendelseMapper {
             .getBehandlingstidFrist(behandling.getBehandlingstidFrist())
             .medEventHendelse(eventHendelse)
             .medBehandlingStatus(behandling.getStatus().getKode())
-            .medBehandlingSteg(behandling.getAktivtBehandlingSteg() == null ? null : behandling.getAktivtBehandlingSteg().getKode())
+            .medBehandlingSteg(behandlingSteg == null ? null : behandlingSteg.getKode())
             .medBehandlingenErHosNavKontor(uledOmBaehandlingErHosNavKontor(behandling))
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())
