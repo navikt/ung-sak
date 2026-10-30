@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(VurderVedtaksbrevTask.class);
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
     public static final String TASKTYPE = "formidling.vedtak.brevvurdering";
 
@@ -67,6 +69,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     public void prosesser(ProsessTaskData prosessTaskData) {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        BehandlingProsessTask.logContext(behandling);
 
         var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(this.vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
         var resultat = vedtaksbrevRegler.kjør(behandlingId);
@@ -136,8 +139,14 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         behandlingVedtaksbrevRepository.lagre(vedtaksbrevResultatEntitet);
 
         prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId(), brevNr));
-        LOG.info("Opprettet vedtaksbrev bestilling med id: {} og mal {}", bestilling.getId(), bestilling.getDokumentMalType().getKode());
+        loggOpprettetBestilling(bestilling);
+    }
 
+    private static void loggOpprettetBestilling(BrevbestillingEntitet bestilling) {
+        LOG_CONTEXT.add("dokumentMalType", bestilling.getDokumentMalType());
+        LOG.info("Opprettet vedtaksbrev bestilling med id: {} og mal {}", bestilling.getId(), bestilling.getDokumentMalType().getKode());
+        //Må cleare manuelt da det kjører i loop.
+        LOG_CONTEXT.remove("dokumentMalType");
     }
 
 
@@ -173,7 +182,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             ProsessTaskData prosessTaskData = lagBestillingTask(behandling, bestilling.getId(), 0);
             prosessTaskData.setProperty(VedtaksbrevBestillingTask.VEDTAKSBREV_VALG_ID, vedtaksbrevValg.getId().toString());
             prosessTaskTjeneste.lagre(prosessTaskData);
-
+            loggOpprettetBestilling(bestilling);
         }
 
     }

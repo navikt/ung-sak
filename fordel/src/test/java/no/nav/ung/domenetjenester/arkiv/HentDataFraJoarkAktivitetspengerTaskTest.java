@@ -4,11 +4,7 @@ package no.nav.ung.domenetjenester.arkiv;
 import no.nav.k9.felles.integrasjon.saf.Journalstatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.domenetjenester.arkiv.journalpostvurderer.AlleredeMottattJournalpost;
-import no.nav.ung.domenetjenester.arkiv.journalpostvurderer.IgnorertJournalpost;
-import no.nav.ung.domenetjenester.arkiv.journalpostvurderer.Journalpostvurderer;
-import no.nav.ung.domenetjenester.arkiv.journalpostvurderer.StrukturertJournalpost;
-import no.nav.ung.domenetjenester.arkiv.journalpostvurderer.UhåndtertJournalpost;
+import no.nav.ung.domenetjenester.arkiv.journalpostvurderer.*;
 import no.nav.ung.fordel.handler.FordelProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.MottattMeldingTjeneste;
@@ -36,13 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.calls;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -60,7 +50,7 @@ public class HentDataFraJoarkAktivitetspengerTaskTest {
     @Spy
     private AlleredeMottattJournalpost alleredeMottattJournalpost = new AlleredeMottattJournalpost(journalpostRepository);
     @Spy
-    private StrukturertJournalpost strukturertJournalpost = new StrukturertJournalpost(true, true);
+    private StrukturertJournalpost strukturertJournalpost = new StrukturertJournalpost(true);
     @Spy
     private UhåndtertJournalpost uhåndtertJournalpost = new UhåndtertJournalpost();
 

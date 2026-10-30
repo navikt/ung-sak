@@ -39,7 +39,7 @@ public class InformasjonsbrevGenerererTjeneste {
     private BrevMottakerTjeneste brevMottakerTjeneste;
     private Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere;
     private MicrosoftGraphTjeneste microsoftGraphTjeneste;
-    private boolean enableBrevAnsvarlig;
+    private boolean enableBrevAnsvarligUng;
 
     @Inject
     public InformasjonsbrevGenerererTjeneste(
@@ -47,14 +47,14 @@ public class InformasjonsbrevGenerererTjeneste {
         PdfGenKlient pdfGen,
         BrevMottakerTjeneste brevMottakerTjeneste,
         @Any Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere, MicrosoftGraphTjeneste microsoftGraphTjeneste,
-        @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG", defaultVerdi = "true") boolean enableBrevAnsvarlig) {
+        @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG_UNG", defaultVerdi = "true") boolean enableBrevAnsvarligUng) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
         this.informasjonsbrevInnholdByggere = informasjonsbrevInnholdByggere;
         this.microsoftGraphTjeneste = microsoftGraphTjeneste;
-        this.enableBrevAnsvarlig = enableBrevAnsvarlig;
+        this.enableBrevAnsvarligUng = enableBrevAnsvarligUng;
     }
 
     public InformasjonsbrevGenerererTjeneste() {
@@ -71,7 +71,7 @@ public class InformasjonsbrevGenerererTjeneste {
         var bygger = bestemBygger(informasjonsbrevBestillingInput.dokumentMalType(), behandling.getFagsakYtelseType());
         var innhold = bygger.bygg(behandling, informasjonsbrevBestillingInput.getTypedInnhold());
 
-        BrevSignaturDto signatur = lagSignatur(informasjonsbrevBestillingInput.bestillerIdent());
+        BrevSignaturDto signatur = lagSignatur(informasjonsbrevBestillingInput.bestillerIdent(), behandling.getFagsakYtelseType());
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
                 FellesDto.lag(new MottakerDto(mottaker.navn(), mottaker.fnr()), signatur, behandling.getFagsakYtelseType()),
@@ -96,8 +96,8 @@ public class InformasjonsbrevGenerererTjeneste {
     }
 
 
-    private BrevSignaturDto lagSignatur(String bestillerIdent) {
-        if (!enableBrevAnsvarlig) {
+    private BrevSignaturDto lagSignatur(String bestillerIdent, FagsakYtelseType ytelseType) {
+        if (!enableBrevAnsvarligUng && ytelseType != FagsakYtelseType.AKTIVITETSPENGER) {
             return new BrevSignaturDto(false, List.of());
         }
         var bestillerNavn = microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null);
