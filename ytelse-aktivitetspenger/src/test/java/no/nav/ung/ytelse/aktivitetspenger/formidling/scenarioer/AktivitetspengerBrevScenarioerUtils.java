@@ -95,7 +95,7 @@ public class AktivitetspengerBrevScenarioerUtils {
 
     public static Beregningsgrunnlag lagBeregningsgrunnlag(LocalDate skjæringstidspunkt) {
         var input = new BeregningInput(new Beløp(0), new Beløp(0), new Beløp(0), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
-        return new Beregningsgrunnlag(input, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, "test-sporing");
+        return new Beregningsgrunnlag(input, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, grunnbeløpVed(skjæringstidspunkt), "test-sporing");
     }
 
     /**
@@ -104,7 +104,7 @@ public class AktivitetspengerBrevScenarioerUtils {
      */
     public static Beregningsgrunnlag lagBeregningsgrunnlagHøyereEnnLavMinstesats(LocalDate skjæringstidspunkt) {
         var input = new BeregningInput(new Beløp(200_000), new Beløp(200_000), new Beløp(300_000), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
-        return new Beregningsgrunnlag(input, BigDecimal.valueOf(300_000), BigDecimal.valueOf(233_333), BigDecimal.valueOf(300_000), BigDecimal.valueOf(198_000), "test-sporing");
+        return new Beregningsgrunnlag(input, BigDecimal.valueOf(300_000), BigDecimal.valueOf(233_333), BigDecimal.valueOf(300_000), BigDecimal.valueOf(198_000), grunnbeløpVed(skjæringstidspunkt), "test-sporing");
     }
 
     /**
@@ -130,7 +130,12 @@ public class AktivitetspengerBrevScenarioerUtils {
             resultat.getÅrsinntektSisteTreÅr(),
             resultat.getBeregningsgrunnlag(),
             resultat.getBeregningsgrunnlag().multiply(BigDecimal.valueOf(0.66)),
+            resultat.getGrunnbeløp(),
             resultat.getRegelSporing());
+    }
+
+    public static BigDecimal grunnbeløpVed(LocalDate dato) {
+        return GrunnbeløpTidslinje.hentTidslinje().getSegment(new LocalDateInterval(dato, dato)).getValue().verdi();
     }
 
     public static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(
