@@ -29,12 +29,12 @@ public class SifAbacPdpRestKlient {
     public SifAbacPdpRestKlient(OidcRestClient restClient,
                                 @KonfigVerdi(value = "sif.abac.pdp.ung.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung") String urlSifAbacPdpUngUrl,
                                 @KonfigVerdi(value = "sif.abac.pdp.aktivitetspenger.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/aktivitetspenger") String urlSifAbacPdpAktivitetspengerUrl,
-                                @KonfigVerdi(value = "sif.abac.pdp.ung-og-aktivitetspenger.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung-og-aktivitetspenger") String urlSifAbacPdpUngOgAktivitetspengerUrl
+                                @KonfigVerdi(value = "sif.abac.pdp.ung.og.aktivitetspenger.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung-og-aktivitetspenger") String urlSifAbacPdpUngOgAktivitetspengerUrl
     ) {
         this.restClient = restClient;
         this.uriTilgangskontrollUngMedSaksinformasjon = tilUri(urlSifAbacPdpUngUrl, "saksinformasjon", "sif.abac.pdp.ung.url");
         this.uriTilgangskontrollAktivitetspengerMedSaksinformasjon = tilUri(urlSifAbacPdpAktivitetspengerUrl, "saksinformasjon", "sif.abac.pdp.aktivitetspenger.url");
-        this.uriTilgangskontrollUngOgAktivitetspengerPersoner = tilUri(urlSifAbacPdpUngOgAktivitetspengerUrl, "personer", "sif.abac.pdp.ung-og-aktivitetspenger.url");
+        this.uriTilgangskontrollUngOgAktivitetspengerPersoner = tilUri(urlSifAbacPdpUngOgAktivitetspengerUrl, "personer", "sif.abac.pdp.ung.og.aktivitetspenger.url");
     }
 
     public Tilgangsbeslutning sjekkTilgangTilPersonerForInnloggetBrukerUngOgAktivitetspenger(PersonerOperasjonDto input) {
