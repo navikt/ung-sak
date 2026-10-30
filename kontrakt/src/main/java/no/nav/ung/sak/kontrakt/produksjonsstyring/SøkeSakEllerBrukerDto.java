@@ -6,12 +6,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.ung.kodeverk.abac.AppAbacAttributt;
 import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
 import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,6 +26,10 @@ public class SøkeSakEllerBrukerDto {
     @Pattern(regexp = "^[a-zA-Z0-9]*$")
     private String searchString;
 
+    @JsonProperty(value = "ytelseType")
+    @Valid
+    private FagsakYtelseType ytelseType;
+
     public SøkeSakEllerBrukerDto() {
     }
 
@@ -33,6 +39,11 @@ public class SøkeSakEllerBrukerDto {
 
     public SøkeSakEllerBrukerDto(String searchString) {
         this.searchString = searchString;
+    }
+
+    public SøkeSakEllerBrukerDto(String searchString, FagsakYtelseType ytelseType) {
+        this.searchString = searchString;
+        this.ytelseType = ytelseType;
     }
 
 
@@ -57,6 +68,10 @@ public class SøkeSakEllerBrukerDto {
 
     public void setSearchString(String searchString) {
         this.searchString = searchString;
+    }
+
+    public FagsakYtelseType getYtelseType() {
+        return ytelseType;
     }
 
     private boolean antattFnr() {

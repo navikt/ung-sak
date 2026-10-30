@@ -271,8 +271,8 @@ public class FagsakRestTjeneste {
         String søk = søkestreng.getSearchString();
         FagsakSamlingForBruker view;
         if (predikatErFnr.test(søk)) {
-            //her vet vi ikke hvilket ytelsestype som er riktig å sende inn, velger en
-            Optional<Personinfo> bruker = tpsTjeneste.hentBrukerForFnr(new PersonIdent(søk), FagsakYtelseType.UNGDOMSYTELSE);
+            FagsakYtelseType ytelseType = Optional.ofNullable(søkestreng.getYtelseType()).orElse(FagsakYtelseType.UNGDOMSYTELSE);
+            Optional<Personinfo> bruker = tpsTjeneste.hentBrukerForFnr(new PersonIdent(søk), ytelseType);
             if (bruker.isEmpty()) {
                 return List.of();
             }
