@@ -80,4 +80,13 @@ class FagsakRestTjenesteSøkTest {
 
         verifyNoInteractions(abacPdpRestKlient, fagsakApplikasjonTjeneste);
     }
+
+    @Test
+    void oppgitt_ytelsetype_brukes_ved_oppslag_av_person() {
+        when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR), FagsakYtelseType.AKTIVITETSPENGER)).thenReturn(Optional.empty());
+
+        assertThat(tjeneste.søkFagsaker(new SøkeSakEllerBrukerDto(FNR, FagsakYtelseType.AKTIVITETSPENGER))).isEmpty();
+
+        verify(tpsTjeneste).hentBrukerForFnr(new PersonIdent(FNR), FagsakYtelseType.AKTIVITETSPENGER);
+    }
 }
