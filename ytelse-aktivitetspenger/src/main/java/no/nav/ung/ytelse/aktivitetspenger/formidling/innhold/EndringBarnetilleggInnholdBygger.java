@@ -49,10 +49,11 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
         }
 
         var sats = Satsberegner.beregnBarnetilleggSats(nyeSatser.satsGrunnlag());
-        var barnFødtFørStartdato = fødselTidslinje.getMinLocalDate().isBefore(satsendringsdato);
+        var fødselsdato = fødselTidslinje.getMinLocalDate();
+        var barnFødtFørStartdato = fødselsdato.isBefore(satsendringsdato);
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_ENDRING_BARNETILLEGG,
-            new EndringBarnetilleggDto(satsendringsdato, nyeSatser.hentBeregnetSats().dagsatsBarnetillegg(), sats, barnFødtFørStartdato));
+            new EndringBarnetilleggDto(satsendringsdato, fødselsdato, nyeSatser.hentBeregnetSats().dagsatsBarnetillegg(), sats, barnFødtFørStartdato));
     }
 }
 

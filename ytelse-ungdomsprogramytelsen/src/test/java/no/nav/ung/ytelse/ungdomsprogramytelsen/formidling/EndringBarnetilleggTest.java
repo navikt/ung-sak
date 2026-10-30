@@ -111,7 +111,7 @@ class EndringBarnetilleggTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
             """
                 Du får mer i ungdomsprogramytelse fordi du har fått barn \
                 Du får 37 kroner i barnetillegg per dag fra og med 3. mai 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn før du startet i ungdomsprogrammet. \
+                Det er fordi du fikk barn 10. april 2025, før du startet i ungdomsprogrammet. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 9 tredje ledd. \
                 """

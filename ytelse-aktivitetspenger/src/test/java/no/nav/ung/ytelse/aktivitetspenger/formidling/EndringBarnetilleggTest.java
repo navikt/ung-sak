@@ -95,7 +95,7 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             """
                 Du får mer i aktivitetspenger fordi du har fått barn \
                 Du får 37 kroner i barnetillegg per dag fra og med 1. august 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn før du begynte å få aktivitetspenger. \
+                Det er fordi du fikk barn 11. juli 2025, før du begynte å få aktivitetspenger. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
