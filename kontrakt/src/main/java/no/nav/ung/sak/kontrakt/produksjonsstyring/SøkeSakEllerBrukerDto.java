@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
@@ -72,6 +73,11 @@ public class SøkeSakEllerBrukerDto {
 
     public FagsakYtelseType getYtelseType() {
         return ytelseType;
+    }
+
+    @AssertTrue(message = "ytelseType må være UNGDOMSYTELSE eller AKTIVITETSPENGER")
+    public boolean isGyldigYtelseType() {
+        return ytelseType == null || ytelseType == FagsakYtelseType.UNGDOMSYTELSE || ytelseType == FagsakYtelseType.AKTIVITETSPENGER;
     }
 
     private boolean antattFnr() {
