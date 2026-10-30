@@ -14,8 +14,8 @@ public class VedtaksbrevVerifikasjon {
         Du har rett til å klage \
         Du kan klage på dette vedtaket. \
         Hvis du skal klage, må du gjøre det innen seks uker har gått fra den datoen da du mottok dette vedtaksbrevet. \
-        Du finner skjema og informasjon på nav.no/klage#aktivitetspenger. \
-        Pass på at du får tydelig fram hva slags vedtak du klager på, og hvorfor du klager. \
+        Du sender klagen din ved å gå inn på nav.no/still-sporsmal og velge temaet “Arbeid”. \
+        Så logger du inn og skriver en melding til oss. Pass på at du får tydelig fram hva slags vedtak du klager på, og hvorfor du klager. \
         Du har rett til innsyn \
         Du kan se dokumentene i saken din ved å logge deg inn på nav.no. \
         Trenger du mer informasjon? \
