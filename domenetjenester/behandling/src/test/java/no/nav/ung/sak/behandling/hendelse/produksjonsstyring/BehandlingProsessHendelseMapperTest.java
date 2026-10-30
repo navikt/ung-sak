@@ -53,9 +53,10 @@ class BehandlingProsessHendelseMapperTest {
     }
 
     @Test
-    void eksplisittStegOverstyrerAktivtStegUavhengigAvHendelse() {
-        var dto = mapper.getProduksjonstyringEventDto(EVENT_TID, EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling, null,
-            BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR);
+    void brukerAktivtStegOgsåVedAnnenHendelse() {
+        when(behandling.getAktivtBehandlingSteg()).thenReturn(BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR);
+
+        var dto = mapper.getProduksjonstyringEventDto(EVENT_TID, EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling, null);
 
         assertThat(dto.getBehandlingSteg()).isEqualTo(BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR.getKode());
     }

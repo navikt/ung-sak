@@ -17,29 +17,49 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class BehandlingskontrollEventObserverTest {
 
     @Test
-    void senderEksplisittStegVedAvslutningAvNavKontor() {
+    void publisererAvslutningNårNavKontorErFerdig() {
         verifiserOvergang(mock(BehandlingStegOvergangEvent.class),
             BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR, BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR,
-            EventHendelse.AVSLUTTE_NAVKONTOR, BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR);
+            EventHendelse.AVSLUTTE_NAVKONTOR);
     }
 
     @Test
-    void overstyrerIkkeStegVedGjenopptakAvNavKontor() {
+    void publisererGjenopptakVedTilbakeføringTilNavKontor() {
         verifiserOvergang(mock(BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent.class),
             BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR, BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR,
-            EventHendelse.GJENOPPTA_NAVKONTOR, null);
+            EventHendelse.GJENOPPTA_NAVKONTOR);
+    }
+
+    @Test
+    void publisererIkkeAvslutningVedVanligInngangTilNavKontor() {
+        var event = mock(BehandlingStegOvergangEvent.class);
+        var behandling = mock(Behandling.class);
+        var repository = mock(BehandlingRepository.class);
+        var mapper = mock(BehandlingProsessHendelseMapper.class);
+        var taskTjeneste = mock(ProsessTaskTjeneste.class);
+        when(event.getBehandlingId()).thenReturn(1L);
+        when(event.getFraStegType()).thenReturn(BehandlingStegType.VURDER_SØKNADSFRIST);
+        when(event.getTilStegType()).thenReturn(BehandlingStegType.ALDERSVILKÅRET);
+        when(behandling.getFagsakYtelseType()).thenReturn(FagsakYtelseType.AKTIVITETSPENGER);
+        when(repository.hentBehandling(1L)).thenReturn(behandling);
+        var observer = new BehandlingskontrollEventObserver(taskTjeneste, repository, mapper, false);
+
+        observer.observerOvergangDel1Del2(event);
+
+        verify(taskTjeneste, never()).lagre(any(ProsessTaskData.class));
+        verify(mapper, never()).getProduksjonstyringEventDto(any(), any());
     }
 
     private void verifiserOvergang(BehandlingStegOvergangEvent event, BehandlingStegType fraSteg, BehandlingStegType tilSteg,
-                                  EventHendelse hendelse, BehandlingStegType overstyrtSteg) {
+                                  EventHendelse hendelse) {
         var behandling = mock(Behandling.class);
         var repository = mock(BehandlingRepository.class);
         var mapper = mock(BehandlingProsessHendelseMapper.class);
@@ -50,13 +70,13 @@ class BehandlingskontrollEventObserverTest {
         when(behandling.getFagsakYtelseType()).thenReturn(FagsakYtelseType.AKTIVITETSPENGER);
         when(repository.hentBehandling(1L)).thenReturn(behandling);
         when(repository.hentBehandlingHvisFinnes(1L)).thenReturn(Optional.of(behandling));
-        when(mapper.getProduksjonstyringEventDto(any(), eq(hendelse), eq(behandling), isNull(), eq(overstyrtSteg)))
+        when(mapper.getProduksjonstyringEventDto(eq(hendelse), eq(behandling)))
             .thenReturn(BehandlingProsessHendelse.builder().medAksjonspunktTilstander(List.of()).build());
         var observer = new BehandlingskontrollEventObserver(taskTjeneste, repository, mapper, false);
 
         observer.observerOvergangDel1Del2(event);
 
-        verify(mapper).getProduksjonstyringEventDto(any(), eq(hendelse), eq(behandling), isNull(), eq(overstyrtSteg));
+        verify(mapper).getProduksjonstyringEventDto(eq(hendelse), eq(behandling));
         verify(taskTjeneste).lagre(any(ProsessTaskData.class));
     }
 }
