@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStegDel;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,11 +90,8 @@ public class BehandlingskontrollEventObserver {
         var eventHendelse = event instanceof BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent && sentralTilNavKontor
             ? EventHendelse.GJENOPPTA_NAVKONTOR
             : EventHendelse.AVSLUTTE_NAVKONTOR;
-        var overstyrtBehandlingSteg = eventHendelse == EventHendelse.AVSLUTTE_NAVKONTOR
-            ? BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR
-            : null;
         try {
-            prosessTaskRepository.lagre(opprettProsessTaskBehandlingprosess(event.getBehandlingId(), eventHendelse, overstyrtBehandlingSteg));
+            prosessTaskRepository.lagre(opprettProsessTaskBehandlingprosess(event.getBehandlingId(), eventHendelse));
         } catch (IOException ex) {
             throw new RuntimeException("Publisering av overgang mellom behandlingsdeler feilet", ex);
         }
@@ -158,18 +154,13 @@ public class BehandlingskontrollEventObserver {
     }
 
     private ProsessTaskData opprettProsessTaskBehandlingprosess(Long behandlingId, EventHendelse eventHendelse) throws IOException {
-        return opprettProsessTaskBehandlingprosess(behandlingId, eventHendelse, null);
-    }
-
-    private ProsessTaskData opprettProsessTaskBehandlingprosess(Long behandlingId, EventHendelse eventHendelse,
-                                                             BehandlingStegType overstyrtBehandlingSteg) throws IOException {
         ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
         taskData.setCallIdFraEksisterende();
         taskData.setPrioritet(50);
 
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
-        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(LocalDateTime.now(), eventHendelse, behandling.get(), null, overstyrtBehandlingSteg);
+        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
         taskData.setPayload(dtoTilJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
         taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
