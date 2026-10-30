@@ -1,16 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.fagsak;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
@@ -23,12 +12,20 @@ import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.typer.Saksnummer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FagsakApplikasjonTjenesteTest {
 
-    private static final String FNR = "12345678901";
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final Saksnummer SAKSNUMMER  = new Saksnummer("123");
 
@@ -57,17 +54,16 @@ public class FagsakApplikasjonTjenesteTest {
     }
 
     @Test
-    public void skal_hente_saker_på_fnr() {
+    public void skal_hente_saker_for_bruker() {
         // Arrange
         Personinfo personinfo = new PersoninfoBuilder().medAktørId(AKTØR_ID).build();
-        when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR), ytelseType)).thenReturn(Optional.of(personinfo));
 
         Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentForBruker(AKTØR_ID)).thenReturn(Collections.singletonList(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
 
         // Act
-        FagsakSamlingForBruker view = tjeneste.hentSaker(FNR);
+        FagsakSamlingForBruker view = tjeneste.hentSakerForBruker(personinfo);
 
         // Assert
         assertThat(view.isEmpty()).isFalse();
@@ -87,7 +83,7 @@ public class FagsakApplikasjonTjenesteTest {
         when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID, ytelseType)).thenReturn(Optional.of(personinfo));
 
         // Act
-        FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
+        FagsakSamlingForBruker view = tjeneste.hentFagsakForSaksnummer(SAKSNUMMER);
 
         // Assert
         assertThat(view.isEmpty()).isFalse();
@@ -104,18 +100,9 @@ public class FagsakApplikasjonTjenesteTest {
         when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID, ytelseType)).thenReturn(Optional.empty()); // Ingen treff i TPS
 
         // Act
-        FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
+        FagsakSamlingForBruker view = tjeneste.hentFagsakForSaksnummer(SAKSNUMMER);
 
         // Assert
-        assertThat(view.isEmpty()).isTrue();
-    }
-
-    @Test
-    public void skal_returnere_tomt_view_ved_ukjent_fnr() {
-        when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR), ytelseType)).thenReturn(Optional.empty());
-
-        FagsakSamlingForBruker view = tjeneste.hentSaker(FNR);
-
         assertThat(view.isEmpty()).isTrue();
     }
 
@@ -123,7 +110,7 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_returnere_tomt_view_ved_ukjent_saksnr() {
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.empty());
 
-        FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
+        FagsakSamlingForBruker view = tjeneste.hentFagsakForSaksnummer(SAKSNUMMER);
 
         assertThat(view.isEmpty()).isTrue();
     }
