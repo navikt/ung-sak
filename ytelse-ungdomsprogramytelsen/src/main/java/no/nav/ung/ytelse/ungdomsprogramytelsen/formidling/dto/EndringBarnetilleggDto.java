@@ -7,5 +7,6 @@ import java.time.LocalDate;
 public record EndringBarnetilleggDto(
     LocalDate fom,
     long barnetillegg,
-    long sats) implements TemplateInnholdDto {
+    long sats,
+    boolean barnFødtFørStartdato) implements TemplateInnholdDto {
 }
