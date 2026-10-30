@@ -3,14 +3,17 @@ package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
+import no.nav.ung.sak.behandlingslager.task.FagsakProsessTask;
 import no.nav.ung.sak.formidling.BrevHistorikkinnslagTjeneste;
 import no.nav.ung.sak.formidling.dokdist.DokDistRestKlient;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
@@ -30,18 +33,21 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "formidling.brevdistribusjon";
 
     private static final Logger LOG = LoggerFactory.getLogger(BrevdistribusjonTask.class);
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
     static final String BREVBESTILLING_ID_PARAM = "brevbestillingId";
     static final String BREVBESTILLING_DISTRIBUSJONSTYPE = "brevbestilling.distribusjonstype";
     private BrevbestillingRepository brevbestillingRepository;
     private DokDistRestKlient dokDistRestKlient;
     private BrevHistorikkinnslagTjeneste brevHistorikkinnslagTjeneste;
+    private FagsakRepository fagsakRepository;
 
     @Inject
-    public BrevdistribusjonTask(BrevbestillingRepository brevbestillingRepository, DokDistRestKlient dokDistRestKlient, BrevHistorikkinnslagTjeneste brevHistorikkinnslagTjeneste) {
+    public BrevdistribusjonTask(BrevbestillingRepository brevbestillingRepository, DokDistRestKlient dokDistRestKlient, BrevHistorikkinnslagTjeneste brevHistorikkinnslagTjeneste, FagsakRepository fagsakRepository) {
         this.brevbestillingRepository = brevbestillingRepository;
         this.dokDistRestKlient = dokDistRestKlient;
         this.brevHistorikkinnslagTjeneste = brevHistorikkinnslagTjeneste;
+        this.fagsakRepository = fagsakRepository;
     }
 
     public BrevdistribusjonTask() {
@@ -56,6 +62,8 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
             prosessTaskData.getPropertyValue(BREVBESTILLING_DISTRIBUSJONSTYPE), "Mangler distribusjonstype");
 
         BrevbestillingEntitet bestilling = brevbestillingRepository.hent(Long.valueOf(bestillingId));
+        FagsakProsessTask.logContext(fagsakRepository.finnEksaktFagsak(bestilling.getFagsakId()));
+        LOG_CONTEXT.add("dokumentMalType", bestilling.getDokumentMalType());
 
         valider(bestilling);
 

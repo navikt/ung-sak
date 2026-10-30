@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinj
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeType;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevMottaker;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
@@ -79,7 +80,7 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VEDTAK.name());
 
         var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
-        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
+        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste, new FagsakRepository(entityManager));
 
         task.doTask(pd);
 
@@ -144,7 +145,7 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VIKTIG.name());
 
         var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
-        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
+        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste, new FagsakRepository(entityManager));
 
         task.doTask(pd);
 
