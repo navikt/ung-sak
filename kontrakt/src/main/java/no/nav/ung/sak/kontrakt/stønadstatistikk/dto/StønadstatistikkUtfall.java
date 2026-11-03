@@ -4,6 +4,7 @@ public enum StønadstatistikkUtfall {
 
     OPPFYLT,
     IKKE_OPPFYLT,
-    IKKE_VURDERT
+    IKKE_VURDERT,
+    IKKE_RELEVANT
 
 }

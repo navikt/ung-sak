@@ -16,7 +16,14 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.ung.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
+import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
+import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,14 +37,31 @@ import java.time.temporal.TemporalAdjusters;
 public class ForvaltningStatistikkRestTjeneste {
 
     private EntityManager entityManager;
+    private StønadstatistikkService stønadstatistikkService;
+    private BehandlingRepository behandlingRepository;
 
     @Inject
-    public ForvaltningStatistikkRestTjeneste(EntityManager entityManager) {
+    public ForvaltningStatistikkRestTjeneste(EntityManager entityManager, StønadstatistikkService stønadstatistikkService, BehandlingRepository behandlingRepository) {
         this.entityManager = entityManager;
+        this.stønadstatistikkService = stønadstatistikkService;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public ForvaltningStatistikkRestTjeneste() {
         // For Rest-CDI
+    }
+
+    @GET
+    @Path("stonadstatistikk-hendelse")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Bygger stønadsstatistikk-hendelsen for en behandling uten å publisere den. Returnerer samme JSON som sendes på Kafka, og hendelsen valideres på samme måte.",
+        summary = "Forhåndsvis stønadsstatistikk-hendelse", tags = "statistikk")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    public String forhåndsvisStønadstatistikkHendelse(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+        // Endepunkt for test - kan fjernes igjen
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getId());
+        StønadstatistikkHendelse hendelse = stønadstatistikkService.lagHendelse(behandling.getId());
+        return StønadstatistikkSerializer.toJson(hendelse);
     }
 
 

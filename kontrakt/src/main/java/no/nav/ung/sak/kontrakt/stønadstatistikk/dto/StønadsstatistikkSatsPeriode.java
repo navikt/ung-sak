@@ -14,6 +14,6 @@ public record StønadsstatistikkSatsPeriode(
     @NotNull @DecimalMin("0") BigDecimal dagsatsUtenBarnetillegg,
     @NotNull @Min(0) int antallBarn,
     @NotNull @Min(0) int dagsatsBarnetillegg,
-    @NotNull @DecimalMin("0") BigDecimal grunnbeløpFaktor
+    @DecimalMin("0") BigDecimal grunnbeløpFaktor
 ) {
 }

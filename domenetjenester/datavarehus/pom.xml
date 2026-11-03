@@ -45,6 +45,10 @@
 			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>vedtak</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>no.nav.ung.sak.ytelse</groupId>
+			<artifactId>ytelse-aktivitetspenger</artifactId>
+		</dependency>
 
         <dependency>
             <groupId>com.google.cloud</groupId>

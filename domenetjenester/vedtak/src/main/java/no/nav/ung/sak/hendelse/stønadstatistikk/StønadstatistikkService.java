@@ -40,7 +40,7 @@ public class StønadstatistikkService {
     }
 
     public void publiserHendelse(Behandling behandling) {
-        Set<FagsakYtelseType> aktiverteForYtelsetyper = Set.of(FagsakYtelseType.UNGDOMSYTELSE);
+        Set<FagsakYtelseType> aktiverteForYtelsetyper = Set.of(FagsakYtelseType.UNGDOMSYTELSE); //Hvis publisering skal på må aktivitetspenger legges til her
         if (!aktiverteForYtelsetyper.contains(behandling.getFagsakYtelseType())) {
             log.info("Stønadstatistikk publisering er ikke aktivert for ytelse {}", behandling.getFagsakYtelseType());
             return;

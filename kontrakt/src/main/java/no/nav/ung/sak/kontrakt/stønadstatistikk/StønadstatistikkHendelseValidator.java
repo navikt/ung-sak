@@ -3,7 +3,9 @@ package no.nav.ung.sak.kontrakt.stønadstatistikk;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadsstatistikkSatsPeriode;
 import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse;
+import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkSatsType;
 
 import java.util.Objects;
 import java.util.Set;
@@ -21,13 +23,30 @@ public class StønadstatistikkHendelseValidator {
 
         switch (stønadstatistikkHendelse.ytelseType()) {
             case UNGDOMSYTELSE -> validerUngdomsprogramytelse(stønadstatistikkHendelse);
+            case AKTIVITETSPENGER -> validerAktivitetspenger(stønadstatistikkHendelse);
             default ->
                 throw new IllegalArgumentException("Ikke-støttet ytelsetype:  " + stønadstatistikkHendelse.ytelseType());
         }
     }
 
     private void validerUngdomsprogramytelse(StønadstatistikkHendelse stønadstatistikkHendelse) {
-        //valider her om det trengs noe utenom annoteringene
+        for (StønadsstatistikkSatsPeriode satsPeriode : stønadstatistikkHendelse.satsPerioder()) {
+            if (satsPeriode.satsType() == StønadstatistikkSatsType.BEREGNINGSGRUNNLAG) {
+                throw new IllegalArgumentException("Satstype " + satsPeriode.satsType() + " er ikke støttet for ungdomsprogramytelsen");
+            }
+            krevNotNull(satsPeriode.grunnbeløpFaktor(), "grunnbeløpFaktor");
+        }
+    }
+
+    private void validerAktivitetspenger(StønadstatistikkHendelse stønadstatistikkHendelse) {
+        krevNull(stønadstatistikkHendelse.ungdomsprogramDeltakelsePeriode(), "ungdomsprogramDeltakelsePeriode");
+        for (StønadsstatistikkSatsPeriode satsPeriode : stønadstatistikkHendelse.satsPerioder()) {
+            if (satsPeriode.satsType() == StønadstatistikkSatsType.BEREGNINGSGRUNNLAG) {
+                krevNull(satsPeriode.grunnbeløpFaktor(), "grunnbeløpFaktor");
+            } else {
+                krevNotNull(satsPeriode.grunnbeløpFaktor(), "grunnbeløpFaktor");
+            }
+        }
     }
 
 
