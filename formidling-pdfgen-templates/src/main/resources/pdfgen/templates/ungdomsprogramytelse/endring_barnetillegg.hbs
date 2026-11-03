@@ -4,7 +4,11 @@
         <h1>Du får mer i ungdomsprogramytelse fordi du har fått barn</h1>
         <p>
             Du får {{> felles/beløp barnetillegg}} i barnetillegg per dag fra og med {{fom}}, utenom lørdag og søndag.
+            {{#if barnFødtFørStartdato}}
+            Det er fordi du fikk barn {{fødselsdato}}, før du startet i ungdomsprogrammet.
+            {{else}}
             Det er fordi du fikk barn denne datoen.
+            {{/if}}
         </p>
         <p>
             Når du har barn, får du et barnetillegg på {{> felles/beløp sats}} per dag for hvert barn du har.
