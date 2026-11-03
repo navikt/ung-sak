@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.maksdato;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.EtterlysningOgGrunnlag;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.EtterlysningStatusOgType;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
     @Test
     void skalOppretteEtterlysning_nårIngenEksisterende_ogMaksdatoInnenforVarslingsvindu() {
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), null);
+            lagGrunnlag(TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), null);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -38,7 +39,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
     @Test
     void skalIkkeOppretteEtterlysning_nårMaksdatoUtenforVarslingsvindu_ogIngenEksisterende() {
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            MAKSDATO_UTENFOR_VARSLINGSVINDU, MAKSDATO_UTENFOR_VARSLINGSVINDU, LocalDate.now(), null);
+            lagGrunnlag(MAKSDATO_UTENFOR_VARSLINGSVINDU, MAKSDATO_UTENFOR_VARSLINGSVINDU), LocalDate.now(), null);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -48,7 +49,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
     @Test
     void skalIngenEndring_nårTomDatoFørMaksdato_ogIngenEksisterende() {
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_FØR_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), null);
+            lagGrunnlag(TOM_FØR_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), null);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -59,7 +60,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
     void skalAvbryteEtterlysning_nårTomDatoFørMaksdato_ogEksisterendeVenter() {
         var eksisterende = lagEtterlysningOgGrunnlag(EtterlysningStatus.VENTER, MAKSDATO_INNENFOR_VARSLINGSVINDU);
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_FØR_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), eksisterende);
+            lagGrunnlag(TOM_FØR_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), eksisterende);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -70,7 +71,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
     void skalIngenEndring_nårTomDatoFørMaksdato_ogEksisterendeIkkeVenter() {
         var eksisterende = lagEtterlysningOgGrunnlag(EtterlysningStatus.MOTTATT_SVAR, MAKSDATO_INNENFOR_VARSLINGSVINDU);
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_FØR_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), eksisterende);
+            lagGrunnlag(TOM_FØR_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), eksisterende);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -81,7 +82,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
     void skalAvbryteEtterlysning_nårMaksdatoUtenforVarslingsvindu_ogEksisterendeVenter() {
         var eksisterende = lagEtterlysningOgGrunnlag(EtterlysningStatus.VENTER, MAKSDATO_UTENFOR_VARSLINGSVINDU);
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            MAKSDATO_UTENFOR_VARSLINGSVINDU, MAKSDATO_UTENFOR_VARSLINGSVINDU, LocalDate.now(), eksisterende);
+            lagGrunnlag(MAKSDATO_UTENFOR_VARSLINGSVINDU, MAKSDATO_UTENFOR_VARSLINGSVINDU), LocalDate.now(), eksisterende);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -92,7 +93,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
     void skalIngenEndring_nårEksisterendeVenter_ogSammeMaksdato() {
         var eksisterende = lagEtterlysningOgGrunnlag(EtterlysningStatus.VENTER, MAKSDATO_INNENFOR_VARSLINGSVINDU);
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), eksisterende);
+            lagGrunnlag(TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), eksisterende);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -104,7 +105,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
         var gammeltMaksdato = MAKSDATO_INNENFOR_VARSLINGSVINDU.minusWeeks(1);
         var eksisterende = lagEtterlysningOgGrunnlag(EtterlysningStatus.VENTER, gammeltMaksdato);
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), eksisterende);
+            lagGrunnlag(TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), eksisterende);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -116,7 +117,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
         var gammeltMaksdato = MAKSDATO_INNENFOR_VARSLINGSVINDU.minusWeeks(1);
         var eksisterende = lagEtterlysningOgGrunnlag(EtterlysningStatus.OPPRETTET, gammeltMaksdato);
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), eksisterende);
+            lagGrunnlag(TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), eksisterende);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -128,7 +129,7 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
         var gammeltMaksdato = MAKSDATO_INNENFOR_VARSLINGSVINDU.minusWeeks(1);
         var eksisterende = lagEtterlysningOgGrunnlag(EtterlysningStatus.MOTTATT_SVAR, gammeltMaksdato);
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), eksisterende);
+            lagGrunnlag(TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), eksisterende);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
@@ -140,11 +141,18 @@ class EtterlysningForOpphørVedMaksdatoResultatUtlederTest {
         var gammeltMaksdato = MAKSDATO_INNENFOR_VARSLINGSVINDU.minusWeeks(1);
         var eksisterende = lagEtterlysningOgGrunnlag(EtterlysningStatus.UTLØPT, gammeltMaksdato);
         var input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(
-            TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU, LocalDate.now(), eksisterende);
+            lagGrunnlag(TOM_VED_MAKSDATO, MAKSDATO_INNENFOR_VARSLINGSVINDU), LocalDate.now(), eksisterende);
 
         var resultat = EtterlysningForOpphørVedMaksdatoResultatUtleder.utledResultat(input);
 
         assertThat(resultat).isEqualTo(EtterlysningForOpphørVedMaksdatoResultatUtleder.ResultatType.OPPRETT_ETTERLYSNING);
+    }
+
+    private static UngdomsprogramPeriodeGrunnlag lagGrunnlag(LocalDate tom, LocalDate maksdato) {
+        var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
+        when(grunnlag.hentForEksaktEnPeriode()).thenReturn(DatoIntervallEntitet.fraOgMedTilOgMed(tom.minusMonths(6), tom));
+        when(grunnlag.getPeriodeMaksDato()).thenReturn(Optional.of(maksdato));
+        return grunnlag;
     }
 
     private static EtterlysningOgGrunnlag lagEtterlysningOgGrunnlag(EtterlysningStatus status, LocalDate maksdato) {

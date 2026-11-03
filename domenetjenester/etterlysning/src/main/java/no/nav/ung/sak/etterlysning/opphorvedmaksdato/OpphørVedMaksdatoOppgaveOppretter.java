@@ -8,6 +8,7 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.opphorvedmaksdato.BekreftOpphorVedMaksdatoOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
@@ -48,7 +49,7 @@ public class OpphørVedMaksdatoOppgaveOppretter {
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
         LocalDate maksdato = ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElseThrow(() -> new IllegalStateException("Forventer å finne maksdato"));
-        LocalDate sluttdato = utledSisteDagMedYtelse(ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato(), maksdato);
+        LocalDate sluttdato = UngdomsprogramOpphørUtleder.finnSisteDagMedYtelse(ungdomsprogramPeriodeGrunnlag);
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
@@ -57,14 +58,6 @@ public class OpphørVedMaksdatoOppgaveOppretter {
             etterlysning.getFrist(),
             new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
-    }
-
-    /**
-     * Sluttdatoen vises til deltaker som siste dag med ytelsen. Programperioden er typisk åpen
-     * (tom = TIDENES_ENDE), så siste dag med ytelse er den tidligste av programperiodens tom og maksdato.
-     */
-    private static LocalDate utledSisteDagMedYtelse(LocalDate programperiodeTom, LocalDate maksdato) {
-        return programperiodeTom.isBefore(maksdato) ? programperiodeTom : maksdato;
     }
 }
 
