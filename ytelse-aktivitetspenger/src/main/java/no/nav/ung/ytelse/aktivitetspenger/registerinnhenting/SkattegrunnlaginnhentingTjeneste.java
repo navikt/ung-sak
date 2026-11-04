@@ -18,14 +18,15 @@ public class SkattegrunnlaginnhentingTjeneste {
     public static Periode utledSkattegrunnlagOpplysningsperiode(LocalDate førsteSkjæringstidspunkt, LocalDate fagsakperiodeTom, LocalDate dagensDato) {
         int sisteÅr = finnSisteÅr(fagsakperiodeTom, dagensDato);
         int førsteÅr = finnFørsteÅr(førsteSkjæringstidspunkt);
-        if (førsteÅr <= 2015) {
+        // Rettighetspakken for aktivitetspenger støtter ikkje innhenting før 2023
+        if (førsteÅr < 2023) {
             LOGGER.warn("Kutter opplysningsperiode for skattegrunnlag. Opprinnelig startår var " + førsteÅr);
-            førsteÅr = 2016;
-            if (sisteÅr <= 2015) {
+            førsteÅr = 2023;
+            if (sisteÅr < 2023) {
                 // abakus støtter ikkje å skippe innhenting av sigruninntekt
                 // defaulter til å innhente for 2016, sjølv om fagsaken avsluttes tidligere
                 LOGGER.warn("Flytter siste dato for opplysningsperiode for skattegrunnlag. Opprinnelig sluttår var " + sisteÅr);
-                sisteÅr = 2016;
+                sisteÅr = 2023;
 
             }
         }
