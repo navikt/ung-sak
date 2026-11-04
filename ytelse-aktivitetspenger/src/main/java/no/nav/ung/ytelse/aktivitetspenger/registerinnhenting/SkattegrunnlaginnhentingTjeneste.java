@@ -24,7 +24,7 @@ public class SkattegrunnlaginnhentingTjeneste {
             førsteÅr = 2023;
             if (sisteÅr < 2023) {
                 // abakus støtter ikkje å skippe innhenting av sigruninntekt
-                // defaulter til å innhente for 2016, sjølv om fagsaken avsluttes tidligere
+                // defaulter til å innhente for 2023, sjølv om fagsaken avsluttes tidligere
                 LOGGER.warn("Flytter siste dato for opplysningsperiode for skattegrunnlag. Opprinnelig sluttår var " + sisteÅr);
                 sisteÅr = 2023;
 
