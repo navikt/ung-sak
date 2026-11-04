@@ -73,7 +73,7 @@ public class VilkårsavklaringRestTjeneste {
 
     // hentUttalelser filtrerer på typene den får, og returnerer ingenting uten typer
     private static final EndringType[] AVKLARINGSUTTALELSER = {
-        EndringType.AVKLAR_BOSTED, EndringType.AVKLAR_BISTAND, EndringType.AVKLAR_ANDRE_LIVSOPPHOLDSYTELSER
+        EndringType.AVKLAR_BOSTED, EndringType.AVKLAR_BISTAND, EndringType.AVKLAR_AKTIVITET, EndringType.AVKLAR_ANDRE_LIVSOPPHOLDSYTELSER
     };
 
     private BehandlingRepository behandlingRepository;
