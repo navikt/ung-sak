@@ -66,6 +66,7 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
         var dto = new EndringAvslagDto(
             AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(avslag.get(VilkårType.BOSTEDSVILKÅR)),
             AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(avslag.get(VilkårType.BISTANDSVILKÅR)),
+            AvslåttVilkårBrevinnholdHjelper.lagAvslåttAktivitet(avslag.get(VilkårType.AKTIVITETSVILKÅR)),
             AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(avslag.get(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)));
 
         var templateType = avklaringstyper.contains(Avklaringtype.OPPHØR)
