@@ -376,6 +376,54 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .asPlainTextNotContains("Trøndelag § 7.");
     }
 
+    @DisplayName("Opphør pga aktivitetsvilkåret")
+    @Test
+    void opphørAktivitet() {
+        var fritekst = "Du har ikke deltatt i aktivitetene du har avtalt med veilederen din.";
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAktivitet(FOM, fritekst);
+        var behandling = lagBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ikke lenger aktivitetspenger</h1>",
+                "Fra " + brevDatoString(aktivitetsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
+                fritekst
+            )
+            .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("8").trim())
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER)
+            .asPlainTextNotContains("For å ha rett til aktivitetspenger");
+    }
+
+    @DisplayName("Endring/avslag pga aktivitetsvilkåret")
+    @Test
+    void endringAvslagAktivitet() {
+        var fritekst = "Du har ikke deltatt i aktivitetene du har avtalt med veilederen din.";
+        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaAktivitet(FOM, fritekst);
+        var behandling = lagBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har endret aktivitetspengene dine</h1>",
+                "Du får ikke aktivitetspenger i perioden fra "
+                    + brevDatoString(aktivitetsperiode(scenario).getFom()) + " til "
+                    + brevDatoString(aktivitetsperiode(scenario).getTom()),
+                fritekst
+            )
+            .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("8").trim())
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER)
+            .asPlainTextNotContains("For å ha rett til aktivitetspenger");
+    }
+
+    private static Periode aktivitetsperiode(AktivitetspengerTestScenario scenario) {
+        return scenario.vilkårsavklaringer().get(VilkårType.AKTIVITETSVILKÅR).getFirst().periode();
+    }
+
     private static Periode bistandsperiode(AktivitetspengerTestScenario scenario) {
         return scenario.vilkårsavklaringer().get(VilkårType.BISTANDSVILKÅR).getFirst().periode();
     }
