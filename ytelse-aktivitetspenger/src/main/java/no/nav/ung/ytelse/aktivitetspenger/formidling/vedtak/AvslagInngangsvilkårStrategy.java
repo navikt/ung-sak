@@ -16,8 +16,6 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.FørstegangsAvslagI
 
 import java.util.List;
 
-import static no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.AvslåttVilkårBrevinnholdHjelper.VILKÅR_I_MALEN;
-
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdbyggerStrategy {
@@ -43,7 +41,7 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
             && periodeTilVurdering.stream().allMatch(it -> it.getValue().erAvslått());
         boolean harAvslagIMalen = periodeTilVurdering.stream()
             .flatMap(it -> it.getValue().avslåtteVilkår().stream())
-            .anyMatch(it -> VILKÅR_I_MALEN.contains(it.vilkårType()));
+            .anyMatch(it -> FørstegangsAvslagInnholdBygger.erInngangsvilkårIMalen(it.vilkårType()));
 
         if (fullAvslag && harAvslagIMalen) {
             return List.of(new VedtaksbrevStrategyResultat(

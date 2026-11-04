@@ -7,6 +7,8 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAktivitet;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAktivitet.Aktivitetsårsak;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser.Livsoppholdsårsak;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBistand;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBistand.Bistandsårsak;
@@ -25,6 +27,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
     public static final Set<VilkårType> VILKÅR_I_MALEN = EnumSet.of(
         VilkårType.BOSTEDSVILKÅR,
         VilkårType.BISTANDSVILKÅR,
+        VilkårType.AKTIVITETSVILKÅR,
         VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
         VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET
         );
@@ -83,6 +86,19 @@ public class AvslåttVilkårBrevinnholdHjelper {
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };
         return new AvslåttBistand(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());
+    }
+
+    public static AvslåttAktivitet lagAvslåttAktivitet(AvslåttVurdering avslag) {
+        if (avslag == null) {
+            return null;
+        }
+        var vurdering = avslag.vurdering();
+        var årsak = årsakFra(vurdering, AktivitetsvilkåretIkkeOppfyltÅrsak.class);
+        var brevårsak = switch (årsak) {
+            case ANNET -> Aktivitetsårsak.ANNEN_ÅRSAK;
+            case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
+        };
+        return new AvslåttAktivitet(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());
     }
 
     public static AvslåttAndreLivsoppholdsytelser lagAvslåttPgaAndreLivsoppholdsytelser(AvslåttVurdering avslag) {
