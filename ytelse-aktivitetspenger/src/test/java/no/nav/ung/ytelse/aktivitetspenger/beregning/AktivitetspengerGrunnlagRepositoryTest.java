@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -88,6 +89,34 @@ class AktivitetspengerGrunnlagRepositoryTest {
 
         var grunnlag = repository.hentGrunnlag(behandling.getId()).orElseThrow();
         assertThat(grunnlag.getBeregningsgrunnlag()).hasSize(1);
+    }
+
+    @Test
+    void beregningsgrunnlagTidslinje_skal_ha_åpen_slutt_og_gjelde_til_dagen_før_neste_grunnlag() {
+        Behandling behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad().lagre(entityManager);
+        var stp1 = LocalDate.of(2024, 1, 1);
+        var stp2 = LocalDate.of(2024, 6, 1);
+
+        repository.lagreBeregningsgrunnlag(behandling.getId(), lagBeregningsgrunnlag(stp1));
+        entityManager.flush();
+
+        var kunEttGrunnlag = repository.hentGrunnlag(behandling.getId()).orElseThrow().hentBeregningsgrunnlagTidslinje().segmenter();
+        assertThat(kunEttGrunnlag).hasSize(1);
+        assertThat(kunEttGrunnlag.getFirst().getFom()).isEqualTo(stp1);
+        assertThat(kunEttGrunnlag.getFirst().getTom()).isEqualTo(Tid.TIDENES_ENDE);
+
+        repository.lagreBeregningsgrunnlag(behandling.getId(), lagBeregningsgrunnlag(stp2));
+        entityManager.flush();
+
+        var segmenter = repository.hentGrunnlag(behandling.getId()).orElseThrow().hentBeregningsgrunnlagTidslinje().segmenter().stream().toList();
+        assertThat(segmenter).hasSize(2);
+        assertThat(segmenter.get(0).getFom()).isEqualTo(stp1);
+        assertThat(segmenter.get(0).getTom()).isEqualTo(stp2.minusDays(1));
+        assertThat(segmenter.get(0).getValue().getSkjæringstidspunkt()).isEqualTo(stp1);
+
+        assertThat(segmenter.get(1).getFom()).isEqualTo(stp2);
+        assertThat(segmenter.get(1).getTom()).isEqualTo(Tid.TIDENES_ENDE);
+        assertThat(segmenter.get(1).getValue().getSkjæringstidspunkt()).isEqualTo(stp2);
     }
 
     private static Beregningsgrunnlag lagBeregningsgrunnlag(LocalDate skjæringstidspunkt) {
