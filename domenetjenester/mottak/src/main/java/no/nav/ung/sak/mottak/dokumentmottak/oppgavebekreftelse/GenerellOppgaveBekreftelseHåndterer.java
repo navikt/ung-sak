@@ -29,6 +29,7 @@ import java.util.UUID;
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_PERIODE)
 @OppgaveTypeRef(Bekreftelse.Type.AVP_BOSTED_AVKLARING)
 @OppgaveTypeRef(Bekreftelse.Type.AVP_BISTANDSBEHOV_AVKLARING)
+@OppgaveTypeRef(Bekreftelse.Type.AVP_AKTIVITET_AVKLARING)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_OPPHOR_VED_MAKSDATO)
 @OppgaveTypeRef(Bekreftelse.Type.AVP_ANDRE_LIVSOPPHOLDSYTELSER_AVKLARING)
 public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndterer {
@@ -101,6 +102,7 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
             case UTTALELSE_OPPHOR_VED_MAKSDATO -> EndringType.OPPHOR_VED_MAKSDATO;
             case UTTALELSE_BOSTED -> EndringType.AVKLAR_BOSTED;
             case UTTALELSE_BISTAND -> EndringType.AVKLAR_BISTAND;
+            case UTTALELSE_AKTIVITET -> EndringType.AVKLAR_AKTIVITET;
             case UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER -> EndringType.AVKLAR_ANDRE_LIVSOPPHOLDSYTELSER;
         };
     }

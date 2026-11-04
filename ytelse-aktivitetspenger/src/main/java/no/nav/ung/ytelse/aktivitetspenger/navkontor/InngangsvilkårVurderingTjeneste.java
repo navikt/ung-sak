@@ -231,6 +231,13 @@ public class InngangsvilkårVurderingTjeneste {
                     .toList();
                 vilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
             }
+            case AKTIVITETSVILKÅR -> {
+                var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentAktivitetsvilkårResultatPeriodeTidslinje().intersection(perioderSomSkalGjenopprettes)
+                    .segmenter().stream()
+                    .map(it -> new AktivitetsvilkårResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
+                    .toList();
+                vilkårVurderingRepository.lagreAktivitetVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
+            }
             case ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR -> {
                 var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentLivsoppholdResultatPeriodeTidslinje().intersection(perioderSomSkalGjenopprettes)
                     .segmenter().stream()
