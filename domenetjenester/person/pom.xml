@@ -22,6 +22,10 @@
             <groupId>no.nav.k9.felles.integrasjon</groupId>
             <artifactId>k9-pdl-klient</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-microsoft-graph-klient</artifactId>
+        </dependency>
 
         <!-- Prosjektinterne avhengigheter -->
         <dependency>

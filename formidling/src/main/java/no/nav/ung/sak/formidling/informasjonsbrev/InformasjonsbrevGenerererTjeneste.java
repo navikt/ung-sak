@@ -6,7 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
+import no.nav.ung.sak.domene.person.navansatt.NavAnsattNavnTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
@@ -38,7 +38,7 @@ public class InformasjonsbrevGenerererTjeneste {
     private PdfGenKlient pdfGen;
     private BrevMottakerTjeneste brevMottakerTjeneste;
     private Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere;
-    private MicrosoftGraphTjeneste microsoftGraphTjeneste;
+    private NavAnsattNavnTjeneste navAnsattNavnTjeneste;
     private boolean enableBrevAnsvarligUng;
 
     @Inject
@@ -46,14 +46,14 @@ public class InformasjonsbrevGenerererTjeneste {
         BehandlingRepository behandlingRepository,
         PdfGenKlient pdfGen,
         BrevMottakerTjeneste brevMottakerTjeneste,
-        @Any Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere, MicrosoftGraphTjeneste microsoftGraphTjeneste,
+        @Any Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere, NavAnsattNavnTjeneste navAnsattNavnTjeneste,
         @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG_UNG", defaultVerdi = "true") boolean enableBrevAnsvarligUng) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
         this.informasjonsbrevInnholdByggere = informasjonsbrevInnholdByggere;
-        this.microsoftGraphTjeneste = microsoftGraphTjeneste;
+        this.navAnsattNavnTjeneste = navAnsattNavnTjeneste;
         this.enableBrevAnsvarligUng = enableBrevAnsvarligUng;
     }
 
@@ -100,7 +100,7 @@ public class InformasjonsbrevGenerererTjeneste {
         if (!enableBrevAnsvarligUng && ytelseType != FagsakYtelseType.AKTIVITETSPENGER) {
             return new BrevSignaturDto(false, List.of());
         }
-        var bestillerNavn = microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null);
+        var bestillerNavn = navAnsattNavnTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null);
         return new BrevSignaturDto(false, List.of(new BrevAnsvarligDto(bestillerNavn, null)));
     }
 
