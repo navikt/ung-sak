@@ -5,7 +5,7 @@ package no.nav.ung.kodeverk.vilkår;
  * Alle vilkår har en kilde, men utvalget av gyldige koder er vilkårsspesifikt
  */
 public sealed interface AvklaringKilde
-    permits BostedsavklaringKildeType, BistandsavklaringKildeType, AndreLivsoppholdsytelserAvklaringKildeType {
+    permits BostedsavklaringKildeType, BistandsavklaringKildeType, AktivitetsavklaringKildeType, AndreLivsoppholdsytelserAvklaringKildeType {
 
     String getKode();
 
@@ -18,6 +18,7 @@ public sealed interface AvklaringKilde
         return switch (vilkårType) {
             case BOSTEDSVILKÅR -> BostedsavklaringKildeType.fraKode(kode);
             case BISTANDSVILKÅR -> BistandsavklaringKildeType.fraKode(kode);
+            case AKTIVITETSVILKÅR -> AktivitetsavklaringKildeType.fraKode(kode);
             case ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR -> AndreLivsoppholdsytelserAvklaringKildeType.fraKode(kode);
             default -> throw new IllegalArgumentException("Vilkår " + vilkårType + " har ingen avklaringskilder");
         };
