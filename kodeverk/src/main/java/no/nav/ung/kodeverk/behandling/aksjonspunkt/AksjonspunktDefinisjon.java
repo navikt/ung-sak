@@ -115,6 +115,13 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_AKTIVITETSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_AKTIVITETSVILKÅR_KODE,
         AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder aktivitet", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_AKTIVITETSVILKÅR,
         VilkårType.AKTIVITETSVILKÅR, SkjermlenkeType.AKTIVITETSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
+    VURDER_FAKTA_OM_AKTIVITET(AksjonspunktKodeDefinisjon.VURDER_FAKTA_OM_AKTIVITET_KODE,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder fakta om aktivitet", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_AKTIVITET,
+        UTEN_VILKÅR, SkjermlenkeType.AKTIVITETSVILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
+    VURDER_AKTIVITETSVILKÅR_OPPHØR(AksjonspunktKodeDefinisjon.VURDER_AKTIVITETSVILKÅR_OPPHØR_KODE,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder opphør av aktivitetsvilkåret", BehandlingStatus.UTREDES,
+        BehandlingStegType.VURDER_AKTIVITETSVILKÅR,
+        VilkårType.AKTIVITETSVILKÅR, SkjermlenkeType.AKTIVITETSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER(AksjonspunktKodeDefinisjon.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER_KODE,
         AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder fakta om andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER,
         UTEN_VILKÅR, SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER, ENTRINN, AVVENTER_SAKSBEHANDLER),
@@ -173,6 +180,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     AUTO_SATT_PÅ_VENT_ETTERLYST_LIVSOPPHOLDSYTELSEUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_LIVSOPPHOLDSYTELSE_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
         "Satt på vent i påvente av brukers svar på avklaring av andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER, UTEN_VILKÅR,
+        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
+
+    AUTO_SATT_PÅ_VENT_ETTERLYST_AKTIVITETUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_AKTIVITET_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
+        "Satt på vent i påvente av brukers svar på aktivitetsavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_AKTIVITETSVILKÅR, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
     // Gruppe: 80xx

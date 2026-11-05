@@ -28,6 +28,7 @@ public final class BehandlingStegDel {
             case VURDER_ANDRE_LIVSOPPHOLDSYTELSER -> BehandlingDel.NAV_KONTOR;
             case VURDER_FAKTA_OM_BISTAND -> BehandlingDel.NAV_KONTOR;
             case VURDER_BISTANDSVILKÅR -> BehandlingDel.NAV_KONTOR;
+            case VURDER_FAKTA_OM_AKTIVITET -> BehandlingDel.NAV_KONTOR;
             case VURDER_AKTIVITETSVILKÅR -> BehandlingDel.NAV_KONTOR;
             case NAV_KONTOR_FORESLÅ_VILKÅR -> BehandlingDel.NAV_KONTOR;
             case NAV_KONTOR_BESLUTTER_VILKÅR -> BehandlingDel.NAV_KONTOR;
