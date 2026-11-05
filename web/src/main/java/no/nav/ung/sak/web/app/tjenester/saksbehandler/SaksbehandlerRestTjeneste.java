@@ -13,7 +13,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphRestKlient;
-import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
+import no.nav.ung.sak.domene.person.navansatt.NavAnsattNavnTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
@@ -43,7 +43,7 @@ public class SaksbehandlerRestTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(SaksbehandlerRestTjeneste.class);
 
-    private MicrosoftGraphTjeneste microsoftGraphTjeneste;
+    private NavAnsattNavnTjeneste navAnsattNavnTjeneste;
 
     private String appName;
     private HistorikkinnslagRepository historikkRepository;
@@ -55,11 +55,11 @@ public class SaksbehandlerRestTjeneste {
 
     @Inject
     public SaksbehandlerRestTjeneste(
-        MicrosoftGraphTjeneste microsoftGraphTjeneste,
+        NavAnsattNavnTjeneste navAnsattNavnTjeneste,
         @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName,
         HistorikkinnslagRepository historikkRepository,
         BehandlingRepository behandlingRepository) {
-        this.microsoftGraphTjeneste = microsoftGraphTjeneste;
+        this.navAnsattNavnTjeneste = navAnsattNavnTjeneste;
         this.appName = appName;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
@@ -107,9 +107,9 @@ public class SaksbehandlerRestTjeneste {
 
         Map<String, String> identTilNavn;
         try {
-             identTilNavn = microsoftGraphTjeneste.navnPåNavAnsatte(unikeIdenter);
+             identTilNavn = navAnsattNavnTjeneste.navnPåNavAnsatte(unikeIdenter);
         } catch (Exception e) {
-            logger.warn("Feil ved henting av navn for saksbehandlere fra Microsoft Graph. Returnerer tomt liste.", e);
+            logger.warn("Feil ved henting av navn for saksbehandlere fra entra-proxy/Microsoft Graph. Returnerer tomt liste.", e);
             identTilNavn = Collections.emptyMap();
         }
         return new SaksbehandlerDto(identTilNavn);

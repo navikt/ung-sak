@@ -18,7 +18,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
+import no.nav.ung.sak.domene.person.navansatt.NavAnsattNavnTjeneste;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
@@ -35,14 +35,14 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 @Produces(MediaType.APPLICATION_JSON)
 public class ForvaltningTestRestTjeneste {
 
-    private MicrosoftGraphTjeneste microsoftGraphTjeneste;
+    private NavAnsattNavnTjeneste navAnsattNavnTjeneste;
 
     public ForvaltningTestRestTjeneste() {
     }
 
     @Inject
-    public ForvaltningTestRestTjeneste(MicrosoftGraphTjeneste microsoftGraphTjeneste) {
-        this.microsoftGraphTjeneste = microsoftGraphTjeneste;
+    public ForvaltningTestRestTjeneste(NavAnsattNavnTjeneste navAnsattNavnTjeneste) {
+        this.navAnsattNavnTjeneste = navAnsattNavnTjeneste;
     }
 
     @POST
@@ -55,7 +55,7 @@ public class ForvaltningTestRestTjeneste {
         if (Environment.current().isProd()) {
             throw new IllegalArgumentException("Kun tiltenkt brukt i test");
         }
-        Optional<String> resultat = microsoftGraphTjeneste.navnPåNavAnsatt(saksbehandler.ident);
+        Optional<String> resultat = navAnsattNavnTjeneste.navnPåNavAnsatt(saksbehandler.ident);
         if (resultat.isPresent()) {
             return Response.ok(resultat.get()).build();
         }
