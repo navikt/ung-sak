@@ -39,15 +39,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>12.2.5</felles.version>
+        <felles.version>12.2.8</felles.version>
         <swagger.version>2.2.53</swagger.version>
         <junit.version>6.1.2</junit.version>
-        <k9format.version>14.1.1</k9format.version>
+        <k9format.version>14.1.2</k9format.version>
         <jackson.version>2.22.1</jackson.version>
         <asm.version>9.10.1</asm.version>
         <kotlin-stdlib.version>2.4.10</kotlin-stdlib.version>
         <jandex.version>3.6.0</jandex.version>
-        <pdfgen-core.version>1.1.82</pdfgen-core.version>
+        <pdfgen-core.version>1.1.87</pdfgen-core.version>
         <flyway.version>12.10.0</flyway.version>
         <confluent.platform.version>8.3.0</confluent.platform.version>
         <mockito.version>5.23.0</mockito.version>
@@ -141,7 +141,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>6.0.16</version>
+                <version>6.0.18</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -344,7 +344,7 @@
             <dependency>
                 <groupId>no.nav.sif.abac</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.14.2</version>
+                <version>1.15.0</version>
             </dependency>
 
             <dependency>
@@ -391,7 +391,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
-                <version>2.7.0</version>
+                <version>2.7.1</version>
             </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
