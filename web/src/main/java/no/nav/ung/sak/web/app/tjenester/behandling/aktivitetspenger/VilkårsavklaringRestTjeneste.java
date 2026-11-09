@@ -149,7 +149,7 @@ public class VilkårsavklaringRestTjeneste {
         var perioderDekketAvAvklaring = TidslinjeUtil.tilTidslinje(Stream.concat(foreslåtte.stream(), ferdigstilte.stream()).map(VilkårPeriodeAvklaring::getPeriode).toList());
 
         var relevanteVilkårsperioder = vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
-            .map(v -> InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(v, vilkårType))
+            .map(v -> InngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(v, vilkårType))
             .orElse(LocalDateTimeline.empty());
         var vilkårsrader = relevanteVilkårsperioder.disjoint(perioderDekketAvAvklaring).stream()
             .map(s -> new VilkårsavklaringOgUtfallPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), null));
@@ -168,7 +168,7 @@ public class VilkårsavklaringRestTjeneste {
             .orElse(Set.of());
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         LocalDateTimeline<VilkårPeriode> relevanteVilkårsperioder = vilkårene
-            .map(v -> InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(v, vilkårType))
+            .map(v -> InngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(v, vilkårType))
             .orElse(LocalDateTimeline.empty());
         var vurderinger = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandling.getId(), vilkårType);
         var uttalelser = hentUttalelserPerReferanse(behandling);
