@@ -70,10 +70,11 @@ public class VurderFaktaOmAktivitetOppdaterer implements AksjonspunktOppdaterer<
         aktivitetAvklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId,
             dto.getAvklaringer().stream().map(AktivitetFaktaavklaringPeriodeDto::periode).toList());
 
-        // Opphør lukkes mot slutten av relevante vilkårsperioder, siden avklaringen kan gjelde en vilkårlig periode i den.
-        var vilkårsperioder = inngangsvilkårVurderingTjeneste.hentRelevanteVilkårsperioder(behandlingId, VilkårType.AKTIVITETSVILKÅR);
+        // Opphør lukkes mot slutten av vilkårsperiodene, siden avklaringen kan gjelde en vilkårlig periode i den.
+        // Aktivitetsvilkåret inkluderer også ikke-relevante, fordi aktivitetsvilkåret ikke er vurdert i en førsteangsbehandling
+        var vilkårsperioder = inngangsvilkårVurderingTjeneste.hentVilkårsperioderInkludertIkkeRelevante(behandlingId, VilkårType.AKTIVITETSVILKÅR);
         if (vilkårsperioder.isEmpty()) {
-            throw new IllegalStateException("Må ha relevante vilkårsperioder");
+            throw new IllegalStateException("Må ha vilkårsperioder");
         }
         var maxTomDato = vilkårsperioder.getMaxLocalDate();
 

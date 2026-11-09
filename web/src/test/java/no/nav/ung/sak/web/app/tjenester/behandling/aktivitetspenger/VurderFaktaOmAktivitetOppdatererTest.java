@@ -216,14 +216,23 @@ class VurderFaktaOmAktivitetOppdatererTest {
     }
 
     @Test
-    void apen_tom_skal_lukkes_for_ikke_relevant_del_av_vilkarsperioden() {
-        var ikkeRelevantFom = LocalDate.of(2026, 7, 1);
-        settVilkårsperiodenFra(ikkeRelevantFom, Utfall.IKKE_RELEVANT, null);
+    void apen_tom_skal_lukkes_mot_slutten_av_vilkarsperioden_selv_om_deler_er_ikke_relevant() {
+        settVilkårsperiodenFra(LocalDate.of(2026, 7, 1), Utfall.IKKE_RELEVANT, null);
 
         oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET));
 
         assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
-            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), ikkeRelevantFom.minusDays(1)));
+            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), TOM));
+    }
+
+    @Test
+    void skal_kunne_avklare_periode_som_kun_er_ikke_relevant() {
+        settVilkårsperiodenFra(FOM, Utfall.IKKE_RELEVANT, null);
+
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, null), AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET));
+
+        assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
+            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
     }
 
     @Test
