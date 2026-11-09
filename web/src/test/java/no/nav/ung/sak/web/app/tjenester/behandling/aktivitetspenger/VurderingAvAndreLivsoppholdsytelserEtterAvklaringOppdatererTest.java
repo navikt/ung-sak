@@ -106,7 +106,7 @@ class VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdatererTest {
 
     @BeforeEach
     void setUp() {
-        var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(vilkårResultatRepository);
+        var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(inngangsvilkårVurderingTjeneste);
 
         oppdaterer = new VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdaterer(
             vurderingAvVilkårEtterAvklaringTjeneste,
