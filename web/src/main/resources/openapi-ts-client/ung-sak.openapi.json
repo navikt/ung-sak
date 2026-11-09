@@ -6755,9 +6755,9 @@
         "x-enum-varnames" : [ "UTBETALING_PER_DAG", "UTBETALING_PER_BRUKER", "G_REGULERING" ]
       },
       "ung.sak.web.app.tjenester.forvaltning.rapportering.YtelseTypeKode" : {
-        "enum" : [ "OMP", "PSB", "PPN", "OMP_KS", "OMP_MA", "OMP_AO", "FRISINN" ],
+        "enum" : [ "UNG", "AVP" ],
         "type" : "string",
-        "x-enum-varnames" : [ "OMP", "PSB", "PPN", "OMP_KS", "OMP_MA", "OMP_AO", "FRISINN" ]
+        "x-enum-varnames" : [ "UNG", "AVP" ]
       },
       "ung.sak.web.app.tjenester.klage.KlageRestTjeneste.AbacKlageVurderingResultatAksjonspunktMellomlagringDto" : {
         "properties" : {
@@ -10919,6 +10919,13 @@
       "get" : {
         "description" : "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først",
         "operationId" : "sakerPåAksjonspunkt",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "ytelseType",
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.rapportering.YtelseTypeKode"
+          }
+        } ],
         "responses" : {
           "default" : {
             "content" : {
