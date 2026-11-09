@@ -15,8 +15,11 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.YtelseTypeKode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 
 import java.util.LinkedHashSet;
@@ -46,16 +49,21 @@ public class ForvaltningProduksjonsstyringRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først", summary = ("Brukes for produksjonsstyring"), tags = "produksjonsstyring")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
-    public List<Saksnummer> sakerPåAksjonspunkt() {
+    public List<Saksnummer> sakerPåAksjonspunkt(
+        @QueryParam("ytelseType") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) YtelseTypeKode ytelseType
+    ) {
+        FagsakYtelseType fagsakYtelseType = FagsakYtelseType.fraKode(ytelseType.name());
         List<String> resultat = (List<String>) entityManager.createNativeQuery("""
                 select saksnummer
                  from aksjonspunkt a
                  join behandling b on a.behandling_id = b.id
                  join fagsak f on b.fagsak_id = f.id
                  where a.aksjonspunkt_status = 'OPPR'
+                   and f.ytelse_type = :ytelse
                    and (a.vent_aarsak = '-' or a.vent_aarsak is null) -- filtrerer bort autopunkt
                  order by b.opprettet_tid;
                 """)
+            .setParameter("ytelse", fagsakYtelseType.getKode())
             .getResultList();
         return resultat.stream()
             .map(Saksnummer::new)
