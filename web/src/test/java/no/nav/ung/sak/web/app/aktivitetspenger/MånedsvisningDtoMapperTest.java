@@ -14,6 +14,8 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningInput;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,6 +29,38 @@ import java.util.Map;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class MånedsvisningDtoMapperTest {
+
+    @ParameterizedTest
+    @CsvSource({"5000,3000,8000", "0,3000,3000", ",3000,3000", "5000,,5000"})
+    void skal_vise_arbeidsinntekt_og_ytelse_som_reduksjonsgrunnlag(BigDecimal arbeidsinntekt, BigDecimal ytelse, BigDecimal samletInntekt) {
+        // Arrange
+        var fom = LocalDate.of(2026, 7, 1);
+        var tom = LocalDate.of(2026, 7, 31);
+        var reduksjon = samletInntekt.multiply(new BigDecimal("0.66"));
+        var utbetaling = BigDecimal.valueOf(23000).subtract(reduksjon);
+        var tilkjentYtelse = new LocalDateTimeline<>(fom, tom, new TilkjentYtelseVerdi(
+            BigDecimal.valueOf(23000), reduksjon, utbetaling, BigDecimal.ONE, BigDecimal.valueOf(100), utbetaling));
+        var satser = lagSatser(BigDecimal.valueOf(1000), BigDecimal.valueOf(130000), BigDecimal.valueOf(2),
+            UngdomsytelseSatsType.HØY, 0, 0, BigDecimal.ZERO);
+        var avsluttetTid = new BehandlingAvsluttetTidspunkt(LocalDateTime.of(2026, 8, 1, 12, 0));
+
+        // Act
+        var månedsvisning = MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(
+            avsluttetTid,
+            new LocalDateTimeline<>(fom, tom, YearMonth.of(2026, 7)),
+            tilkjentYtelse,
+            new LocalDateTimeline<>(fom, tom, new KontrollerteInntekter(arbeidsinntekt, ytelse)),
+            new LocalDateTimeline<>(fom, tom, satser),
+            Map.of(avsluttetTid, tilkjentYtelse));
+
+        // Assert
+        assertThat(månedsvisning.size()).isEqualTo(1);
+        var måned = månedsvisning.getFirst();
+        assertThat(måned.rapportertInntekt()).isEqualByComparingTo(samletInntekt);
+        assertThat(måned.reduksjonsgrunnlag()).isEqualByComparingTo(samletInntekt);
+        assertThat(måned.reduksjon()).isEqualByComparingTo(reduksjon);
+        assertThat(måned.utbetaling()).isEqualByComparingTo(utbetaling);
+    }
 
     private static AktivitetspengerSatser lagSatser(BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor, UngdomsytelseSatsType satsType, int antallBarn, int dagsatsBarnetillegg, BigDecimal beregnetRedusertPrAar) {
         var satsGrunnlag = new AktivitetspengerSatsGrunnlag(dagsats, grunnbeløp, grunnbeløpFaktor, grunnbeløpFaktor.multiply(grunnbeløp), satsType, antallBarn, dagsatsBarnetillegg);
