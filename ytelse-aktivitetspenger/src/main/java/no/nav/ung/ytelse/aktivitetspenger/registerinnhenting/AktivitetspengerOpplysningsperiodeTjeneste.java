@@ -47,7 +47,7 @@ public class AktivitetspengerOpplysningsperiodeTjeneste implements Opplysningspe
             .getPeriode();
         var fagsakperiodeTom = fagsakPeriode
             .getTomDato();
-        return Optional.of(SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(fagsakPeriode.getFomDato(), fagsakperiodeTom, LocalDate.now()));
+        return Optional.of(SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(fagsakPeriode.getFomDato(), LocalDate.now()));
     }
 
 }

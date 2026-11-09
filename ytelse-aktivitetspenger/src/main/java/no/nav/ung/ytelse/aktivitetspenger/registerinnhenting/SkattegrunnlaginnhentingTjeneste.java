@@ -9,14 +9,15 @@ import java.time.MonthDay;
 
 public class SkattegrunnlaginnhentingTjeneste {
 
-    public static final int MAKS_ANTALL_FERDIGLIGNEDE_ÅR = 4;
+    public static final int ANTALL_FERDIGLIGNEDE_ÅR = 3;
 
     public static final MonthDay FØRSTE_MULIGE_SKATTEOPPGJØRSDATO = MonthDay.of(5, 1);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SkattegrunnlaginnhentingTjeneste.class);
 
-    public static Periode utledSkattegrunnlagOpplysningsperiode(LocalDate førsteSkjæringstidspunkt, LocalDate fagsakperiodeTom, LocalDate dagensDato) {
-        int sisteÅr = finnSisteÅr(fagsakperiodeTom, dagensDato);
+    // TODO: Denne må skrives om til å kunne innhente for fleire skjæringstidspunkter når vi kjem dit (nye perioder)
+    public static Periode utledSkattegrunnlagOpplysningsperiode(LocalDate førsteSkjæringstidspunkt, LocalDate dagensDato) {
+        int sisteÅr = finnSisteÅr(førsteSkjæringstidspunkt, dagensDato);
         int førsteÅr = finnFørsteÅr(førsteSkjæringstidspunkt);
         if (førsteÅr <= 2015) {
             LOGGER.warn("Kutter opplysningsperiode for skattegrunnlag. Opprinnelig startår var " + førsteÅr);
@@ -34,13 +35,13 @@ public class SkattegrunnlaginnhentingTjeneste {
 
     private static int finnFørsteÅr(LocalDate førsteSkjæringstidspunkt) {
         var stpÅr = førsteSkjæringstidspunkt.getYear();
-        return stpÅr - MAKS_ANTALL_FERDIGLIGNEDE_ÅR;
+        return stpÅr - ANTALL_FERDIGLIGNEDE_ÅR;
     }
 
-    private static int finnSisteÅr(LocalDate fagsakperiodeTom, LocalDate dagensDato) {
-        var åretFørFagsakTom = fagsakperiodeTom.getYear() - 1;
+    private static int finnSisteÅr(LocalDate førsteSkjæringstidspunkt, LocalDate dagensDato) {
+        var åretFørFørsteSkjæringstidspunkt = førsteSkjæringstidspunkt.getYear() - 1;
         int sisteTilgjengeligeÅr = finnSisteTilgjengeligeÅr(dagensDato);
-        return Math.min(åretFørFagsakTom, sisteTilgjengeligeÅr);
+        return Math.min(åretFørFørsteSkjæringstidspunkt, sisteTilgjengeligeÅr);
     }
 
     private static int finnSisteTilgjengeligeÅr(LocalDate dagensDato) {
