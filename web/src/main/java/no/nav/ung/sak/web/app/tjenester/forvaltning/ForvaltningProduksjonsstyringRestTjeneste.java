@@ -1,11 +1,13 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -50,7 +52,7 @@ public class ForvaltningProduksjonsstyringRestTjeneste {
     @Operation(description = "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først", summary = ("Brukes for produksjonsstyring"), tags = "produksjonsstyring")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     public List<Saksnummer> sakerPåAksjonspunkt(
-        @QueryParam("ytelseType") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) YtelseTypeKode ytelseType
+        @NotNull @QueryParam("ytelseType") @Parameter(required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) YtelseTypeKode ytelseType
     ) {
         FagsakYtelseType fagsakYtelseType = FagsakYtelseType.fraKode(ytelseType.name());
         List<String> resultat = (List<String>) entityManager.createNativeQuery("""
