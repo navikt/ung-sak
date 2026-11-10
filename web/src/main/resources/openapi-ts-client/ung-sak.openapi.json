@@ -10922,6 +10922,7 @@
         "parameters" : [ {
           "in" : "query",
           "name" : "ytelseType",
+          "required" : true,
           "schema" : {
             "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.rapportering.YtelseTypeKode"
           }
