@@ -41,6 +41,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerS
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerBrevScenarioerUtils;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 
@@ -62,6 +63,29 @@ class AktivitetspengerBeregnYtelseStegTest {
     private static final Long BEHANDLING_ID = 1L;
     private static final LocalDate FOM = LocalDate.of(2026, 7, 1);
     private static final LocalDate TOM = LocalDate.of(2026, 7, 31);
+
+    @Test
+    void skal_ikke_tilkjenne_første_måned_før_inntekten_er_kontrollert() {
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySats(FOM);
+        var satser = AktivitetspengerBrevScenarioerUtils.lagSatserTidslinje(
+            scenario.satsperioder().mapValue(AktivitetspengerSatsPeriode::satsGrunnlag), scenario.beregningsgrunnlag());
+        var grunnlagRepository = mock(AktivitetspengerGrunnlagRepository.class);
+        var grunnlag = mock(AktivitetspengerGrunnlag.class);
+        when(grunnlagRepository.hentGrunnlag(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
+        when(grunnlag.hentAktivitetspengerSatsTidslinje()).thenReturn(satser);
+        var tilkjentRepository = mock(TilkjentYtelseRepository.class);
+        when(tilkjentRepository.hentKontrollerInntektTidslinje(BEHANDLING_ID)).thenReturn(LocalDateTimeline.empty());
+        var perioder = mock(MånedsvisTidslinjeUtleder.class);
+        when(perioder.finnMånedsvisPeriodisertePerioder(BEHANDLING_ID)).thenReturn(new LocalDateTimeline<>(FOM, TOM, YearMonth.from(FOM)));
+        var steg = new AktivitetspengerBeregnYtelseSteg(grunnlagRepository, tilkjentRepository, perioder);
+        var behandling = Behandling.forFørstegangssøknad(Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, AktørId.dummy())).build();
+
+        steg.utførSteg(new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), new BehandlingLås(BEHANDLING_ID)));
+
+        ArgumentCaptor<LocalDateTimeline<TilkjentYtelseVerdi>> resultat = ArgumentCaptor.captor();
+        verify(tilkjentRepository).lagre(eq(BEHANDLING_ID), resultat.capture(), anyString(), anyString());
+        assertThat(resultat.getValue().isEmpty()).isTrue();
+    }
 
     @ParameterizedTest
     @EnumSource(value = InntektYtelseType.class, names = {"SYKEPENGER", "OMSORGSPENGER", "PLEIEPENGER", "OPPLÆRINGSPENGER"})

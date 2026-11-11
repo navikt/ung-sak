@@ -3,6 +3,7 @@ package no.nav.ung.sak.ytelse;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 
@@ -13,15 +14,17 @@ import java.time.YearMonth;
  * `LagTilkjentYtelse` er en hjelpeklasse som brukes til å generere en tidslinje for tilkjent ytelse basert på godkjente perioder,
  * totale satser og perioder med kontrollert inntekt.
  * <p>
- * Det er i utgangspukntet kun perioder der det utført kontroll av rapportert inntekt som vil bli med i tilkjent ytelse. Unntaket er første og siste periode. I disse periodene utføres det ingen kontroll og vi sender disse til oppdrag med en gang.
+ * Bare perioder med kontrollert inntekt eller ytelsesspesifikt fritak fra kontroll tas med i tilkjent ytelse.
  */
 public class LagTilkjentYtelse {
 
     private static final KontrollerteInntekter INGEN_INNTEKT = new KontrollerteInntekter(BigDecimal.ZERO, BigDecimal.ZERO);
     private InntektsreduksjonKonfigurasjon inntektsreduksjonKonfigurasjon;
+    private final FagsakYtelseType ytelseType;
 
-    public LagTilkjentYtelse(InntektsreduksjonKonfigurasjon inntektsreduksjonKonfigurasjon) {
+    public LagTilkjentYtelse(InntektsreduksjonKonfigurasjon inntektsreduksjonKonfigurasjon, FagsakYtelseType ytelseType) {
         this.inntektsreduksjonKonfigurasjon = inntektsreduksjonKonfigurasjon;
+        this.ytelseType = ytelseType;
     }
 
     public LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
@@ -32,7 +35,7 @@ public class LagTilkjentYtelse {
             return LocalDateTimeline.empty();
         }
 
-        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje);
+        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje, ytelseType);
 
 
         final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);

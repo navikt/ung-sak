@@ -61,7 +61,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         var tilVurdering = tidslinje.tilVurdering();
-        var periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
+        var periode = tilVurdering.filterValue(r -> !r.erAvslåttEllerAvkortet() && r.ikkeVurderteVilkår().isEmpty());
 
         var ytelseFom = periode.getMinLocalDate();
 
@@ -106,7 +106,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
         if (tilkjentYtelseTimeline.isEmpty()) {
-            throw new IllegalStateException("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
+            return new UtbetalingDto(null, false, true);
         }
         var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
         var dagensDato = bestemDagensDato();
@@ -115,7 +115,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var erEtterbetaling = dagensDato.isAfter(førstkommendeUtbetalingskjøring);
 
         var månedNavn = MonthUtils.navnPåMåned(førstkommendeUtbetalingskjøring.getMonth());
-        return new UtbetalingDto(månedNavn, erEtterbetaling);
+        return new UtbetalingDto(månedNavn, erEtterbetaling, false);
     }
 
 

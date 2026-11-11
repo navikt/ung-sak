@@ -69,7 +69,7 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
 
         // Utfør reduksjon og map til tilkjent ytelse
         final var konfigurasjon = new InntektsreduksjonKonfigurasjon(REDUKSJONSFAKTOR_ARBEIDSINNTEKT, REDUKSJONSFAKTOR_YTELSE);
-        final var tilkjentYtelseTidslinje = new LagTilkjentYtelse(konfigurasjon).lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
+        final var tilkjentYtelseTidslinje = new LagTilkjentYtelse(konfigurasjon, FagsakYtelseType.UNGDOMSYTELSE).lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);

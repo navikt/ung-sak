@@ -3,14 +3,18 @@ package no.nav.ung.sak.kontroll;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPerioder;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +38,26 @@ class KontrollerteInntektperioderTjenesteTest {
         relevanteKontrollperioderUtleder = mock(RelevanteKontrollperioderUtleder.class);
         when(tilkjentYtelseRepository.hentKontrollertInntektPerioder(anyLong())).thenReturn(Optional.empty());
         tjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, relevanteKontrollperioderUtleder);
+    }
+
+    @Test
+    void skal_beholde_kontrollert_inntekt_i_første_aktivitetspengemåned() {
+        var kontrollert = KontrollertInntektPeriode.ny()
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))
+            .medInntekt(BigDecimal.valueOf(5000))
+            .medKilde(KontrollertInntektKilde.BRUKER)
+            .build();
+        when(tilkjentYtelseRepository.hentKontrollertInntektPerioder(1L)).thenReturn(
+            Optional.of(KontrollertInntektPerioder.ny(1L).medPerioder(List.of(kontrollert)).build()));
+        var utleder = new RelevanteKontrollperioderUtleder(null, null, null);
+        var relevant = utleder.utledPerioderRelevantForKontrollAvInntekt(
+            new LocalDateTimeline<>(FOM, TOM, YearMonth.from(FOM)), FagsakYtelseType.AKTIVITETSPENGER);
+        when(relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(1L)).thenReturn(relevant);
+        when(relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(1L)).thenReturn(LocalDateTimeline.empty());
+
+        tjeneste.ryddPerioderFritattForKontrollEllerTilVurderingIBehandlingen(1L);
+
+        verify(tilkjentYtelseRepository, never()).lagre(eq(1L), anyList());
     }
 
     @Test

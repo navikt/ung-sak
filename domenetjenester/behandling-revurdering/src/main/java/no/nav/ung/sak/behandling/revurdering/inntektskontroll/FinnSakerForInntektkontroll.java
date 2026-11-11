@@ -58,7 +58,7 @@ public class FinnSakerForInntektkontroll {
 
         /* Filtrere ut behandlinger som skal ha inntektskontroll:
             - Har ikke allerede opprettet trigger for inntektskontroll
-            - Har programdeltagelse og den startet ikke forrige måned. Og slutter ikke i inneværende måned
+            - Har ytelsesperiode som krever inntektskontroll
             - Har ikke avslåtte vilkår, men kan ha vilkår som er til vurdering
             - Har ikke avslått uttak, men kan ha uttak som er til vurdering
             - Har ikke utført kontroll for perioden tidligere
@@ -87,7 +87,6 @@ public class FinnSakerForInntektkontroll {
         return samletResultat.segmenter().stream().noneMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.IKKE_OPPFYLT));
     }
 
-    // Inntektsrapportering gjelder bare fra måned nr 2 og inkluderer ikke evt. opphørsmåned
     private boolean harPeriodeSomGirInntektskontroll(Behandling behandling, LocalDate fom, LocalDate tom) {
         var relevantePerioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(behandling.getId());
         return !relevantePerioderForKontroll.intersection(new LocalDateInterval(fom, tom)).isEmpty();

@@ -153,7 +153,7 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 3))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, FagsakYtelseType.UNGDOMSYTELSE);
 
         assertEquals(1, result.segmenter().size());
         final var første = result.segmenter().getFirst();
@@ -173,7 +173,7 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 2))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, FagsakYtelseType.UNGDOMSYTELSE);
 
         assertEquals(1, result.segmenter().size());
         final var første = result.segmenter().getFirst();
@@ -200,7 +200,7 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 4))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, FagsakYtelseType.UNGDOMSYTELSE);
 
         assertEquals(2, result.segmenter().size());
         final var iterator = result.segmenter().iterator();
@@ -235,7 +235,7 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 6))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, FagsakYtelseType.UNGDOMSYTELSE);
 
         assertEquals(2, result.segmenter().size());
         final var iterator = result.segmenter().iterator();

@@ -52,9 +52,7 @@ public class KontrollerteInntektperioderTjeneste {
     }
 
     /**
-     * Det er ikke påkrevd med kontroll av inntekt for første og siste måned.
-     * Dersom programperioden har endret seg fjernes allerede kontrollerte perioder dersom første og siste måned for programmet er endret.
-     * Dette for å unngå at utbetaling reduseres i disse månedene og potensielt også reduseres basert på feilaktig inntekt.
+     * Fjerner kontrollert inntekt for perioder som er fritatt for kontroll, har bortfalt eller skal vurderes på nytt.
      *
      * @param behandlingId BehandlingId
      */

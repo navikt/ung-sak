@@ -51,9 +51,9 @@ public class RyddingAvInntektsrapporteringUtleder {
      */
     public Optional<DatoIntervallEntitet> utledPeriodeForRyddingAvRapporteringsoppgaver(BehandlingReferanse behandlingReferanse) {
         LocalDateTimeline<YearMonth> intiellePerioder = ytelsesperiodeutleder.finnInitielleMånedsvisPeriodisertePerioder(behandlingReferanse.getBehandlingId());
-        LocalDateTimeline<Boolean> initielleRelevantePerioder = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(intiellePerioder).mapValue(_ -> true);
+        LocalDateTimeline<Boolean> initielleRelevantePerioder = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(intiellePerioder, behandlingReferanse.getFagsakYtelseType()).mapValue(_ -> true);
         LocalDateTimeline<YearMonth> gjeldendePerioder = ytelsesperiodeutleder.finnMånedsvisPeriodisertePerioder(behandlingReferanse.getBehandlingId());
-        LocalDateTimeline<Boolean> relevantePerioder = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(gjeldendePerioder).mapValue(_ -> true);
+        LocalDateTimeline<Boolean> relevantePerioder = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(gjeldendePerioder, behandlingReferanse.getFagsakYtelseType()).mapValue(_ -> true);
 
         ZonedDateTime nå = ZonedDateTime.now();
         return finnBortfaltRapporteringsperiode(initielleRelevantePerioder, relevantePerioder, nå, inntektskontrollCron, inntektsrapporteringCron);

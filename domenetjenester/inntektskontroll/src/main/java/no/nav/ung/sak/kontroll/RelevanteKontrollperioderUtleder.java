@@ -8,6 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -65,7 +66,8 @@ public class RelevanteKontrollperioderUtleder {
      */
     public LocalDateTimeline<InfoOmRådata> utledPerioderRelevantForKontrollAvInntekt(Long behandlingId) {
         final var periodisertMånedsvis = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
-        return utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis);
+        final var ytelseType = behandlingRepository.hentBehandling(behandlingId).getFagsakYtelseType();
+        return utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis, ytelseType);
     }
 
 
@@ -75,26 +77,34 @@ public class RelevanteKontrollperioderUtleder {
      * @param ytelsesPerioder Ytelseperioder
      * @return Perioder som er relevante for kontroll av inntekt
      */
-    public LocalDateTimeline<InfoOmRådata> utledPerioderRelevantForKontrollAvInntekt(LocalDateTimeline<YearMonth> ytelsesPerioder) {
-        LocalDateTimeline<Boolean> perioderForKontroll = LocalDateTimeline.empty();
-        if (ytelsesPerioder.segmenter().size() > 1) {
-            final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
-            perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(it -> true);
-        }
+    public LocalDateTimeline<InfoOmRådata> utledPerioderRelevantForKontrollAvInntekt(LocalDateTimeline<YearMonth> ytelsesPerioder,
+                                                                                 FagsakYtelseType ytelseType) {
+        final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, ytelseType);
+        final var perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(_ -> true);
         return utvidTilHeleMåneder(perioderForKontroll);
     }
 
     private static LocalDateTimeline<InfoOmRådata> utvidTilHeleMåneder(LocalDateTimeline<Boolean> perioderForKontroll) {
-        var mappedSegments = perioderForKontroll
+        if (perioderForKontroll.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+        return perioderForKontroll.compress()
+            .splitAtRegular(perioderForKontroll.getMinLocalDate().withDayOfMonth(1), perioderForKontroll.getMaxLocalDate(), Period.ofMonths(1))
             .segmenter()
             .stream()
-            .map(it -> new LocalDateSegment<>(it.getFom().withDayOfMonth(1), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), new InfoOmRådata(it.getTom().equals(it.getTom().with(TemporalAdjusters.lastDayOfMonth())))))
-            .toList(); // Mapper segmenter til å dekke hele måneder
-        // Forventer ikkje overlapp her
-        return new LocalDateTimeline<>(mappedSegments).compress();
+            .map(it -> new LocalDateTimeline<>(it.getFom().withDayOfMonth(1), it.getTom().with(TemporalAdjusters.lastDayOfMonth()),
+                new InfoOmRådata(it.getFom().getDayOfMonth() == 1 && it.getTom().equals(it.getTom().with(TemporalAdjusters.lastDayOfMonth())))))
+            .reduce(LocalDateTimeline.empty(), (venstre, høyre) -> venstre.crossJoin(høyre,
+                (periode, v, h) -> new LocalDateSegment<>(periode, new InfoOmRådata(
+                    (v == null || v.getValue().gjelderHelePerioden()) && (h == null || h.getValue().gjelderHelePerioden())))))
+            .compress();
     }
 
-    public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder) {
+    public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder,
+                                                                                         FagsakYtelseType ytelseType) {
+        if (ytelseType == FagsakYtelseType.AKTIVITETSPENGER) {
+            return LocalDateTimeline.empty();
+        }
         var ikkePåkrevdKontrollSegmenter = ytelsesPerioder.segmenter().stream()
             .filter(it -> harIkkeYtelseDagenFør(ytelsesPerioder, it))
             .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new FritattForKontroll(harIkkeYtelseDagenFør(ytelsesPerioder, it), false)))

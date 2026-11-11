@@ -150,6 +150,16 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(0, fagsaker.size());
     }
 
+    @Test
+    void skal_finne_aktivitetspenger_for_kontroll_av_første_og_eneste_delvise_måned() {
+        behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER).lagre(entityManager);
+        opprettPeriode(MIDT_I_SEPTEMBER, SISTE_DAG_I_SEPTEMBER);
+
+        var fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        assertEquals(List.of(behandling.getFagsak()), fagsaker);
+    }
+
     /**
      * Skal finne fagsak for kontroll av andre måned i programperiode.
      * Tester at én fagsak returneres når programperioden starter i august og september er andre måned.
