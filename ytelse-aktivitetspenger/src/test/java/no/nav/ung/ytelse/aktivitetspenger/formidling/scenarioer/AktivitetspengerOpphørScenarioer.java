@@ -64,6 +64,24 @@ public class AktivitetspengerOpphørScenarioer {
             .build();
     }
 
+    public static AktivitetspengerTestScenario opphørPgaAktivitet(LocalDate fom, String fritekstTilBrev) {
+        var opphørtVilkårPeriode = opphørtPeriode(fom);
+        var ikkeOppfyltÅrsak = AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET;
+
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medAktivitetsvilkårResultat(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
+            .build();
+
+        return opphørBuilder(fom, opphørtVilkårPeriode)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_AKTIVITET, DatoIntervallEntitet.fra(lagPeriodeMedEttÅrFra(fom)))))
+            .medInngangsvilkårVurderinger(vurderinger)
+            .medVilkår(VilkårType.AKTIVITETSVILKÅR,
+                avslåttTidslinje(opphørtVilkårPeriode, Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK, fritekstTilBrev))
+            .medVilkårsavklaringer(VilkårType.AKTIVITETSVILKÅR,
+                List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, AktivitetsavklaringKildeType.BRUKER)))
+            .build();
+    }
+
     public static AktivitetspengerTestScenario opphørPgaBistand(LocalDate fom, String fritekstTilBrev) {
         return opphørPgaBistand(fom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, fritekstTilBrev);
     }

@@ -9,6 +9,7 @@ public record VilkårsvurderingDto(
     String ikkeOppfyltÅrsak,
     String begrunnelse,
     String fritekstVurderingBrev,
+    @NotNull boolean skalSendeVarsel,
     @NotNull boolean erManuellVurdering,
     @NotNull String vurdertAv,
     @NotNull LocalDateTime vurdertTidspunkt

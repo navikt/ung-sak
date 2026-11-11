@@ -51,6 +51,9 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
+    @Column(name = "skal_sende_varsel", nullable = false, updatable = false)
+    private boolean skalSendeVarsel;
+
     @Column(name = "regel_input", updatable = false)
     private String regelInput;
 
@@ -64,12 +67,25 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
     /**
      * Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer.
      */
-    AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode, AktivitetsvilkårResultatPeriode kilde) {
-        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
+    public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode, AktivitetsvilkårResultatPeriode kilde) {
+        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null), kilde.skalSendeVarsel);
     }
 
     AktivitetsvilkårResultatPeriode(AktivitetsvilkårResultatPeriode kilde) {
-        this(kilde.getPeriode(), kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
+        this(kilde.getPeriode(), kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null), kilde.skalSendeVarsel());
+    }
+
+    public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat, Regelsporing regelsporing) {
+        this(periode,
+            vilkårsvurderingResultat.godkjent(),
+            (AktivitetsvilkåretIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
+            vilkårsvurderingResultat.erManuellVurdering(),
+            vilkårsvurderingResultat.begrunnelse(),
+            vilkårsvurderingResultat.fritekstVurderingBrev(),
+            vilkårsvurderingResultat.vurdertAv(),
+            vilkårsvurderingResultat.vurdertTidspunkt(),
+            regelsporing,
+            vilkårsvurderingResultat.skalSendeVarsel());
     }
 
     public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode,
@@ -81,6 +97,19 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
                                            String vurdertAv,
                                            LocalDateTime vurdertTidspunkt,
                                            Regelsporing regelsporing) {
+        this(periode, godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt, regelsporing, true);
+    }
+
+    public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode,
+                                           boolean godkjent,
+                                           AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
+                                           boolean manuellVurdering,
+                                           String begrunnelse,
+                                           String fritekstVurderingBrev,
+                                           String vurdertAv,
+                                           LocalDateTime vurdertTidspunkt,
+                                           Regelsporing regelsporing,
+                                           boolean skalSendeVarsel) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
@@ -95,6 +124,7 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
         this.fritekstVurderingBrev = fritekstVurderingBrev;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.skalSendeVarsel = skalSendeVarsel;
         this.regelInput = regelsporing != null ? regelsporing.input() : null;
         this.regelEvaluering = regelsporing != null ? regelsporing.evaluering() : null;
     }
@@ -132,7 +162,7 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
     }
 
     public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
-        return new GenereltVilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+        return new GenereltVilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt, skalSendeVarsel);
     }
 
     public String getVurdertAv() {
@@ -141,6 +171,10 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
 
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
+    }
+
+    public boolean skalSendeVarsel() {
+        return skalSendeVarsel;
     }
 
     public Optional<Regelsporing> getRegelsporing() {
@@ -158,6 +192,7 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
             && Objects.equals(fritekstVurderingBrev, annen.fritekstVurderingBrev)
             && Objects.equals(vurdertAv, annen.vurdertAv)
             && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt)
+            && skalSendeVarsel == annen.skalSendeVarsel
             && Objects.equals(regelInput, annen.regelInput)
             && Objects.equals(regelEvaluering, annen.regelEvaluering);
     }

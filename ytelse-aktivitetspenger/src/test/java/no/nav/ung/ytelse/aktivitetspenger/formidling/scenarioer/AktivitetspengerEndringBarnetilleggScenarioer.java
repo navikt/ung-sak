@@ -34,6 +34,34 @@ public class AktivitetspengerEndringBarnetilleggScenarioer {
         return fødselBuilder(fom, 2).build();
     }
 
+    /**
+     * Fødselshendelse som kommer etter startdato, men barnet er født før startdato.
+     */
+    public static AktivitetspengerTestScenario fødselFørStartdato(LocalDate fom) {
+        LocalDate fødselsdatoBarn = fom.minusDays(21);
+        LocalDate fødselsdatoBruker = fom.minusYears(20);
+        var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+
+        var satsMedBarn = lavSatsMedBarnBuilder(fom, 1).build();
+        var satsperioder = new LocalDateTimeline<>(p, new AktivitetspengerSatsPeriode(p, satsMedBarn));
+        var satsGrunnlagTidslinje = new LocalDateTimeline<>(p, satsMedBarn);
+
+        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
+        ));
+
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, p.getTomDato())))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), p))
+            .medVilkår(VilkårType.ALDERSVILKÅR, new LocalDateTimeline<>(p, VilkårUtfall.oppfylt()))
+            .medFødselsdato(fødselsdatoBruker)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(fødselsdatoBarn, p.getTomDato()))))
+            .build();
+    }
+
     private static AktivitetspengerTestScenario.Builder fødselBuilder(LocalDate fom, int antallBarn) {
         LocalDate fødselsdatoBarn = fom.plusDays(15);
         LocalDate fødselsdatoBruker = fom.minusYears(20);

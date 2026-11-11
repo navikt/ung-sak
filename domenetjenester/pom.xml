@@ -36,6 +36,7 @@
         <module>behandlingskontroll</module>
         <module>etterlysning</module>
         <module>kabal</module>
+        <module>vedtatt-ytelse</module>
     </modules>
 
 </project>

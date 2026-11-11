@@ -105,7 +105,7 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
         vilkårsavklaringGrunnlagRepository = new VilkårsavklaringGrunnlagRepository(entityManager);
         bostedSøknadsfaktaGrunnlagRepository = new BostedSøknadsfaktaGrunnlagRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(vilkårResultatRepository);
+        var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(inngangsvilkårVurderingTjeneste);
         historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
 
         oppdaterer = new VurderingAvBostedsvilkårEtterAvklaringOppdaterer(
@@ -214,7 +214,7 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
     }
 
     private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
-        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev);
+        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, false);
     }
 
     private static DatoIntervallEntitet tilDatoIntervallEntitet(Periode periode) {

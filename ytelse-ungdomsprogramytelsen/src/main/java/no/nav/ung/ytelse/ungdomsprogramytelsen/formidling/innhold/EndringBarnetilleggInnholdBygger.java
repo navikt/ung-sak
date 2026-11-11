@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.formidling.innhold.BarnetilleggEndringsdatoUtleder;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringBarnetilleggDto;
@@ -24,8 +25,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
     private static final Logger LOG = LoggerFactory.getLogger(EndringBarnetilleggInnholdBygger.class);
 
     @Inject
-    public EndringBarnetilleggInnholdBygger(
-            UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
+    public EndringBarnetilleggInnholdBygger(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
@@ -33,13 +33,17 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
 
-        LocalDate satsendringsdato = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
-            .getMinLocalDate();
+        // Satstidslinjen viser ikke hvilken satsendring som skyldes fødselen. Er barnet født før startdato,
+        // er barnet med i satsen fra første dag. Derfor bruker vi fødselstidslinjen til å finne fom-datoen.
+        var fødselTidslinje = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())
                 .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
+        var satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
 
-        var nyeSatser = ungdomsytelseGrunnlag.getSatsTidslinje().getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
+        LocalDate satsendringsdato = BarnetilleggEndringsdatoUtleder.finnFørsteDatoMedSats(fødselTidslinje, satsTidslinje);
+
+        var nyeSatser = satsTidslinje.getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
         if (nyeSatser.antallBarn() == 0) {
             throw new IllegalStateException("Ingen barn på fom=" + satsendringsdato);

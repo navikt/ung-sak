@@ -221,6 +221,7 @@ class VilkårsavklaringRestTjenesteTest {
             BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID.getKode(),
             "begrunnelse for vurdering",
             "fritekst til brev",
+            false,
             true,
             SAKSBEHANDLER,
             vurdertTidspunkt));
@@ -270,7 +271,7 @@ class VilkårsavklaringRestTjenesteTest {
     }
 
     @Test
-    void ikke_relevante_og_avkortede_vilkårsperioder_utelates() {
+    void avkortede_vilkårsperioder_utelates_mens_ikke_relevante_vises() {
         var behandling = opprettFørstegangsbehandling(
             new Vilkårsperiode(JAN_MAR, Utfall.OPPFYLT, null),
             new Vilkårsperiode(APR_JUN, Utfall.IKKE_OPPFYLT, Avslagsårsak.AVKORTET),
@@ -278,7 +279,7 @@ class VilkårsavklaringRestTjenesteTest {
 
         assertThat(tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder())
             .extracting(VilkårsvurderingOgAvklaringPeriodeDto::periode, VilkårsvurderingOgAvklaringPeriodeDto::utfall, VilkårsvurderingOgAvklaringPeriodeDto::avklaringOgVurdering)
-            .containsExactly(tuple(JAN_MAR, Utfall.OPPFYLT, null));
+            .containsExactly(tuple(JUL_DES, Utfall.IKKE_RELEVANT, null), tuple(JAN_MAR, Utfall.OPPFYLT, null));
     }
 
     @Test
@@ -396,7 +397,8 @@ class VilkårsavklaringRestTjenesteTest {
             "fritekst til brev",
             SAKSBEHANDLER,
             vurdertTidspunkt,
-            null
+            null,
+            false
         );
     }
 

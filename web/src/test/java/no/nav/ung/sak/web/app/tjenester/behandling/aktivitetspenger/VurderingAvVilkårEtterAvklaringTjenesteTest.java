@@ -4,19 +4,23 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
 import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.VilkårsvurderingResultatOgEvaluering;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -64,7 +67,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     @BeforeEach
     void setUp() {
         vilkårResultatRepository = mock(VilkårResultatRepository.class);
-        tjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(vilkårResultatRepository);
+        tjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(new InngangsvilkårVurderingTjeneste(mock(InngangsvilkårVurderingRepository.class), mock(BehandlingRepository.class), vilkårResultatRepository));
     }
 
     @Test
@@ -127,10 +130,10 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
-    void ikke_relevante_vilkårsperioder_vurderes_ikke() {
+    void avkortede_vilkårsperioder_vurderes_ikke() {
         medVilkårsperioder(
             vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
-            vilkårsperiode(MARS, Utfall.IKKE_RELEVANT)
+            avkortetVilkårsperiode(MARS)
         );
 
         var resultat = utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
@@ -192,8 +195,8 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
-    void ingen_relevante_vilkårsperioder_gir_feil() {
-        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_RELEVANT));
+    void ingen_ikke_avkortede_vilkårsperioder_gir_feil() {
+        medVilkårsperioder(avkortetVilkårsperiode(JANUAR));
 
         assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
             List.of(vurdering(JANUAR, false, "uten relevante vilkårsperioder", null)),
@@ -236,6 +239,28 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
+    void manglende_fritekst_er_gyldig_når_brev_ikke_skal_sendes() {
+        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT));
+
+        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+            List.of(vurdering(JANUAR, false, "årsak annet uten fritekst", null, true)),
+            årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.ANNET));
+
+        assertThat(enesteSegment(resultat.vurderinger()).skalSendeVarsel()).isFalse();
+    }
+
+    @Test
+    void fritekst_gir_feil_når_brev_ikke_skal_sendes() {
+        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT));
+
+        assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+            List.of(vurdering(JANUAR, false, "årsak annet", "tekst til brev", true)),
+            årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.ANNET)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("fritekstVurderingBrev må være tom");
+    }
+
+    @Test
     void regelsporing_viser_klipping_mot_hull_i_vilkårsperioderne() {
         medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_VURDERT));
         var opphørsdato = LocalDate.of(2026, 1, 15);
@@ -266,7 +291,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VILKÅR_TYPE);
         Arrays.stream(perioder).forEach(vilkårBuilder::leggTil);
         vilkårResultatBuilder.leggTil(vilkårBuilder);
-        when(vilkårResultatRepository.hentHvisEksisterer(anyLong())).thenReturn(Optional.of(vilkårResultatBuilder.build()));
+        when(vilkårResultatRepository.hent(anyLong())).thenReturn(vilkårResultatBuilder.build());
     }
 
     private static VilkårPeriodeBuilder vilkårsperiode(Periode periode, Utfall utfall) {
@@ -275,12 +300,27 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
             .medUtfall(utfall);
     }
 
+    private static VilkårPeriodeBuilder avkortetVilkårsperiode(Periode periode) {
+        return vilkårsperiode(periode, Utfall.IKKE_OPPFYLT).medAvslagsårsak(Avslagsårsak.AVKORTET);
+    }
+
     private static LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje(Periode periode, IkkeOppfyltDetaljertÅrsak årsak) {
         return new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getFom(), periode.getTom(), årsak)));
     }
 
     private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
-        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev);
+        return vurdering(periode, erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, false);
+    }
+
+    private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse,
+                                                                       String fritekstVurderingBrev, boolean skalIkkeSendeVarsel) {
+        return new VurderingAvVilkårPeriodeEtterAvklaringDto(
+            new ÅpenPeriode(periode.getFom(), periode.getTom()),
+            erVilkårOppfylt,
+            begrunnelse,
+            fritekstVurderingBrev,
+            skalIkkeSendeVarsel
+        );
     }
 
     private LocalDateTimeline<VilkårsvurderingResultatOgEvaluering> utled(long behandlingId, VilkårType vilkårType,

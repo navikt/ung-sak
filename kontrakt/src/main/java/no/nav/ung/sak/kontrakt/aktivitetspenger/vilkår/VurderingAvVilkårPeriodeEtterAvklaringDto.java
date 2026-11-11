@@ -1,6 +1,8 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -24,6 +26,13 @@ public record VurderingAvVilkårPeriodeEtterAvklaringDto(
     @Size(max = 10000)
     @Valid
     @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
-    String fritekstVurderingBrev
+    String fritekstVurderingBrev,
+
+    boolean skalIkkeSendeVarsel
 ) {
+    @JsonIgnore
+    @AssertTrue(message = "fritekstVurderingBrev må være tom når skalIkkeSendeVarsel er true")
+    public boolean isFritekstVurderingBrevGyldig() {
+        return !skalIkkeSendeVarsel || fritekstVurderingBrev == null || fritekstVurderingBrev.isBlank();
+    }
 }

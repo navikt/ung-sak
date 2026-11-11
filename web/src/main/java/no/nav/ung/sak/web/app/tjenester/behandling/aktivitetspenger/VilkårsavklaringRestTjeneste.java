@@ -73,7 +73,7 @@ public class VilkårsavklaringRestTjeneste {
 
     // hentUttalelser filtrerer på typene den får, og returnerer ingenting uten typer
     private static final EndringType[] AVKLARINGSUTTALELSER = {
-        EndringType.AVKLAR_BOSTED, EndringType.AVKLAR_BISTAND, EndringType.AVKLAR_ANDRE_LIVSOPPHOLDSYTELSER
+        EndringType.AVKLAR_BOSTED, EndringType.AVKLAR_BISTAND, EndringType.AVKLAR_AKTIVITET, EndringType.AVKLAR_ANDRE_LIVSOPPHOLDSYTELSER
     };
 
     private BehandlingRepository behandlingRepository;
@@ -149,7 +149,7 @@ public class VilkårsavklaringRestTjeneste {
         var perioderDekketAvAvklaring = TidslinjeUtil.tilTidslinje(Stream.concat(foreslåtte.stream(), ferdigstilte.stream()).map(VilkårPeriodeAvklaring::getPeriode).toList());
 
         var relevanteVilkårsperioder = vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
-            .map(v -> InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(v, vilkårType))
+            .map(v -> InngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(v, vilkårType))
             .orElse(LocalDateTimeline.empty());
         var vilkårsrader = relevanteVilkårsperioder.disjoint(perioderDekketAvAvklaring).stream()
             .map(s -> new VilkårsavklaringOgUtfallPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), null));
@@ -168,7 +168,7 @@ public class VilkårsavklaringRestTjeneste {
             .orElse(Set.of());
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         LocalDateTimeline<VilkårPeriode> relevanteVilkårsperioder = vilkårene
-            .map(v -> InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(v, vilkårType))
+            .map(v -> InngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(v, vilkårType))
             .orElse(LocalDateTimeline.empty());
         var vurderinger = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandling.getId(), vilkårType);
         var uttalelser = hentUttalelserPerReferanse(behandling);
@@ -245,6 +245,7 @@ public class VilkårsavklaringRestTjeneste {
             v.ikkeOppfyltÅrsak() != null ? v.ikkeOppfyltÅrsak().getKode() : null,
             v.begrunnelse(),
             v.fritekstVurderingBrev(),
+            v.skalSendeVarsel(),
             v.erManuellVurdering(),
             v.vurdertAv(),
             v.vurdertTidspunkt());
