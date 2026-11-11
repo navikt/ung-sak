@@ -283,8 +283,6 @@ spec:
       value: "false"
     - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
       value: "true"
-    - name: HISTORIKKINNSLAG_FOR_OPPGAVE_ENABLED
-      value: "true"
     - name: BARNETILLEGG_BREV_FODSEL_FOR_STARTDATO_ENABLED
       value: "true"
 

@@ -55,11 +55,9 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
         }
 
         var sats = Satsberegner.beregnBarnetilleggSats(nyeSatser);
-        var fødselsdato = fødselTidslinje.getMinLocalDate();
-        var barnFødtFørStartdato = fødselsdato.isBefore(satsendringsdato);
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_BARNETILLEGG,
-                new EndringBarnetilleggDto(satsendringsdato, fødselsdato, nyeSatser.dagsatsBarnetillegg(), sats, barnFødtFørStartdato));
+                new EndringBarnetilleggDto(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), sats));
 
     }
 

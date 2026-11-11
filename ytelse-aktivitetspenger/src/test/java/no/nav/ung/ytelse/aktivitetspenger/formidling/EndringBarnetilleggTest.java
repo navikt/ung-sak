@@ -52,7 +52,6 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             """
                 Du får mer i aktivitetspenger fordi du har fått barn \
                 Du får 37 kroner i barnetillegg per dag fra og med 16. august 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
@@ -75,7 +74,6 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             """
                 Du får mer i aktivitetspenger fordi du har fått barn \
                 Du får 74 kroner i barnetillegg per dag fra og med 16. august 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
@@ -86,7 +84,7 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             );
     }
 
-    @DisplayName("Barn født før startdato gir startdato og egen begrunnelse når toggle er på")
+    @DisplayName("Barn født før startdato gir startdato som fom når toggle er på")
     @Test
     void barnFødtFørStartdatoMedToggle() {
         var behandling = lagScenario(AktivitetspengerEndringBarnetilleggScenarioer.fødselFørStartdato(FOM));
@@ -95,7 +93,6 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             """
                 Du får mer i aktivitetspenger fordi du har fått barn \
                 Du får 37 kroner i barnetillegg per dag fra og med 1. august 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn 11. juli 2025, før du begynte å få aktivitetspenger. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
@@ -104,7 +101,7 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
         assertThatHtml(generertBrev.dokument().html()).asPlainTextIsEqualTo(forventet);
     }
 
-    @DisplayName("Barn født etter startdato gir fødselsdato og uendret begrunnelse når toggle er på")
+    @DisplayName("Barn født etter startdato gir fødselsdato som fom når toggle er på")
     @Test
     void barnFødtEtterStartdatoMedToggle() {
         var behandling = lagScenario(AktivitetspengerEndringBarnetilleggScenarioer.fødselMedEttBarn(FOM));
@@ -113,7 +110,6 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             """
                 Du får mer i aktivitetspenger fordi du har fått barn \
                 Du får 37 kroner i barnetillegg per dag fra og med 16. august 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
