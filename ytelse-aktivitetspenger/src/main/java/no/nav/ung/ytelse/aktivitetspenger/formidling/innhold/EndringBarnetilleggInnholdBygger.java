@@ -32,6 +32,8 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        // Satstidslinjen viser ikke hvilken satsendring som skyldes fødselen. Er barnet født før startdato,
+        // er barnet med i satsen fra første dag. Derfor bruker vi fødselstidslinjen til å finne fom-datoen.
         var fødselTidslinje = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
 
         var grunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
