@@ -13,7 +13,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,20 +58,20 @@ public class FinnSakerForInntektkontroll {
         /* Filtrere ut behandlinger som skal ha inntektskontroll:
             - Har ikke allerede opprettet trigger for inntektskontroll
             - Har ytelsesperiode som krever inntektskontroll
-            - Har ikke avslåtte vilkår, men kan ha vilkår som er til vurdering
+            - Har innvilget vilker eller vilkår som er til vurdering
             - Har ikke avslått uttak, men kan ha uttak som er til vurdering
             - Har ikke utført kontroll for perioden tidligere
          */
         var behandlingerTilKontroll = behandlinger.stream()
             .filter(behandling -> erIkkeAlleredeMarkertForKontroll(behandling, fom, tom))
             .filter(behandling -> harPeriodeSomGirInntektskontroll(behandling, fom, tom))
-            .filter(behandling -> harIkkeAvslåtteVilkår(behandling, fom, tom))
+            .filter(behandling -> harInnvilgetVilkårEllerVilkårTilVurdering(behandling, fom, tom))
             .filter(behandling -> harIkkeUtførtKontroll(behandling, fom, tom))
             .toList();
         return behandlingerTilKontroll.stream().map(Behandling::getFagsak).toList();
     }
 
-    private boolean harIkkeAvslåtteVilkår(Behandling behandling, LocalDate fom, LocalDate tom) {
+    private boolean harInnvilgetVilkårEllerVilkårTilVurdering(Behandling behandling, LocalDate fom, LocalDate tom) {
         var samletResultat = vilkårTjeneste.samletVilkårsresultat(behandling.getId()).intersection(new LocalDateInterval(fom, tom));
         var harVilkårSomIkkeErVurdert = samletResultat.segmenter().stream().anyMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.IKKE_VURDERT));
         if (samletResultat.isEmpty() || harVilkårSomIkkeErVurdert) {
@@ -84,7 +83,7 @@ public class FinnSakerForInntektkontroll {
     }
 
     private static boolean erInnvilget(LocalDateTimeline<VilkårUtfallSamlet> samletResultat) {
-        return samletResultat.segmenter().stream().noneMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.IKKE_OPPFYLT));
+        return samletResultat.segmenter().stream().anyMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.OPPFYLT));
     }
 
     private boolean harPeriodeSomGirInntektskontroll(Behandling behandling, LocalDate fom, LocalDate tom) {
