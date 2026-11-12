@@ -6,6 +6,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
@@ -36,6 +37,21 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
     @AfterAll
     static void afterAll() {
         System.clearProperty("BREV_DAGENS_DATO_TEST");
+    }
+
+    @Test
+    void skal_innvilge_uten_tilkjent_ytelse_og_vise_planlagt_utbetalingsdato() {
+        var fom = LocalDate.of(2025, 8, 15);
+        var behandling = lagScenario(AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySats(fom));
+        repositories.tilkjentYtelseRepository().lagre(behandling.getId(), LocalDateTimeline.empty(), "input", "sporing");
+
+        var brev = genererVedtaksbrev(behandling.getId());
+
+        assertThat(brev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_INNVILGELSE);
+        assertThatHtml(brev.dokument().html())
+            .asPlainTextContains("Du får aktivitetspenger fra og med 15. august 2025.")
+            .asPlainTextContains("Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned.")
+            .asPlainTextNotContains("etter at vi har kontrollert inntekten din");
     }
 
     @DisplayName("Førstegangsinnvilgelse med lav og høy sats (24 år blir 25), besteberegning (siste år) høyest under 25")

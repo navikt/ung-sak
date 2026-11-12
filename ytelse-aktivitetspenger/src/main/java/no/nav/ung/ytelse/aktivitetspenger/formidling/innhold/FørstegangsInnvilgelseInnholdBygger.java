@@ -61,7 +61,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         var tilVurdering = tidslinje.tilVurdering();
-        var periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
+        var periode = tilVurdering.filterValue(r -> !r.erAvslåttEllerAvkortet() && r.ikkeVurderteVilkår().isEmpty());
 
         var ytelseFom = periode.getMinLocalDate();
 
@@ -105,10 +105,9 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
-        if (tilkjentYtelseTimeline.isEmpty()) {
-            throw new IllegalStateException("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
-        }
-        var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
+        var førsteTilkjentMåned = (tilkjentYtelseTimeline.isEmpty()
+            ? detaljertResultatTidslinje.getMinLocalDate()
+            : tilkjentYtelseTimeline.getMinLocalDate()).withDayOfMonth(1);
         var dagensDato = bestemDagensDato();
 
         var førstkommendeUtbetalingskjøring = førsteTilkjentMåned.plusMonths(1).plusDays(9);
