@@ -71,9 +71,19 @@ public class AktivitetspengerGrunnlag {
         if (beregningsgrunnlag.isEmpty()) {
             throw new IllegalStateException("Fant ikke beregningsgrunnlag på AktivitetspengerGrunnlag");
         }
-        var segmenter = beregningsgrunnlag.stream()
-            .map(bg -> new LocalDateSegment<>(bg.getSkjæringstidspunkt(), null, bg))
+        var sortert = beregningsgrunnlag.stream()
+            .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
             .toList();
+
+        var segmenter = new ArrayList<LocalDateSegment<Beregningsgrunnlag>>();
+        var iterator = sortert.iterator();
+        var gjeldende = iterator.next();
+        while (iterator.hasNext()) {
+            var neste = iterator.next();
+            segmenter.add(new LocalDateSegment<>(gjeldende.getSkjæringstidspunkt(), neste.getSkjæringstidspunkt().minusDays(1), gjeldende));
+            gjeldende = neste;
+        }
+        segmenter.add(new LocalDateSegment<>(gjeldende.getSkjæringstidspunkt(), null, gjeldende));
         return new LocalDateTimeline<>(segmenter);
     }
 
