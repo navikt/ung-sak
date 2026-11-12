@@ -1,28 +1,23 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.perioder;
 
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontroll.InntektskontrollFritakUtleder;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.sak.trigger.Trigger;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -42,49 +37,24 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
     public static final LocalDate PROGRAMPERIODE_FOM = LocalDate.of(2025, 12, 15);
     public static final LocalDate PROGRAMPERIODE_TOM = LocalDate.of(2026, 3, 15);
     @Inject
+    private EntityManager entityManager;
+    @Inject
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
-    @Inject
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-
-    @Inject
-    private BehandlingRepository behandlingRepository;
-
-    @Inject
-    private FagsakRepository fagsakRepository;
-
-    @Inject
-    private ProsessTriggereRepository prosessTriggereRepository;
 
     @Inject
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
     @Inject
     @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
     private InntektskontrollFritakUtleder fritakUtleder;
-    private Behandling behandling;
-
-
-    @BeforeEach
-    void setUp() {
-
-        lagFagsakOgBehandling();
-
-        ungdomsprogramPeriodeRepository.lagre(
-            behandling.getId(),
-            List.of(new UngdomsprogramPeriode(PROGRAMPERIODE_FOM, PROGRAMPERIODE_TOM))
-        );
-
-    }
-
+    private Long behandlingId;
 
     @Test
     void skal_finne_perioder_for_kontroll_der_deler_av_relevante_perioder_er_markert() {
-        // Programperiode går fra desember til mars
-        // Markerer kun januar for kontroll
         DatoIntervallEntitet januar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 1),
             LocalDate.of(2026, 1, 31));
-        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar)));
+        lagBehandling(Set.of(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar)));
 
-        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
 
         assertEquals(new LocalDateTimeline<>(januar.toLocalDateInterval(), true), perioderForKontroll);
     }
@@ -92,21 +62,19 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
 
     @Test
     void skal_finne_perioder_for_kontroll_der_alle_relevante_perioder_er_markert_med_kontroll_av_siste_periode() {
-        // Programperiode går fra desember til mars
-        // Markerer kun januar for kontroll
         DatoIntervallEntitet januar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 1),
             LocalDate.of(2026, 1, 31));
         DatoIntervallEntitet februar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 2, 1),
             LocalDate.of(2026, 2, 28));
         DatoIntervallEntitet mars = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 3, 1),
             LocalDate.of(2026, 3, 31));
-        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
+        lagBehandling(Set.of(
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar),
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, februar),
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, mars)
         ));
 
-        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
 
         LocalDateTimeline<Boolean> expected = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(januar.toLocalDateInterval(), true),
@@ -119,22 +87,20 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
 
     @Test
     void skal_finne_perioder_for_kontroll_der_alle_relevante_perioder_er_markert_med_kontroll_av_siste_periode_og_annen_trigger() {
-        // Programperiode går fra desember til mars
-        // Markerer kun januar for kontroll
         DatoIntervallEntitet januar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 1),
             LocalDate.of(2026, 1, 31));
         DatoIntervallEntitet februar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 2, 1),
             LocalDate.of(2026, 2, 28));
         DatoIntervallEntitet mars = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 3, 1),
             LocalDate.of(2026, 3, 31));
-        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
+        lagBehandling(Set.of(
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar),
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, februar),
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, mars),
             new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 3, 1), PROGRAMPERIODE_TOM))
         ));
 
-        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
 
         LocalDateTimeline<Boolean> expected = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(januar.toLocalDateInterval(), true),
@@ -266,10 +232,29 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
         assertTrue(resultat.isEmpty());
     }
 
-    private void lagFagsakOgBehandling() {
-        final var fagsak = new Fagsak(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), PROGRAMPERIODE_FOM, PROGRAMPERIODE_TOM);
-        fagsakRepository.opprettNy(fagsak);
-        behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+    private void lagBehandling(Set<Trigger> triggere) {
+        var scenario = new UngTestScenario(
+            "Kontrollperiode",
+            List.of(new UngdomsprogramPeriode(PROGRAMPERIODE_FOM, PROGRAMPERIODE_TOM)),
+            null,
+            null,
+            null,
+            null,
+            null,
+            LocalDate.of(2000, 1, 1),
+            List.of(PROGRAMPERIODE_FOM),
+            triggere,
+            List.of(),
+            null,
+            null,
+            null,
+            false
+        );
+        var repositories = UngTestRepositories.lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, null);
+        behandlingId = TestScenarioBuilder.builderMedSøknad()
+            .medSøknadDato(PROGRAMPERIODE_FOM)
+            .medUngTestGrunnlag(scenario)
+            .buildOgLagreMedUng(repositories)
+            .getId();
     }
 }
