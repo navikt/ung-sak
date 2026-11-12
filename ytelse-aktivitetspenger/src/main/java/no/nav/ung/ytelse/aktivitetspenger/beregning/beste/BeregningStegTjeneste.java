@@ -2,10 +2,12 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.List;
 
 @ApplicationScoped
 public class BeregningStegTjeneste {
@@ -22,20 +24,10 @@ public class BeregningStegTjeneste {
         this.beregningTjeneste = beregningTjeneste;
     }
 
-    // TODO: Koble på utledning av siste tilgjengelige lignede år
-    private Year utledSistLignedeÅr(LocalDate skjæringstidspunkt) {
-        LocalDate maiFørste = LocalDate.of(LocalDate.now().getYear(), 5, 1);
-        if (skjæringstidspunkt.isBefore(maiFørste)) {
-            return Year.of(skjæringstidspunkt.minusYears(2).getYear());
-        } else {
-            return Year.of(skjæringstidspunkt.minusYears(1).getYear());
-        }
-    }
-
     public Beregningsgrunnlag utførBesteberegning(Long behandlingId, LocalDate skjæringstidspunkt) {
         var inntektsposter = beregningTjeneste.hentSigrunInntektsposter(behandlingId);
-        var sistLignedeÅr = utledSistLignedeÅr(skjæringstidspunkt);
 
+        var sistLignedeÅr = beregningTjeneste.utledSisteLignedeÅr(skjæringstidspunkt, inntektsposter);
         var beregningInput = BeregningTjeneste.lagBeregningInput(sistLignedeÅr, skjæringstidspunkt, inntektsposter);
         var besteBeregningResultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);
 

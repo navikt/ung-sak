@@ -12,6 +12,7 @@ import java.util.List;
 
 import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningTjeneste.lagBeregningInput;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class BeregningTjenesteTest {
 
@@ -72,6 +73,77 @@ class BeregningTjenesteTest {
     void ingen_inntektsposter_gir_null_resultat() {
         var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, List.of()));
         assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    void siste_lignede_år_er_året_før_stp_fra_dagen_ligningsverdi_kan_være_tilgjengelig() {
+        var inntektsposter = List.of(
+            lagInntektspost(2025, BigDecimal.ZERO),
+            lagInntektspost(2024, BigDecimal.ZERO)
+        );
+
+        assertThat(utledSisteLignedeÅr(LocalDate.of(2026, 5, 1), inntektsposter)).isEqualTo(Year.of(2025));
+    }
+
+    @Test
+    void siste_lignede_år_faller_tilbake_til_seneste_inntektspost_når_året_før_stp_ikke_er_lignet() {
+        var inntektsposter = List.of(
+            lagInntektspost(2024, BigDecimal.ZERO),
+            lagInntektspost(2023, BigDecimal.ZERO)
+        );
+
+        assertThat(utledSisteLignedeÅr(LocalDate.of(2026, 5, 1), inntektsposter)).isEqualTo(Year.of(2024));
+        assertThat(utledSisteLignedeÅr(LocalDate.of(2026, 11, 30), inntektsposter)).isEqualTo(Year.of(2024));
+    }
+
+    @Test
+    void siste_lignede_år_faller_tilbake_til_seneste_inntektspost_også_etter_grensen_for_når_ligningsverdi_må_være_tilgjengelig() {
+        var inntektsposter = List.of(
+            lagInntektspost(2024, BigDecimal.ZERO),
+            lagInntektspost(2023, BigDecimal.ZERO)
+        );
+
+        assertThat(utledSisteLignedeÅr(LocalDate.of(2026, 12, 1), inntektsposter)).isEqualTo(Year.of(2024));
+
+        // Bruker siste tilgjengelig ligningsår fra skatt også etter fristen, men logger warning
+        assertThat(utledSisteLignedeÅr(LocalDate.of(2026, 12, 31), inntektsposter)).isEqualTo(Year.of(2024));
+    }
+
+    @Test
+    void siste_lignede_år_er_året_før_stp_selv_om_det_finnes_inntektspost_for_stp_året() {
+        var inntektsposter = List.of(
+            lagInntektspost(2026, BigDecimal.ZERO),
+            lagInntektspost(2025, BigDecimal.ZERO),
+            lagInntektspost(2024, BigDecimal.ZERO)
+        );
+        var skjæringstidspunkt = LocalDate.of(2026, 6, 1);
+        assertThat(utledSisteLignedeÅr(skjæringstidspunkt, inntektsposter)).isEqualTo(Year.of(2025));
+    }
+
+    @Test
+    void siste_lignede_år_kaster_exception_når_seneste_inntektspost_er_mer_enn_to_år_før_stp() {
+        var inntektsposter = List.of(
+            lagInntektspost(2023, BigDecimal.ZERO)
+        );
+        var skjæringstidspunkt = LocalDate.of(2026, 6, 1);
+
+        assertThatThrownBy(() -> utledSisteLignedeÅr(skjæringstidspunkt, inntektsposter))
+            .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void siste_lignede_år_avhenger_av_stp_året_og_ikke_dagens_dato() {
+        var inntektsposter = List.of(
+            lagInntektspost(2024, BigDecimal.ZERO),
+            lagInntektspost(2023, BigDecimal.ZERO)
+        );
+
+        assertThat(utledSisteLignedeÅr(LocalDate.of(2025, 4, 30), inntektsposter)).isEqualTo(Year.of(2023));
+        assertThat(utledSisteLignedeÅr(LocalDate.of(2025, 5, 1), inntektsposter)).isEqualTo(Year.of(2024));
+    }
+
+    private static Year utledSisteLignedeÅr(LocalDate skjæringstidspunkt, List<Inntektspost> inntektsposter) {
+        return new BeregningTjeneste().utledSisteLignedeÅr(skjæringstidspunkt, inntektsposter);
     }
 
     private static Inntektspost lagInntektspost(int år, BigDecimal beløp) {
