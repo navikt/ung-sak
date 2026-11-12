@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public class EtterlysningForOpphørVedMaksdatoResultatUtleder {
 
     static ResultatType utledResultat(EtterlysningForMaksdatoInput input) {
-        if (!MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(input.tomDato, input.maksdato)) {
+        if (!MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(input.grunnlag)) {
             // Avbryter eventuelt eksisterende etterlysning og varsel
             return input.eksisterendeEtterlysning != null && input.eksisterendeEtterlysning.etterlysningData().status().equals(EtterlysningStatus.VENTER) ? ResultatType.AVBRYT_ETTERLYSNING : ResultatType.INGEN_ENDRING;
         }
@@ -19,7 +19,9 @@ public class EtterlysningForOpphørVedMaksdatoResultatUtleder {
             // Vi sjekker om eksisterende etterlysning gjelder for samme maksdato
             UngdomsprogramPeriodeGrunnlag etterlystForGrunnlag = input.eksisterendeEtterlysning.grunnlag();
             LocalDate etterlystForMaksdato = etterlystForGrunnlag.getPeriodeMaksDato().orElseThrow(() -> new IllegalStateException("Forventer maksdato"));
-            if (etterlystForMaksdato.equals(input.maksdato)) {
+            // Maksdato finnes, ellers hadde erRelevantForVarsling feilet
+            LocalDate maksdato = input.grunnlag.getPeriodeMaksDato().orElseThrow();
+            if (etterlystForMaksdato.equals(maksdato)) {
                 return ResultatType.INGEN_ENDRING;
             } else {
                 EtterlysningStatus status = input.eksisterendeEtterlysning.etterlysningData().status();
@@ -38,8 +40,7 @@ public class EtterlysningForOpphørVedMaksdatoResultatUtleder {
 
 
     record EtterlysningForMaksdatoInput(
-        LocalDate tomDato,
-        LocalDate maksdato,
+        UngdomsprogramPeriodeGrunnlag grunnlag,
         LocalDate dagensDato,
         EtterlysningOgGrunnlag eksisterendeEtterlysning) {
     }

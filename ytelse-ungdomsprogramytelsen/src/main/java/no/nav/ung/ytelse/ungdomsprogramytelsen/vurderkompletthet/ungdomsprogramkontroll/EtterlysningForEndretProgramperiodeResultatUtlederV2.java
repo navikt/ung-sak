@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogram
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
@@ -89,12 +90,9 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
             return false;
         }
 
+        // Ligger hele endringen etter maksdato, håndteres den av varsel ved opphør på maksdato
         return andreGrunnlag.getPeriodeMaksDato()
-            .filter(maksDato -> {
-                // Hele endringen ligger etter maksdato
-                // dette håndteres av varsel ved opphør på maksdato
-                return maksDato.isBefore(endretTidslinje.getMinLocalDate());
-            })
+            .filter(maksDato -> UngdomsprogramOpphørUtleder.erEtterMaksdato(endretTidslinje.getMinLocalDate(), maksDato))
             .isEmpty();
     }
 

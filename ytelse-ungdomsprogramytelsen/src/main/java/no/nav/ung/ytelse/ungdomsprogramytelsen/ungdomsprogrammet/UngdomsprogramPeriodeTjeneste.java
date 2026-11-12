@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -23,7 +24,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UngdomsprogramPeriodeTjeneste {
@@ -85,38 +85,16 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
     /**
-     * Returnerer ungdomsprogramperiodene for en behandling der hver periode sin {@code tom}-dato
-     * er kappet mot {@code periodeMaksDato} fra grunnlaget.
-     *
-     * <p>For hver periode brukes {@code min(opprinnelig tom, periodeMaksDato)}.
-     * {@code periodeMaksDato} er allerede beregnet som en virkedag av ung-deltakelse-opplyser.
-     * Dersom {@code periodeMaksDato} ikke er satt på grunnlaget beholdes opprinnelig {@code tom} uendret.
-     * Perioder som ligger helt etter maksdato filtreres bort.
+     * Returnerer ungdomsprogramperiodene for en behandling kappet mot {@code periodeMaksDato} fra grunnlaget,
+     * se {@link UngdomsprogramOpphørUtleder#finnPerioderKappetMotMaksdato}.
      *
      * @param behandlingId Behandling som det skal hentes perioder for
      * @return Perioder kappet mot maksdato, eller tom mengde dersom grunnlag mangler
      */
     public Set<DatoIntervallEntitet> finnPerioderKappetMotMaksdato(Long behandlingId) {
-        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
-        if (grunnlag.isEmpty()) {
-            return Set.of();
-        }
-        var perioder = grunnlag.get().getUngdomsprogramPerioder().getPerioder();
-        var maksDato = grunnlag.get().getPeriodeMaksDato();
-        if (maksDato.isEmpty()) {
-            return perioder.stream()
-                .map(UngdomsprogramPeriode::getPeriode)
-                .collect(Collectors.toSet());
-        }
-        var kappetTom = maksDato.get();
-        return perioder.stream()
-            .filter(p -> !p.getPeriode().getFomDato().isAfter(kappetTom))
-            .map(p -> {
-                var opprinneligTom = p.getPeriode().getTomDato();
-                var nyTom = opprinneligTom.isBefore(kappetTom) ? opprinneligTom : kappetTom;
-                return DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFomDato(), nyTom);
-            })
-            .collect(Collectors.toSet());
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .map(UngdomsprogramOpphørUtleder::finnPerioderKappetMotMaksdato)
+            .orElse(Set.of());
     }
 
     /**
@@ -208,8 +186,11 @@ public class UngdomsprogramPeriodeTjeneste {
             return List.of();
         }
 
-        // Dersom sluttdato endres til å være maksdato eller senere og denne før enten ikke var satt (tidenes ende) eller satt til noe lenger frem i tid enn gjeldende sluttdato håndteres varsling av varsel ved opphør på maksdato
-        if (andreGrunnlag.getPeriodeMaksDato().isPresent() && førsteSluttdato.isAfter(andreGrunnlag.getPeriodeMaksDato().get()) && !andreSluttdato.isBefore(andreGrunnlag.getPeriodeMaksDato().get())) {
+        // Dersom sluttdato endres til å være maksdato eller senere og denne før enten ikke var satt (tidenes ende) eller satt til noe lenger frem i tid enn maksdato håndteres varsling av varsel ved opphør på maksdato
+        var maksdato = andreGrunnlag.getPeriodeMaksDato();
+        if (maksdato.isPresent()
+            && UngdomsprogramOpphørUtleder.erEtterMaksdato(førsteSluttdato, maksdato.get())
+            && UngdomsprogramOpphørUtleder.opphørerVedMaksdato(andreGrunnlag)) {
             return List.of();
         }
 
