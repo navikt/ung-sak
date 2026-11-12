@@ -25,6 +25,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontroll.InntektskontrollFritakUtleder;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
@@ -96,11 +97,14 @@ class FinnSakerForInntektkontrollTest {
     private Behandling behandling;
     private KvalifiserteYtelsesperioderTjeneste kvalifiserteYtelsesperioderTjeneste;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private InntektskontrollFritakUtleder fritakUtleder;
 
     @BeforeEach
     void setUp() {
         kvalifiserteYtelsesperioderTjeneste = Mockito.mock(KvalifiserteYtelsesperioderTjeneste.class);
         prosessTriggerPeriodeUtleder = Mockito.mock(ProsessTriggerPeriodeUtleder.class);
+        fritakUtleder = Mockito.mock(InntektskontrollFritakUtleder.class);
+        when(fritakUtleder.finnPerioderFritattForKontroll(any())).thenReturn(LocalDateTimeline.empty());
         when(prosessTriggerPeriodeUtleder.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         finnSakerForInntektkontroll = new FinnSakerForInntektkontroll(
@@ -111,7 +115,8 @@ class FinnSakerForInntektkontrollTest {
             new RelevanteKontrollperioderUtleder(
                 new UnitTestLookupInstanceImpl<>(prosessTriggerPeriodeUtleder),
                 new MånedsvisTidslinjeUtleder(new UnitTestLookupInstanceImpl<>(kvalifiserteYtelsesperioderTjeneste), behandlingRepository),
-                behandlingRepository)
+                behandlingRepository,
+                new UnitTestLookupInstanceImpl<>(fritakUtleder))
         );
 
         behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
@@ -142,6 +147,8 @@ class FinnSakerForInntektkontrollTest {
     void skal_ikke_finne_fagsak_for_kontroll_av_første_måned_i_programperiode() {
         // Arrange
         opprettPeriode(FØRSTE_SEPTEMBER, LANGT_FRAM);
+        when(fritakUtleder.finnPerioderFritattForKontroll(any())).thenReturn(
+            new LocalDateTimeline<>(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER, true));
 
         // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
@@ -330,7 +337,7 @@ class FinnSakerForInntektkontrollTest {
     }
 
     private void opprettPeriode(LocalDate fomDato, LocalDate tomDato) {
-        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(any()))
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(behandling.getId()))
             .thenReturn(new LocalDateTimeline<>(fomDato, tomDato, true));
     }
 

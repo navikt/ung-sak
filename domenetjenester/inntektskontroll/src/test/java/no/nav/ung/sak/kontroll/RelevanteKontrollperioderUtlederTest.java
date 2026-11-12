@@ -3,7 +3,9 @@ package no.nav.ung.sak.kontroll;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -13,14 +15,23 @@ import java.time.YearMonth;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class RelevanteKontrollperioderUtlederTest {
 
-    private final RelevanteKontrollperioderUtleder utleder = new RelevanteKontrollperioderUtleder(null, null, null);
+    private final InntektskontrollFritakUtleder fritakUtleder = mock(InntektskontrollFritakUtleder.class);
+    private final RelevanteKontrollperioderUtleder utleder = new RelevanteKontrollperioderUtleder(
+        null, null, null, new UnitTestLookupInstanceImpl<>(fritakUtleder));
     private static final YearMonth NOVEMBER = YearMonth.of(2026, 11);
 
+    @BeforeEach
+    void setUp() {
+        when(fritakUtleder.finnPerioderFritattForKontroll(any())).thenReturn(LocalDateTimeline.empty());
+    }
+
     @Test
-    void aktivitetspenger_skal_kontrollere_en_enkelt_delvis_måned() {
+    void skal_kontrollere_en_enkelt_delvis_måned_uten_fritak() {
         var perioder = new LocalDateTimeline<>(NOVEMBER.atDay(10), NOVEMBER.atDay(20), NOVEMBER);
 
         var resultat = utleder.utledPerioderRelevantForKontrollAvInntekt(perioder, FagsakYtelseType.AKTIVITETSPENGER);
@@ -30,7 +41,7 @@ class RelevanteKontrollperioderUtlederTest {
     }
 
     @Test
-    void aktivitetspenger_skal_kontrollere_første_og_siste_måned_og_ny_periode_etter_opphold() {
+    void skal_kontrollere_første_og_siste_måned_og_ny_periode_uten_fritak() {
         var desember = NOVEMBER.plusMonths(1);
         var februar = NOVEMBER.plusMonths(3);
         var perioder = new LocalDateTimeline<>(List.of(
@@ -49,7 +60,7 @@ class RelevanteKontrollperioderUtlederTest {
     }
 
     @Test
-    void aktivitetspenger_skal_samle_flere_ytelsesperioder_i_samme_kontrollmåned() {
+    void skal_samle_flere_ytelsesperioder_i_samme_kontrollmåned() {
         var perioder = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(NOVEMBER.atDay(1), NOVEMBER.atDay(10), NOVEMBER),
             new LocalDateSegment<>(NOVEMBER.atDay(20), NOVEMBER.atEndOfMonth(), NOVEMBER)));
@@ -61,11 +72,13 @@ class RelevanteKontrollperioderUtlederTest {
     }
 
     @Test
-    void ungdomsytelse_skal_fortsatt_frita_første_måned_og_kontrollere_siste() {
+    void skal_trekke_fra_perioder_fra_ytelsesspesifikk_fritaksutleder() {
         var desember = NOVEMBER.plusMonths(1);
         var perioder = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(NOVEMBER.atDay(1), NOVEMBER.atEndOfMonth(), NOVEMBER),
             new LocalDateSegment<>(desember.atDay(1), desember.atDay(10), desember)));
+        when(fritakUtleder.finnPerioderFritattForKontroll(any())).thenReturn(
+            new LocalDateTimeline<>(NOVEMBER.atDay(1), NOVEMBER.atEndOfMonth(), true));
 
         var resultat = utleder.utledPerioderRelevantForKontrollAvInntekt(perioder, FagsakYtelseType.UNGDOMSYTELSE);
 
@@ -82,7 +95,7 @@ class RelevanteKontrollperioderUtlederTest {
     }
 
     @Test
-    void hel_aktivitetspengemåned_skal_markeres_som_hel() {
+    void hel_ytelsesmåned_skal_markeres_som_hel() {
         var resultat = utleder.utledPerioderRelevantForKontrollAvInntekt(
             new LocalDateTimeline<>(NOVEMBER.atDay(1), NOVEMBER.atEndOfMonth(), NOVEMBER), FagsakYtelseType.AKTIVITETSPENGER);
 

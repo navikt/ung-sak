@@ -2,6 +2,7 @@ package no.nav.ung.sak.kontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
@@ -49,7 +50,8 @@ class KontrollerteInntektperioderTjenesteTest {
             .build();
         when(tilkjentYtelseRepository.hentKontrollertInntektPerioder(1L)).thenReturn(
             Optional.of(KontrollertInntektPerioder.ny(1L).medPerioder(List.of(kontrollert)).build()));
-        var utleder = new RelevanteKontrollperioderUtleder(null, null, null);
+        var utleder = new RelevanteKontrollperioderUtleder(
+            null, null, null, new UnitTestLookupInstanceImpl<>(perioder -> LocalDateTimeline.empty()));
         var relevant = utleder.utledPerioderRelevantForKontrollAvInntekt(
             new LocalDateTimeline<>(FOM, TOM, YearMonth.from(FOM)), FagsakYtelseType.AKTIVITETSPENGER);
         when(relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(1L)).thenReturn(relevant);

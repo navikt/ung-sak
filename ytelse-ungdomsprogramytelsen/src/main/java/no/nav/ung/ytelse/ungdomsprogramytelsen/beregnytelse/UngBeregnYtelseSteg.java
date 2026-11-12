@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.kontroll.InntektskontrollFritakUtleder;
 import no.nav.ung.sak.domene.behandling.steg.beregnytelse.BeregnYtelseSteg;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.ytelse.*;
@@ -36,6 +37,7 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private InntektskontrollFritakUtleder inntektskontrollFritakUtleder;
 
     public UngBeregnYtelseSteg() {
     }
@@ -43,10 +45,12 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
     @Inject
     public UngBeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                                TilkjentYtelseRepository tilkjentYtelseRepository,
-                               MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+                               MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+                               @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) InntektskontrollFritakUtleder inntektskontrollFritakUtleder) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+        this.inntektskontrollFritakUtleder = inntektskontrollFritakUtleder;
     }
 
     @Override
@@ -69,7 +73,7 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
 
         // Utfør reduksjon og map til tilkjent ytelse
         final var konfigurasjon = new InntektsreduksjonKonfigurasjon(REDUKSJONSFAKTOR_ARBEIDSINNTEKT, REDUKSJONSFAKTOR_YTELSE);
-        final var tilkjentYtelseTidslinje = new LagTilkjentYtelse(konfigurasjon, FagsakYtelseType.UNGDOMSYTELSE).lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
+        final var tilkjentYtelseTidslinje = new LagTilkjentYtelse(konfigurasjon, inntektskontrollFritakUtleder).lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);

@@ -4,7 +4,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -26,14 +25,17 @@ public class RelevanteKontrollperioderUtleder {
     private final Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
     private final MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private final BehandlingRepository behandlingRepository;
+    private final Instance<InntektskontrollFritakUtleder> fritakUtledere;
 
     @Inject
     public RelevanteKontrollperioderUtleder(@Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere,
                                             MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
-                                            BehandlingRepository behandlingRepository) {
+                                            BehandlingRepository behandlingRepository,
+                                            @Any Instance<InntektskontrollFritakUtleder> fritakUtledere) {
         this.prosessTriggerPeriodeUtledere = prosessTriggerPeriodeUtledere;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.behandlingRepository = behandlingRepository;
+        this.fritakUtledere = fritakUtledere;
     }
 
     public LocalDateTimeline<Boolean> utledPerioderForKontrollAvInntekt(Long behandlingId) {
@@ -79,7 +81,8 @@ public class RelevanteKontrollperioderUtleder {
      */
     public LocalDateTimeline<InfoOmRådata> utledPerioderRelevantForKontrollAvInntekt(LocalDateTimeline<YearMonth> ytelsesPerioder,
                                                                                  FagsakYtelseType ytelseType) {
-        final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, ytelseType);
+        final var ikkePåkrevdKontrollTidslinje = InntektskontrollFritakUtleder.finnTjeneste(ytelseType, fritakUtledere)
+            .finnPerioderFritattForKontroll(ytelsesPerioder);
         final var perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(_ -> true);
         return utvidTilHeleMåneder(perioderForKontroll);
     }
@@ -98,29 +101,6 @@ public class RelevanteKontrollperioderUtleder {
                 (periode, v, h) -> new LocalDateSegment<>(periode, new InfoOmRådata(
                     (v == null || v.getValue().gjelderHelePerioden()) && (h == null || h.getValue().gjelderHelePerioden())))))
             .compress();
-    }
-
-    public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder,
-                                                                                         FagsakYtelseType ytelseType) {
-        if (ytelseType == FagsakYtelseType.AKTIVITETSPENGER) {
-            return LocalDateTimeline.empty();
-        }
-        var ikkePåkrevdKontrollSegmenter = ytelsesPerioder.segmenter().stream()
-            .filter(it -> harIkkeYtelseDagenFør(ytelsesPerioder, it))
-            .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new FritattForKontroll(harIkkeYtelseDagenFør(ytelsesPerioder, it), false)))
-            .toList();
-        return new LocalDateTimeline<>(ikkePåkrevdKontrollSegmenter);
-    }
-
-    private static boolean harIkkeYtelseDagenFør(LocalDateTimeline<YearMonth> ytelsesPerioder, LocalDateSegment<YearMonth> it) {
-        return ytelsesPerioder.intersection(dagenFør(it)).isEmpty();
-    }
-
-    private static LocalDateInterval dagenFør(LocalDateSegment<?> it) {
-        return new LocalDateInterval(it.getFom().minusDays(1), it.getFom().minusDays(1));
-    }
-
-    public record FritattForKontroll(boolean gjelderFørstePeriode, boolean gjelderSistePeriode) {
     }
 
     public record InfoOmRådata(boolean gjelderHelePerioden) {

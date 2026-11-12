@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -13,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.kontroll.InntektskontrollFritakUtleder;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -55,6 +57,9 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
 
     @Inject
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
+    @Inject
+    @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+    private InntektskontrollFritakUtleder fritakUtleder;
     private Behandling behandling;
 
 
@@ -153,11 +158,11 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 3))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, FagsakYtelseType.UNGDOMSYTELSE);
+        LocalDateTimeline<Boolean> result = fritakUtleder.finnPerioderFritattForKontroll(ytelsesPerioder);
 
         assertEquals(1, result.segmenter().size());
         final var første = result.segmenter().getFirst();
-        assertTrue(første.getValue().gjelderFørstePeriode());
+        assertTrue(første.getValue());
         assertThat(første.getFom()).isEqualTo(førstePeriodeFom);
         assertThat(første.getTom()).isEqualTo(førstePeriodeTom);
     }
@@ -173,11 +178,11 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 2))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, FagsakYtelseType.UNGDOMSYTELSE);
+        LocalDateTimeline<Boolean> result = fritakUtleder.finnPerioderFritattForKontroll(ytelsesPerioder);
 
         assertEquals(1, result.segmenter().size());
         final var første = result.segmenter().getFirst();
-        assertTrue(første.getValue().gjelderFørstePeriode());
+        assertTrue(første.getValue());
         assertThat(første.getFom()).isEqualTo(førstePeriodeFom);
         assertThat(første.getTom()).isEqualTo(førstePeriodeTom);
     }
@@ -200,17 +205,17 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 4))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, FagsakYtelseType.UNGDOMSYTELSE);
+        LocalDateTimeline<Boolean> result = fritakUtleder.finnPerioderFritattForKontroll(ytelsesPerioder);
 
         assertEquals(2, result.segmenter().size());
         final var iterator = result.segmenter().iterator();
         final var første1 = iterator.next();
-        assertTrue(første1.getValue().gjelderFørstePeriode());
+        assertTrue(første1.getValue());
         assertThat(første1.getFom()).isEqualTo(førstePeriode1Fom);
         assertThat(første1.getTom()).isEqualTo(førstePeriode1Tom);
 
         final var første2 = iterator.next();
-        assertTrue(første2.getValue().gjelderFørstePeriode());
+        assertTrue(første2.getValue());
         assertThat(første2.getFom()).isEqualTo(førstePeriode2Fom);
         assertThat(første2.getTom()).isEqualTo(førstePeriode2Tom);
     }
@@ -235,19 +240,30 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 6))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, FagsakYtelseType.UNGDOMSYTELSE);
+        LocalDateTimeline<Boolean> result = fritakUtleder.finnPerioderFritattForKontroll(ytelsesPerioder);
 
         assertEquals(2, result.segmenter().size());
         final var iterator = result.segmenter().iterator();
         final var første1 = iterator.next();
-        assertTrue(første1.getValue().gjelderFørstePeriode());
+        assertTrue(første1.getValue());
         assertThat(første1.getFom()).isEqualTo(førstePeriode1Fom);
 
 
         final var første2 = iterator.next();
-        assertTrue(første2.getValue().gjelderFørstePeriode());
+        assertTrue(første2.getValue());
         assertThat(første2.getFom()).isEqualTo(førstePeriode2Fom);
         assertThat(første2.getTom()).isEqualTo(førstePeriode2Tom);
+    }
+
+    @Test
+    void skal_frita_første_og_eneste_delvise_måned() {
+        var desember = YearMonth.of(2026, 12);
+        var perioder = new LocalDateTimeline<>(desember.atDay(10), desember.atDay(20), desember);
+
+        var resultat = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(
+            perioder, FagsakYtelseType.UNGDOMSYTELSE);
+
+        assertTrue(resultat.isEmpty());
     }
 
     private void lagFagsakOgBehandling() {

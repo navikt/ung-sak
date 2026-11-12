@@ -35,6 +35,7 @@ import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+import no.nav.ung.ytelse.aktivitetspenger.perioder.AktivitetspengerInntektskontrollFritakUtleder;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
@@ -77,7 +78,7 @@ class AktivitetspengerBeregnYtelseStegTest {
         when(tilkjentRepository.hentKontrollerInntektTidslinje(BEHANDLING_ID)).thenReturn(LocalDateTimeline.empty());
         var perioder = mock(MånedsvisTidslinjeUtleder.class);
         when(perioder.finnMånedsvisPeriodisertePerioder(BEHANDLING_ID)).thenReturn(new LocalDateTimeline<>(FOM, TOM, YearMonth.from(FOM)));
-        var steg = new AktivitetspengerBeregnYtelseSteg(grunnlagRepository, tilkjentRepository, perioder);
+        var steg = new AktivitetspengerBeregnYtelseSteg(grunnlagRepository, tilkjentRepository, perioder, new AktivitetspengerInntektskontrollFritakUtleder());
         var behandling = Behandling.forFørstegangssøknad(Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, AktørId.dummy())).build();
 
         steg.utførSteg(new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), new BehandlingLås(BEHANDLING_ID)));
@@ -149,7 +150,7 @@ class AktivitetspengerBeregnYtelseStegTest {
         var månedsvisUtleder = mock(MånedsvisTidslinjeUtleder.class);
         when(månedsvisUtleder.finnMånedsvisPeriodisertePerioder(BEHANDLING_ID)).thenReturn(
             new LocalDateTimeline<>(FOM, TOM, YearMonth.of(2026, 7)));
-        var steg = new AktivitetspengerBeregnYtelseSteg(grunnlagRepository, tilkjentYtelseRepository, månedsvisUtleder);
+        var steg = new AktivitetspengerBeregnYtelseSteg(grunnlagRepository, tilkjentYtelseRepository, månedsvisUtleder, new AktivitetspengerInntektskontrollFritakUtleder());
         steg.utførSteg(new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), new BehandlingLås(BEHANDLING_ID)));
 
         // Assert
