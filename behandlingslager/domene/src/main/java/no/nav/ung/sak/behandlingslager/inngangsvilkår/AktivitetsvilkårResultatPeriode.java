@@ -64,12 +64,24 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
     /**
      * Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer.
      */
-    AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode, AktivitetsvilkårResultatPeriode kilde) {
+    public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode, AktivitetsvilkårResultatPeriode kilde) {
         this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
     }
 
     AktivitetsvilkårResultatPeriode(AktivitetsvilkårResultatPeriode kilde) {
         this(kilde.getPeriode(), kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
+    }
+
+    public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat, Regelsporing regelsporing) {
+        this(periode,
+            vilkårsvurderingResultat.godkjent(),
+            (AktivitetsvilkåretIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
+            vilkårsvurderingResultat.erManuellVurdering(),
+            vilkårsvurderingResultat.begrunnelse(),
+            vilkårsvurderingResultat.fritekstVurderingBrev(),
+            vilkårsvurderingResultat.vurdertAv(),
+            vilkårsvurderingResultat.vurdertTidspunkt(),
+            regelsporing);
     }
 
     public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode,

@@ -52,6 +52,11 @@ public class InngangsvilkårVurderingTjeneste {
         return alleRelevanteVilkårsperioder(vilkårResultatRepository.hent(behandlingId), vilkårType);
     }
 
+    public LocalDateTimeline<VilkårPeriode> hentVilkårsperioderInkludertIkkeRelevante(Long behandlingId, VilkårType vilkårType) {
+        return vilkårResultatRepository.hent(behandlingId).getVilkårTimeline(vilkårType)
+            .filterValue(v -> v.getAvslagsårsak() != Avslagsårsak.AVKORTET);
+    }
+
     // Ikke-relevante og avkortede perioder vurderes aldri. Avklaring, vurdering og visning må bruke samme utvalg,
     // ellers kan en avklaring dekke perioder som ikke vises, eller en vurdering mangle avklaring.
     public static LocalDateTimeline<VilkårPeriode> alleRelevanteVilkårsperioder(Vilkårene vilkårene, VilkårType vilkårType) {
@@ -230,6 +235,13 @@ public class InngangsvilkårVurderingTjeneste {
                     .map(it -> new BistandsvilkårResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
                     .toList();
                 vilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
+            }
+            case AKTIVITETSVILKÅR -> {
+                var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentAktivitetsvilkårResultatPeriodeTidslinje().intersection(perioderSomSkalGjenopprettes)
+                    .segmenter().stream()
+                    .map(it -> new AktivitetsvilkårResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
+                    .toList();
+                vilkårVurderingRepository.lagreAktivitetVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
             }
             case ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR -> {
                 var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentLivsoppholdResultatPeriodeTidslinje().intersection(perioderSomSkalGjenopprettes)
