@@ -5,5 +5,6 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdDto;
 public record EndringAvslagDto(
     AvslåttBosted bosted,
     AvslåttBistand bistand,
+    AvslåttAktivitet aktivitet,
     AvslåttAndreLivsoppholdsytelser andreLivsoppholdsytelser
 ) implements TemplateInnholdDto { }

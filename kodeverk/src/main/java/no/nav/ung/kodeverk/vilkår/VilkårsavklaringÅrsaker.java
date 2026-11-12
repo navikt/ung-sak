@@ -16,7 +16,8 @@ public final class VilkårsavklaringÅrsaker {
     private static final Map<VilkårType, BehandlingÅrsakType> AVKLARINGSÅRSAK_PER_VILKÅR = Map.of(
         VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED,
         VilkårType.BISTANDSVILKÅR, BehandlingÅrsakType.ENDRET_BISTANDSBEHOV,
-        VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE
+        VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE,
+        VilkårType.AKTIVITETSVILKÅR, BehandlingÅrsakType.ENDRET_AKTIVITET
     );
 
     private VilkårsavklaringÅrsaker() {

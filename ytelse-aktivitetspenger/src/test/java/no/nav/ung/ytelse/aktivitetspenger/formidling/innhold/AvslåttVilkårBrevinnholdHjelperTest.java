@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
+import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
@@ -9,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserV
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.GenereltVilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAktivitet.Aktivitetsårsak;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser.Livsoppholdsårsak;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBistand.Bistandsårsak;
@@ -49,6 +51,15 @@ class AvslåttVilkårBrevinnholdHjelperTest {
             vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(new AvslåttVurdering(vurdering, PERIODE)).årsak());
 
         assertThat(brevårsaker).doesNotHaveDuplicates().containsExactlyInAnyOrder(Bistandsårsak.values());
+    }
+
+    @DisplayName("Hver aktivitetsårsak i kodeverket oversettes til sin egen årsak i brevet")
+    @Test
+    void aktivitetsårsakerOversettesEntydig() {
+        var brevårsaker = oversett(AktivitetsvilkåretIkkeOppfyltÅrsak.class, VilkårType.AKTIVITETSVILKÅR,
+            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttAktivitet(new AvslåttVurdering(vurdering, PERIODE)).årsak());
+
+        assertThat(brevårsaker).doesNotHaveDuplicates().containsExactlyInAnyOrder(Aktivitetsårsak.values());
     }
 
     @DisplayName("Hver livsoppholdsårsak i kodeverket oversettes til sin egen årsak i brevet")
