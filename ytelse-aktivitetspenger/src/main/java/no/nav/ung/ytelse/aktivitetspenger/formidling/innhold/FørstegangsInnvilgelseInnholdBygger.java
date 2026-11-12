@@ -105,17 +105,16 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
-        if (tilkjentYtelseTimeline.isEmpty()) {
-            return new UtbetalingDto(null, false, true);
-        }
-        var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
+        var førsteTilkjentMåned = (tilkjentYtelseTimeline.isEmpty()
+            ? detaljertResultatTidslinje.getMinLocalDate()
+            : tilkjentYtelseTimeline.getMinLocalDate()).withDayOfMonth(1);
         var dagensDato = bestemDagensDato();
 
         var førstkommendeUtbetalingskjøring = førsteTilkjentMåned.plusMonths(1).plusDays(9);
         var erEtterbetaling = dagensDato.isAfter(førstkommendeUtbetalingskjøring);
 
         var månedNavn = MonthUtils.navnPåMåned(førstkommendeUtbetalingskjøring.getMonth());
-        return new UtbetalingDto(månedNavn, erEtterbetaling, false);
+        return new UtbetalingDto(månedNavn, erEtterbetaling);
     }
 
 
