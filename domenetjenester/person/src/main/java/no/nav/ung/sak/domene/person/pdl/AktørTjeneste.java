@@ -250,7 +250,7 @@ public class AktørTjeneste {
             return Optional.of(identer.get(0));
         } catch (VLException e) {
             if (PdlKlient.PDL_KLIENT_NOT_FOUND_KODE.equals(e.getKode())) {
-                log.info("Ident av type {} ikke funnet for ident {}", identGruppe, ident);
+                log.info("Ident av type {} ikke funnet", identGruppe);
                 return Optional.empty();
             }
             throw e;
