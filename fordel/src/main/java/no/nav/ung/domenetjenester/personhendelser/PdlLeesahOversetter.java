@@ -115,7 +115,7 @@ public class PdlLeesahOversetter {
         PersonIdent barnPersonIdent = PersonIdent.fra(barnIdent);
         Optional<AktørId> optionalAktørId = aktørTjeneste.hentAktørIdForPersonIdent(barnPersonIdent);
         if (optionalAktørId.isEmpty()) {
-            logger.info("Ignorerer forelderBarnRelasjon fordi det ikke finnes aktørId for barnet. barnIdent {}. endringstype {}, hendelseId {}", barnIdent, endringstype, hendelseInfo.getHendelseId());
+            logger.info("Ignorerer forelderBarnRelasjon fordi det ikke finnes aktørId for barnet. endringstype {}, hendelseId {}", endringstype, hendelseInfo.getHendelseId());
             return Optional.empty();
         }
 
@@ -132,7 +132,7 @@ public class PdlLeesahOversetter {
             return Optional.empty();
         }
 
-        logger.info("Oppretter FødselHendelse for {} med barn født {}. hendelseId {}", rolleForPerson, fødselsdato, hendelseInfo.getHendelseId());
+        logger.info("Oppretter FødselHendelse for {}. hendelseId {}", rolleForPerson, hendelseInfo.getHendelseId());
 
         FødselHendelse fødselHendelse = new FødselHendelse.Builder()
             .medHendelseInfo(hendelseInfo)
