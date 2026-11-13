@@ -125,6 +125,8 @@ public class KontrollerInntektEtterlysningTjeneste {
                         etterlysningerSomSkalAvbrytes.addAll(etterlysningerForPeriode);
                     }
                 }
+                case BEHOLD_EKSISTERENDE -> // NO-OP
+                    log.info("Beholder eksisterende etterlysning for periode {}", kontrollSegment.getLocalDateInterval());
             }
         }
 

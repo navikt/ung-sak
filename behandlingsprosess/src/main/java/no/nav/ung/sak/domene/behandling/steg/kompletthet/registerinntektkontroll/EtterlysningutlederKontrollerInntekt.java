@@ -40,10 +40,6 @@ public class EtterlysningutlederKontrollerInntekt {
         var etterlysningResultatFraEndretRegisteropplysning = finnNyeEtterlysningerGrunnetRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, tidslinjeTilVurdering);
         resultatTidslinje = resultatTidslinje.crossJoin(etterlysningResultatFraEndretRegisteropplysning, StandardCombinators::coalesceLeftHandSide);
 
-        // Sjekker om bruker har svart på etterlysning og denne fortsatt er gyldig
-        var resultatForGodkjenteInntekter = finnTidslinjeForMottatteSvarUtenRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, tidslinjeTilVurdering);
-        resultatTidslinje = resultatTidslinje.crossJoin(resultatForGodkjenteInntekter, StandardCombinators::coalesceLeftHandSide);
-
         // Sjekker vi må ha etterlysning pga avvik mellom rapportert inntekt og registerinntekt
         var restTidslinjeÅVurdere = tidslinjeTilVurdering.disjoint(resultatTidslinje);
         var avviksvurderingMotRegisterinntekt = finnTidslinjeForEtterlysningFraAvvik(gjeldendeRapporterteInntekter, restTidslinjeÅVurdere);
@@ -52,9 +48,9 @@ public class EtterlysningutlederKontrollerInntekt {
         // Etterlysninger som venter svar skal avbrytes dersom perioden de gjelder for ikke lenger er relevant for kontroll
         resultatTidslinje = resultatTidslinje.crossJoin(input.gjeldendeEtterlysningTidslinje()
                 .filterValue(it -> it.etterlysning().etterlysningStatus() == EtterlysningStatus.VENTER)
-            .disjoint(input.relevantForKontrollTidslinje())
-            .mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING),
-        StandardCombinators::coalesceLeftHandSide);
+                .disjoint(input.relevantForKontrollTidslinje())
+                .mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING),
+            StandardCombinators::coalesceLeftHandSide);
 
         // Fyller resten av tidslinjen til vurdering med "ingen etterlysning"
         resultatTidslinje = resultatTidslinje.crossJoin(tidslinjeTilVurdering.mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING), StandardCombinators::coalesceLeftHandSide);
@@ -68,19 +64,7 @@ public class EtterlysningutlederKontrollerInntekt {
                                                                                                     LocalDateTimeline<Boolean> tidslinjeRelevanteÅrsaker) {
         var relevanteEtterlysninger = etterlysningTidslinje.intersection(tidslinjeRelevanteÅrsaker);
         var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, relevanteEtterlysninger);
-        return endringsresultatEtterlysninger.filterValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.ENDRING)
-            .mapValue(it -> EtterlysningBehov.ERSTATT_EKSISTERENDE);
-    }
-
-
-    private static LocalDateTimeline<EtterlysningBehov> finnTidslinjeForMottatteSvarUtenRegisterendring(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-                                                                                                        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje,
-                                                                                                        LocalDateTimeline<Boolean> tidslinjeRelevanteÅrsaker) {
-        var mottattSvarTidslinje = etterlysningTidslinje
-                .filterValue(it -> it.etterlysning().etterlysningStatus() == EtterlysningStatus.MOTTATT_SVAR).intersection(tidslinjeRelevanteÅrsaker);
-        var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, mottattSvarTidslinje);
-        return endringsresultatEtterlysninger.filterValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.INGEN_ENDRING)
-                .mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING);
+        return endringsresultatEtterlysninger.mapValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.INGEN_ENDRING ? EtterlysningBehov.BEHOLD_EKSISTERENDE : EtterlysningBehov.ERSTATT_EKSISTERENDE);
     }
 
     private LocalDateTimeline<EtterlysningBehov> finnTidslinjeForNegativRegisterinntekt(
