@@ -6,7 +6,6 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
@@ -42,8 +41,8 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
     @Test
     void skal_innvilge_uten_tilkjent_ytelse_og_vise_planlagt_utbetalingsdato() {
         var fom = LocalDate.of(2025, 8, 15);
-        var behandling = lagScenario(AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySats(fom));
-        repositories.tilkjentYtelseRepository().lagre(behandling.getId(), LocalDateTimeline.empty(), "input", "sporing");
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySatsUtenInntektskontroll(fom);
+        var behandling = lagScenario(scenario);
 
         var brev = genererVedtaksbrev(behandling.getId());
 
