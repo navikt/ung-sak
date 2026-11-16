@@ -89,13 +89,13 @@ public class AktivitetspengerEndringHøySatsScenarioer {
     private static Beregningsgrunnlag lagHøytBeregningsgrunnlag(LocalDate skjæringstidspunkt) {
         // Beregnet redusert pr år på 200_000 -> overstiger lav minstesats (~177_104) men ikke høy minstesats (~265_657)
         var input = new BeregningInput(new Beløp(400_000), new Beløp(350_000), new Beløp(300_000), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
-        return new Beregningsgrunnlag(input, BigDecimal.valueOf(400_000), BigDecimal.valueOf(350_000), BigDecimal.valueOf(400_000), BigDecimal.valueOf(200_000), "test-sporing");
+        return new Beregningsgrunnlag(input, BigDecimal.valueOf(400_000), BigDecimal.valueOf(350_000), BigDecimal.valueOf(400_000), BigDecimal.valueOf(200_000), AktivitetspengerBrevScenarioerUtils.grunnbeløpVed(skjæringstidspunkt), "test-sporing");
     }
 
     private static Beregningsgrunnlag lagSværtHøytBeregningsgrunnlag(LocalDate skjæringstidspunkt) {
         // Beregnet redusert pr år på 500_000 -> overstiger også høy minstesats (~265_657)
         var input = new BeregningInput(new Beløp(800_000), new Beløp(700_000), new Beløp(600_000), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
-        return new Beregningsgrunnlag(input, BigDecimal.valueOf(800_000), BigDecimal.valueOf(700_000), BigDecimal.valueOf(800_000), BigDecimal.valueOf(500_000), "test-sporing");
+        return new Beregningsgrunnlag(input, BigDecimal.valueOf(800_000), BigDecimal.valueOf(700_000), BigDecimal.valueOf(800_000), BigDecimal.valueOf(500_000), AktivitetspengerBrevScenarioerUtils.grunnbeløpVed(skjæringstidspunkt), "test-sporing");
     }
 }
 

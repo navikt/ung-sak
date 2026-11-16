@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 import jakarta.persistence.*;
 import no.nav.ung.sak.diff.DiffIgnore;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType;
+import org.hibernate.annotations.Immutable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 @Entity(name = "Beregningsgrunnlag")
 @Table(name = "BEREGNINGSGRUNNLAG")
+@Immutable
 public class Beregningsgrunnlag {
 
     @Id
@@ -36,6 +38,9 @@ public class Beregningsgrunnlag {
     @Column(name = "beregnet_redusert_pr_aar", nullable = false, updatable = false)
     private BigDecimal beregnetRedusertPrAar;
 
+    @Column(name = "grunnbeloep", nullable = false, updatable = false)
+    private BigDecimal grunnbeløp;
+
     @Embedded
     private BeregningsgrunnlagInput beregningInput;
 
@@ -47,13 +52,14 @@ public class Beregningsgrunnlag {
     protected Beregningsgrunnlag() {
     }
 
-    public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal beregnetPrAar, BigDecimal beregnetRedusertPrAar, String regelSporing) {
+    public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal beregnetPrAar, BigDecimal beregnetRedusertPrAar, BigDecimal grunnbeløp, String regelSporing) {
         this.skjæringstidspunkt = beregningInputGrunnlag.skjæringstidspunkt();
         this.sisteLignedeÅr = beregningInputGrunnlag.sisteLignedeÅr();
         this.årsinntektAvkortetOppjustertSisteÅr = årsinntektSisteÅr;
         this.årsinntektAvkortetOppjustertSisteTreÅr = årsinntektSisteTreÅr;
         this.beregnetPrAar = beregnetPrAar;
         this.beregnetRedusertPrAar = beregnetRedusertPrAar;
+        this.grunnbeløp = grunnbeløp;
         this.regelSporing = regelSporing;
         this.beregningInput = new BeregningsgrunnlagInput(beregningInputGrunnlag);
     }
@@ -76,6 +82,10 @@ public class Beregningsgrunnlag {
 
     public BigDecimal getBeregnetRedusertPrAar() {
         return beregnetRedusertPrAar;
+    }
+
+    public BigDecimal getGrunnbeløp() {
+        return grunnbeløp;
     }
 
     public BigDecimal getDagsats() {

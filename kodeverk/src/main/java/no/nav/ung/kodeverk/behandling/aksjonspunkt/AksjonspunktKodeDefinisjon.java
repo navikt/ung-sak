@@ -22,6 +22,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTED_UTTALELSE_KODE = "7041";
     public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_BISTAND_UTTALELSE_KODE = "7042";
     public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_LIVSOPPHOLDSYTELSE_UTTALELSE_KODE = "7043";
+    public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_AKTIVITET_UTTALELSE_KODE = "7044";
 
 
     public static final String FATTER_VEDTAK_KODE = "5016";
@@ -57,6 +58,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_BOSTEDSVILKÅR_OPPHØR_KODE = "5145";
     public static final String VURDER_BISTANDSVILKÅR_OPPHØR_KODE = "5146";
     public static final String VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER_KODE = "5148";
+    public static final String VURDER_FAKTA_OM_AKTIVITET_KODE = "5149";
+    public static final String VURDER_AKTIVITETSVILKÅR_OPPHØR_KODE = "5150";
     public static final String VURDER_ANDRE_LIVSOPPHOLDSYTELSER_OPPHØR_KODE = "5147";
     public static final String NAV_KONTOR_FORESLÅR_VILKÅR_KODE = "5100";
     public static final String NAV_KONTOR_BESLUTTER_VILKÅR_KODE = "5200";

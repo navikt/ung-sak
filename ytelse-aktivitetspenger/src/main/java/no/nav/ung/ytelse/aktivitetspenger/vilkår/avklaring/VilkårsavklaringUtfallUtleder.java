@@ -9,8 +9,15 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+
+import static no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK;
+import static no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
+import static no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING;
+import static no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE;
 
 public class VilkårsavklaringUtfallUtleder {
 
@@ -19,28 +26,39 @@ public class VilkårsavklaringUtfallUtleder {
     private final VilkårType vilkårType;
     private final VilkårPeriodeAvklaring foreslåttAvklaring;
     private final EtterlysningData etterlysning;
+    private final boolean nySøknadsperiode;
 
     public VilkårsavklaringUtfallUtleder(VilkårType vilkårType, VilkårPeriodeAvklaring foreslåttAvklaring) {
-        this(vilkårType, foreslåttAvklaring, null);
+        this(vilkårType, foreslåttAvklaring, null, false);
     }
 
-    private VilkårsavklaringUtfallUtleder(VilkårType vilkårType, VilkårPeriodeAvklaring foreslåttAvklaring, EtterlysningData etterlysning) {
+    private VilkårsavklaringUtfallUtleder(VilkårType vilkårType, VilkårPeriodeAvklaring foreslåttAvklaring, EtterlysningData etterlysning, boolean nySøknadsperiode) {
         this.vilkårType = Objects.requireNonNull(vilkårType, "vilkårType");
         this.foreslåttAvklaring = foreslåttAvklaring;
         this.etterlysning = etterlysning;
+        this.nySøknadsperiode = nySøknadsperiode;
     }
 
     public VilkårsavklaringUtfallUtleder medEtterlysning(EtterlysningData etterlysning) {
-        return new VilkårsavklaringUtfallUtleder(this.vilkårType, this.foreslåttAvklaring, etterlysning);
+        return new VilkårsavklaringUtfallUtleder(this.vilkårType, this.foreslåttAvklaring, etterlysning, this.nySøknadsperiode);
     }
 
-    public VilkårsavklaringUtfall utledUtfall() {
+    public VilkårsavklaringUtfallUtleder medNySøknadsperiode() {
+        return new VilkårsavklaringUtfallUtleder(this.vilkårType, this.foreslåttAvklaring, this.etterlysning, true);
+    }
+
+    // Avklaringen og en ny søknadsperiode gir hvert sitt utfall, siden de vurderes i hvert sitt aksjonspunkt.
+    public Set<VilkårsavklaringUtfall> utledUtfall() {
+        var utfall = EnumSet.noneOf(VilkårsavklaringUtfall.class);
         if (erVentende()) {
-            return VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
+            utfall.add(VENTER_PÅ_UTTALELSE_FRA_BRUKER);
+        } else if (foreslåttAvklaring != null) {
+            utfall.add(kanAvslåsAutomatisk() ? AVSLÅS_AUTOMATISK : VURDERES_MANUELT_ETTER_AVKLARING);
         }
-        return kanAvslåsAutomatisk()
-            ? VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK
-            : VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT;
+        if (nySøknadsperiode) {
+            utfall.add(VURDERES_MANUELT_NY_PERIODE);
+        }
+        return utfall;
     }
 
     public LocalDateTime getFrist() {
@@ -56,7 +74,7 @@ public class VilkårsavklaringUtfallUtleder {
     }
 
     private boolean kanAvslåsAutomatisk() {
-        if (foreslåttAvklaring == null || harMottattSvarMedUttalelse() || !foreslåttAvklaring.skalSendeVarsel()) {
+        if (harMottattSvarMedUttalelse() || !foreslåttAvklaring.skalSendeVarsel()) {
             return false;
         }
         var ikkeOppfyltÅrsak = IkkeOppfyltDetaljertÅrsak.fraKode(vilkårType, foreslåttAvklaring.getIkkeOppfyltÅrsakKode());
@@ -83,10 +101,11 @@ public class VilkårsavklaringUtfallUtleder {
                               boolean skalSendeVarsel,
                               EtterlysningStatus etterlysningStatus,
                               Boolean harUttalelse,
-                              LocalDateTime frist) {
+                              LocalDateTime frist,
+                              boolean nySøknadsperiode) {
     }
 
-    public record RegelEvaluering(VilkårsavklaringUtfall utfall) {
+    public record RegelEvaluering(Set<VilkårsavklaringUtfall> utfall) {
     }
 
     public RegelInput tilRegelInput() {
@@ -97,7 +116,8 @@ public class VilkårsavklaringUtfallUtleder {
             foreslåttAvklaring != null && foreslåttAvklaring.skalSendeVarsel(),
             etterlysning != null ? etterlysning.status() : null,
             uttalelse != null ? uttalelse.harUttalelse() : null,
-            getFrist());
+            getFrist(),
+            nySøknadsperiode);
     }
 
     public RegelEvaluering tilRegelEvaluering() {

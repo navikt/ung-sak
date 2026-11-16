@@ -34,7 +34,7 @@ class VilkårsavklaringUtfallUtlederTest {
         var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
             .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, false));
 
-        assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+        assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
     }
 
     @Test
@@ -42,7 +42,7 @@ class VilkårsavklaringUtfallUtlederTest {
         var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
             .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
 
-        assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+        assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
     }
 
     @Test
@@ -51,10 +51,10 @@ class VilkårsavklaringUtfallUtlederTest {
 
         assertThat(utleder(VilkårType.BOSTEDSVILKÅR, avklaring)
             .medEtterlysning(etterlysning(EtterlysningStatus.OPPRETTET, false)).utledUtfall())
-            .isEqualTo(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER);
+            .containsExactly(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER);
         assertThat(utleder(VilkårType.BOSTEDSVILKÅR, avklaring)
             .medEtterlysning(etterlysning(EtterlysningStatus.VENTER, true)).utledUtfall())
-            .isEqualTo(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER);
+            .containsExactly(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER);
     }
 
     @Test
@@ -62,13 +62,48 @@ class VilkårsavklaringUtfallUtlederTest {
         var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
             .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, true));
 
-        assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+        assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING);
     }
 
     @Test
-    void skal_vurderes_manuelt_når_det_ikke_finnes_foreslått_avklaring() {
-        assertThat(utleder(VilkårType.BOSTEDSVILKÅR, null).utledUtfall())
-            .isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+    void skal_ikke_gi_utfall_uten_avklaring_eller_ny_søknadsperiode() {
+        assertThat(utleder(VilkårType.BOSTEDSVILKÅR, null).utledUtfall()).isEmpty();
+    }
+
+    @Test
+    void skal_vurderes_manuelt_som_ny_søknadsperiode_uten_avklaring() {
+        assertThat(utleder(VilkårType.BOSTEDSVILKÅR, null).medNySøknadsperiode().utledUtfall())
+            .containsExactly(VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE);
+    }
+
+    @Test
+    void skal_gi_både_automatisk_avslag_og_vurdering_av_ny_søknadsperiode() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false))
+            .medNySøknadsperiode();
+
+        assertThat(utleder.utledUtfall())
+            .containsExactly(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK, VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE);
+    }
+
+    @Test
+    void skal_gi_både_manuell_vurdering_av_avklaring_og_av_ny_søknadsperiode() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, true))
+            .medNySøknadsperiode();
+
+        assertThat(utleder.utledUtfall())
+            .containsExactly(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING, VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE);
+    }
+
+    @Test
+    void skal_vente_og_spore_ny_søknadsperiode() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.VENTER, false))
+            .medNySøknadsperiode();
+
+        assertThat(utleder.utledUtfall())
+            .containsExactly(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER, VilkårsavklaringUtfall.VURDERES_MANUELT_NY_PERIODE);
     }
 
     @Test
@@ -76,7 +111,7 @@ class VilkårsavklaringUtfallUtlederTest {
         var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, KREVER_FRITEKST, BOSTED_KILDE, true))
             .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
 
-        assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+        assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING);
     }
 
     @Test
@@ -84,7 +119,7 @@ class VilkårsavklaringUtfallUtlederTest {
         var utleder = utleder(VilkårType.BISTANDSVILKÅR, avklaring(VilkårType.BISTANDSVILKÅR, UTEN_AVSLAGSÅRSAK, BISTAND_KILDE, true))
             .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
 
-        assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+        assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING);
     }
 
     @Test
@@ -93,7 +128,7 @@ class VilkårsavklaringUtfallUtlederTest {
             avklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, LIVSOPPHOLD_KILDE, true))
             .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
 
-        assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+        assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
     }
 
     @Test
@@ -103,18 +138,18 @@ class VilkårsavklaringUtfallUtlederTest {
         assertThat(utleder(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, avklaring)
             .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false)).utledUtfall())
             .as("ytelsen står kun i fritekst, så saksbehandler må vurdere den")
-            .isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+            .containsExactly(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
 
         assertThat(utleder(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, avklaring)
             .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, false)).utledUtfall())
-            .isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+            .containsExactly(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
     }
 
     @Test
     void skal_vurderes_manuelt_når_saksbehandler_har_valgt_å_ikke_varsle() {
         var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, false));
 
-        assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+        assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING);
     }
 
     @Test
@@ -166,6 +201,14 @@ class VilkårsavklaringUtfallUtlederTest {
 
         assertThat(input.avklaringReferanse()).isNull();
         assertThat(input.ikkeOppfyltÅrsak()).isNull();
+        assertThat(input.nySøknadsperiode()).isFalse();
+    }
+
+    @Test
+    void skal_gi_regelinput_for_ny_søknadsperiode() {
+        var input = utleder(VilkårType.BOSTEDSVILKÅR, null).medNySøknadsperiode().tilRegelInput();
+
+        assertThat(input.nySøknadsperiode()).isTrue();
     }
 
     @Test
@@ -179,7 +222,8 @@ class VilkårsavklaringUtfallUtlederTest {
     @Test
     void skal_gi_regelsporing_som_kan_leses_tilbake() {
         var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
-            .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, true));
+            .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, true))
+            .medNySøknadsperiode();
         var json = new VilkårJsonObjectMapper();
 
         var regelsporing = utleder.tilRegelsporing();

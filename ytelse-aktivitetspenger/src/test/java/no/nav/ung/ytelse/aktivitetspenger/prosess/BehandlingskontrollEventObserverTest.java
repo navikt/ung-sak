@@ -69,7 +69,7 @@ class BehandlingskontrollEventObserverTest {
             .containsExactly(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP);
         assertThat(overgangTaskerFor(behandling)).singleElement().satisfies(task -> {
             var hendelse = JsonObjectMapper.fromJson(task.getPayloadAsString(), BehandlingProsessHendelse.class);
-            assertThat(hendelse.getEventHendelse()).isEqualTo(EventHendelse.AKSJONSPUNKT_UTFØRT);
+            assertThat(hendelse.getEventHendelse()).isEqualTo(EventHendelse.AVSLUTTE_NAVKONTOR);
             assertThat(hendelse.getBehandlingSteg()).isEqualTo(SENTRALT_STEG.getKode());
             assertThat(hendelse.getBehandlingenErHosNavKontor()).isFalse();
             assertThat(hendelse.getAksjonspunktTilstand()).isEmpty();
@@ -89,7 +89,7 @@ class BehandlingskontrollEventObserverTest {
         assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
         assertThat(overgangTaskerFor(behandling)).singleElement().satisfies(task -> {
             var hendelse = JsonObjectMapper.fromJson(task.getPayloadAsString(), BehandlingProsessHendelse.class);
-            assertThat(hendelse.getEventHendelse()).isEqualTo(EventHendelse.AKSJONSPUNKT_TILBAKEFØR);
+            assertThat(hendelse.getEventHendelse()).isEqualTo(EventHendelse.GJENOPPTA_NAVKONTOR);
             assertThat(hendelse.getBehandlingSteg()).isEqualTo(NAV_KONTOR_STEG.getKode());
             assertThat(hendelse.getBehandlingenErHosNavKontor()).isTrue();
         });
@@ -116,7 +116,7 @@ class BehandlingskontrollEventObserverTest {
         return taskerFor(behandling).stream()
             .filter(task -> {
                 var hendelse = JsonObjectMapper.fromJson(task.getPayloadAsString(), BehandlingProsessHendelse.class).getEventHendelse();
-                return hendelse == EventHendelse.AKSJONSPUNKT_UTFØRT || hendelse == EventHendelse.AKSJONSPUNKT_TILBAKEFØR;
+                return hendelse == EventHendelse.AVSLUTTE_NAVKONTOR || hendelse == EventHendelse.GJENOPPTA_NAVKONTOR;
             })
             .toList();
     }

@@ -87,9 +87,11 @@ public class BehandlingskontrollEventObserver {
         if (!navKontorTilSentral && !sentralTilNavKontor) {
             return;
         }
-        var eventHendelse = event instanceof BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent
-            ? EventHendelse.AKSJONSPUNKT_TILBAKEFØR
-            : EventHendelse.AKSJONSPUNKT_UTFØRT;
+        var tilbakeføringTilNavKontor = event instanceof BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent && sentralTilNavKontor;
+        if (!navKontorTilSentral && !tilbakeføringTilNavKontor) {
+            return;
+        }
+        var eventHendelse = tilbakeføringTilNavKontor ? EventHendelse.GJENOPPTA_NAVKONTOR : EventHendelse.AVSLUTTE_NAVKONTOR;
         try {
             prosessTaskRepository.lagre(opprettProsessTaskBehandlingprosess(event.getBehandlingId(), eventHendelse));
         } catch (IOException ex) {
