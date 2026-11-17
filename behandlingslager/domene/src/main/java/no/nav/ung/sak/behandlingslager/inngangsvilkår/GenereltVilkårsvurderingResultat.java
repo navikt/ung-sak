@@ -13,6 +13,12 @@ public record GenereltVilkårsvurderingResultat(
     String begrunnelse,
     String fritekstVurderingBrev,
     String vurdertAv,
-    LocalDateTime vurdertTidspunkt
+    LocalDateTime vurdertTidspunkt,
+    boolean skalSendeVarsel
 ) implements VilkårsvurderingResultat {
+
+    public GenereltVilkårsvurderingResultat(VilkårType vilkårType, boolean godkjent, IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering,
+                                            String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+        this(vilkårType, godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt, true);
+    }
 }

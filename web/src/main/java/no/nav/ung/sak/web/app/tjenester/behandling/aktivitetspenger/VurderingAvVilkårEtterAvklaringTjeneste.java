@@ -162,7 +162,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         for (var avklaring : årsakTidslinje.segmenter()) {
             var ulikeVurderinger = vurdertTidslinje.intersection(avklaring.getLocalDateInterval()).stream()
                 .map(LocalDateSegment::getValue)
-                .map(v -> List.of(v.erVilkårOppfylt(), Objects.toString(v.begrunnelse(), ""), Objects.toString(v.fritekstVurderingBrev(), "")))
+                .map(v -> List.of(v.erVilkårOppfylt(), Objects.toString(v.begrunnelse(), ""), Objects.toString(v.fritekstVurderingBrev(), ""), v.skalIkkeSendeVarsel()))
                 .distinct()
                 .toList();
             if (ulikeVurderinger.size() > 1) {
@@ -196,7 +196,8 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             vurdering.begrunnelse(),
             vurdering.fritekstVurderingBrev(),
             vurdertAv,
-            vurdertTidspunkt);
+            vurdertTidspunkt,
+            !vurdering.skalIkkeSendeVarsel());
 
         var periode = vurdering.periode();
         var lukketTom = lukkÅpenPeriode(periode, maksDatoIVilkårsperioden);

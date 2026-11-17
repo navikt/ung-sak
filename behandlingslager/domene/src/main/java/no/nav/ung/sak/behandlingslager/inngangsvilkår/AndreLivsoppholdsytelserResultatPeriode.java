@@ -54,6 +54,9 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
+    @Column(name = "skal_sende_varsel", nullable = false, updatable = false)
+    private boolean skalSendeVarsel;
+
     @Column(name = "regel_input", updatable = false)
     private String regelInput;
 
@@ -66,7 +69,7 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
 
     /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
     public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserResultatPeriode kilde) {
-        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.ytelseNavn, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
+        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.ytelseNavn, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null), kilde.skalSendeVarsel);
     }
 
     AndreLivsoppholdsytelserResultatPeriode(AndreLivsoppholdsytelserResultatPeriode kilde) {
@@ -83,10 +86,16 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
             vilkårsvurderingResultat.ytelseNavn(),
             vilkårsvurderingResultat.vurdertAv(),
             vilkårsvurderingResultat.vurdertTidspunkt(),
-            regelsporing);
+            regelsporing,
+            vilkårsvurderingResultat.skalSendeVarsel());
     }
 
     public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt, Regelsporing regelsporing) {
+        this(periode, godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, ytelseNavn, vurdertAv, vurdertTidspunkt, regelsporing, true);
+    }
+
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt, Regelsporing regelsporing,
+ boolean skalSendeVarsel) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
@@ -102,6 +111,7 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         this.ytelseNavn = ytelseNavn;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.skalSendeVarsel = skalSendeVarsel;
         this.regelInput = regelsporing != null ? regelsporing.input() : null;
         this.regelEvaluering = regelsporing != null ? regelsporing.evaluering() : null;
     }
@@ -143,7 +153,7 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
     }
 
     public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
-        return new AndreLivsoppholdsytelserVurderingResultat(godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, ytelseNavn, vurdertAv, vurdertTidspunkt);
+        return new AndreLivsoppholdsytelserVurderingResultat(godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, ytelseNavn, vurdertAv, vurdertTidspunkt, skalSendeVarsel);
     }
 
     public String getVurdertAv() {
@@ -152,6 +162,10 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
 
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
+    }
+
+    public boolean skalSendeVarsel() {
+        return skalSendeVarsel;
     }
 
     public Optional<Regelsporing> getRegelsporing() {
@@ -170,6 +184,7 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
             && Objects.equals(ytelseNavn, annen.ytelseNavn)
             && Objects.equals(vurdertAv, annen.vurdertAv)
             && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt)
+            && skalSendeVarsel == annen.skalSendeVarsel
             && Objects.equals(regelInput, annen.regelInput)
             && Objects.equals(regelEvaluering, annen.regelEvaluering);
     }

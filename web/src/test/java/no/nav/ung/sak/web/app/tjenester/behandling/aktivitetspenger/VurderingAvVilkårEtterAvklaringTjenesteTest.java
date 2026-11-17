@@ -287,7 +287,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
-        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev);
+        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, false);
     }
 
     private LocalDateTimeline<VilkårsvurderingResultatOgEvaluering> utled(long behandlingId, VilkårType vilkårType,
