@@ -87,7 +87,7 @@ public class MigrerIkkeRelevantAktivitetsvilkårTask implements ProsessTaskHandl
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var automatiskInnvilget = vilkårene.getVilkår(VilkårType.AKTIVITETSVILKÅR).orElseThrow().getPerioder().stream()
             .filter(p -> p.getUtfall() == Utfall.IKKE_RELEVANT && AUTOMATISK_IKKE_RELEVANT_BEGRUNNELSE.equals(p.getBegrunnelse()))
-            .map(p -> new AktivitetsvilkårResultatPeriode(p.getPeriode(), true, null, false, null, null, "ung-sak", LocalDateTime.now(), null))
+            .map(p -> new AktivitetsvilkårResultatPeriode(p.getPeriode(), true, null, false, null, null, "ung-sak", p.getOpprettetTidspunkt(), null))
             .toList();
 
         var vilkårBuilder = Vilkårene.builderFraEksisterende(vilkårene);
