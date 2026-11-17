@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -23,6 +24,7 @@ import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Leser saksbehandlers lagrede vurderinger fra {@link AktivitetspengerInngangsvilkårResultatGrunnlag}
@@ -52,17 +54,14 @@ public class InngangsvilkårVurderingTjeneste {
         return alleRelevanteVilkårsperioder(vilkårResultatRepository.hent(behandlingId), vilkårType);
     }
 
-    public LocalDateTimeline<VilkårPeriode> hentVilkårsperioderInkludertIkkeRelevante(Long behandlingId, VilkårType vilkårType) {
-        return vilkårResultatRepository.hent(behandlingId).getVilkårTimeline(vilkårType)
-            .filterValue(v -> v.getAvslagsårsak() != Avslagsårsak.AVKORTET);
-    }
-
-    // Ikke-relevante og avkortede perioder vurderes aldri. Avklaring, vurdering og visning må bruke samme utvalg,
-    // ellers kan en avklaring dekke perioder som ikke vises, eller en vurdering mangle avklaring.
+    // Perioder der et vilkår er avkortet vurderes aldri. Avklaring, vurdering og restendepunkt må bruke samme utvalg.
     public static LocalDateTimeline<VilkårPeriode> alleRelevanteVilkårsperioder(Vilkårene vilkårene, VilkårType vilkårType) {
-        return vilkårene.getVilkårTimeline(vilkårType)
-            .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT)
-            .filterValue(v -> v.getAvslagsårsak() != Avslagsårsak.AVKORTET);
+        var avkortet = vilkårene.getVilkårene().stream()
+            .flatMap(vilkår -> vilkår.getPerioder().stream())
+            .filter(vp -> vp.getAvslagsårsak() == Avslagsårsak.AVKORTET)
+            .map(vp -> new LocalDateSegment<>(vp.getFom(), vp.getTom(), true))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), segmenter -> new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch)));
+        return vilkårene.getVilkårTimeline(vilkårType).disjoint(avkortet);
     }
 
     public void settBistandsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
@@ -252,6 +251,8 @@ public class InngangsvilkårVurderingTjeneste {
             }
             default -> throw new IllegalArgumentException("Gjenoppretting av forrige vurdering er ikke støttet for vilkårtype " + vilkårType);
         }
+
+        gjenopprettIkkeRelevantUtenVurdering(originalBehandlingId, vilkårResultatBuilder, vilkårType, perioderSomSkalGjenopprettes);
     }
 
     private static LocalDateTimeline<Boolean> hentPerioderSomSkalGjenopprettes(VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, LocalDateTimeline<Boolean> avgrensningstidslinje) {
@@ -261,6 +262,27 @@ public class InngangsvilkårVurderingTjeneste {
             .toList());
 
         return vilkårsperioderIkkeVurdert.intersection(avgrensningstidslinje);
+    }
+
+    // Vilkår som var satt ikke-relevant i forrige behandling har ikke vurdering. I de tilfellene tilbakefører vi Utfall.IKKE_RELEVANT.
+    private void gjenopprettIkkeRelevantUtenVurdering(Long originalBehandlingId,
+                                                      VilkårResultatBuilder vilkårResultatBuilder,
+                                                      VilkårType vilkårType,
+                                                      LocalDateTimeline<Boolean> perioderSomSkalGjenopprettes) {
+        var vurdertIOriginalBehandling = vilkårVurderingRepository.hentVurderingTidslinje(originalBehandlingId, vilkårType);
+        var ikkeRelevantUtenVurdering = vilkårResultatRepository.hentHvisEksisterer(originalBehandlingId)
+            .map(v -> v.getVilkårTimeline(vilkårType))
+            .orElse(LocalDateTimeline.empty())
+            .filterValue(p -> p.getUtfall() == Utfall.IKKE_RELEVANT)
+            .intersection(perioderSomSkalGjenopprettes)
+            .disjoint(vurdertIOriginalBehandling);
+        if (ikkeRelevantUtenVurdering.isEmpty()) {
+            return;
+        }
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
+        ikkeRelevantUtenVurdering.segmenter().forEach(s ->
+            vilkårBuilder.leggTil(new VilkårPeriodeBuilder(s.getValue()).medPeriode(s.getFom(), s.getTom())));
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
     }
 
     public void settBostedsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {

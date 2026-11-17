@@ -72,7 +72,7 @@ public class VurderFaktaOmAktivitetOppdaterer implements AksjonspunktOppdaterer<
 
         // Opphør lukkes mot slutten av vilkårsperiodene, siden avklaringen kan gjelde en vilkårlig periode i den.
         // Aktivitetsvilkåret inkluderer også ikke-relevante, fordi aktivitetsvilkåret ikke er vurdert i en førsteangsbehandling
-        var vilkårsperioder = inngangsvilkårVurderingTjeneste.hentVilkårsperioderInkludertIkkeRelevante(behandlingId, VilkårType.AKTIVITETSVILKÅR);
+        var vilkårsperioder = inngangsvilkårVurderingTjeneste.hentRelevanteVilkårsperioder(behandlingId, VilkårType.AKTIVITETSVILKÅR);
         if (vilkårsperioder.isEmpty()) {
             throw new IllegalStateException("Må ha vilkårsperioder");
         }

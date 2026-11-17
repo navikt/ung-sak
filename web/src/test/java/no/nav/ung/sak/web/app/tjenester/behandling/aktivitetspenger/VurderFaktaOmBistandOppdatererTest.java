@@ -216,17 +216,6 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     @Test
-    void apen_tom_skal_lukkes_for_ikke_relevant_del_av_vilkarsperioden() {
-        var ikkeRelevantFom = LocalDate.of(2026, 7, 1);
-        settVilkårsperiodenFra(ikkeRelevantFom, Utfall.IKKE_RELEVANT, null);
-
-        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
-
-        assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
-            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), ikkeRelevantFom.minusDays(1)));
-    }
-
-    @Test
     void skal_sette_vilkarsperiode_for_avklaringen_til_ikke_vurdert() {
         var dto = dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
         var param = new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto);

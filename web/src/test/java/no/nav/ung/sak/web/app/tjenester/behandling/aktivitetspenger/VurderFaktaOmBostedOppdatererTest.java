@@ -217,17 +217,6 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     @Test
-    void apen_tom_skal_lukkes_for_ikke_relevant_del_av_vilkarsperioden() {
-        var ikkeRelevantFom = LocalDate.of(2026, 7, 1);
-        settVilkårsperiodenFra(ikkeRelevantFom, Utfall.IKKE_RELEVANT, null);
-
-        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BostedsvilkårIkkeOppfyltÅrsak.ANNET));
-
-        assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
-            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), ikkeRelevantFom.minusDays(1)));
-    }
-
-    @Test
     void endret_avklaring_som_ikke_dekker_hele_tidligere_avklaring_skal_gjenopprette_resten_fra_forrige_behandling() {
         var heleperioden = new Periode(FOM, TOM);
         var originalBehandling = opprettOriginalBehandling(vilkårsperiode(heleperioden, Utfall.OPPFYLT));

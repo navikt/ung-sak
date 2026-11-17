@@ -270,11 +270,10 @@ class VilkårsavklaringRestTjenesteTest {
     }
 
     @Test
-    void ikke_relevante_og_avkortede_vilkårsperioder_utelates() {
+    void avkortede_vilkårsperioder_utelates() {
         var behandling = opprettFørstegangsbehandling(
             new Vilkårsperiode(JAN_MAR, Utfall.OPPFYLT, null),
-            new Vilkårsperiode(APR_JUN, Utfall.IKKE_OPPFYLT, Avslagsårsak.AVKORTET),
-            new Vilkårsperiode(JUL_DES, Utfall.IKKE_RELEVANT, null));
+            new Vilkårsperiode(APR_JUN, Utfall.IKKE_OPPFYLT, Avslagsårsak.AVKORTET));
 
         assertThat(tjeneste.hentVurderinger(behandling, VilkårType.BISTANDSVILKÅR).perioder())
             .extracting(VilkårsvurderingOgAvklaringPeriodeDto::periode, VilkårsvurderingOgAvklaringPeriodeDto::utfall, VilkårsvurderingOgAvklaringPeriodeDto::avklaringOgVurdering)

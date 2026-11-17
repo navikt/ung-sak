@@ -4,6 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
 import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -127,10 +128,10 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
-    void ikke_relevante_vilkårsperioder_vurderes_ikke() {
+    void avkortede_vilkårsperioder_vurderes_ikke() {
         medVilkårsperioder(
             vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
-            vilkårsperiode(MARS, Utfall.IKKE_RELEVANT)
+            avkortetVilkårsperiode(MARS)
         );
 
         var resultat = utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
@@ -192,8 +193,8 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
-    void ingen_relevante_vilkårsperioder_gir_feil() {
-        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_RELEVANT));
+    void ingen_ikke_avkortede_vilkårsperioder_gir_feil() {
+        medVilkårsperioder(avkortetVilkårsperiode(JANUAR));
 
         assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
             List.of(vurdering(JANUAR, false, "uten relevante vilkårsperioder", null)),
@@ -273,6 +274,10 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         return new VilkårPeriodeBuilder()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()))
             .medUtfall(utfall);
+    }
+
+    private static VilkårPeriodeBuilder avkortetVilkårsperiode(Periode periode) {
+        return vilkårsperiode(periode, Utfall.IKKE_OPPFYLT).medAvslagsårsak(Avslagsårsak.AVKORTET);
     }
 
     private static LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje(Periode periode, IkkeOppfyltDetaljertÅrsak årsak) {
