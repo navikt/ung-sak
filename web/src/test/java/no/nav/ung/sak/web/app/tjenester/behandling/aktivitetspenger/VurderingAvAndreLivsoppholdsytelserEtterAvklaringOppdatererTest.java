@@ -225,7 +225,7 @@ class VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdatererTest {
     }
 
     private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
-        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev);
+        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, false);
     }
 
     private static DatoIntervallEntitet tilDatoIntervallEntitet(Periode periode) {

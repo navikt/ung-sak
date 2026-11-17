@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
@@ -43,8 +44,16 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
             return List.of();
         }
 
+        var endringSkalIkkeVarsles = avklarteAvslag.values().stream()
+            .flatMap(LocalDateTimeline::stream)
+            .noneMatch(it -> it.getValue().vilkårsvurdering().skalSendeVarsel());
+
+        if (endringSkalIkkeVarsles) {
+            return List.of();
+        }
+
         var harAvklaringMedOpphør = avklarteAvslag.values().stream()
-            .flatMap(it -> it.stream())
+            .flatMap(LocalDateTimeline::stream)
             .anyMatch(it -> it.getValue().vilkårsavklaring().avklaringtype() == Avklaringtype.OPPHØR);
 
         return List.of(new VedtaksbrevStrategyResultat(

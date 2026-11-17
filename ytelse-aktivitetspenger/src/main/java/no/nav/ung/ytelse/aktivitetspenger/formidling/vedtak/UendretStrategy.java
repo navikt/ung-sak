@@ -9,6 +9,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -67,6 +69,10 @@ public final class UendretStrategy implements VedtaksbrevInnholdbyggerStrategy {
             return List.of();
         }
 
+        if (skalIkkeSendeVarselForAlleVurderinger(avklaringOgVurderingTidslinje, tilVurdering)) {
+            return List.of();
+        }
+
         var endring = vedtakEndringSammenligner.sammenlignMedOriginal(behandling, tilVurdering);
         if (endring.isEmpty()) {
             return List.of();
@@ -94,6 +100,17 @@ public final class UendretStrategy implements VedtaksbrevInnholdbyggerStrategy {
         var vilkårsavklaringÅrsaker = VilkårsavklaringÅrsaker.alleÅrsaker();
         return tilVurdering.stream()
             .anyMatch(it -> !vilkårsavklaringÅrsaker.containsAll(it.getValue().behandlingsårsaker()));
+    }
+
+    private static boolean skalIkkeSendeVarselForAlleVurderinger(LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> avklaringer,
+                                                                 LocalDateTimeline<DetaljertResultat> tilVurdering) {
+        var vurderinger = avklaringer.intersection(tilVurdering).stream()
+            .flatMap(segment -> segment.getValue().values().stream())
+            .filter(VilkårsavklaringMedVurdering::harVilkårsAvklaring)
+            .map(VilkårsavklaringMedVurdering::vilkårsvurdering)
+            .filter(Objects::nonNull)
+            .toList();
+        return !vurderinger.isEmpty() && vurderinger.stream().noneMatch(VilkårsvurderingResultat::skalSendeVarsel);
     }
 
     private static boolean harVilkårsavklaring(LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> avklaringer,

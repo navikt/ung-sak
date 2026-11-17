@@ -24,6 +24,8 @@ public record VurderingAvVilkårPeriodeEtterAvklaringDto(
     @Size(max = 10000)
     @Valid
     @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
-    String fritekstVurderingBrev
+    String fritekstVurderingBrev,
+
+    boolean skalIkkeSendeVarsel
 ) {
 }
