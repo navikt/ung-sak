@@ -23,7 +23,7 @@ public class AvroJsonUtils {
             jsonEncoder.flush();
             return stream.toString();
         } catch (IOException e) {
-            log.error("Serialiseringsfeil:", e.getMessage());
+            log.error("Serialiseringsfeil: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -34,7 +34,7 @@ public class AvroJsonUtils {
             Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
             return reader.read(null, decoder);
         } catch (IOException e) {
-            log.error("Deserialiseringsfeil: {} json: {}", e.getMessage(), json);
+            log.error("Deserialiseringsfeil: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
