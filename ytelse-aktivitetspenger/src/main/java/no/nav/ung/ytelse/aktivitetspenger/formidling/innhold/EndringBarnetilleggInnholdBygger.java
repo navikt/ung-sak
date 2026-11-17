@@ -3,7 +3,6 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.BarnetilleggEndringsdatoUtleder;
@@ -20,14 +19,10 @@ import java.time.LocalDate;
 public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
-    private final boolean fødselFørStartdatoEnabled;
 
     @Inject
-    public EndringBarnetilleggInnholdBygger(
-        AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
-        @KonfigVerdi(value = BarnetilleggEndringsdatoUtleder.TOGGLE_FØDSEL_FØR_STARTDATO, defaultVerdi = "false") boolean fødselFørStartdatoEnabled) {
+    public EndringBarnetilleggInnholdBygger(AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository) {
         this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
-        this.fødselFørStartdatoEnabled = fødselFørStartdatoEnabled;
     }
 
     @Override
@@ -40,9 +35,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag for aktivitetspenger"));
 
         var satsTidslinje = grunnlag.hentAktivitetspengerSatsTidslinje();
-        LocalDate satsendringsdato = fødselFørStartdatoEnabled
-            ? BarnetilleggEndringsdatoUtleder.finnFørsteDatoMedSats(fødselTidslinje, satsTidslinje)
-            : fødselTidslinje.getMinLocalDate();
+        LocalDate satsendringsdato = BarnetilleggEndringsdatoUtleder.finnFørsteDatoMedSats(fødselTidslinje, satsTidslinje);
 
         var nyeSatser = satsTidslinje.getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 

@@ -6,8 +6,6 @@ import java.time.LocalDate;
 
 public final class BarnetilleggEndringsdatoUtleder {
 
-    public static final String TOGGLE_FØDSEL_FØR_STARTDATO = "BARNETILLEGG_BREV_FODSEL_FOR_STARTDATO_ENABLED";
-
     private BarnetilleggEndringsdatoUtleder() {
     }
 

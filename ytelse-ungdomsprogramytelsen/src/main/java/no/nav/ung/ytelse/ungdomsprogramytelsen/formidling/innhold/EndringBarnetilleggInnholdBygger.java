@@ -3,7 +3,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
@@ -22,16 +21,12 @@ import java.time.LocalDate;
 public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private final boolean fødselFørStartdatoEnabled;
 
     private static final Logger LOG = LoggerFactory.getLogger(EndringBarnetilleggInnholdBygger.class);
 
     @Inject
-    public EndringBarnetilleggInnholdBygger(
-            UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-            @KonfigVerdi(value = BarnetilleggEndringsdatoUtleder.TOGGLE_FØDSEL_FØR_STARTDATO, defaultVerdi = "false") boolean fødselFørStartdatoEnabled) {
+    public EndringBarnetilleggInnholdBygger(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
-        this.fødselFørStartdatoEnabled = fødselFørStartdatoEnabled;
     }
 
 
@@ -46,9 +41,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
                 .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
         var satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
 
-        LocalDate satsendringsdato = fødselFørStartdatoEnabled
-            ? BarnetilleggEndringsdatoUtleder.finnFørsteDatoMedSats(fødselTidslinje, satsTidslinje)
-            : fødselTidslinje.getMinLocalDate();
+        LocalDate satsendringsdato = BarnetilleggEndringsdatoUtleder.finnFørsteDatoMedSats(fødselTidslinje, satsTidslinje);
 
         var nyeSatser = satsTidslinje.getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
