@@ -91,7 +91,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
 
             fagsak.ifPresent(f -> {
                     if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktørIdBarn.get(), aktuellDato, hendelseId)) {
-                        ÅrsakOgPerioder årsakOgPerioder = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsak.get().getPeriode().getTomDato()));
+                        ÅrsakOgPerioder årsakOgPerioder = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, utledTriggerperiode(f, aktuellDato));
                         fagsakÅrsakMap.put(f,
                             List.of(årsakOgPerioder));
                     }
@@ -100,6 +100,15 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
         }
 
         return fagsakÅrsakMap;
+    }
+
+    /**
+     * Barnet kan være født før fagsakperioden starter. Triggeren starter da på fagsakens fom.
+     */
+    private static DatoIntervallEntitet utledTriggerperiode(Fagsak fagsak, LocalDate fødselsdato) {
+        var fagsakperiode = fagsak.getPeriode();
+        var fom = fødselsdato.isBefore(fagsakperiode.getFomDato()) ? fagsakperiode.getFomDato() : fødselsdato;
+        return DatoIntervallEntitet.fraOgMedTilOgMed(fom, fagsakperiode.getTomDato());
     }
 
 
