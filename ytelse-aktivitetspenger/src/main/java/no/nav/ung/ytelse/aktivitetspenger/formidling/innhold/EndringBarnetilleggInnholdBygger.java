@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.formidling.innhold.BarnetilleggEndringsdatoUtleder;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
@@ -26,13 +27,16 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
-        LocalDate satsendringsdato = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
-            .getMinLocalDate();
+        // Satstidslinjen viser ikke hvilken satsendring som skyldes fødselen. Er barnet født før startdato,
+        // er barnet med i satsen fra første dag. Derfor bruker vi fødselstidslinjen til å finne fom-datoen.
+        var fødselTidslinje = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
 
         var grunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag for aktivitetspenger"));
 
         var satsTidslinje = grunnlag.hentAktivitetspengerSatsTidslinje();
+        LocalDate satsendringsdato = BarnetilleggEndringsdatoUtleder.finnFørsteDatoMedSats(fødselTidslinje, satsTidslinje);
+
         var nyeSatser = satsTidslinje.getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
         if (nyeSatser.satsGrunnlag().antallBarn() == 0) {

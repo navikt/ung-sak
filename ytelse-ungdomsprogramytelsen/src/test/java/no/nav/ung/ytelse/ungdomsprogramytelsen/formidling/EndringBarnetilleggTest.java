@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EndringBarnetilleggTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
 
-
     EndringBarnetilleggTest() {
         super(1, "Du får mer i ungdomsprogramytelse fordi du har fått barn");
     }
@@ -32,7 +31,6 @@ class EndringBarnetilleggTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
             """
                 Du får mer i ungdomsprogramytelse fordi du har fått barn \
                 Du får 37 kroner i barnetillegg per dag fra og med 27. mai 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 9 tredje ledd. \
                 """
@@ -63,7 +61,6 @@ class EndringBarnetilleggTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
             """
                 Du får mer i ungdomsprogramytelse fordi du har fått barn \
                 Du får 111 kroner i barnetillegg per dag fra og med 27. mai 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 9 tredje ledd. \
                 """
@@ -83,6 +80,27 @@ class EndringBarnetilleggTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
                 "<h1>Du får mer i ungdomsprogramytelse fordi du har fått barn</h1>"
             );
 
+    }
+
+    @Test
+    void barnFødtFørStartdato_girStartdatoSomFom() {
+        LocalDate startdato = LocalDate.of(2025, 5, 3);
+        LocalDate barnFødselsdato = LocalDate.of(2025, 4, 10);
+        var behandling = lagStandardScenario(EndringBarnetilleggScenarioer.endringBarnetilleggBarnFødtFørStartdato(startdato, barnFødselsdato));
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får mer i ungdomsprogramytelse fordi du har fått barn \
+                Du får 37 kroner i barnetillegg per dag fra og med 3. mai 2025, utenom lørdag og søndag. \
+                Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 9 tredje ledd. \
+                """
+        );
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_BARNETILLEGG);
+
+        assertThatHtml(generertBrev.dokument().html()).asPlainTextIsEqualTo(forventet);
     }
 
     private Behandling lagStandardScenario(UngTestScenario ungTestscenario) {

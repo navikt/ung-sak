@@ -35,7 +35,6 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             """
                 Du får mer i aktivitetspenger fordi du har fått barn \
                 Du får 37 kroner i barnetillegg per dag fra og med 16. august 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
@@ -58,7 +57,6 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             """
                 Du får mer i aktivitetspenger fordi du har fått barn \
                 Du får 74 kroner i barnetillegg per dag fra og med 16. august 2025, utenom lørdag og søndag. \
-                Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
@@ -67,6 +65,24 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får mer i aktivitetspenger fordi du har fått barn</h1>"
             );
+    }
+
+    @DisplayName("Barn født før startdato gir startdato som fom")
+    @Test
+    void barnFødtFørStartdato() {
+        var behandling = lagScenario(AktivitetspengerEndringBarnetilleggScenarioer.fødselFørStartdato(FOM));
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får mer i aktivitetspenger fordi du har fått barn \
+                Du får 37 kroner i barnetillegg per dag fra og med 1. august 2025, utenom lørdag og søndag. \
+                Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_BARNETILLEGG);
+
+        assertThatHtml(generertBrev.dokument().html()).asPlainTextIsEqualTo(forventet);
     }
 
     private Behandling lagScenario(AktivitetspengerTestScenario testScenario) {
