@@ -27,7 +27,7 @@ public class BeregningStegTjeneste {
     public Beregningsgrunnlag utførBesteberegning(Long behandlingId, LocalDate skjæringstidspunkt) {
         var inntektsposter = beregningTjeneste.hentSigrunInntektsposter(behandlingId);
 
-        var sistLignedeÅr = beregningTjeneste.utledSisteLignedeÅr(skjæringstidspunkt, inntektsposter);
+        var sistLignedeÅr = beregningTjeneste.utledSisteLignedeÅr(inntektsposter, skjæringstidspunkt);
         var beregningInput = BeregningTjeneste.lagBeregningInput(sistLignedeÅr, skjæringstidspunkt, inntektsposter);
         var besteBeregningResultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);
 

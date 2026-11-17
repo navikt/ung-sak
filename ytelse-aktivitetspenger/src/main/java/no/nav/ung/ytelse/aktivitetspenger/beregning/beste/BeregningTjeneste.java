@@ -8,7 +8,6 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
-import org.slf4j.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -24,7 +23,6 @@ import java.util.Map;
 public class BeregningTjeneste {
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BeregningTjeneste.class);
 
     public BeregningTjeneste() {
     }
@@ -45,31 +43,17 @@ public class BeregningTjeneste {
         return List.copyOf(inntektsposter);
     }
 
-
-    public Year utledSisteLignedeÅr(LocalDate skjæringstidspunkt, List<Inntektspost> inntektsposter) {
+    public Year utledSisteLignedeÅr(List<Inntektspost> inntektsposter, LocalDate skjæringstidspunkt) {
         LocalDate grenseForNårLigningsverdiKanVæreTilgjengelig = LocalDate.of(skjæringstidspunkt.getYear(), 5, 1);
-        LocalDate grenseForNårLigningsverdiMåVæreTilgjengelig = LocalDate.of(skjæringstidspunkt.getYear(), 11, 30);
-
         if (skjæringstidspunkt.isBefore(grenseForNårLigningsverdiKanVæreTilgjengelig)) {
             return Year.of(skjæringstidspunkt.minusYears(2).getYear());
         } else {
-            var forrigeÅr = Year.of(skjæringstidspunkt.minusYears(1).getYear());
-            var senesteTilgjengeligeLigningsår = inntektsposter.stream()
+            return inntektsposter.stream()
                 .map(ip -> Year.from(ip.getPeriode().getFomDato()))
-                .max(Year::compareTo);
-
-            if (senesteTilgjengeligeLigningsår.isPresent() && forrigeÅr.isAfter(senesteTilgjengeligeLigningsår.get())) {
-                if (skjæringstidspunkt.isAfter(grenseForNårLigningsverdiMåVæreTilgjengelig)) {
-                    LOGGER.warn("Forrige år er ikke tilgjengelig fra skatt, men grensen for når det senest skal kunne brukes er passert");
-                }
-
-                if (senesteTilgjengeligeLigningsår.get().isBefore(Year.of(skjæringstidspunkt.getYear() - 2))) {
-                    throw new IllegalStateException("Siste tilgjengelige ligningsår fra skatt er over to år gammelt. Dette er ikke forventet og vil påvirke beregningen.");
-                }
-
-                return senesteTilgjengeligeLigningsår.get();
-            }
-            return forrigeÅr;
+                .max(Year::compareTo)
+                .orElseGet(() ->
+                    Year.of(skjæringstidspunkt.minusYears(1).getYear())
+                );
         }
     }
 
