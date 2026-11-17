@@ -28,7 +28,7 @@ import java.util.List;
 @ProsessTask(value = MigrerIkkeRelevantAktivitetsvilkårTask.TASKTYPE, maxFailedRuns = 1)
 public class MigrerIkkeRelevantAktivitetsvilkårTask implements ProsessTaskHandler {
 
-    public static final String TASKTYPE = "batch.migrerIkkeRelevantAktivitetsvilkaar";
+    public static final String TASKTYPE = "avp.migrerIkkeRelevantAktivitetsvilkaar";
 
     static final String AUTOMATISK_IKKE_RELEVANT_BEGRUNNELSE = "Automatisk vurdering: Ingen vurdering av aktivitetsvilkår for ny søkt periode";
 
