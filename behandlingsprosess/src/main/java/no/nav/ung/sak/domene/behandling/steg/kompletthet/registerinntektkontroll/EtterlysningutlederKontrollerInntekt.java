@@ -64,7 +64,7 @@ public class EtterlysningutlederKontrollerInntekt {
                                                                                                     LocalDateTimeline<Boolean> tidslinjeRelevanteÅrsaker) {
         var relevanteEtterlysninger = etterlysningTidslinje.intersection(tidslinjeRelevanteÅrsaker);
         var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, relevanteEtterlysninger);
-        return endringsresultatEtterlysninger.mapValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.INGEN_ENDRING ? EtterlysningBehov.BEHOLD_EKSISTERENDE : EtterlysningBehov.ERSTATT_EKSISTERENDE);
+        return endringsresultatEtterlysninger.filterValue(FinnResultatForEndretRegisteropplysninger.Endringsresultat.ENDRING::equals).mapValue(_ -> EtterlysningBehov.ERSTATT_EKSISTERENDE);
     }
 
     private LocalDateTimeline<EtterlysningBehov> finnTidslinjeForNegativRegisterinntekt(

@@ -31,11 +31,11 @@ class EtterlysningutlederKontrollerInntektTest {
 
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
 
-        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.BEHOLD_EKSISTERENDE), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
     @Test
-    void skal_beholde_ventende_etterlysning_dersom_registerinntekt_er_uendret_og_bruker_har_rapportert_samme_inntekt() {
+    void skal_avbryte_ventende_etterlysning_dersom_registerinntekt_er_uendret_og_bruker_har_rapportert_samme_inntekt() {
         final var fom = LocalDate.of(2026, 1, 1);
         final var tom = LocalDate.of(2026, 1, 31);
         final var prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
@@ -44,7 +44,20 @@ class EtterlysningutlederKontrollerInntektTest {
 
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
 
-        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.BEHOLD_EKSISTERENDE), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
+    }
+
+    @Test
+    void skal_erstatte_ventende_etterlysning_dersom_registerinntekt_endres_og_bruker_har_rapportert_samme_inntekt() {
+        final var fom = LocalDate.of(2026, 1, 1);
+        final var tom = LocalDate.of(2026, 1, 31);
+        final var prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 10_000, 10_000);
+        final var etterlysningTidslinje = lagEtterlysningMedRegisterinntekt(fom, tom, 20_000, EtterlysningStatus.VENTER);
+
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
+
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.ERSTATT_EKSISTERENDE), resultat);
     }
 
     @Test
@@ -163,7 +176,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.BEHOLD_EKSISTERENDE), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
     @Test
@@ -182,7 +195,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.BEHOLD_EKSISTERENDE), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
 
@@ -204,7 +217,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.BEHOLD_EKSISTERENDE), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
 
