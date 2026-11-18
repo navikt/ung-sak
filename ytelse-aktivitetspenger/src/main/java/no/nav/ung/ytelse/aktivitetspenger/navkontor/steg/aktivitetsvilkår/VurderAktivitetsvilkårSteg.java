@@ -15,11 +15,16 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +39,8 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     VurderAktivitetsvilkårSteg() {
         //for CDI proxy
@@ -45,10 +52,14 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
                                       VilkårTjeneste vilkårTjeneste,
                                       BehandlingRepository behandlingRepository,
                                       @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                      VilkårResultatRepository vilkårResultatRepository1) {
+                                      VilkårResultatRepository vilkårResultatRepository1,
+                                      InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
+                                      InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository1;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
     @Override
@@ -69,7 +80,7 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
     public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = finnPerioderSomSkalVurderes(kontekst);
         if (førstegangsbehandlingEllerForrigeErAvslåttFørstegangsbehandling(kontekst.getBehandlingId())) {
-            automatiskMarkereAktivitetsvilkåretIkkeRelevant(kontekst.getBehandlingId(), tidslinjeTilVurdering);
+            automatiskInnvilgAktivitetsvilkåret(kontekst.getBehandlingId(), tidslinjeTilVurdering);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -101,17 +112,26 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
             .isEmpty();
     }
 
-    private void automatiskMarkereAktivitetsvilkåretIkkeRelevant(Long behandlingId, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+    private void automatiskInnvilgAktivitetsvilkåret(Long behandlingId, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        List<AktivitetsvilkårResultatPeriode> automatiskVurdering = tidslinjeTilVurdering.getLocalDateIntervals().stream()
+            .map(periode -> new AktivitetsvilkårResultatPeriode(
+                DatoIntervallEntitet.fra(periode),
+                true,
+                null,
+                false,
+                null,
+                null,
+                "ung-sak",
+                LocalDateTime.now(),
+                null
+            ))
+            .toList();
+
         var vilkåreneOptional = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        VilkårResultatBuilder vilkårResultatBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
-        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.AKTIVITETSVILKÅR);
+        VilkårResultatBuilder vilkårBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
 
-        tidslinjeTilVurdering.segmenter()
-            .forEach(segment -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(segment.getFom(), segment.getTom())
-                .medUtfall(Utfall.IKKE_RELEVANT)
-                .medBegrunnelse("Automatisk vurdering: Ingen vurdering av aktivitetsvilkår for ny søkt periode")));
-
-        vilkårResultatBuilder.leggTil(vilkårBuilder);
-        vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
+        inngangsvilkårVurderingRepository.lagreAktivitetVurderinger(behandlingId, automatiskVurdering);
+        inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(behandlingId, vilkårBuilder);
+        vilkårResultatRepository.lagre(behandlingId, vilkårBuilder.build());
     }
 }
