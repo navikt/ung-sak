@@ -14,13 +14,22 @@ import java.time.YearMonth;
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public class UngdomsytelseInntektskontrollFritakUtleder implements InntektskontrollFritakUtleder {
 
+    public static final YearMonth UNG_VIRKNINGSDATO_LOVENDRING_KONTROLL_FØRSTE_MÅNED = YearMonth.of(2027, 1);
+
+
     @Override
     public LocalDateTimeline<Boolean> finnPerioderFritattForKontroll(LocalDateTimeline<YearMonth> ytelsesPerioder) {
+        // "Første måneder" før lovendring er fritatt fra kontroll
         var fritatteSegmenter = ytelsesPerioder.stream()
-            .filter(it -> ytelsesPerioder.intersection(
-                new LocalDateInterval(it.getFom().minusDays(1), it.getFom().minusDays(1))).isEmpty())
+            .filter(it -> erFørsteMåned(ytelsesPerioder, it))
+            .filter(it -> it.getValue().isBefore(UNG_VIRKNINGSDATO_LOVENDRING_KONTROLL_FØRSTE_MÅNED))
             .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(), true))
             .toList();
         return new LocalDateTimeline<>(fritatteSegmenter);
+    }
+
+    private static boolean erFørsteMåned(LocalDateTimeline<YearMonth> ytelsesPerioder, LocalDateSegment<YearMonth> it) {
+        return ytelsesPerioder.intersection(
+            new LocalDateInterval(it.getFom().minusDays(1), it.getFom().minusDays(1))).isEmpty();
     }
 }
