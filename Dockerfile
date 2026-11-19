@@ -14,7 +14,7 @@ LABEL org.opencontainers.image.source=https://github.com/navikt/ung-sak
 COPY --link --from=duplikatfjerner /build/lib/ /app/lib/
 USER root
 RUN ["java", "scripts/RyddBiblioteker", "UBRUKT", "/app/lib"]
-USER 65532
+USER java
 
 COPY --link web/target/classes/logback.xml /app/conf/
 
