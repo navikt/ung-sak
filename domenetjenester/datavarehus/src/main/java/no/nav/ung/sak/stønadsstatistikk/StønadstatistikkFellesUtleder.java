@@ -36,9 +36,6 @@ import java.util.UUID;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
-/**
- * Utleder de delene av stønadsstatistikk-hendelsen som er felles for alle ytelser.
- */
 @ApplicationScoped
 public class StønadstatistikkFellesUtleder {
 

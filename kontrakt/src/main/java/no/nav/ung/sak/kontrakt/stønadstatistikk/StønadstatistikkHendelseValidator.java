@@ -16,13 +16,13 @@ public class StønadstatistikkHendelseValidator {
 
     private static final Validator JAKARTA_VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
-    public void valider(StønadstatistikkHendelse hendelse) {
-        Set<ConstraintViolation<StønadstatistikkHendelse>> constraintViolations = JAKARTA_VALIDATOR.validate(hendelse);
+    public void valider(StønadstatistikkHendelse stønadstatistikkHendelse) {
+        Set<ConstraintViolation<StønadstatistikkHendelse>> constraintViolations = JAKARTA_VALIDATOR.validate(stønadstatistikkHendelse);
         if (!constraintViolations.isEmpty()) {
             throw new IllegalArgumentException("Ugyldig stønadsstatistikkHendelse: " + String.join("\n", constraintViolations.stream().map(cv -> cv.getPropertyPath() + " " + cv.getMessage()).toList()));
         }
 
-        switch (hendelse) {
+        switch (stønadstatistikkHendelse) {
             case UngStønadstatistikkHendelse ung -> validerUngdomsprogramytelse(ung);
             case AktivitetspengerStønadstatistikkHendelse aktivitetspenger -> validerAktivitetspenger(aktivitetspenger);
         }
