@@ -11,10 +11,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkHendelseBygger;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType;
 import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadsstatistikkSatsPeriode;
-import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse;
-import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkInntektPeriode;
+import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.AktivitetspengerStønadstatistikkHendelse;
+import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.AktivitetspengerStønadstatistikkPeriode;
 import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkSatsType;
-import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
@@ -23,19 +22,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-import static no.nav.ung.sak.stønadsstatistikk.StønadstatistikkFellesUtleder.normaliser;
-
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class AktivitetspengerStønadsstatistikkHendelseBygger implements StønadstatistikkHendelseBygger {
 
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.AKTIVITETSPENGER;
-    private static final String KLASSEKODE = "AKTIVITETPENGUNG"; // Er klassekode riktig?
+    private static final String KLASSEKODE = "AKTIVITETPENGUNG";
 
     private BehandlingRepository behandlingRepository;
     private StønadstatistikkFellesUtleder fellesUtleder;
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
 
     AktivitetspengerStønadsstatistikkHendelseBygger() {
         //for CDI proxy
@@ -44,31 +40,27 @@ public class AktivitetspengerStønadsstatistikkHendelseBygger implements Stønad
     @Inject
     public AktivitetspengerStønadsstatistikkHendelseBygger(BehandlingRepository behandlingRepository,
                                                            StønadstatistikkFellesUtleder fellesUtleder,
-                                                           AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
-                                                           KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste) {
+                                                           AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository) {
         this.behandlingRepository = behandlingRepository;
         this.fellesUtleder = fellesUtleder;
         this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
-        this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
     }
 
     @Override
-    public StønadstatistikkHendelse lagHendelse(UUID behandlingUuid) {
+    public AktivitetspengerStønadstatistikkHendelse lagHendelse(UUID behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid);
-        return new StønadstatistikkHendelse(
+        return new AktivitetspengerStønadstatistikkHendelse(
             YTELSE_TYPE,
             behandling.getAktørId(),
             behandling.getFagsak().getSaksnummer(),
             behandling.getUuid(),
             fellesUtleder.hentOrginalBehandlingUuidHvisEksisterer(behandling),
-            fellesUtleder.hentFørsteSøknadsdato(behandling),
             fellesUtleder.hentVedtakTidspunkt(behandling),
             HenvisningUtleder.utledHenvisning(behandling.getUuid(), null),
-            null, // aktivitetspenger har ikke deltakelse i ungdomsprogrammet
-            fellesUtleder.hentBehandlingsperioder(behandling),
+            hentBehandlingsperioder(behandling),
             hentSatsPerioder(behandling),
             fellesUtleder.hentTilkjentYtelsePerioder(behandling, KLASSEKODE),
-            hentInntektPerioder(behandling)
+            fellesUtleder.hentInntektPerioder(behandling)
         );
     }
 
@@ -97,13 +89,12 @@ public class AktivitetspengerStønadsstatistikkHendelseBygger implements Stønad
             satsType == StønadstatistikkSatsType.BEREGNINGSGRUNNLAG ? null : satser.satsGrunnlag().grunnbeløpFaktor());
     }
 
-    private List<StønadstatistikkInntektPeriode> hentInntektPerioder(Behandling behandling) {
-        return kontrollerteInntektperioderTjeneste.hentTidslinje(behandling.getId()).segmenter().stream()
-            .map(periode -> new StønadstatistikkInntektPeriode(
-                periode.getFom(),
-                periode.getTom(),
-                normaliser(periode.getValue())
-            ))
+    private List<AktivitetspengerStønadstatistikkPeriode> hentBehandlingsperioder(Behandling behandling) {
+        return fellesUtleder.hentVilkårTidslinje(behandling).segmenter().stream()
+            .map(segment -> new AktivitetspengerStønadstatistikkPeriode(
+                segment.getFom(),
+                segment.getTom(),
+                StønadstatistikkFellesUtleder.samletUtfall(segment.getValue())))
             .toList();
     }
 
