@@ -216,14 +216,14 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     @Test
-    void apen_tom_skal_lukkes_for_ikke_relevant_del_av_vilkarsperioden() {
+    void apen_tom_skal_ikke_lukkes_for_ikke_relevant_del_av_vilkarsperioden() {
         var ikkeRelevantFom = LocalDate.of(2026, 7, 1);
         settVilkårsperiodenFra(ikkeRelevantFom, Utfall.IKKE_RELEVANT, null);
 
         oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
 
         assertThat(hentSorterteAvklaringer().getFirst().getPeriode())
-            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), ikkeRelevantFom.minusDays(1)));
+            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1), TOM));
     }
 
     @Test

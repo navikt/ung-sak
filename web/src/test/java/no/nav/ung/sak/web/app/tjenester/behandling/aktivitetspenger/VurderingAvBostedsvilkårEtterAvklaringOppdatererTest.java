@@ -105,7 +105,7 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
         vilkårsavklaringGrunnlagRepository = new VilkårsavklaringGrunnlagRepository(entityManager);
         bostedSøknadsfaktaGrunnlagRepository = new BostedSøknadsfaktaGrunnlagRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(vilkårResultatRepository);
+        var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(inngangsvilkårVurderingTjeneste);
         historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
 
         oppdaterer = new VurderingAvBostedsvilkårEtterAvklaringOppdaterer(
