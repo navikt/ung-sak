@@ -46,10 +46,7 @@ public class BistandAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     public void validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(long behandlingId, List<ÅpenPeriode> perioder) {
-        var eksisterendeVilkårperioder = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
-            .map(vilkårene -> vilkårene.getVilkårTimeline(VILKÅR_TYPE))
-            .orElseThrow(() -> new IllegalArgumentException("Fant ingen vilkårsperioder for " + VILKÅR_TYPE + " på behandlingId=" + behandlingId));
-
+        var eksisterendeVilkårperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VILKÅR_TYPE);
         for (var periode : perioder) {
             boolean erÅpenPeriode = periode.getTom() == null || periode.getTom().equals(TIDENES_ENDE);
             if (erÅpenPeriode) {
