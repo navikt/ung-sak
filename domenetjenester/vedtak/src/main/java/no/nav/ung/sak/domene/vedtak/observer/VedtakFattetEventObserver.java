@@ -9,6 +9,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.domene.vedtak.brukerdialog.PubliserSakTilBrukerdialogTask;
+import no.nav.ung.sak.domene.vedtak.samordning.LagreVedtattYtelseTask;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {
@@ -27,6 +28,7 @@ public class VedtakFattetEventObserver {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
             if (erBehandlingAvRettTypeForAbakus(event)) {
                 taskTjeneste.lagre(opprettTaskForPubliseringAvVedtakMedYtelse(event));
+                taskTjeneste.lagre(opprettTaskForLagringAvVedtattYtelse(event));
             }
             if (FagsakYtelseType.AKTIVITETSPENGER.equals(event.getBehandling().getFagsakYtelseType())) {
                 taskTjeneste.lagre(opprettTaskForVedtaksstatusTilBrukerdialog(event));
@@ -36,6 +38,13 @@ public class VedtakFattetEventObserver {
 
     private ProsessTaskData opprettTaskForVedtaksstatusTilBrukerdialog(BehandlingVedtakEvent event) {
         final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserSakTilBrukerdialogTask.class);
+        taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().getId());
+        taskData.setCallIdFraEksisterende();
+        return taskData;
+    }
+
+    private ProsessTaskData opprettTaskForLagringAvVedtattYtelse(BehandlingVedtakEvent event) {
+        final ProsessTaskData taskData = ProsessTaskData.forProsessTask(LagreVedtattYtelseTask.class);
         taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().getId());
         taskData.setCallIdFraEksisterende();
         return taskData;

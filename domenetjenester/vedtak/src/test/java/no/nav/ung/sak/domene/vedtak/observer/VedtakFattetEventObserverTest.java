@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposit
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.vedtak.brukerdialog.PubliserSakTilBrukerdialogTask;
+import no.nav.ung.sak.domene.vedtak.samordning.LagreVedtattYtelseTask;
 import no.nav.ung.sak.formidling.bestilling.VedtaksbrevbestillingTjeneste;
 import no.nav.ung.sak.formidling.bestilling.VurderVedtaksbrevTask;
 import no.nav.ung.sak.typer.AktørId;
@@ -69,10 +70,10 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET);
         observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
+        verify(prosessTaskRepository, times(3)).lagre(prosessTaskDataCaptorCaptor.capture());
         assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
             .map(ProsessTaskData::getTaskType))
-            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, VurderVedtaksbrevTask.TASKTYPE);
+            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, LagreVedtattYtelseTask.TASKTYPE, VurderVedtaksbrevTask.TASKTYPE);
     }
 
     @Test
@@ -88,10 +89,10 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.AVSLAG);
         observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
+        verify(prosessTaskRepository, times(3)).lagre(prosessTaskDataCaptorCaptor.capture());
         assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
             .map(ProsessTaskData::getTaskType))
-            .containsExactlyInAnyOrder(VurderVedtaksbrevTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
+            .containsExactlyInAnyOrder(VurderVedtaksbrevTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE, LagreVedtattYtelseTask.TASKTYPE);
     }
 
     @Test
@@ -99,7 +100,7 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET, FagsakYtelseType.AKTIVITETSPENGER);
         observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(3)).lagre(prosessTaskDataCaptorCaptor.capture());
+        verify(prosessTaskRepository, times(4)).lagre(prosessTaskDataCaptorCaptor.capture());
         var brukerdialogTask = prosessTaskDataCaptorCaptor.getAllValues().stream()
             .filter(it -> PubliserSakTilBrukerdialogTask.TASKTYPE.equals(it.getTaskType()))
             .findFirst()
@@ -111,7 +112,7 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.AVSLAG, FagsakYtelseType.AKTIVITETSPENGER);
         observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(3)).lagre(prosessTaskDataCaptorCaptor.capture());
+        verify(prosessTaskRepository, times(4)).lagre(prosessTaskDataCaptorCaptor.capture());
         assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
             .map(ProsessTaskData::getTaskType))
             .contains(PubliserSakTilBrukerdialogTask.TASKTYPE);
@@ -122,7 +123,7 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET, FagsakYtelseType.UNGDOMSYTELSE);
         observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
+        verify(prosessTaskRepository, times(3)).lagre(prosessTaskDataCaptorCaptor.capture());
         assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
             .map(ProsessTaskData::getTaskType))
             .doesNotContain(PubliserSakTilBrukerdialogTask.TASKTYPE);
