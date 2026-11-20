@@ -81,6 +81,24 @@ public class AktivitetspengerEndringAvslagScenarioer {
             .build();
     }
 
+    public static AktivitetspengerTestScenario avslagPgaAktivitet(LocalDate fom, String fritekstTilBrev) {
+        var avslåttVilkårPeriode = avslåttPeriode(fom);
+        var ikkeOppfyltÅrsak = AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET;
+
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medAktivitetsvilkårResultat(avslåttVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
+            .build();
+
+        return avslagBuilder(fom, avslåttVilkårPeriode)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_AKTIVITET, DatoIntervallEntitet.fra(lagPeriodeForEttÅrFra(fom)))))
+            .medInngangsvilkårVurderinger(vurderinger)
+            .medVilkår(VilkårType.AKTIVITETSVILKÅR,
+                avslåttTidslinje(avslåttVilkårPeriode, Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK, fritekstTilBrev))
+            .medVilkårsavklaringer(VilkårType.AKTIVITETSVILKÅR,
+                List.of(VilkårsavklaringTestData.avslag(avslåttVilkårPeriode, ikkeOppfyltÅrsak, AktivitetsavklaringKildeType.BRUKER)))
+            .build();
+    }
+
     public static AktivitetspengerTestScenario avslagPgaBistand(LocalDate fom, String fritekstTilBrev) {
         return avslagPgaBistand(fom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, fritekstTilBrev);
     }
