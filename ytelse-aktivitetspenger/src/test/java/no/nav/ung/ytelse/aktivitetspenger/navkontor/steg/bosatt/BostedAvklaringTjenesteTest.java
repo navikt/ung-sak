@@ -45,7 +45,6 @@ class BostedAvklaringTjenesteTest {
 
         tjeneste = new BostedAvklaringTjeneste(
             vilkårsavklaringGrunnlagRepository,
-            null,
             null
         );
 

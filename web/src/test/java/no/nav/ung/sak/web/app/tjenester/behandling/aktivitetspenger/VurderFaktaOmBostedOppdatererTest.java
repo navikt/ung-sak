@@ -115,7 +115,7 @@ class VurderFaktaOmBostedOppdatererTest {
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(vilkårsavklaringGrunnlagRepository, inngangsvilkårVurderingTjeneste, vilkårResultatRepository);
+        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(vilkårsavklaringGrunnlagRepository, inngangsvilkårVurderingTjeneste);
         var vilkårsavklaringEtterlysningTjeneste = new VilkårsavklaringEtterlysningTjeneste(etterlysningRepository, prosessTaskTjeneste);
 
         oppdaterer = new VurderFaktaOmBostedOppdaterer(

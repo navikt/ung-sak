@@ -30,7 +30,6 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
-    private VilkårResultatRepository vilkårResultatRepository;
 
     public BostedAvklaringTjeneste() {
         // for CDI proxy
@@ -38,11 +37,9 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     @Inject
     public BostedAvklaringTjeneste(VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
-                                   InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
-                                   VilkårResultatRepository vilkårResultatRepository) {
+                                   InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
-        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     public void validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(long behandlingId, List<ÅpenPeriode> perioder) {
