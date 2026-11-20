@@ -84,6 +84,12 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(30), høySatsBuilder(fom).build(), lagBeregningsgrunnlag(fom)).build();
     }
 
+    public static AktivitetspengerTestScenario innvilgetKunHøySatsUtenInntektskontroll(LocalDate fom) {
+        return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(30), høySatsBuilder(fom).build())
+            .medTilkjentYtelse(LocalDateTimeline.empty())
+            .build();
+    }
+
     /**
      * Person over 25 år gjennom hele programperioden.
      * Besteberegning der årsinntekten er avkortet til 6G. Ingen inntektsgradering og ingen barn.
@@ -401,4 +407,3 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
     }
 
 }
-

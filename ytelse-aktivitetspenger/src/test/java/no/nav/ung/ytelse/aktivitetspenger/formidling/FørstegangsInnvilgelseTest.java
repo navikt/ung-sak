@@ -38,6 +38,21 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         System.clearProperty("BREV_DAGENS_DATO_TEST");
     }
 
+    @Test
+    void skal_innvilge_uten_tilkjent_ytelse_og_vise_planlagt_utbetalingsdato() {
+        var fom = LocalDate.of(2025, 8, 15);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySatsUtenInntektskontroll(fom);
+        var behandling = lagScenario(scenario);
+
+        var brev = genererVedtaksbrev(behandling.getId());
+
+        assertThat(brev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_INNVILGELSE);
+        assertThatHtml(brev.dokument().html())
+            .asPlainTextContains("Du får aktivitetspenger fra og med 15. august 2025.")
+            .asPlainTextContains("Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned.")
+            .asPlainTextNotContains("etter at vi har kontrollert inntekten din");
+    }
+
     @DisplayName("Førstegangsinnvilgelse med lav og høy sats (24 år blir 25), besteberegning (siste år) høyest under 25")
     @Test
     void lavOgHøySatsMedBesteberegning() {
