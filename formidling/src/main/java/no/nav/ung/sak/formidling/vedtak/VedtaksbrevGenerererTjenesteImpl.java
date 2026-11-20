@@ -4,7 +4,7 @@ package no.nav.ung.sak.formidling.vedtak;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
+import no.nav.ung.sak.domene.person.navansatt.NavAnsattNavnTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -43,7 +43,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private PdfGenKlient pdfGen;
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
-    private MicrosoftGraphTjeneste microsoftGraphTjeneste;
+    private NavAnsattNavnTjeneste navAnsattNavnTjeneste;
     private boolean enableBrevAnsvarligUng;
 
     public VedtaksbrevGenerererTjenesteImpl() {
@@ -55,14 +55,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         PdfGenKlient pdfGen,
         ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger,
         BrevMottakerTjeneste brevMottakerTjeneste,
-        MicrosoftGraphTjeneste microsoftGraphTjeneste,
+        NavAnsattNavnTjeneste navAnsattNavnTjeneste,
         @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG_UNG", defaultVerdi = "true") boolean enableBrevAnsvarligUng) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.pdfGen = pdfGen;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
-        this.microsoftGraphTjeneste = microsoftGraphTjeneste;
+        this.navAnsattNavnTjeneste = navAnsattNavnTjeneste;
         this.enableBrevAnsvarligUng = enableBrevAnsvarligUng;
     }
 
@@ -125,7 +125,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
     private String hentNavn(String ident) {
         return Optional.ofNullable(ident)
-            .flatMap(microsoftGraphTjeneste::navnPåNavAnsatt)
+            .flatMap(navAnsattNavnTjeneste::navnPåNavAnsatt)
             .orElse(null);
     }
 

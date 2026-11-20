@@ -90,6 +90,8 @@ spec:
         - application: ung-tilbake
         - application: kabal-api
           namespace: klage
+        - application: entra-proxy
+          namespace: sikkerhetstjenesten
       external:
         - host: "dokarkiv-q2.dev-fss-pub.nais.io"
         - host: "k9-abakus.dev-fss-pub.nais.io"
@@ -219,6 +221,10 @@ spec:
       value: http://ung-tilbake/ung/tilbake/api
     - name: SIF_ABAC_PDP_SCOPE
       value: api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
+    - name: ENTRA_PROXY_URL
+      value: http://entra-proxy.sikkerhetstjenesten/api/v1
+    - name: ENTRA_PROXY_SCOPE
+      value: api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default
     - name: SIF_ABAC_PDP_UNG_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
     - name: SIF_ABAC_PDP_AKTIVITETSPENGER_URL
@@ -279,6 +285,8 @@ spec:
       value: "true"
     - name: ENABLE_BREV_ANSVARLIG_UNG
       value: "true"
+    - name: ENTRA_PROXY_ENABLED
+      value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "true"
     - name: AKTIVITETSPENGER_INNTEKTSGRUNNLAG_ENABLED
