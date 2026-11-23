@@ -374,6 +374,29 @@ class VurderAktivitetsvilkårStegTest {
         assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_AKTIVITETSVILKÅR_OPPHØR);
     }
 
+    @Test
+    void skal_feile_ved_forsøk_på_å_vurdere_opphør_på_avslått_førstegangsbehandling() {
+        var avslåttFørstegangsbehandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+            .leggTilVilkår(VilkårType.AKTIVITETSVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(FOM, TOM))
+            .lagre(entityManager);
+        var revurdering = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(avslåttFørstegangsbehandling, BehandlingÅrsakType.ENDRET_AKTIVITET)
+            .leggTilVilkår(VilkårType.AKTIVITETSVILKÅR, Utfall.IKKE_VURDERT, new Periode(FOM, TOM))
+            .lagre(entityManager);
+        var søktStartdato = new SøktStartdato(FOM, new JournalpostId("jp-vilkår"));
+        startdatoRepository.lagre(revurdering.getId(), List.of(søktStartdato));
+        startdatoRepository.lagreRelevanteSøknader(revurdering.getId(), new Startdatoer(List.of(søktStartdato)));
+        prosessTriggereRepository.leggTil(revurdering.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.ENDRET_AKTIVITET, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))
+        );
+        lagreForeslåttAvklaring(revurdering.getId(), FOM, TOM, AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET, false);
+
+        assertThatThrownBy(() -> utførSteg(revurdering))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Forventer ikke avklaringer");
+    }
+
     private UUID finnReferanse(Set<VilkårPeriodeAvklaring> lagrede, LocalDate fom) {
         return lagrede.stream()
             .filter(a -> a.getPeriode().getFomDato().equals(fom))

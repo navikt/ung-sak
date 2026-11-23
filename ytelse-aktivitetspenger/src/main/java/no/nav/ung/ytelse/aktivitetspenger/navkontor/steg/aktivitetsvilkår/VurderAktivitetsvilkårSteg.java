@@ -113,11 +113,16 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
     public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
         long behandlingId = kontekst.getBehandlingId();
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = finnPerioderSomSkalVurderes(kontekst);
-        if (førstegangsbehandlingEllerForrigeErAvslåttFørstegangsbehandling(behandlingId)) {
-            automatiskInnvilgAktivitetsvilkåret(behandlingId, tidslinjeTilVurdering);
+        if (tidslinjeTilVurdering.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        if (tidslinjeTilVurdering.isEmpty()) {
+
+        var avklaringTidslinje = hentForeslåttAvklaringTidslinje(behandlingId).intersection(tidslinjeTilVurdering);
+        if (førstegangsbehandlingEllerForrigeErAvslåttFørstegangsbehandling(behandlingId)) {
+            if (!avklaringTidslinje.isEmpty()) {
+                throw new IllegalStateException("Forventer ikke avklaringer for førstegangsbehandling eller hvis det kun eksisterer en avslått førstegangsbehandling, behandlingId=" + behandlingId);
+            }
+            automatiskInnvilgAktivitetsvilkåret(behandlingId, tidslinjeTilVurdering);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -132,7 +137,6 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
             ).collect(Collectors.toList())
         ).intersection(tidslinjeTilVurdering);
 
-        var avklaringTidslinje = hentForeslåttAvklaringTidslinje(behandlingId).intersection(tidslinjeTilVurdering);
         var nyeSøknadsperioder = aktivitetspengerVilkårsPerioderTilVurderingTjeneste.utledPerÅrsak(behandlingId, getAktuellVilkårType())
             .getOrDefault(BehandlingÅrsakType.NY_SØKT_PERIODE, LocalDateTimeline.empty())
             .intersection(tidslinjeTilVurdering);
