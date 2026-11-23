@@ -39,9 +39,12 @@ public record AktivitetAvklaringIkkeOppfyltDto(
     }
 
     @JsonIgnore
-    @AssertTrue(message = "begrunnelseIkkeVarsel skal kun settes når skalIkkeSendeVarsel er true")
+    @AssertTrue(message = "begrunnelseIkkeVarsel må settes når skalIkkeSendeVarsel er true, og skal ikke settes ellers")
     public boolean isBegrunnelseIkkeVarselGyldig() {
-        return !skalSendeVarsel() || (begrunnelseIkkeVarsel == null || begrunnelseIkkeVarsel.isBlank());
+        if (skalSendeVarsel()) {
+            return begrunnelseIkkeVarsel == null || begrunnelseIkkeVarsel.isBlank();
+        }
+        return begrunnelseIkkeVarsel != null && !begrunnelseIkkeVarsel.isBlank();
     }
 
     @JsonIgnore
