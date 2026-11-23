@@ -10,8 +10,11 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +26,8 @@ import java.util.Set;
 /**
  * Engangsmigrering som lagrer vedtak for samordning for eksisterende saker.
  * <p>
- * Oppretter én {@link LagreVedtattYtelseTask} per avsluttet, ikke henlagt ytelsesbehandling, i kronologisk rekkefølge per fagsak.
+ * Oppretter én {@link LagreVedtattYtelseTask} per iverksatt, ikke henlagt ytelsesbehandling, i kronologisk rekkefølge per fagsak.
+ * Vedtak som ikke er ferdig iverksatt lagres av {@code VedtakFattetEventObserver} når iverksettingen er ferdig.
  * Behandlingene i én fagsak kjøres sekvensielt for å unngå samtidige skrivinger på samme sak.
  * Fagsakene behandles i bolker, og hver bolk oppretter neste bolk. Kan kjøres på nytt, siden lagringen er idempotent.
  * <p>
@@ -52,6 +56,7 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
 
     private EntityManager entityManager;
     private BehandlingRepository behandlingRepository;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     MigrerVedtattYtelseTilSamordningTask() {
@@ -61,9 +66,11 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
     @Inject
     public MigrerVedtattYtelseTilSamordningTask(EntityManager entityManager,
                                                 BehandlingRepository behandlingRepository,
+                                                BehandlingVedtakRepository behandlingVedtakRepository,
                                                 ProsessTaskTjeneste prosessTaskTjeneste) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
@@ -111,7 +118,10 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
 
     private Optional<ProsessTaskGruppe> opprettLagringstasker(Fagsak fagsak) {
         // Sortert nyeste først; snus slik at eldste vedtak lagres først
-        List<Behandling> behandlinger = behandlingRepository.finnAlleAvsluttedeIkkeHenlagteYtelsebehandlinger(fagsak.getId()).reversed();
+        List<Behandling> behandlinger = behandlingRepository.finnAlleAvsluttedeIkkeHenlagteYtelsebehandlinger(fagsak.getId()).reversed()
+            .stream()
+            .filter(this::erIverksatt)
+            .toList();
         if (behandlinger.isEmpty()) {
             return Optional.empty();
         }
@@ -119,6 +129,14 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
         var gruppe = new ProsessTaskGruppe();
         behandlinger.forEach(behandling -> gruppe.addNesteSekvensiell(lagringstask(fagsak, behandling)));
         return Optional.of(gruppe);
+    }
+
+    // Utvalget over tar også med IVERKSETTER_VEDTAK, der vedtaket ennå ikke er iverksatt
+    private boolean erIverksatt(Behandling behandling) {
+        return behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId())
+            .map(BehandlingVedtak::getIverksettingStatus)
+            .filter(IverksettingStatus.IVERKSATT::equals)
+            .isPresent();
     }
 
     private static ProsessTaskData lagringstask(Fagsak fagsak, Behandling behandling) {

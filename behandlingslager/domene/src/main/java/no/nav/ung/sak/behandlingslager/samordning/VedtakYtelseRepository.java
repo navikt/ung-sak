@@ -107,6 +107,26 @@ public class VedtakYtelseRepository {
             .getResultList();
     }
 
+    /**
+     * Flytter alle vedtak fra gammel til ny aktørId ved aktørbytte. Fagsaken følges ikke ved oppslag, så vedtakene må oppdateres
+     * sammen med fagsaken.
+     *
+     * @return antall vedtak som ble oppdatert
+     */
+    public int byttAktørId(AktørId gammelAktørId, AktørId nyAktørId) {
+        Objects.requireNonNull(gammelAktørId, "gammelAktørId");
+        Objects.requireNonNull(nyAktørId, "nyAktørId");
+        entityManager.flush();
+        return entityManager.createNativeQuery("""
+                update vedtak_ytelse
+                   set aktoer_id = :ny_aktoer_id, versjon = versjon + 1, endret_av = 'bytte ' || :gammel_aktoer_id, endret_tid = current_timestamp
+                 where aktoer_id = :gammel_aktoer_id
+                """)
+            .setParameter("ny_aktoer_id", nyAktørId.getId())
+            .setParameter("gammel_aktoer_id", gammelAktørId.getId())
+            .executeUpdate();
+    }
+
     private void oppdaterAktivtVedtak(Saksnummer saksnummer, FagsakYtelseType ytelseType) {
         var alle = hentAlleVedtak(saksnummer, ytelseType);
         var gjeldende = alle.stream().max(GJELDENDE_SIST).orElseThrow();

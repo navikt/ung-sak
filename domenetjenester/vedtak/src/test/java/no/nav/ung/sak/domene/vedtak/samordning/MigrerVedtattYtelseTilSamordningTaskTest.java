@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +26,11 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -41,6 +45,7 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
     private EntityManager entityManager;
 
     private final BehandlingRepository behandlingRepository = mock();
+    private final BehandlingVedtakRepository behandlingVedtakRepository = mock();
     private final ProsessTaskTjeneste prosessTaskTjeneste = mock();
 
     private FagsakRepository fagsakRepository;
@@ -49,7 +54,7 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
     @BeforeEach
     void setUp() {
         fagsakRepository = new FagsakRepository(entityManager);
-        task = new MigrerVedtattYtelseTilSamordningTask(entityManager, behandlingRepository, prosessTaskTjeneste);
+        task = new MigrerVedtattYtelseTilSamordningTask(entityManager, behandlingRepository, behandlingVedtakRepository, prosessTaskTjeneste);
     }
 
     @Test
@@ -100,6 +105,21 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
 
         assertThat(lagredeGrupper()).singleElement()
             .satisfies(gruppe -> assertThat(behandlingIder(gruppe)).containsExactly("401"));
+    }
+
+    @Test
+    void skal_hoppe_over_behandlinger_som_ikke_er_iverksatt() {
+        var delvisIverksatt = lagFagsak(FagsakYtelseType.UNGDOMSYTELSE);
+        var ikkeIverksatt = lagFagsak(FagsakYtelseType.AKTIVITETSPENGER);
+        medBehandlinger(delvisIverksatt, 502L, 501L);
+        medIverksettingStatus(502L, IverksettingStatus.IKKE_IVERKSATT);
+        medBehandlinger(ikkeIverksatt, 601L);
+        medIverksettingStatus(601L, IverksettingStatus.UNDER_IVERKSETTING);
+
+        task.doTask(bolk(delvisIverksatt.getId() - 1, 100, false));
+
+        assertThat(lagredeGrupper()).singleElement()
+            .satisfies(gruppe -> assertThat(behandlingIder(gruppe)).containsExactly("501"));
     }
 
     @Test
@@ -161,10 +181,17 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
             .map(id -> {
                 Behandling behandling = mock();
                 when(behandling.getId()).thenReturn(id);
+                medIverksettingStatus(id, IverksettingStatus.IVERKSATT);
                 return behandling;
             })
             .toList();
         when(behandlingRepository.finnAlleAvsluttedeIkkeHenlagteYtelsebehandlinger(fagsak.getId())).thenReturn(behandlinger);
+    }
+
+    private void medIverksettingStatus(Long behandlingId, IverksettingStatus status) {
+        BehandlingVedtak vedtak = mock();
+        when(vedtak.getIverksettingStatus()).thenReturn(status);
+        when(behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)).thenReturn(Optional.of(vedtak));
     }
 
     private List<ProsessTaskGruppe> lagredeGrupper() {

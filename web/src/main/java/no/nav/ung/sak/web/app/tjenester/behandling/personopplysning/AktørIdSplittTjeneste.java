@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository;
 import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.typer.AktørId;
@@ -32,6 +33,7 @@ public class AktørIdSplittTjeneste {
     private final AbakusTjeneste abakusTjeneste;
     private final AktørBytteFordelKlient fordelKlient;
     private final UngTilbakeRestKlient ungTilbakeRestKlient;
+    private final VedtakYtelseRepository vedtakYtelseRepository;
 
     @Inject
     public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste,
@@ -39,13 +41,15 @@ public class AktørIdSplittTjeneste {
                                  K9OppdragRestKlient oppdragRestKlient,
                                  AbakusTjeneste abakusTjeneste,
                                  AktørBytteFordelKlient fordelKlient,
-                                 UngTilbakeRestKlient ungTilbakeRestKlient) {
+                                 UngTilbakeRestKlient ungTilbakeRestKlient,
+                                 VedtakYtelseRepository vedtakYtelseRepository) {
         this.aktørTjeneste = aktørTjeneste;
         this.entityManager = entityManager;
         this.oppdragRestKlient = oppdragRestKlient;
         this.abakusTjeneste = abakusTjeneste;
         this.fordelKlient = fordelKlient;
         this.ungTilbakeRestKlient = ungTilbakeRestKlient;
+        this.vedtakYtelseRepository = vedtakYtelseRepository;
     }
 
     public void patchBrukerAktørId(AktørId nyAktørId,
@@ -80,6 +84,8 @@ public class AktørIdSplittTjeneste {
         var brukerOppdaterteFagsaker = oppdaterFagsakForBruker(nyAktørId, gammelAktørId);
         oppdaterPoAggregat(nyAktørId, gammelAktørId);
         oppdaterNotatISak(nyAktørId, gammelAktørId);
+        var antallVedtakForSamordning = vedtakYtelseRepository.byttAktørId(gammelAktørId, nyAktørId);
+        logger.info("Oppdaterte {} vedtak for samordning", antallVedtakForSamordning);
         var personidenterSomSkalByttesUt = aktørIdForIdenterSomSkalByttes.map(aktørTjeneste::hentHistoriskePersonIdenterForAktørId)
             .orElse(Collections.emptySet());
 

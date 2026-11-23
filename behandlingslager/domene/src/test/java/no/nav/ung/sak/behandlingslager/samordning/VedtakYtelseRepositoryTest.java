@@ -204,6 +204,41 @@ class VedtakYtelseRepositoryTest {
     }
 
     @Test
+    void skal_flytte_alle_vedtak_til_ny_aktørId_ved_aktørbytte() {
+        var nyAktørId = AktørId.dummy();
+        var annenAktør = AktørId.dummy();
+        var gammelt = innvilget(UUID.randomUUID(), VEDTATT, FOM, TOM);
+        var gjeldende = innvilget(UUID.randomUUID(), VEDTATT.plusMonths(1), FOM, TOM);
+        var annenAktørsVedtak = VedtakYtelse.builder()
+            .medAktørId(annenAktør)
+            .medSaksnummer(new Saksnummer("SAMORD" + SAKSNUMMER_TELLER.incrementAndGet()))
+            .medYtelseType(FagsakYtelseType.UNGDOMSYTELSE)
+            .medVedtakReferanse(UUID.randomUUID())
+            .medVedtattTidspunkt(VEDTATT)
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))
+            .build();
+        repository.lagre(gammelt);
+        repository.lagre(gjeldende);
+        repository.lagre(annenAktørsVedtak);
+
+        int antall = repository.byttAktørId(aktørId, nyAktørId);
+        entityManager.clear();
+
+        var ytelser = Set.of(FagsakYtelseType.UNGDOMSYTELSE);
+        assertThat(antall).isEqualTo(2);
+        assertThat(repository.hentAlleVedtak(saksnummer, FagsakYtelseType.UNGDOMSYTELSE))
+            .extracting(VedtakYtelse::getAktørId)
+            .containsOnly(nyAktørId);
+        assertThat(repository.hentAktiveVedtakSomOverlapper(List.of(nyAktørId), ytelser, FOM, TOM))
+            .extracting(VedtakYtelse::getVedtakReferanse)
+            .containsExactly(gjeldende.getVedtakReferanse());
+        assertThat(repository.hentAktiveVedtakSomOverlapper(List.of(aktørId), ytelser, FOM, TOM)).isEmpty();
+        assertThat(repository.hentAktiveVedtakSomOverlapper(List.of(annenAktør), ytelser, FOM, TOM))
+            .extracting(VedtakYtelse::getVedtakReferanse)
+            .containsExactly(annenAktørsVedtak.getVedtakReferanse());
+    }
+
+    @Test
     void skal_avvise_anvisning_utenfor_vedtaksperioden() {
         var builder = vedtakBuilder(UUID.randomUUID(), VEDTATT, FagsakYtelseType.UNGDOMSYTELSE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))
             .leggTilAnvisning(YtelseAnvist.builder(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM.plusDays(1))).build());
