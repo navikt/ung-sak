@@ -34,11 +34,11 @@ import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
 @Dependent
 public class VurderingAvVilkårEtterAvklaringTjeneste {
 
-    private final VilkårResultatRepository vilkårResultatRepository;
+    private final InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     @Inject
-    public VurderingAvVilkårEtterAvklaringTjeneste(VilkårResultatRepository vilkårResultatRepository) {
-        this.vilkårResultatRepository = vilkårResultatRepository;
+    public VurderingAvVilkårEtterAvklaringTjeneste(InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
     public VurderingEtterAvklaringResultat utled(long behandlingId,
@@ -50,8 +50,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
                 + " ved avslått periode/opphør uten at det finnes en ikkeOppfyltÅrsak (foreslått vilkårsavklaring) på behandlingen. behandlingId=" + behandlingId);
         }
 
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(vilkårene, vilkårType);
+        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, vilkårType);
 
         if (eksisterendeVilkårperioder.isEmpty()) {
             throw new IllegalArgumentException("Fant ingen relevante vilkårsperioder for " + vilkårType

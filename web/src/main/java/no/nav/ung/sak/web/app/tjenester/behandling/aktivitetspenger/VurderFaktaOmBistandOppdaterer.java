@@ -71,7 +71,7 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
             dto.getAvklaringer().stream().map(BistandFaktaavklaringPeriodeDto::periode).toList());
 
         // Opphør lukkes mot slutten av relevante vilkårsperioder, siden avklaringen kan gjelde en vilkårlig periode i den.
-        var vilkårsperioder = inngangsvilkårVurderingTjeneste.hentRelevanteVilkårsperioder(behandlingId, VilkårType.BISTANDSVILKÅR);
+        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VilkårType.BISTANDSVILKÅR);
         if (vilkårsperioder.isEmpty()) {
             throw new IllegalStateException("Må ha relevante vilkårsperioder");
         }

@@ -86,6 +86,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
             .toList());
     }
 
+    public LocalDateTimeline<AktivitetsvilkårResultatPeriode> hentAktivitetsvilkårResultatPeriodeTidslinje() {
+        return new LocalDateTimeline<>(getAktivitetsvilkårResultatHolder().map(AktivitetsvilkårResultatHolder::getVurderinger).orElse(Set.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
+    }
+
     public Set<BistandsvilkårResultatPeriode> hentBistandsvilkårResultatPerioder() {
         return getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger)
             .orElseThrow(() -> new IllegalStateException("Fant ikke BistandsvilkårResultatPerioder"));
