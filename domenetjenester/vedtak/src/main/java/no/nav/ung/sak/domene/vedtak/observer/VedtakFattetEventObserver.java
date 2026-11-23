@@ -26,7 +26,7 @@ public class VedtakFattetEventObserver {
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
-            if (erBehandlingAvRettTypeForAbakus(event)) {
+            if (event.getBehandling().erYtelseBehandling()) {
                 taskTjeneste.lagre(opprettTaskForPubliseringAvVedtakMedYtelse(event));
                 taskTjeneste.lagre(opprettTaskForLagringAvVedtattYtelse(event));
             }
@@ -48,10 +48,6 @@ public class VedtakFattetEventObserver {
         taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().getId());
         taskData.setCallIdFraEksisterende();
         return taskData;
-    }
-
-    private boolean erBehandlingAvRettTypeForAbakus(BehandlingVedtakEvent event) {
-        return event.getBehandling().erYtelseBehandling();
     }
 
     @Deprecated
