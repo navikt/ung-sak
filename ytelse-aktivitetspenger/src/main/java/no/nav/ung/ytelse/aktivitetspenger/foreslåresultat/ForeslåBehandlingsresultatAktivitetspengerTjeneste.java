@@ -3,13 +3,10 @@ package no.nav.ung.ytelse.aktivitetspenger.foreslåresultat;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -34,7 +31,7 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
 
     private BehandlingRepository behandlingRepository;
     private AktivitetspengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
-    private Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester;
+    private VilkårsavklaringTjeneste vilkårsavklaringTjeneste;
 
     ForeslåBehandlingsresultatAktivitetspengerTjeneste() {
         // for proxy
@@ -43,11 +40,11 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
     @Inject
     public ForeslåBehandlingsresultatAktivitetspengerTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                                               @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) AktivitetspengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                              @Any Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester) {
+                                                              VilkårsavklaringTjeneste vilkårsavklaringTjeneste) {
         super(repositoryProvider);
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
-        this.alleVilkårsavklaringTjenester = alleVilkårsavklaringTjenester;
+        this.vilkårsavklaringTjeneste = vilkårsavklaringTjeneste;
     }
 
     @Override
@@ -79,12 +76,11 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
 
         return VilkårsavklaringÅrsaker.alle().entrySet().stream()
             .filter(entry -> behandlingÅrsaker.contains(entry.getValue()))
-            .anyMatch(entry -> harOpphørMedAvslag(ref.getBehandlingId(), vilkårene, entry.getKey(), entry.getValue()));
+            .anyMatch(entry -> harOpphørMedAvslag(ref.getBehandlingId(), vilkårene, entry.getKey()));
     }
 
-    private boolean harOpphørMedAvslag(Long behandlingId, Vilkårene vilkårene, VilkårType vilkårType, BehandlingÅrsakType årsak) {
-        return VilkårsavklaringTjeneste.finnForÅrsak(alleVilkårsavklaringTjenester, årsak).stream()
-            .flatMap(tjeneste -> tjeneste.hentSenesteForeslåtteAvklaringForBehandling(behandlingId).stream())
+    private boolean harOpphørMedAvslag(Long behandlingId, Vilkårene vilkårene, VilkårType vilkårType) {
+        return vilkårsavklaringTjeneste.hentSenesteForeslåtteAvklaringForBehandling(behandlingId, vilkårType).stream()
             .filter(avklaring -> Avklaringtype.OPPHØR.equals(avklaring.avklaringtype()))
             .anyMatch(avklaring -> harAvslagIPeriode(vilkårene, vilkårType, avklaring.periode()));
     }

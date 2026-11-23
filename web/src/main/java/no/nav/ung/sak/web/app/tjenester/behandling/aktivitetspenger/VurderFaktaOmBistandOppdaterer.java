@@ -3,7 +3,6 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -12,20 +11,19 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsvarselInnhold;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
-import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bistandsvilkår.BistandAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bistandsvilkår.BistandAvklaringDataMapper;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bistandsvilkår.BistandAvklaringTjeneste;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -38,7 +36,7 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste;
-    private BistandAvklaringTjeneste bistandAvklaringTjeneste;
+    private VilkårsavklaringTjeneste vilkårsavklaringTjeneste;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     VurderFaktaOmBistandOppdaterer() {
@@ -49,12 +47,12 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
     public VurderFaktaOmBistandOppdaterer(BehandlingRepository behandlingRepository,
                                           HistorikkinnslagRepository historikkinnslagRepository,
                                           VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste,
-                                          @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV) BistandAvklaringTjeneste bistandAvklaringTjeneste,
+                                          VilkårsavklaringTjeneste vilkårsavklaringTjeneste,
                                           InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårsavklaringEtterlysningTjeneste = vilkårsavklaringEtterlysningTjeneste;
-        this.bistandAvklaringTjeneste = bistandAvklaringTjeneste;
+        this.vilkårsavklaringTjeneste = vilkårsavklaringTjeneste;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
@@ -67,17 +65,17 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        bistandAvklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId,
+        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VilkårType.BISTANDSVILKÅR);
+        vilkårsavklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId, VilkårType.BISTANDSVILKÅR, vilkårsperioder,
             dto.getAvklaringer().stream().map(BistandFaktaavklaringPeriodeDto::periode).toList());
 
         // Opphør lukkes mot slutten av relevante vilkårsperioder, siden avklaringen kan gjelde en vilkårlig periode i den.
-        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VilkårType.BISTANDSVILKÅR);
         if (vilkårsperioder.isEmpty()) {
             throw new IllegalStateException("Må ha relevante vilkårsperioder");
         }
         var maxTomDato = vilkårsperioder.getMaxLocalDate();
 
-        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = bistandAvklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId);
+        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = vilkårsavklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId, VilkårType.BISTANDSVILKÅR, BistandAvklaringDataMapper::mapTilBistandAvklaringInnhold);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -90,7 +88,7 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
             throw new IllegalArgumentException("Støtter kun lagring av én avklaring for bistandsvilkåret samtidig");
         }
 
-        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = bistandAvklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, nyeAvklaringer);
+        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = vilkårsavklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, VilkårType.BISTANDSVILKÅR, nyeAvklaringer, BistandAvklaringDataMapper::mapTilBistandAvklaringInnhold);
 
         inngangsvilkårVurderingTjeneste.nullstillOverlappendeVurderingOgGjenopprettTidligereVedBehov(param,
             VilkårType.BISTANDSVILKÅR,

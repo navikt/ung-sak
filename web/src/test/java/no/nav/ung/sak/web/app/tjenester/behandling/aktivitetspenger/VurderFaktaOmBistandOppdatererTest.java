@@ -41,6 +41,7 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnl
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandAvklaringIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto;
@@ -51,7 +52,6 @@ import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bistandsvilkår.BistandAvklaringTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -111,10 +111,7 @@ class VurderFaktaOmBistandOppdatererTest {
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        var bistandAvklaringTjeneste = new BistandAvklaringTjeneste(
-            vilkårsavklaringGrunnlagRepository,
-            inngangsvilkårVurderingTjeneste,
-            vilkårResultatRepository);
+        var bistandAvklaringTjeneste = new VilkårsavklaringTjeneste(vilkårsavklaringGrunnlagRepository);
 
         oppdaterer = new VurderFaktaOmBistandOppdaterer(
             behandlingRepository,

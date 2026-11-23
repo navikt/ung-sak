@@ -1,4 +1,4 @@
-package no.nav.ung.sak.etterlysning;
+package no.nav.ung.sak.behandlingslager.vilkårsavklaring;
 
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

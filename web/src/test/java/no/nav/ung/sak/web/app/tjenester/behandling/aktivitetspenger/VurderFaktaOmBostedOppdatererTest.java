@@ -31,10 +31,10 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
-import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
@@ -50,7 +50,7 @@ import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedAvklaringTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedsAvklaringDataMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -90,7 +90,7 @@ class VurderFaktaOmBostedOppdatererTest {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private VurderFaktaOmBostedOppdaterer oppdaterer;
     private Behandling behandling;
-    private BostedAvklaringTjeneste bostedAvklaringTjeneste;
+    private VilkårsavklaringTjeneste vilkårsavklaringTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     @BeforeAll
@@ -115,14 +115,14 @@ class VurderFaktaOmBostedOppdatererTest {
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(vilkårsavklaringGrunnlagRepository, inngangsvilkårVurderingTjeneste);
+        vilkårsavklaringTjeneste = new VilkårsavklaringTjeneste(vilkårsavklaringGrunnlagRepository);
         var vilkårsavklaringEtterlysningTjeneste = new VilkårsavklaringEtterlysningTjeneste(etterlysningRepository, prosessTaskTjeneste);
 
         oppdaterer = new VurderFaktaOmBostedOppdaterer(
             behandlingRepository,
             historikkinnslagRepository,
             vilkårsavklaringEtterlysningTjeneste,
-            bostedAvklaringTjeneste,
+            vilkårsavklaringTjeneste,
             inngangsvilkårVurderingTjeneste
         );
 
@@ -136,7 +136,7 @@ class VurderFaktaOmBostedOppdatererTest {
         var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
         var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto, behandling);
 
-        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(bostedAvklaringPeriode));
+        vilkårsavklaringTjeneste.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(bostedAvklaringPeriode), BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold);
 
         oppdater(dto);
 
@@ -147,7 +147,7 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
         var opprinnelig = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "opprinnelig begrunnelse");
-        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(konverterTilBostedAvklaringPeriode(opprinnelig, behandling)));
+        vilkårsavklaringTjeneste.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(konverterTilBostedAvklaringPeriode(opprinnelig, behandling)), BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold);
 
         oppdater(dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "rettet begrunnelse"));
 
@@ -162,11 +162,8 @@ class VurderFaktaOmBostedOppdatererTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
-    private static VilkårPeriodeAvklaringForeslått konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
-        return BostedsAvklaringDataMapper.mapTilVilkårPeriodeAvklaring(
-            BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now()),
-            UUID.randomUUID()
-        );
+    private static BostedAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
+        return BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now());
     }
 
     @Test

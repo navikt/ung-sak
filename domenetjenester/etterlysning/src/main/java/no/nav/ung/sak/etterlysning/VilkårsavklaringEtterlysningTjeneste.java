@@ -9,6 +9,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsvarselInnhold;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
