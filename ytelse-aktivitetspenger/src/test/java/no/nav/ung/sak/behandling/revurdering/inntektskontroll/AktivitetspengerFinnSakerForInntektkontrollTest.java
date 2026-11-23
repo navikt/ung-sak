@@ -28,9 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(CdiAwareExtension.class)
 class AktivitetspengerFinnSakerForInntektkontrollTest {
 
-    private static final LocalDate NOVEMBER_START = LocalDate.of(2026, 11, 1);
-    private static final LocalDate NOVEMBER_SLUTT = LocalDate.of(2026, 11, 30);
-    private static final LocalDate DESEMBER_SLUTT = LocalDate.of(2026, 12, 31);
+    private static final LocalDate JANUAR_START = LocalDate.of(2027, 1, 1);
+    private static final LocalDate JANUAR_SLUTT = LocalDate.of(2027, 1, 31);
+    private static final LocalDate FEBRUAR_SLUTT = LocalDate.of(2027, 2, 28);
 
     @Inject
     private EntityManager entityManager;
@@ -38,13 +38,13 @@ class AktivitetspengerFinnSakerForInntektkontrollTest {
     private FinnSakerForInntektkontroll finnSakerForInntektkontroll;
 
     @Test
-    void skal_velge_delvis_innvilget_november_og_ikke_helt_avslått_eller_innvilget_utenfor_måneden() {
+    void skal_velge_delvis_innvilget_januar_og_ikke_helt_avslått_eller_innvilget_utenfor_måneden() {
         var repositories = AktivitetspengerTestRepositories.lagAlleAktivitetspengerTestRepositoriesOgAbakusTjeneste(entityManager, null);
-        var delvisInnvilget = lagreScenario(repositories, scenario(NOVEMBER_START.plusDays(8), NOVEMBER_START.plusDays(9)));
-        lagreScenario(repositories, scenario(DESEMBER_SLUTT, LocalDate.of(2027, 1, 1)));
-        lagreScenario(repositories, scenario(NOVEMBER_SLUTT, NOVEMBER_START.plusMonths(1)));
+        var delvisInnvilget = lagreScenario(repositories, scenario(JANUAR_START.plusDays(8), JANUAR_START.plusDays(9)));
+        lagreScenario(repositories, scenario(FEBRUAR_SLUTT, LocalDate.of(2027, 3, 1)));
+        lagreScenario(repositories, scenario(JANUAR_SLUTT, JANUAR_START.plusMonths(1)));
 
-        List<Fagsak> fagsaker = finnSakerForInntektkontroll.finnFagsaker(NOVEMBER_START, NOVEMBER_SLUTT);
+        List<Fagsak> fagsaker = finnSakerForInntektkontroll.finnFagsaker(JANUAR_START, JANUAR_SLUTT);
 
         assertThat(fagsaker).containsExactly(delvisInnvilget.getFagsak());
     }
@@ -53,27 +53,27 @@ class AktivitetspengerFinnSakerForInntektkontrollTest {
         AktivitetspengerTestRepositories repositories,
         AktivitetspengerTestScenario scenario) {
         return AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medSøknadDato(NOVEMBER_START)
+            .medSøknadDato(JANUAR_START)
             .medAktivitetspengerTestGrunnlag(scenario)
             .buildOgLagreMedAktivitspenger(repositories);
     }
 
     private static AktivitetspengerTestScenario scenario(LocalDate avslåttTom, LocalDate innvilgetFom) {
-        var fagsakPeriode = new LocalDateTimeline<>(NOVEMBER_START, DESEMBER_SLUTT, VilkårUtfall.oppfylt());
+        var fagsakPeriode = new LocalDateTimeline<>(JANUAR_START, FEBRUAR_SLUTT, VilkårUtfall.oppfylt());
         var bostedsvilkår = new ArrayList<LocalDateSegment<VilkårUtfall>>();
-        if (!avslåttTom.isBefore(NOVEMBER_START)) {
+        if (!avslåttTom.isBefore(JANUAR_START)) {
             bostedsvilkår.add(new LocalDateSegment<>(
-                NOVEMBER_START, avslåttTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET)));
+                JANUAR_START, avslåttTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET)));
         }
-        if (!innvilgetFom.isAfter(DESEMBER_SLUTT)) {
+        if (!innvilgetFom.isAfter(FEBRUAR_SLUTT)) {
             bostedsvilkår.add(new LocalDateSegment<>(
-                innvilgetFom, DESEMBER_SLUTT, VilkårUtfall.oppfylt()));
+                innvilgetFom, FEBRUAR_SLUTT, VilkårUtfall.oppfylt()));
         }
 
         return AktivitetspengerTestScenario.builder()
             .medNavn("Test")
-            .medSøknadsperioder(List.of(new Periode(NOVEMBER_START, DESEMBER_SLUTT)))
-            .medFødselsdato(NOVEMBER_START.minusYears(30))
+            .medSøknadsperioder(List.of(new Periode(JANUAR_START, FEBRUAR_SLUTT)))
+            .medFødselsdato(JANUAR_START.minusYears(30))
             .medVilkår(VilkårType.ALDERSVILKÅR, fagsakPeriode)
             .medVilkår(VilkårType.BOSTEDSVILKÅR, new LocalDateTimeline<>(bostedsvilkår))
             .medVilkår(VilkårType.BISTANDSVILKÅR, fagsakPeriode)
