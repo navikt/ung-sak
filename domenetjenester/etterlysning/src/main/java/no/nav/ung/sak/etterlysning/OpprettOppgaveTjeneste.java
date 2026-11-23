@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.aktivitet.AktivitetOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.bistand.BistandOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.bosted.BostedOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.kontroll.InntektkontrollOppgaveOppretter;
@@ -38,6 +39,7 @@ public class OpprettOppgaveTjeneste {
     private final BostedOppgaveOppretter bostedOppgaveOppretter;
     private final AndreLivsoppholdsytelserOppgaveOppretter andreLivsoppholdsytelserOppgaveOppretter;
     private final BistandOppgaveOppretter bistandOppgaveOppretter;
+    private final AktivitetOppgaveOppretter aktivitetOppgaveOppretter;
     private final EtterlysningRepository etterlysningRepository;
     private final HistorikkinnslagRepository historikkinnslagRepository;
     private final Duration ventePeriode;
@@ -52,6 +54,7 @@ public class OpprettOppgaveTjeneste {
         BostedOppgaveOppretter bostedOppgaveOppretter,
         AndreLivsoppholdsytelserOppgaveOppretter andreLivsoppholdsytelserOppgaveOppretter,
         BistandOppgaveOppretter bistandOppgaveOppretter,
+        AktivitetOppgaveOppretter aktivitetOppgaveOppretter,
         EtterlysningRepository etterlysningRepository,
         HistorikkinnslagRepository historikkinnslagRepository,
         @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode
@@ -64,6 +67,7 @@ public class OpprettOppgaveTjeneste {
         this.bostedOppgaveOppretter = bostedOppgaveOppretter;
         this.andreLivsoppholdsytelserOppgaveOppretter = andreLivsoppholdsytelserOppgaveOppretter;
         this.bistandOppgaveOppretter = bistandOppgaveOppretter;
+        this.aktivitetOppgaveOppretter = aktivitetOppgaveOppretter;
         this.etterlysningRepository = etterlysningRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.ventePeriode = Duration.parse(ventePeriode);
@@ -94,6 +98,8 @@ public class OpprettOppgaveTjeneste {
                 andreLivsoppholdsytelserOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
             case UTTALELSE_BISTAND ->
                 bistandOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
+            case UTTALELSE_AKTIVITET ->
+                aktivitetOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
             default ->
                 throw new IllegalArgumentException("Har ikke implementert oppretting av oppgave for etterlysningstype: " + etterlysningType);
         }
@@ -132,6 +138,7 @@ public class OpprettOppgaveTjeneste {
             case UTTALELSE_OPPHOR_VED_MAKSDATO -> "Varsel: Opphør ved maksdato";
             case UTTALELSE_BOSTED -> "Varsel: Bostedavklaring";
             case UTTALELSE_BISTAND -> "Varsel: Bistandsavklaring";
+            case UTTALELSE_AKTIVITET -> "Varsel: Aktivitetsavklaring";
             case UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER -> "Varsel: Avklaring av andre livsoppholdsytelser";
         };
     }

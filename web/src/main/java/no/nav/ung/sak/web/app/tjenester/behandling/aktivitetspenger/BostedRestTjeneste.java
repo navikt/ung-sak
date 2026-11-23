@@ -121,7 +121,7 @@ public class BostedRestTjeneste {
         var faktaOgResultat = lagFaktaOgResultatTidslinje(søknadsfaktaGrunnlag.get(), behandling);
 
         var relevanteVilkårsperioder = vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
-            .map(v -> InngangsvilkårVurderingTjeneste.alleRelevanteVilkårsperioder(v, VilkårType.BOSTEDSVILKÅR))
+            .map(v -> InngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(v, VilkårType.BOSTEDSVILKÅR))
             .orElse(LocalDateTimeline.empty());
 
         // Søknadsfakta uten avklaring eller vurdering vises kun innenfor vilkårsperiodene
