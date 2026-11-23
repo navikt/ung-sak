@@ -26,6 +26,8 @@ import java.util.Set;
  * Oppretter én {@link LagreVedtattYtelseTask} per avsluttet, ikke henlagt ytelsesbehandling, i kronologisk rekkefølge per fagsak.
  * Behandlingene i én fagsak kjøres sekvensielt for å unngå samtidige skrivinger på samme sak.
  * Fagsakene behandles i bolker, og hver bolk oppretter neste bolk. Kan kjøres på nytt, siden lagringen er idempotent.
+ * <p>
+ * Dryrun går gjennom alle bolkene uten å opprette lagringstasker, og logger totalt antall vedtak til slutt.
  */
 @ApplicationScoped
 @ProsessTask(MigrerVedtattYtelseTilSamordningTask.TASKTYPE)
@@ -33,9 +35,14 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
 
     public static final String TASKTYPE = "migrer.vedtak.samordning";
 
-    public static final String FRA_OG_MED_FAGSAK_ID = "fraOgMedFagsakId";
+    /** Bare fagsaker med høyere id enn denne tas med. */
+    public static final String ETTER_FAGSAK_ID = "etterFagsakId";
     public static final String ANTALL = "antall";
     public static final String DRY_RUN = "dryrun";
+
+    // Summeres fra bolk til bolk, slik at siste bolk kan logge totalen
+    static final String TOTALT_VEDTAK = "totaltVedtak";
+    static final String TOTALT_SAKER = "totaltSaker";
 
     static final Set<FagsakYtelseType> YTELSER = Set.of(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER);
 
@@ -62,45 +69,42 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        long fraOgMedFagsakId = lesLong(prosessTaskData, FRA_OG_MED_FAGSAK_ID, 0L);
+        long etterFagsakId = lesLong(prosessTaskData, ETTER_FAGSAK_ID, 0L);
         int antall = (int) lesLong(prosessTaskData, ANTALL, STANDARD_ANTALL);
         boolean dryRun = Boolean.parseBoolean(prosessTaskData.getPropertyValue(DRY_RUN));
 
-        List<Fagsak> fagsaker = hentNesteFagsaker(fraOgMedFagsakId, antall);
-        if (fagsaker.isEmpty()) {
-            log.info("Migrering av vedtak til samordning er ferdig. Ingen flere saker etter fagsakId={}.", fraOgMedFagsakId);
-            return;
-        }
-
+        List<Fagsak> fagsaker = hentNesteFagsaker(etterFagsakId, antall);
         var grupper = fagsaker.stream()
             .map(this::opprettLagringstasker)
             .flatMap(Optional::stream)
             .toList();
         int antallVedtak = grupper.stream().mapToInt(g -> g.getTasks().size()).sum();
+        long totaltVedtak = lesLong(prosessTaskData, TOTALT_VEDTAK, 0L) + antallVedtak;
+        long totaltSaker = lesLong(prosessTaskData, TOTALT_SAKER, 0L) + grupper.size();
 
-        long sisteFagsakId = fagsaker.getLast().getId();
-        if (dryRun) {
-            log.info("Dryrun: {} vedtak fra {} av {} saker mellom fagsakId={} og {} ville blitt lagret for samordning.",
-                antallVedtak, grupper.size(), fagsaker.size(), fraOgMedFagsakId, sisteFagsakId);
+        if (!dryRun) {
+            grupper.forEach(prosessTaskTjeneste::lagre);
+        }
+        String prefiks = dryRun ? "Dryrun: " : "";
+
+        if (!fagsaker.isEmpty()) {
+            log.info("{}{} vedtak fra {} av {} saker etter fagsakId={} til og med {} for samordning.",
+                prefiks, antallVedtak, grupper.size(), fagsaker.size(), etterFagsakId, fagsaker.getLast().getId());
+        }
+
+        if (!fagsaker.isEmpty() && fagsaker.size() == antall) {
+            prosessTaskTjeneste.lagre(nesteBolk(fagsaker.getLast().getId(), antall, dryRun, totaltVedtak, totaltSaker));
             return;
         }
-
-        grupper.forEach(prosessTaskTjeneste::lagre);
-
-        log.info("Opprettet lagring av {} vedtak fra {} av {} saker mellom fagsakId={} og {} for samordning.",
-            antallVedtak, grupper.size(), fagsaker.size(), fraOgMedFagsakId, sisteFagsakId);
-
-        if (fagsaker.size() == antall) {
-            prosessTaskTjeneste.lagre(nesteBolk(sisteFagsakId, antall));
-        }
+        log.info("{}Migrering av vedtak til samordning er ferdig. Totalt {} vedtak fra {} saker.", prefiks, totaltVedtak, totaltSaker);
     }
 
-    private List<Fagsak> hentNesteFagsaker(long fraOgMedFagsakId, int antall) {
+    private List<Fagsak> hentNesteFagsaker(long etterFagsakId, int antall) {
         TypedQuery<Fagsak> query = entityManager.createQuery(
             "SELECT f FROM Fagsak f WHERE f.ytelseType IN (:ytelseTyper) AND f.id > :fagsakId ORDER BY f.id",
             Fagsak.class);
         query.setParameter("ytelseTyper", YTELSER);
-        query.setParameter("fagsakId", fraOgMedFagsakId);
+        query.setParameter("fagsakId", etterFagsakId);
         query.setMaxResults(antall);
         return query.getResultList();
     }
@@ -124,10 +128,13 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
         return taskData;
     }
 
-    private static ProsessTaskData nesteBolk(long sisteFagsakId, int antall) {
+    private static ProsessTaskData nesteBolk(long sisteFagsakId, int antall, boolean dryRun, long totaltVedtak, long totaltSaker) {
         var taskData = ProsessTaskData.forProsessTask(MigrerVedtattYtelseTilSamordningTask.class);
-        taskData.setProperty(FRA_OG_MED_FAGSAK_ID, Long.toString(sisteFagsakId));
+        taskData.setProperty(ETTER_FAGSAK_ID, Long.toString(sisteFagsakId));
         taskData.setProperty(ANTALL, Integer.toString(antall));
+        taskData.setProperty(DRY_RUN, Boolean.toString(dryRun));
+        taskData.setProperty(TOTALT_VEDTAK, Long.toString(totaltVedtak));
+        taskData.setProperty(TOTALT_SAKER, Long.toString(totaltSaker));
         taskData.setCallIdFraEksisterende();
         return taskData;
     }

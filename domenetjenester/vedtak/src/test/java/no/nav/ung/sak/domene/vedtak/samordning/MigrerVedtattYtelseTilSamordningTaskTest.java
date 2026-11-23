@@ -103,14 +103,35 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
     }
 
     @Test
-    void skal_ikke_opprette_tasker_ved_dryrun() {
+    void skal_ikke_opprette_lagringstasker_ved_dryrun() {
         var upy = lagFagsak(FagsakYtelseType.UNGDOMSYTELSE);
         medBehandlinger(upy, 101L);
 
-        task.doTask(bolk(upy.getId() - 1, 1, true));
+        task.doTask(bolk(upy.getId() - 1, 100, true));
 
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
+    }
+
+    @Test
+    void skal_fortsette_dryrun_i_neste_bolk_og_summere_antall_vedtak() {
+        var første = lagFagsak(FagsakYtelseType.UNGDOMSYTELSE);
+        var andre = lagFagsak(FagsakYtelseType.AKTIVITETSPENGER);
+        medBehandlinger(første, 102L, 101L);
+        medBehandlinger(andre, 201L);
+
+        task.doTask(bolk(første.getId() - 1, 1, true));
+        var andreBolk = sisteBolk();
+        task.doTask(andreBolk);
+        var tredjeBolk = sisteBolk();
+
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
+        assertThat(andreBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.DRY_RUN)).isEqualTo("true");
+        assertThat(andreBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.TOTALT_VEDTAK)).isEqualTo("2");
+        assertThat(andreBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.TOTALT_SAKER)).isEqualTo("1");
+        assertThat(tredjeBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.ETTER_FAGSAK_ID)).isEqualTo(Long.toString(andre.getId()));
+        assertThat(tredjeBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.TOTALT_VEDTAK)).isEqualTo("3");
+        assertThat(tredjeBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.TOTALT_SAKER)).isEqualTo("2");
     }
 
     @Test
@@ -120,12 +141,11 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
 
         task.doTask(bolk(første.getId() - 1, 1, false));
 
-        var captor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskTjeneste).lagre(captor.capture());
-        var nesteBolk = captor.getValue();
+        var nesteBolk = sisteBolk();
         assertThat(nesteBolk.getTaskType()).isEqualTo(MigrerVedtattYtelseTilSamordningTask.TASKTYPE);
-        assertThat(nesteBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.FRA_OG_MED_FAGSAK_ID)).isEqualTo(Long.toString(første.getId()));
+        assertThat(nesteBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.ETTER_FAGSAK_ID)).isEqualTo(Long.toString(første.getId()));
         assertThat(nesteBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.ANTALL)).isEqualTo("1");
+        assertThat(nesteBolk.getPropertyValue(MigrerVedtattYtelseTilSamordningTask.DRY_RUN)).isEqualTo("false");
     }
 
     private Fagsak lagFagsak(FagsakYtelseType ytelseType) {
@@ -153,6 +173,12 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
         return captor.getAllValues();
     }
 
+    private ProsessTaskData sisteBolk() {
+        var captor = ArgumentCaptor.forClass(ProsessTaskData.class);
+        verify(prosessTaskTjeneste, atLeast(1)).lagre(captor.capture());
+        return captor.getValue();
+    }
+
     private static List<String> behandlingIder(ProsessTaskGruppe gruppe) {
         return gruppe.getTasks().stream().map(e -> e.getTask().getBehandlingId()).toList();
     }
@@ -161,10 +187,10 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
         return gruppe.getTasks().stream().map(e -> e.getTask().getTaskType()).toList();
     }
 
-    private static ProsessTaskData bolk(long fraOgMedFagsakId, int antall, boolean dryRun) {
+    private static ProsessTaskData bolk(long etterFagsakId, int antall, boolean dryRun) {
         var taskData = ProsessTaskData.forProsessTask(MigrerVedtattYtelseTilSamordningTask.class);
         Map.of(
-            MigrerVedtattYtelseTilSamordningTask.FRA_OG_MED_FAGSAK_ID, Long.toString(fraOgMedFagsakId),
+            MigrerVedtattYtelseTilSamordningTask.ETTER_FAGSAK_ID, Long.toString(etterFagsakId),
             MigrerVedtattYtelseTilSamordningTask.ANTALL, Integer.toString(antall),
             MigrerVedtattYtelseTilSamordningTask.DRY_RUN, Boolean.toString(dryRun)
         ).forEach(taskData::setProperty);

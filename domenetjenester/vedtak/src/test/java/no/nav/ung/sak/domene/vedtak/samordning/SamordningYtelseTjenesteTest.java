@@ -204,10 +204,12 @@ class SamordningYtelseTjenesteTest {
     }
 
     @Test
-    void skal_tolke_standardverdien_for_ytelser_som_begge_ung_ytelser() {
+    void skal_tolke_standardverdi_og_tom_liste_for_ytelser_som_begge_ung_ytelser() {
         assertThat(SamordningYtelseTjeneste.utledYtelseTyper(VedtakForPeriodeRequest.ALLE_YTELSER))
             .containsExactlyInAnyOrder(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER);
         assertThat(SamordningYtelseTjeneste.utledYtelseTyper(null))
+            .containsExactlyInAnyOrder(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER);
+        assertThat(SamordningYtelseTjeneste.utledYtelseTyper(Set.of()))
             .containsExactlyInAnyOrder(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER);
         assertThat(SamordningYtelseTjeneste.utledYtelseTyper(Set.of(Ytelser.UNGDOMSYTELSE, Ytelser.FORELDREPENGER)))
             .containsExactly(FagsakYtelseType.UNGDOMSYTELSE);

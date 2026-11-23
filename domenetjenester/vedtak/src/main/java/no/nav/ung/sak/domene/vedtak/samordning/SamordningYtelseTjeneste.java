@@ -82,10 +82,11 @@ public class SamordningYtelseTjeneste {
 
     /**
      * {@link VedtakForPeriodeRequest#ALLE_YTELSER} er standardverdien når konsumenten ikke oppgir ytelser,
-     * men den inneholder ikke UNG-ytelsene. Da tolkes forespørselen som «alle ytelser vi har».
+     * men den inneholder ikke UNG-ytelsene. Da tolkes forespørselen som «alle ytelser vi har», på samme måte som
+     * en tom liste.
      */
     static Set<FagsakYtelseType> utledYtelseTyper(Set<Ytelser> forespurteYtelser) {
-        if (forespurteYtelser == null || forespurteYtelser.equals(VedtakForPeriodeRequest.ALLE_YTELSER)) {
+        if (forespurteYtelser == null || forespurteYtelser.isEmpty() || forespurteYtelser.equals(VedtakForPeriodeRequest.ALLE_YTELSER)) {
             return EnumSet.copyOf(STØTTEDE_YTELSER.keySet());
         }
         return STØTTEDE_YTELSER.entrySet().stream()
