@@ -8,6 +8,8 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
@@ -22,6 +24,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -50,6 +53,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.parallellbehandling.ParallellBehandlingVentRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.soknad.SøknadStatistikkRecord;
@@ -266,14 +270,16 @@ class BigQueryStatistikkRepositoryTest {
         // Og ungdomsytelsen skal publisere til de opprinnelige tabellene, uten søknadsstatistikk
         assertThat(ungPerTabell.keySet()).containsExactlyInAnyOrder(
             "fagsak_status_v2", "behandling_status", "aksjonspunkter_status", "sats_statistikk",
-            "behandlingsresultat_statistikk_v2", "etterlysning", "uttalelse", "behandling_årsak"
+            "behandlingsresultat_statistikk_v2", "etterlysning", "uttalelse", "behandling_årsak",
+            "parallelle_behandlinger_vent"
         );
 
         // Og aktivitetspenger skal publisere til egne tabeller, inkludert søknadsstatistikk
         assertThat(aktPerTabell.keySet()).containsExactlyInAnyOrder(
             "aktivitetspenger_fagsak_status", "aktivitetspenger_behandling_status", "aktivitetspenger_aksjonspunkter_status",
             "aktivitetspenger_sats_statistikk", "aktivitetspenger_behandlingsresultat_statistikk", "aktivitetspenger_etterlysning",
-            "aktivitetspenger_uttalelse", "aktivitetspenger_behandling_årsak", "aktivitetspenger_soknad_mottatt"
+            "aktivitetspenger_uttalelse", "aktivitetspenger_behandling_årsak", "aktivitetspenger_soknad_mottatt",
+            "aktivitetspenger_parallelle_behandlinger_vent"
         );
 
         // Og fagsak-status skal være separert per ytelse
@@ -304,6 +310,50 @@ class BigQueryStatistikkRepositoryTest {
         assertThat(aksjonspunktRecords)
             .extracting(AksjonspunktRecord::ytelseType, AksjonspunktRecord::aksjonspunktDefinisjon)
             .containsExactly(org.assertj.core.groups.Tuple.tuple(ytelse, AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = FagsakYtelseType.class, names = {"UNGDOMSYTELSE", "AKTIVITETSPENGER"})
+    void skal_telle_behandlinger_som_venter_i_porten_med_eldste_ventetid(FagsakYtelseType ytelse) {
+        Fagsak fagsakLengeVentende = byggFagsak(ytelse, FagsakStatus.LØPENDE);
+        Fagsak fagsakNyligVentende = byggFagsak(ytelse, FagsakStatus.LØPENDE);
+        Fagsak fagsakTattAvVent = byggFagsak(ytelse, FagsakStatus.LØPENDE);
+        Fagsak fagsakAnnenYtelse = byggFagsak(annenYtelse(ytelse), FagsakStatus.LØPENDE);
+        lagreFagsaker(List.of(fagsakLengeVentende, fagsakNyligVentende, fagsakTattAvVent, fagsakAnnenYtelse));
+
+        // Gitt to kontrollbehandlinger som venter i porten, der den ene kom dit for ni dager siden
+        Behandling lengeVentende = lagreBehandlingIPorten(fagsakLengeVentende, BehandlingType.KONTROLL, true);
+        lagreBehandlingIPorten(fagsakNyligVentende, BehandlingType.KONTROLL, true);
+        entityManager.createNativeQuery("update behandling_steg_tilstand set opprettet_tid = :tid where behandling_id = :id and aktiv = true")
+            .setParameter("tid", LocalDateTime.now().minusDays(9))
+            .setParameter("id", lengeVentende.getId())
+            .executeUpdate();
+
+        // Og en behandling som er tatt av vent i porten, og en som venter i porten for en annen ytelse
+        lagreBehandlingIPorten(fagsakTattAvVent, BehandlingType.FØRSTEGANGSSØKNAD, false);
+        lagreBehandlingIPorten(fagsakAnnenYtelse, BehandlingType.KONTROLL, true);
+
+        // Når vi henter statistikken for porten
+        Collection<ParallellBehandlingVentRecord> records = statistikkRepository.parallellBehandlingVentStatistikk(ytelse);
+
+        // Så skal bare de ventende behandlingene for oppgitt ytelse telles, med ventetiden til den eldste
+        assertThat(records).hasSize(1);
+        ParallellBehandlingVentRecord kontroll = records.iterator().next();
+        assertThat(kontroll.ytelseType()).isEqualTo(ytelse);
+        assertThat(kontroll.behandlingType()).isEqualTo(BehandlingType.KONTROLL);
+        assertThat(kontroll.antall()).isEqualTo(2L);
+        assertThat(kontroll.eldsteVentetidTimer()).isBetween(9 * 24L, 9 * 24L + 1);
+    }
+
+    private Behandling lagreBehandlingIPorten(Fagsak fagsak, BehandlingType behandlingType, boolean venter) {
+        Behandling behandling = byggBehandlingForFagsak(fagsak, behandlingType, BehandlingStatus.UTREDES);
+        new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER, BehandlingStegStatus.VENTER);
+        Aksjonspunkt ventepunkt = leggTilAksjonspunktPåBehandling(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING);
+        if (!venter) {
+            new AksjonspunktTestSupport().setTilUtført(ventepunkt, "tatt av vent");
+        }
+        lagreBehandling(behandling);
+        return behandling;
     }
 
 
