@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -18,6 +19,7 @@ import no.nav.ung.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -105,6 +107,46 @@ public class BehandlingRepositoryTest {
         assertThatThrownBy(() -> behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.KONTROLL, BehandlingStatus.UTREDES))
             .isInstanceOf(PersistenceException.class)
             .hasStackTraceContaining("uidx_behandling_aapen_kontroll_per_fagsak");
+    }
+
+    @Test
+    public void ny_originalbehandling_må_være_avsluttet_ikke_henlagt_og_tilhøre_samme_fagsak() {
+        var fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.UNGDOMSYTELSE);
+        var vedtatt = behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.REVURDERING, BehandlingStatus.AVSLUTTET);
+        var henlagt = lagreBehandling(fagsak, BehandlingStatus.AVSLUTTET, BehandlingResultatType.HENLAGT_MASKINELT);
+        var underIverksetting = behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.REVURDERING, BehandlingStatus.IVERKSETTER_VEDTAK);
+        var annenFagsak = behandlingBuilder.opprettNyBehandling(behandlingBuilder.opprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy()), BehandlingType.REVURDERING, BehandlingStatus.AVSLUTTET);
+        var kontroll = behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.KONTROLL, BehandlingStatus.UTREDES);
+
+        assertThatThrownBy(() -> kontroll.oppdaterOriginalBehandling(henlagt)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> kontroll.oppdaterOriginalBehandling(underIverksetting)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> kontroll.oppdaterOriginalBehandling(annenFagsak)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(kontroll.getOriginalBehandlingId()).isEmpty();
+
+        kontroll.oppdaterOriginalBehandling(vedtatt);
+
+        assertThat(kontroll.getOriginalBehandlingId()).contains(vedtatt.getId());
+    }
+
+    @Test
+    public void originalbehandling_kan_ikke_oppdateres_når_behandlingen_fatter_vedtak() {
+        var fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.UNGDOMSYTELSE);
+        var vedtatt = behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.REVURDERING, BehandlingStatus.AVSLUTTET);
+        var kontroll = behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.KONTROLL, BehandlingStatus.FATTER_VEDTAK);
+
+        assertThatThrownBy(() -> kontroll.oppdaterOriginalBehandling(vedtatt))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("UTREDES");
+    }
+
+    private Behandling lagreBehandling(Fagsak fagsak, BehandlingStatus status, BehandlingResultatType resultatType) {
+        var behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.REVURDERING)
+            .medBehandlingStatus(status)
+            .medBehandlingResultatType(resultatType)
+            .build();
+        behandlingRepository.lagre(behandling);
+        entityManager.flush();
+        return behandling;
     }
 }
 
