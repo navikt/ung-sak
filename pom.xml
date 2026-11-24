@@ -47,7 +47,7 @@
         <asm.version>9.10.1</asm.version>
         <kotlin-stdlib.version>2.4.10</kotlin-stdlib.version>
         <jandex.version>3.6.0</jandex.version>
-        <pdfgen-core.version>1.1.82</pdfgen-core.version>
+        <pdfgen-core.version>2.0.1</pdfgen-core.version>
         <flyway.version>12.10.0</flyway.version>
         <confluent.platform.version>8.3.0</confluent.platform.version>
         <mockito.version>5.23.0</mockito.version>
