@@ -521,6 +521,32 @@ class FagsakProsessTaskRepositoryTest {
         assertThat(fagsakIder).containsOnlyOnce(fagsakId).doesNotContain(annenFagsakId);
     }
 
+    @Test
+    void finnesUferdigTaskForFagsak_finner_fagsaktask_uten_behandling_av_riktig_type() {
+        ProsessTaskData task = ProsessTaskData.forTaskType(taskTypeA);
+        task.setFagsakId(fagsakId);
+        fagsakProsessTaskRepository.lagreNyGruppe(task);
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, null, task.getId(), 100L, task.getTaskType()));
+        entityManager.flush();
+
+        assertThat(fagsakProsessTaskRepository.finnesUferdigTaskForFagsak(fagsakId, taskTypeA.value())).isTrue();
+        assertThat(fagsakProsessTaskRepository.finnesUferdigTaskForFagsak(fagsakId, taskTypeB.value())).isFalse();
+    }
+
+    @Test
+    void finnesUferdigTaskForFagsak_finner_ikke_task_når_koblingen_er_fjernet() {
+        ProsessTaskData task = ProsessTaskData.forTaskType(taskTypeA);
+        task.setFagsakId(fagsakId);
+        fagsakProsessTaskRepository.lagreNyGruppe(task);
+        fagsakProsessTaskRepository.lagre(new FagsakProsessTask(fagsakId, null, task.getId(), 100L, task.getTaskType()));
+        entityManager.flush();
+
+        fagsakProsessTaskRepository.fjern(fagsakId, task.getId(), 100L);
+        entityManager.flush();
+
+        assertThat(fagsakProsessTaskRepository.finnesUferdigTaskForFagsak(fagsakId, taskTypeA.value())).isFalse();
+    }
+
     /** Kobling til en prosesstask som ikke lenger finnes, slik ryddProsessTasks har etterlatt i prod. */
     private Long lagKoblingUtenProsessTask(Long gruppeSekvensNr) {
         ProsessTaskData task = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
