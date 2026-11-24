@@ -31,6 +31,11 @@ public class AktivitetspengerInformasjonselementerUtleder implements Informasjon
         BehandlingType.REVURDERING,
         Set.of(
             INNTEKT_AKTIVITETSPENGERGRUNNLAG,
+            LIGNET_NÆRING),
+        // Samme informasjonselementer som en revurdering for kontroll av inntekt
+        BehandlingType.KONTROLL,
+        Set.of(
+            INNTEKT_AKTIVITETSPENGERGRUNNLAG,
             LIGNET_NÆRING));
 
     private boolean aktivitetspengerInntektsgrunnlagEnabled;

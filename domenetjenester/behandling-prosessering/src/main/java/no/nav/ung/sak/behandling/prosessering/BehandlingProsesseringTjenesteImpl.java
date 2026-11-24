@@ -356,6 +356,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private boolean skalInnhentePersonopplysningerPåNytt(Behandling behandling) {
+        if (behandling.erKontrollbehandling()) {
+            // Kontrollbehandlingen bygger på vedtatte personopplysninger, som kopieres og synkes fra andre behandlinger
+            return false;
+        }
         return !behandling.erRevurdering() || BehandlingÅrsakType.årsakerForInnhentingAvPersonopplysninger().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
     }
 
