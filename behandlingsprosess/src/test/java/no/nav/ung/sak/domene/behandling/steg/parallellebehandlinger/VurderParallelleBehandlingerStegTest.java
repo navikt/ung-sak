@@ -131,6 +131,24 @@ class VurderParallelleBehandlingerStegTest {
     }
 
     @Test
+    void ser_annen_behandling_som_har_passert_porten_selv_om_sesjonen_har_gammel_tilstand() {
+        avslutt(førstegangsbehandling);
+        var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_KOMPLETTHET);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+
+        // Gitt at revurderingen har gått til beregning i en annen transaksjon etter at sesjonen lastet den
+        entityManager.createNativeQuery("update behandling_steg_tilstand set behandling_steg = :steg where behandling_id = :id and aktiv = true")
+            .setParameter("steg", BEREGN_YTELSE.getKode())
+            .setParameter("id", revurdering.getId())
+            .executeUpdate();
+        assertThat(behandlingRepository.hentBehandling(revurdering.getId()).getAktivtBehandlingSteg()).isEqualTo(VURDER_KOMPLETTHET);
+
+        var resultat = steg.utførSteg(kontekst(kontroll));
+
+        assertVenter(resultat);
+    }
+
+    @Test
     void venter_på_annen_behandling_som_fatter_vedtak() {
         avslutt(førstegangsbehandling);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, FATTE_VEDTAK);

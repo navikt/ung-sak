@@ -19,6 +19,7 @@ class BehandlingStegDelTest {
         assertThat(BehandlingStegDel.forAktivitetspenger(BehandlingStegType.START_STEG)).isEqualTo(BehandlingDel.SENTRAL);
         assertThat(BehandlingStegDel.forAktivitetspenger(BehandlingStegType.FORESLÅ_VEDTAK)).isEqualTo(BehandlingDel.SENTRAL);
         assertThat(BehandlingStegDel.forAktivitetspenger(BehandlingStegType.FATTE_VEDTAK)).isEqualTo(BehandlingDel.SENTRAL);
+        assertThat(BehandlingStegDel.forAktivitetspenger(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER)).isEqualTo(BehandlingDel.SENTRAL);
     }
 
     @Test

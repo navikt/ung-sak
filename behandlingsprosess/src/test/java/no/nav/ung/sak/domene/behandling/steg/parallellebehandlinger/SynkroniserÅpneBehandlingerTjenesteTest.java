@@ -242,6 +242,26 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
     }
 
     @Test
+    void henlagt_kontrollbehandling_blir_ikke_kilde_og_ventende_behandling_tas_bare_av_vent() {
+        var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
+        settPåVentIPorten(revurdering);
+        var kontroll = nyBehandling(BehandlingType.KONTROLL, KONTROLLER_REGISTER_INNTEKT);
+        lagreUttalelse(kontroll, EndringType.ENDRET_INNTEKT, 1);
+        tilkjentYtelseRepository.lagre(kontroll.getId(), List.of(kontrollperiode(BigDecimal.TEN)));
+        kontroll.setBehandlingResultatType(BehandlingResultatType.HENLAGT_MASKINELT);
+        kontroll.avsluttBehandling();
+        lagreOgFlush(kontroll);
+
+        tjeneste.synkroniser(synkTask());
+
+        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(revurdering, false);
+        verify(behandlingProsesseringTjeneste, never()).opprettTaskGruppeForSynkronisering(any());
+        assertThat(behandlingRepository.hentBehandling(revurdering.getId()).getOriginalBehandlingId()).contains(førstegangsbehandling.getId());
+        assertThat(tilkjentYtelseRepository.hentKontrollertInntektPerioder(revurdering.getId())).isEmpty();
+        assertThat(uttalelseRepository.hentUttalelser(revurdering.getId(), EndringType.values())).isEmpty();
+    }
+
+    @Test
     void feiler_når_behandling_som_ikke_bygger_på_siste_vedtak_er_forbi_porten() {
         var revurdering = nyBehandling(BehandlingType.REVURDERING, BEREGN_YTELSE);
         var kontroll = nyBehandling(BehandlingType.KONTROLL, KONTROLLER_REGISTER_INNTEKT);
