@@ -203,7 +203,6 @@ class SamordningYtelseTjenesteTest {
     private static YtelseAnvist beregnet(LocalDate fom, LocalDate tom, String dagsats, String beløp, int antallBarn, int dagsatsBarnetillegg) {
         return YtelseAnvist.builder(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .medDagsats(new BigDecimal(dagsats))
-            .medUtbetalingsgrad(BigDecimal.ZERO)
             .medBeløp(new BigDecimal(beløp))
             .medAntallBarn(antallBarn)
             .medDagsatsBarnetillegg(dagsatsBarnetillegg)

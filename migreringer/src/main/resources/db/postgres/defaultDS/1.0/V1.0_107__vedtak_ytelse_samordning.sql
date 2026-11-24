@@ -46,7 +46,6 @@ create table ve_ytelse_anvist
     periode              daterange    not null,
     dagsats              numeric(19, 2),
     beloep               numeric(19, 2),
-    utbetalingsgrad      numeric(5, 2),
     antall_barn          integer,
     dagsats_barnetillegg integer,
     opprettet_av         varchar(20)  not null default 'VL',
@@ -59,7 +58,6 @@ comment on table ve_ytelse_anvist is 'Innvilgede delperioder i et vedtak. Ny rad
 comment on column ve_ytelse_anvist.periode is 'Innvilget delperiode';
 comment on column ve_ytelse_anvist.dagsats is 'Beregnet dagsats. Null når perioden ikke er beregnet ennå, 0 når ingenting utbetales.';
 comment on column ve_ytelse_anvist.beloep is 'Beregnet beløp for perioden. Null når perioden ikke er beregnet ennå.';
-comment on column ve_ytelse_anvist.utbetalingsgrad is 'Utbetalingsgrad i prosent. Null når perioden ikke er beregnet ennå.';
 comment on column ve_ytelse_anvist.antall_barn is 'Antall barn som gir rett til barnetillegg';
 comment on column ve_ytelse_anvist.dagsats_barnetillegg is 'Dagsats for barnetillegg';
 

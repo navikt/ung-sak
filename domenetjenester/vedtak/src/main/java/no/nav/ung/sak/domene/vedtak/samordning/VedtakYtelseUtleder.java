@@ -113,7 +113,7 @@ public class VedtakYtelseUtleder {
             return new LocalDateSegment<>(intervall, innvilget.getValue());
         }
         var verdi = tilkjentYtelse.getValue();
-        return new LocalDateSegment<>(intervall, innvilget.getValue().medTilkjentYtelse(verdi.dagsats(), verdi.utbetalingsgrad()));
+        return new LocalDateSegment<>(intervall, innvilget.getValue().medDagsats(verdi.dagsats()));
     }
 
     private static LocalDateSegment<Anvisningsverdi> medBarnetillegg(LocalDateInterval intervall,
@@ -138,22 +138,21 @@ public class VedtakYtelseUtleder {
         return YtelseAnvist.builder(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
             .medDagsats(verdi.dagsats())
             .medBeløp(beløp)
-            .medUtbetalingsgrad(verdi.utbetalingsgrad())
             .medAntallBarn(verdi.antallBarn())
             .medDagsatsBarnetillegg(verdi.dagsatsBarnetillegg())
             .build();
     }
 
-    private record Anvisningsverdi(BigDecimal dagsats, BigDecimal utbetalingsgrad, Integer antallBarn, Integer dagsatsBarnetillegg) {
+    private record Anvisningsverdi(BigDecimal dagsats, Integer antallBarn, Integer dagsatsBarnetillegg) {
 
-        static final Anvisningsverdi IKKE_BEREGNET = new Anvisningsverdi(null, null, null, null);
+        static final Anvisningsverdi IKKE_BEREGNET = new Anvisningsverdi(null, null, null);
 
-        Anvisningsverdi medTilkjentYtelse(BigDecimal dagsats, BigDecimal utbetalingsgrad) {
-            return new Anvisningsverdi(dagsats, utbetalingsgrad, antallBarn, dagsatsBarnetillegg);
+        Anvisningsverdi medDagsats(BigDecimal dagsats) {
+            return new Anvisningsverdi(dagsats, antallBarn, dagsatsBarnetillegg);
         }
 
         Anvisningsverdi medBarnetillegg(Integer antallBarn, Integer dagsatsBarnetillegg) {
-            return new Anvisningsverdi(dagsats, utbetalingsgrad, antallBarn, dagsatsBarnetillegg);
+            return new Anvisningsverdi(dagsats, antallBarn, dagsatsBarnetillegg);
         }
     }
 }

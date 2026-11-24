@@ -23,7 +23,7 @@ import java.util.Optional;
 /**
  * Innvilget delperiode i et {@link VedtakYtelse}.
  * <p>
- * Dagsats, beløp og utbetalingsgrad er tomme når perioden ikke er beregnet ennå (f.eks. framtidige måneder),
+ * Dagsats og beløp er tomme når perioden ikke er beregnet ennå (f.eks. framtidige måneder),
  * og 0 når perioden er beregnet uten utbetaling. Perioden er innvilget i begge tilfeller.
  */
 @Entity(name = "YtelseAnvist")
@@ -48,9 +48,6 @@ public class YtelseAnvist extends BaseEntitet {
 
     @Column(name = "beloep", updatable = false)
     private BigDecimal beløp;
-
-    @Column(name = "utbetalingsgrad", updatable = false)
-    private BigDecimal utbetalingsgrad;
 
     @Column(name = "antall_barn", updatable = false)
     private Integer antallBarn;
@@ -82,10 +79,6 @@ public class YtelseAnvist extends BaseEntitet {
         return Optional.ofNullable(beløp);
     }
 
-    public Optional<BigDecimal> getUtbetalingsgrad() {
-        return Optional.ofNullable(utbetalingsgrad);
-    }
-
     public Optional<Integer> getAntallBarn() {
         return Optional.ofNullable(antallBarn);
     }
@@ -102,7 +95,6 @@ public class YtelseAnvist extends BaseEntitet {
     public String toString() {
         return getClass().getSimpleName() + "<periode=" + getPeriode()
             + ", dagsats=" + dagsats
-            + ", utbetalingsgrad=" + utbetalingsgrad
             + ", antallBarn=" + antallBarn
             + ">";
     }
@@ -121,11 +113,6 @@ public class YtelseAnvist extends BaseEntitet {
 
         public Builder medBeløp(BigDecimal beløp) {
             kladd.beløp = beløp;
-            return this;
-        }
-
-        public Builder medUtbetalingsgrad(BigDecimal utbetalingsgrad) {
-            kladd.utbetalingsgrad = utbetalingsgrad;
             return this;
         }
 

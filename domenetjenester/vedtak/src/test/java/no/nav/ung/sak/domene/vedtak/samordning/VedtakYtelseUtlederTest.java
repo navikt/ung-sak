@@ -123,7 +123,6 @@ class VedtakYtelseUtlederTest {
         assertThat(ikkeBeregnet.erBeregnet()).isFalse();
         assertThat(ikkeBeregnet.getDagsats()).isEmpty();
         assertThat(ikkeBeregnet.getBeløp()).isEmpty();
-        assertThat(ikkeBeregnet.getUtbetalingsgrad()).isEmpty();
     }
 
     @Test
@@ -141,7 +140,7 @@ class VedtakYtelseUtlederTest {
     }
 
     @Test
-    void skal_bruke_dagsats_og_utbetalingsgrad_fra_tilkjent_ytelse_og_beløp_som_dagsats_ganger_virkedager() {
+    void skal_bruke_dagsats_fra_tilkjent_ytelse_og_beløp_som_dagsats_ganger_virkedager() {
         medVilkår(segment(JAN_FOM, JAN_TOM, Utfall.OPPFYLT));
         medTilkjentYtelse(tilkjent(JAN_FOM, JAN_TOM, 800, 60, 800 * VIRKEDAGER_JAN));
 
@@ -149,7 +148,6 @@ class VedtakYtelseUtlederTest {
 
         var anvisning = anvisningFra(resultat, JAN_FOM);
         assertThat(anvisning.getDagsats()).hasValueSatisfying(d -> assertThat(d).isEqualByComparingTo("800"));
-        assertThat(anvisning.getUtbetalingsgrad()).hasValueSatisfying(u -> assertThat(u).isEqualByComparingTo("60"));
         assertThat(anvisning.getBeløp()).hasValueSatisfying(b -> assertThat(b).isEqualByComparingTo(BigDecimal.valueOf(800 * VIRKEDAGER_JAN)));
     }
 

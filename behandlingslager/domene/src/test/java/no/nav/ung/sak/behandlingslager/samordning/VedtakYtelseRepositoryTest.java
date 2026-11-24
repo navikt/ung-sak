@@ -54,14 +54,12 @@ class VedtakYtelseRepositoryTest {
             .leggTilAnvisning(YtelseAnvist.builder(januar)
                 .medDagsats(BigDecimal.valueOf(800))
                 .medBeløp(BigDecimal.valueOf(18400))
-                .medUtbetalingsgrad(BigDecimal.valueOf(100))
                 .medAntallBarn(2)
                 .medDagsatsBarnetillegg(74)
                 .build())
             .leggTilAnvisning(YtelseAnvist.builder(februar)
                 .medDagsats(BigDecimal.ZERO)
                 .medBeløp(BigDecimal.ZERO)
-                .medUtbetalingsgrad(BigDecimal.ZERO)
                 .medAntallBarn(2)
                 .medDagsatsBarnetillegg(74)
                 .build())
@@ -94,7 +92,6 @@ class VedtakYtelseRepositoryTest {
         assertThat(ikkeBeregnet.erBeregnet()).isFalse();
         assertThat(ikkeBeregnet.getDagsats()).isEmpty();
         assertThat(ikkeBeregnet.getBeløp()).isEmpty();
-        assertThat(ikkeBeregnet.getUtbetalingsgrad()).isEmpty();
         assertThat(ikkeBeregnet.getAntallBarn()).contains(2);
     }
 
