@@ -47,7 +47,8 @@ class YtelseStatistikkTest {
             "behandling_årsak",
             "alder_og_kjønn",
             "dager_i_programmet_løpende",
-            "kontrollerte_inntekt_perioder_v2"
+            "kontrollerte_inntekt_perioder_v2",
+            "parallelle_behandlinger_vent"
         ),
         FagsakYtelseType.AKTIVITETSPENGER, Set.of(
             "aktivitetspenger_fagsak_status",
@@ -60,7 +61,8 @@ class YtelseStatistikkTest {
             "aktivitetspenger_behandling_årsak",
             "aktivitetspenger_alder_og_kjønn",
             "aktivitetspenger_soknad_mottatt",
-            "aktivitetspenger_kontrollerte_inntekt_perioder"
+            "aktivitetspenger_kontrollerte_inntekt_perioder",
+            "aktivitetspenger_parallelle_behandlinger_vent"
         )
     );
 
