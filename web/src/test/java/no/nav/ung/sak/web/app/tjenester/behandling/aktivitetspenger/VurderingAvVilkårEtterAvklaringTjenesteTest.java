@@ -239,6 +239,28 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
+    void manglende_fritekst_er_gyldig_når_brev_ikke_skal_sendes() {
+        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT));
+
+        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+            List.of(vurdering(JANUAR, false, "årsak annet uten fritekst", null, true)),
+            årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.ANNET));
+
+        assertThat(enesteSegment(resultat.vurderinger()).skalSendeVarsel()).isFalse();
+    }
+
+    @Test
+    void fritekst_gir_feil_når_brev_ikke_skal_sendes() {
+        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT));
+
+        assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+            List.of(vurdering(JANUAR, false, "årsak annet", "tekst til brev", true)),
+            årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.ANNET)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("fritekstVurderingBrev må være tom");
+    }
+
+    @Test
     void regelsporing_viser_klipping_mot_hull_i_vilkårsperioderne() {
         medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_VURDERT));
         var opphørsdato = LocalDate.of(2026, 1, 15);
@@ -287,7 +309,18 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
-        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, false);
+        return vurdering(periode, erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, false);
+    }
+
+    private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse,
+                                                                       String fritekstVurderingBrev, boolean skalIkkeSendeVarsel) {
+        return new VurderingAvVilkårPeriodeEtterAvklaringDto(
+            new ÅpenPeriode(periode.getFom(), periode.getTom()),
+            erVilkårOppfylt,
+            begrunnelse,
+            fritekstVurderingBrev,
+            skalIkkeSendeVarsel
+        );
     }
 
     private LocalDateTimeline<VilkårsvurderingResultatOgEvaluering> utled(long behandlingId, VilkårType vilkårType,

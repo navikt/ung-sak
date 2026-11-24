@@ -181,7 +181,11 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
                                                                      LocalDateTime vurdertTidspunkt) {
         var ikkeOppfyltÅrsak = vurdering.erVilkårOppfylt() ? null : årsakFraAvklaring;
 
-        if (ikkeOppfyltÅrsak != null && ikkeOppfyltÅrsak.kreverFritekst()) {
+        if (vurdering.skalIkkeSendeVarsel()) {
+            if (vurdering.fritekstVurderingBrev() != null && !vurdering.fritekstVurderingBrev().isBlank()) {
+                throw new IllegalArgumentException("fritekstVurderingBrev må være tom når skalIkkeSendeVarsel er true. Gjelder periode: " + interval);
+            }
+        } else if (ikkeOppfyltÅrsak != null && ikkeOppfyltÅrsak.kreverFritekst()) {
             if (vurdering.fritekstVurderingBrev() == null || vurdering.fritekstVurderingBrev().isBlank()) {
                 throw new IllegalArgumentException("fritekstVurderingBrev er påkrevd når avklaringens årsak "
                     + ikkeOppfyltÅrsak.getKode() + " krever fritekst. Gjelder periode: " + interval);
