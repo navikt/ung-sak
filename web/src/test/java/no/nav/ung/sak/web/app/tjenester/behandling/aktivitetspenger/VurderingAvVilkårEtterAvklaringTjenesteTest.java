@@ -4,6 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
 import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -129,6 +130,22 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
+    void avkortede_vilkårsperioder_vurderes_ikke() {
+        medVilkårsperioder(
+            vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
+            avkortetVilkårsperiode(MARS)
+        );
+
+        var resultat = utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
+                vurdering(new Periode(JANUAR.getFom(), null), false, "opphørt", null)
+            ),
+            årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)
+        );
+
+        assertThat(resultat.getMaxLocalDate()).isEqualTo(JANUAR.getTom());
+    }
+
+    @Test
     void ulikt_utfall_i_samme_avklaring_gir_feil() {
         medVilkårsperioder(
             vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
@@ -175,6 +192,17 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
                 .crossJoin(årsakTidslinje(MARS, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM))))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("fyller ikke hele perioden som er avklart");
+    }
+
+    @Test
+    void ingen_ikke_avkortede_vilkårsperioder_gir_feil() {
+        medVilkårsperioder(avkortetVilkårsperiode(JANUAR));
+
+        assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+            List.of(vurdering(JANUAR, false, "uten relevante vilkårsperioder", null)),
+            årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Fant ingen relevante vilkårsperioder");
     }
 
     @Test
@@ -248,6 +276,10 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         return new VilkårPeriodeBuilder()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()))
             .medUtfall(utfall);
+    }
+
+    private static VilkårPeriodeBuilder avkortetVilkårsperiode(Periode periode) {
+        return vilkårsperiode(periode, Utfall.IKKE_OPPFYLT).medAvslagsårsak(Avslagsårsak.AVKORTET);
     }
 
     private static LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje(Periode periode, IkkeOppfyltDetaljertÅrsak årsak) {
