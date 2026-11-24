@@ -8,6 +8,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
@@ -15,9 +16,12 @@ import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjene
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlingerRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.task.FagsakProsessTask;
@@ -60,6 +64,9 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private Instance<RevurderingTjeneste> revurderingTjenester;
+    private KontrollbehandlingRuting kontrollbehandlingRuting;
+    private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     OpprettRevurderingEllerOpprettDiffTask() {
         // for CDI proxy
@@ -73,7 +80,10 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                                                   FagsakLåsRepository fagsakLåsRepository,
                                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, ProsessTaskTjeneste prosessTaskTjeneste,
-                                                  @Any Instance<RevurderingTjeneste> revurderingTjenester) {
+                                                  @Any Instance<RevurderingTjeneste> revurderingTjenester,
+                                                  KontrollbehandlingRuting kontrollbehandlingRuting,
+                                                  ParallelleBehandlingerRepository parallelleBehandlingerRepository,
+                                                  FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         super(fagsakLåsRepository, behandlingLåsRepository);
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
@@ -82,6 +92,25 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.revurderingTjenester = revurderingTjenester;
+        this.kontrollbehandlingRuting = kontrollbehandlingRuting;
+        this.parallelleBehandlingerRepository = parallelleBehandlingerRepository;
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+    }
+
+    /**
+     * Låser behandlingene tasken kan endre eller opprette ny behandling fra, før fagsaklåsen tas: behandlingen på tasken,
+     * alle ytelsesbehandlinger som ikke er avsluttet og siste vedtak. Da tas låsene i samme rekkefølge som i andre tasker
+     * (behandling før fagsak). Spørringene laster ikke entiteter, så behandlingene leses først etter at låsene er tatt.
+     */
+    @Override
+    protected List<String> identifiserBehandling(ProsessTaskData prosessTaskData) {
+        var fagsakId = prosessTaskData.getFagsakId();
+        var behandlingIder = new LinkedHashSet<>(super.identifiserBehandling(prosessTaskData));
+        parallelleBehandlingerRepository.hentIkkeAvsluttedeYtelsesbehandlinger(fagsakId)
+            .forEach(b -> behandlingIder.add(b.behandlingId().toString()));
+        parallelleBehandlingerRepository.finnSisteAvsluttedeIkkeHenlagteYtelsesbehandlingId(fagsakId)
+            .ifPresent(id -> behandlingIder.add(id.toString()));
+        return List.copyOf(behandlingIder);
     }
 
     @Override
@@ -90,12 +119,17 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         logContext(fagsak);
 
-        var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId, BehandlingType.getYtelseBehandlingTyper());
-
         var perioderOgÅrsaker = utledÅrsakOgPerioder(prosessTaskData);
         if (perioderOgÅrsaker.isEmpty()) {
             throw new IllegalArgumentException("Må ha minst en årsak for å opprette revurdering eller diff");
         }
+        Set<BehandlingÅrsakType> årsaker = perioderOgÅrsaker.stream().map(ÅrsakOgPerioder::behandlingÅrsak).collect(Collectors.toSet());
+        if (kontrollbehandlingRuting.skalTilKontrollbehandling(fagsak, årsaker)) {
+            opprettEllerOppdaterKontrollbehandling(prosessTaskData, fagsak, perioderOgÅrsaker);
+            return;
+        }
+
+        var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId, BehandlingType.getOrdinæreYtelseBehandlingTyper());
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
             if (sisteVedtak.isPresent() && skalUtsetteKjøring(prosessTaskData, sisteVedtak)) {
@@ -120,20 +154,78 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             if (behandlinger.size() != 1) {
                 throw new IllegalStateException("Fant flere åpne behandlinger");
             }
-            var behandlingId = behandlinger.get(0);
-            Set<BehandlingÅrsakType> årsaker = perioderOgÅrsaker.stream().map(ÅrsakOgPerioder::behandlingÅrsak).collect(Collectors.toSet());
-            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake pga {}", behandlingId, årsaker);
-            var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
-            var behandling = behandlingRepository.hentBehandling(behandlingId);
-            årsaker.forEach(it -> BehandlingÅrsak.builder(it).buildFor(behandling));
-            behandlingRepository.lagre(behandling, behandlingLås);
-            var skalTvingeRegisterinnhenting = årsaker.stream().anyMatch(REGISTERINNHENTING_ÅRSAKER::contains);
-
-            behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false, skalTvingeRegisterinnhenting);
-
-            // Legger til sist, ønsker diffen denne gir for å sette startpunkt
-            leggTilTriggere(perioderOgÅrsaker, behandling);
+            oppdaterÅpenBehandling(behandlinger.getFirst(), perioderOgÅrsaker);
         }
+    }
+
+    /**
+     * Legger kontrollen til åpen kontrollbehandling, eller oppretter kontrollbehandling fra siste vedtak. Er kontrollbehandlingen
+     * eller siste vedtak under iverksetting, utsettes tasken til iverksettingen er ferdig. Har fagsaken ikke vedtak, opprettes
+     * ingen kontrollbehandling. Etterkontrollen etter første vedtak finner da periodene som mangler kontroll.
+     */
+    private void opprettEllerOppdaterKontrollbehandling(ProsessTaskData prosessTaskData, Fagsak fagsak, List<ÅrsakOgPerioder> perioderOgÅrsaker) {
+        var åpenKontrollbehandling = parallelleBehandlingerRepository.finnIkkeAvsluttetKontrollbehandling(fagsak.getId());
+        if (åpenKontrollbehandling.isPresent()) {
+            var kontrollbehandling = åpenKontrollbehandling.get();
+            if (kontrollbehandling.status() == BehandlingStatus.IVERKSETTER_VEDTAK) {
+                utsettTilIverksettingErFerdig(prosessTaskData, kontrollbehandling.behandlingId());
+            } else {
+                oppdaterÅpenBehandling(kontrollbehandling.behandlingId(), perioderOgÅrsaker);
+            }
+            return;
+        }
+
+        var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsak.getId());
+        if (sisteVedtak.isEmpty()) {
+            log.info("Fagsaken har ikke vedtak. Oppretter ikke kontrollbehandling.");
+            return;
+        }
+        var origBehandling = sisteVedtak.get();
+        if (origBehandling.erUnderIverksettelse()) {
+            utsettTilIverksettingErFerdig(prosessTaskData, origBehandling.getId());
+            return;
+        }
+        var revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, fagsak.getYtelseType()).orElseThrow();
+        var kontrollbehandling = revurderingTjeneste.opprettKontrollbehandling(origBehandling, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, false);
+        leggTilTriggere(perioderOgÅrsaker, kontrollbehandling);
+        log.info("Oppretter kontrollbehandling {} basert på behandling {}", kontrollbehandling.getId(), origBehandling.getId());
+        behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(kontrollbehandling);
+    }
+
+    /**
+     * Tasken kopieres med nytt sekvensnummer for fagsaken. Kopien kjøres etter iverksettingstaskene, når behandlingen er avsluttet.
+     * Har behandlingen ingen uferdige tasker i rekkefølge, ville kopien blitt kjørt med en gang. Da feiler tasken i stedet.
+     */
+    private void utsettTilIverksettingErFerdig(ProsessTaskData prosessTaskData, Long behandlingUnderIverksetting) {
+        var fagsakId = prosessTaskData.getFagsakId();
+        if (fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(fagsakId, behandlingUnderIverksetting, null).isEmpty()) {
+            throw new IllegalStateException("Behandling " + behandlingUnderIverksetting
+                + " er under iverksetting, men har ingen uferdige tasker i rekkefølge. Kan ikke utsette kontroll av inntekt.");
+        }
+        var andreUferdigeTaskerForFagsakenIGruppen = prosessTaskTjeneste.finnUferdigForGruppe(prosessTaskData.getGruppe()).stream()
+            .filter(t -> !Objects.equals(t.getId(), prosessTaskData.getId()))
+            .anyMatch(t -> Objects.equals(t.getFagsakId(), fagsakId));
+        if (andreUferdigeTaskerForFagsakenIGruppen) {
+            throw new IllegalStateException("Fant flere uferdige tasker for fagsaken i gruppe " + prosessTaskData.getGruppe()
+                + ". Kan ikke utsette kontroll av inntekt mens behandling " + behandlingUnderIverksetting + " er under iverksetting.");
+        }
+        log.info("Behandling {} er under iverksetting. Oppretter ny task med samme parametere som kjøres etter iverksettingen", behandlingUnderIverksetting);
+        lagreKopi(prosessTaskData);
+    }
+
+    private void oppdaterÅpenBehandling(Long behandlingId, List<ÅrsakOgPerioder> perioderOgÅrsaker) {
+        Set<BehandlingÅrsakType> årsaker = perioderOgÅrsaker.stream().map(ÅrsakOgPerioder::behandlingÅrsak).collect(Collectors.toSet());
+        log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake pga {}", behandlingId, årsaker);
+        var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        årsaker.forEach(it -> BehandlingÅrsak.builder(it).buildFor(behandling));
+        behandlingRepository.lagre(behandling, behandlingLås);
+        var skalTvingeRegisterinnhenting = årsaker.stream().anyMatch(REGISTERINNHENTING_ÅRSAKER::contains);
+
+        behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false, skalTvingeRegisterinnhenting);
+
+        // Legger til sist, ønsker diffen denne gir for å sette startpunkt
+        leggTilTriggere(perioderOgÅrsaker, behandling);
     }
 
     private void lagreKopi(ProsessTaskData prosessTaskData) {
