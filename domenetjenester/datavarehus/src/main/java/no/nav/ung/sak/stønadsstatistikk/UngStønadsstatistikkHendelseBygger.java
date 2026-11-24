@@ -37,25 +37,21 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
 
     private BehandlingRepository behandlingRepository;
     private StønadstatistikkFellesUtleder fellesUtleder;
+    private SøknadRepository søknadRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private SøknadRepository søknadRepository;
 
     UngStønadsstatistikkHendelseBygger() {
         //for CDI proxy
     }
 
     @Inject
-    public UngStønadsstatistikkHendelseBygger(BehandlingRepository behandlingRepository,
-                                              StønadstatistikkFellesUtleder fellesUtleder,
-                                              UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                              UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-                                              SøknadRepository søknadRepository) {
+    public UngStønadsstatistikkHendelseBygger(BehandlingRepository behandlingRepository, StønadstatistikkFellesUtleder fellesUtleder, SøknadRepository søknadRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.behandlingRepository = behandlingRepository;
         this.fellesUtleder = fellesUtleder;
+        this.søknadRepository = søknadRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
-        this.søknadRepository = søknadRepository;
     }
 
     @Override
@@ -78,6 +74,11 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
         );
     }
 
+    private LocalDate hentFørsteSøknadsdato(Behandling behandling) {
+        List<SøknadEntitet> søknader = søknadRepository.hentSøknaderForFagsak(behandling.getFagsakId());
+        return søknader.stream().map(SøknadEntitet::getMottattDato).min(Comparator.naturalOrder()).orElseThrow();
+    }
+
     private UngdomsprogramDeltakelsePeriode hentDeltakelsePeriode(Behandling behandling) {
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElse(null);
         if (ungdomsprogramPeriodeGrunnlag == null || ungdomsprogramPeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().isEmpty()){
@@ -85,6 +86,18 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
         }
         DatoIntervallEntitet ungdomsprogramPeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
         return new UngdomsprogramDeltakelsePeriode(ungdomsprogramPeriode.getFomDato(), ungdomsprogramPeriode.getTomDato());
+    }
+
+    private List<UngStønadstatistikkPeriode> hentBehandlingsperioder(Behandling behandling) {
+        return fellesUtleder.hentVilkårTidslinje(behandling).segmenter().stream()
+            .map(segment -> new UngStønadstatistikkPeriode(
+                segment.getFom(),
+                segment.getTom(),
+                StønadstatistikkFellesUtleder.samletUtfall(segment.getValue()),
+                segment.getValue().entrySet().stream()
+                    .map(e -> new StønadstatistikkInngangsvilkår(e.getKey(), StønadstatistikkFellesUtleder.map(e.getValue())))
+                    .toList()))
+            .toList();
     }
 
     private List<StønadsstatistikkSatsPeriode> hentSatsPerioder(Behandling behandling) {
@@ -102,23 +115,6 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
                 it.getValue().dagsatsBarnetillegg(),
                 it.getValue().grunnbeløpFaktor()))
             .sorted(Comparator.comparing(StønadsstatistikkSatsPeriode::fom))
-            .toList();
-    }
-
-    private LocalDate hentFørsteSøknadsdato(Behandling behandling) {
-        List<SøknadEntitet> søknader = søknadRepository.hentSøknaderForFagsak(behandling.getFagsakId());
-        return søknader.stream().map(SøknadEntitet::getMottattDato).min(Comparator.naturalOrder()).orElseThrow();
-    }
-
-    private List<UngStønadstatistikkPeriode> hentBehandlingsperioder(Behandling behandling) {
-        return fellesUtleder.hentVilkårTidslinje(behandling).segmenter().stream()
-            .map(segment -> new UngStønadstatistikkPeriode(
-                segment.getFom(),
-                segment.getTom(),
-                StønadstatistikkFellesUtleder.samletUtfall(segment.getValue()),
-                segment.getValue().entrySet().stream()
-                    .map(e -> new StønadstatistikkInngangsvilkår(e.getKey(), StønadstatistikkFellesUtleder.map(e.getValue())))
-                    .toList()))
             .toList();
     }
 
