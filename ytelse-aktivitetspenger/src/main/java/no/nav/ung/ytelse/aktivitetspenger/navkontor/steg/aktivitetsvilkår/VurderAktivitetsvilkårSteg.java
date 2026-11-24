@@ -117,19 +117,20 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
+        HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, getAktuellVilkårType());
+
         var avklaringTidslinje = hentForeslåttAvklaringTidslinje(behandlingId).intersection(tidslinjeTilVurdering);
         if (førstegangsbehandlingEllerForrigeErAvslåttFørstegangsbehandling(behandlingId)) {
             if (!avklaringTidslinje.isEmpty()) {
                 throw new IllegalStateException("Forventer ikke avklaringer for førstegangsbehandling eller hvis det kun eksisterer en avslått førstegangsbehandling, behandlingId=" + behandlingId);
             }
             automatiskInnvilgAktivitetsvilkåret(behandlingId, tidslinjeTilVurdering);
+            lagreHistorikkinnslag(historikkinnslagInput, behandlingId);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
         List<EtterlysningData> etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
             behandlingId, kontekst.getFagsakId(), EtterlysningType.UTTALELSE_AKTIVITET);
-
-        HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, getAktuellVilkårType());
 
         var etterlysningTidslinje = new LocalDateTimeline<>(
             etterlysninger.stream().map(e ->
@@ -208,12 +209,16 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
         inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(behandlingId, resultatBuilder);
         vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
 
+        lagreHistorikkinnslag(historikkinnslagInput, behandlingId);
+
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void lagreHistorikkinnslag(HistorikkinnslagInput historikkinnslagInput, long behandlingId) {
         historikkinnslagInput.setSkjermlenkeType(SkjermlenkeType.AKTIVITETSVILKÅR)
             .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, getAktuellVilkårType()))
             .setHistorikkAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
         vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
-
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     private boolean førstegangsbehandlingEllerForrigeErAvslåttFørstegangsbehandling(long behandlingId) {

@@ -4,12 +4,12 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.*;
@@ -17,6 +17,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.Vilkårsutfallsporing;
@@ -24,7 +25,6 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporin
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
@@ -49,8 +49,6 @@ import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPeri
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
-import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall;
-import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfallUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -101,6 +99,7 @@ class VurderAktivitetsvilkårStegTest {
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private Vilkårsutfallsporing vilkårsutfallsporing;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private VurderAktivitetsvilkårSteg steg;
 
     @BeforeEach
@@ -114,6 +113,7 @@ class VurderAktivitetsvilkårStegTest {
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
         vilkårsutfallsporing = new Vilkårsutfallsporing(new BehandingprosessSporingRepository(entityManager));
+        historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
 
         steg = lagSteg(List.of());
     }
@@ -136,6 +136,11 @@ class VurderAktivitetsvilkårStegTest {
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
         var vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.AKTIVITETSVILKÅR).orElseThrow().getPerioder();
         assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.OPPFYLT);
+        var historikkinnslag = historikkinnslagRepository.hent(behandling.getId());
+        assertThat(historikkinnslag).hasSize(1);
+        assertThat(historikkinnslag.getFirst().getAktør()).isEqualTo(HistorikkAktør.VEDTAKSLØSNINGEN);
+        assertThat(historikkinnslag.getFirst().getTekstLinjer())
+            .containsExactly("Perioden 01.01.2026 - 31.01.2026 ble vurdert til Oppfylt.");
     }
 
     @Test
