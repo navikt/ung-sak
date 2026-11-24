@@ -1,4 +1,4 @@
-package no.nav.ung.sak.behandlingslager.samordning;
+package no.nav.ung.sak.samordning;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;

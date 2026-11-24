@@ -12,7 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository;
+import no.nav.ung.sak.samordning.VedtakYtelseRepository;
 import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.typer.AktørId;

@@ -15,7 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository;
+import no.nav.ung.sak.samordning.VedtakYtelseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

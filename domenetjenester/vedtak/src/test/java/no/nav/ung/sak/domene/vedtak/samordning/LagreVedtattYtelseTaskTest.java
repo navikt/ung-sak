@@ -15,8 +15,8 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelse;
-import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository;
+import no.nav.ung.sak.samordning.VedtakYtelse;
+import no.nav.ung.sak.samordning.VedtakYtelseRepository;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 

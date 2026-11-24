@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>domenetjenester-pom</artifactId>
+        <groupId>no.nav.ung.sak</groupId>
+        <version>${revision}${sha1}${changelist}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>samordning</artifactId>
+    <name>ung-sak :: Domenetjenester - Samordning</name>
+    <packaging>jar</packaging>
+
+    <!-- Lagrer og leser vedtak til samordning med andre ytelser. Skal ikke avhenge av behandlingsdomenet,
+         slik at modulen kan flyttes ut av ung-sak ved behov. -->
+    <dependencies>
+        <!-- Prosjektinterne avhengigheter -->
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandlingslager-domene</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
+
+        <!-- Test avhengigheter -->
+        <dependency>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-testutilities</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandlingslager-testutilities</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>migreringer</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

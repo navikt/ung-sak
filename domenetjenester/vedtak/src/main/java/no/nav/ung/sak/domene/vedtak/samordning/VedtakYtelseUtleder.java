@@ -13,8 +13,8 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelse;
-import no.nav.ung.sak.behandlingslager.samordning.YtelseAnvist;
+import no.nav.ung.sak.samordning.VedtakYtelse;
+import no.nav.ung.sak.samordning.YtelseAnvist;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -27,7 +27,7 @@ import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
  * Utleder vedtaket som lagres til samordning med andre ytelser.
  * <p>
  * Utledningen er tilstandsløs: den ser kun på behandlingen den får inn, aldri på hva som er lagret fra før.
- * Hvilket vedtak som er gjeldende avgjøres av {@link no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository}.
+ * Hvilket vedtak som er gjeldende avgjøres av {@link no.nav.ung.sak.samordning.VedtakYtelseRepository}.
  */
 @Dependent
 public class VedtakYtelseUtleder {

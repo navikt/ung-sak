@@ -6,7 +6,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository;
+import no.nav.ung.sak.samordning.VedtakYtelseRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

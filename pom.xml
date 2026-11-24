@@ -387,6 +387,11 @@
                 <artifactId>kabal</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>samordning</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
