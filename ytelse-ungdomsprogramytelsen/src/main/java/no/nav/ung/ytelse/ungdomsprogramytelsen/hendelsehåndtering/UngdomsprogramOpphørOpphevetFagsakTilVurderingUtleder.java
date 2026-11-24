@@ -74,7 +74,7 @@ public class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder implements F
             }
 
             Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
-            Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(relevantFagsak.get().getId());
+            Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(relevantFagsak.get().getId());
             if (behandlingOpt.isEmpty()) {
                 logger.info("Det er ingen behandling på sak {}. Ignorerer hendelse {}.", saksnummer, hendelseId);
                 continue;

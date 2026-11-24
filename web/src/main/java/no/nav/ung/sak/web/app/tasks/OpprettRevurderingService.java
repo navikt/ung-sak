@@ -89,10 +89,14 @@ public class OpprettRevurderingService {
         }
     }
 
+    /**
+     * En åpen kontrollbehandling sendes ikke tilbake til start. Den går parallelt med den ordinære behandlingen og
+     * hindrer ikke opprettelse av revurdering.
+     */
     private Behandling finnBehandlingSomKanSendesTilbakeTilStart(Saksnummer saksnummer) {
         final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer)
             .stream()
-            .filter(Behandling::erYtelseBehandling)
+            .filter(Behandling::erOrdinærYtelseBehandling)
             .filter(b -> !b.erStatusFerdigbehandlet())
             .toList();
 

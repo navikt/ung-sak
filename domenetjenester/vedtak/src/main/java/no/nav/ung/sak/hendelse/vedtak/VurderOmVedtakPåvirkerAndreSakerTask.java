@@ -69,7 +69,8 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
 
             var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidat.getSaksnummer(), false)
                 .orElseThrow();
-            var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId())
+            // Ordinær behandling, se HendelsemottakTjeneste: henleggelse av kontrollbehandlingen sletter tasker som er knyttet til den.
+            var tilRevurdering = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsak.getId())
                 .orElseThrow();
             taskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(),
                 tilRevurdering.getAktørId().getId());

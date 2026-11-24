@@ -68,7 +68,9 @@ public class HendelsemottakTjeneste {
             String årsakOgPerioderString = mapTilJsonString(entry.getValue());
             ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
             tilRevurderingTaskData.setPayload(årsakOgPerioderString);
-            var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+            // Tasken knyttes til den ordinære behandlingen. Hendelser går aldri til kontrollbehandlingen, og henleggelse
+            // av kontrollbehandlingen sletter uferdige tasker som er knyttet til den.
+            var sisteBehandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsak.getId());
             if (sisteBehandling.isPresent()) {
                 Behandling tilRevurdering = sisteBehandling.get();
                 tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());

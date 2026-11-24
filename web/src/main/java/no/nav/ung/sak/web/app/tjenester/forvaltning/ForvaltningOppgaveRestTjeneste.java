@@ -103,7 +103,7 @@ public class ForvaltningOppgaveRestTjeneste {
     }
 
     private LocalDateInterval finnPeriode(MånedForRapportering måned, Fagsak fagsak) {
-        final var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).get();
+        final var sisteBehandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsak.getId()).get();
 
         final var periodisertMånedvis = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(sisteBehandling.getId());
 

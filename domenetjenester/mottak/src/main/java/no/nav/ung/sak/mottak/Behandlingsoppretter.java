@@ -156,7 +156,7 @@ public class Behandlingsoppretter {
     }
 
     public Optional<Behandling> sisteHenlagteFørstegangsbehandling(Fagsak fagsak) {
-        Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        Optional<Behandling> behandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandling.isPresent()
             && behandling.get().erStatusFerdigbehandlet()
             && behandling.get().erHenlagt()) {

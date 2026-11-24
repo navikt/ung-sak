@@ -109,7 +109,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
      * hindrer også revurdering hvis hendelsen kommer etter at behandlingen er oppdatert med ny data.
      */
     private boolean erNyInformasjonIHendelsen(Fagsak fagsak, AktørId barnAktørId, LocalDate fødselsdato, String hendelseId) {
-        Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandlingOpt.isEmpty()) {
             logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
             return false;
