@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 @FagsakYtelseTypeRef
 @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
 @BehandlingTypeRef(BehandlingType.REVURDERING)
+@BehandlingTypeRef(BehandlingType.KONTROLL)
 public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
 
     private static final Logger LOG = LoggerFactory.getLogger(YtelseVedtaksbrevRegler.class);

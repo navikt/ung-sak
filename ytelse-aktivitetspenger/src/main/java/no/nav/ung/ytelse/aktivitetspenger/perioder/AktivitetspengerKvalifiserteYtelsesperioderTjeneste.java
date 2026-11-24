@@ -40,7 +40,7 @@ public class AktivitetspengerKvalifiserteYtelsesperioderTjeneste implements Kval
     @Override
     public LocalDateTimeline<Boolean> finnInitiellPeriodeTidslinje(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        if (behandling.erRevurdering()) {
+        if (behandling.erRevurdering() || behandling.erKontrollbehandling()) {
             return finnPeriodeTidslinje(behandling.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Forventer å finne original behandling")));
         }
         return LocalDateTimeline.empty();

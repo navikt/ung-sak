@@ -70,6 +70,17 @@ class YtelseVedtaksbrevReglerTest {
     }
 
     @Test
+    void skal_gi_endring_inntekt_brev_for_kontrollbehandling() {
+        var behandling = lagBehandling(EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)), BehandlingType.KONTROLL);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        assertFullAutomatiskBrev(totalresultater.vedtaksbrevResultater().getFirst(), DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
+    }
+
+    @Test
     void skal_gi_ingen_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_uten_ap() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(EndringInntektScenarioer.endring0KrInntekt_19år(fom));
@@ -541,8 +552,12 @@ class YtelseVedtaksbrevReglerTest {
     }
 
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {
+        return lagBehandling(ungTestGrunnlag, BehandlingType.REVURDERING);
+    }
+
+    private Behandling lagBehandling(UngTestScenario ungTestGrunnlag, BehandlingType behandlingType) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.REVURDERING)
+            .medBehandlingType(behandlingType)
             .medUngTestGrunnlag(ungTestGrunnlag);
 
         var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);

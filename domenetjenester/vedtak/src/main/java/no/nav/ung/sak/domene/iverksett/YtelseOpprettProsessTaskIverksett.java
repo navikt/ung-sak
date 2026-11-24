@@ -26,6 +26,7 @@ import java.util.Optional;
 @FagsakYtelseTypeRef
 @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
 @BehandlingTypeRef(BehandlingType.REVURDERING)
+@BehandlingTypeRef(BehandlingType.KONTROLL)
 public class YtelseOpprettProsessTaskIverksett implements OpprettProsessTaskIverksett {
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
