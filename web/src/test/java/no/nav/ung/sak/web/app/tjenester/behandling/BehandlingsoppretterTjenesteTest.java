@@ -27,7 +27,9 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.KontrollbehandlingBryter;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -93,6 +95,9 @@ class BehandlingsoppretterTjenesteTest {
     private PersonopplysningRepository personopplysningRepository;
 
     @Inject
+    private FagsakLåsRepository fagsakLåsRepository;
+
+    @Inject
     @Any
     private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
 
@@ -111,7 +116,8 @@ class BehandlingsoppretterTjenesteTest {
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
         when(behandlendeEnhetTjeneste.finnBehandlendeEnheterFor(any())).thenReturn(Map.of(BehandlingDel.SENTRAL, new OrganisasjonsEnhet("1234", "Nav Test")));
         var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste, revurderingTjenesteFelles, grunnlagKopierere, historikkinnslagRepository,
-            prosessTriggereRepository, repositoryProvider.getBehandlingAnsvarligRepository(), behandlendeEnhetTjeneste);
+            prosessTriggereRepository, repositoryProvider.getBehandlingAnsvarligRepository(), behandlendeEnhetTjeneste,
+            fagsakLåsRepository, new KontrollbehandlingBryter(false, false));
         behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, gyldigePerioderForRevurderingUtledere, behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository,
             new UnitTestLookupInstanceImpl<>(revurderingTjeneste));
     }
