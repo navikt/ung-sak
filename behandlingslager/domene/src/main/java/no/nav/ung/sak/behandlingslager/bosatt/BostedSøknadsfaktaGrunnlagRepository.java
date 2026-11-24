@@ -66,6 +66,19 @@ public class BostedSøknadsfaktaGrunnlagRepository {
         });
     }
 
+    /**
+     * Erstatter grunnlaget på {@code tilBehandlingId} med en kopi av grunnlaget på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ikke grunnlag, deaktiveres grunnlaget på {@code tilBehandlingId}.
+     */
+    public void erstattGrunnlagMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        var fra = hentGrunnlagHvisEksisterer(fraBehandlingId);
+        hentGrunnlagHvisEksisterer(tilBehandlingId).ifPresent(this::deaktiverEksisterende);
+        fra.ifPresent(eksisterende -> {
+            entityManager.persist(BostedSøknadsfaktaGrunnlag.nyttGrunnlagForBehandlingMedReferanserFra(tilBehandlingId, eksisterende));
+            entityManager.flush();
+        });
+    }
+
     private void deaktiverEksisterende(BostedSøknadsfaktaGrunnlag gr) {
         gr.deaktiver();
         entityManager.persist(gr);

@@ -112,6 +112,23 @@ public class VilkårResultatRepository {
         lagre(tilBehandlingId, fraBehandlingVilkår.get(), fagsakPeriode);
     }
 
+    /**
+     * Erstatter vilkårsresultatet på {@code tilBehandlingId} med en kopi av vilkårsresultatet på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ikke vilkårsresultat, deaktiveres resultatet på {@code tilBehandlingId}.
+     * Brukes når en åpen behandling synkes med vedtatte data fra en annen behandling på fagsaken.
+     */
+    public void erstattMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        Objects.requireNonNull(fraBehandlingId);
+        Objects.requireNonNull(tilBehandlingId);
+        var fraBehandlingVilkår = hentHvisEksisterer(fraBehandlingId);
+        if (fraBehandlingVilkår.isEmpty()) {
+            deaktiverVilkårsResultat(tilBehandlingId);
+            return;
+        }
+        var fagsakPeriode = behandlingRepository.hentBehandling(tilBehandlingId).getFagsak().getPeriode();
+        lagre(tilBehandlingId, fraBehandlingVilkår.get(), fagsakPeriode);
+    }
+
     private void kopieringPrecondition(Long fraBehandlingId, Long tilBehandlingId) {
         Objects.requireNonNull(fraBehandlingId);
         Objects.requireNonNull(tilBehandlingId);

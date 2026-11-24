@@ -7,8 +7,10 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.varsel.EndringType;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @ApplicationScoped
 public class UttalelseRepository {
@@ -34,6 +36,37 @@ public class UttalelseRepository {
             entityManager.persist(gr);
             entityManager.flush();
         });
+    }
+
+    /**
+     * Erstatter uttalelsene av de gitte typene på {@code tilBehandlingId} med kopier av uttalelsene av samme typer
+     * fra {@code fraBehandlingId}. Uttalelser av andre typer på {@code tilBehandlingId} beholdes.
+     * Brukes når en åpen behandling synkes med vedtatte data fra en annen behandling på fagsaken.
+     */
+    public void erstattUttalelserMedKopiFra(Long fraBehandlingId, Long tilBehandlingId, Set<EndringType> typer) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(tilBehandlingId);
+        var eksisterende = eksisterendeGrunnlag.map(UttalelseRepository::uttalelserIGrunnlag).orElse(Set.of());
+
+        var nye = new HashSet<UttalelseV2>();
+        eksisterende.stream().filter(it -> !typer.contains(it.getType())).forEach(nye::add);
+        hentEksisterendeGrunnlag(fraBehandlingId).map(UttalelseRepository::uttalelserIGrunnlag).orElse(Set.of()).stream()
+            .filter(it -> typer.contains(it.getType()))
+            .forEach(nye::add);
+
+        if (nye.equals(eksisterende)) {
+            return;
+        }
+        if (nye.isEmpty()) {
+            eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
+            return;
+        }
+        var nyttGrunnlag = new UttalelseGrunnlag(tilBehandlingId);
+        nyttGrunnlag.leggTilUttalelser(nye);
+        persister(eksisterendeGrunnlag, nyttGrunnlag);
+    }
+
+    private static Set<UttalelseV2> uttalelserIGrunnlag(UttalelseGrunnlag grunnlag) {
+        return grunnlag.getUttalelser() == null ? Set.of() : new HashSet<>(grunnlag.getUttalelser().getUttalelser());
     }
 
     private void persister(Optional <UttalelseGrunnlag> eksisterendeGrunnlag, UttalelseGrunnlag nyttGrunnlag) {

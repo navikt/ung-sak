@@ -108,6 +108,23 @@ class UngdomsytelseGrunnlagRepositoryTest {
         assertThat(uttakperioder.get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()));
     }
 
+    @Test
+    void erstatting_kopierer_grunnlaget_og_deaktiverer_det_når_kilden_mangler_grunnlag() {
+        lagreBeregning(new LocalDateInterval(LocalDate.now(), LocalDate.now()), BigDecimal.TEN, BigDecimal.valueOf(50), hentSatstypeOgGrunnbeløp(Sats.HØY), 0, 0);
+        var mål = behandlingBuilder.opprettNyBehandling(behandling.getFagsak(), BehandlingType.REVURDERING, BehandlingStatus.UTREDES);
+        var utenGrunnlag = behandlingBuilder.opprettNyBehandling(behandling.getFagsak(), BehandlingType.REVURDERING, BehandlingStatus.UTREDES);
+
+        repository.erstattGrunnlagMedKopiFra(behandling.getId(), mål.getId());
+
+        var kopiert = repository.hentGrunnlag(mål.getId());
+        assertThat(kopiert.isPresent()).isTrue();
+        assertThat(kopiert.get().getSatsPerioder()).isSameAs(repository.hentGrunnlag(behandling.getId()).orElseThrow().getSatsPerioder());
+
+        repository.erstattGrunnlagMedKopiFra(utenGrunnlag.getId(), mål.getId());
+
+        assertThat(repository.hentGrunnlag(mål.getId()).isPresent()).isFalse();
+    }
+
     private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor, int antallBarn, int barnetilleggDagsats) {
         var tidslinje = new LocalDateTimeline<>(List.of(
             lagSegment(periode1, dagsats, grunnbeløp, satsOgGrunnbeløpfaktor, antallBarn, barnetilleggDagsats)

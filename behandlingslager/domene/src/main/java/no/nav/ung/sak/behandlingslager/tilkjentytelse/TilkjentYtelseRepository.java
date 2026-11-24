@@ -18,6 +18,7 @@ import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -101,6 +102,25 @@ public class TilkjentYtelseRepository {
     public void kopierKontrollPerioder(long originalBehandlingId, long nyBehandlingId) {
         final var eksisterende = hentKontrollertInntektGrunnlag(originalBehandlingId);
         eksisterende.ifPresent(kontrollertInntektGrunnlag -> lagreNyttGrunnlag(nyBehandlingId, kontrollertInntektGrunnlag.getKontrollertInntektPerioder()));
+    }
+
+    /**
+     * Erstatter kontrollperiodene på {@code tilBehandlingId} med kontrollperiodene på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ingen kontrollperioder, deaktiveres grunnlaget på {@code tilBehandlingId}.
+     * Brukes når en åpen behandling synkes med vedtatte data fra en annen behandling på fagsaken.
+     */
+    public void erstattKontrollPerioderMedKopiFra(long fraBehandlingId, long tilBehandlingId) {
+        var fra = hentKontrollertInntektGrunnlag(fraBehandlingId);
+        var til = hentKontrollertInntektGrunnlag(tilBehandlingId);
+        if (fra.isEmpty()) {
+            til.ifPresent(this::deaktiver);
+            return;
+        }
+        var perioder = fra.get().getKontrollertInntektPerioder();
+        if (til.isPresent() && Objects.equals(til.get().getKontrollertInntektPerioder(), perioder)) {
+            return;
+        }
+        lagreNyttGrunnlag(tilBehandlingId, perioder);
     }
 
     public void gjenopprettTilOriginal(Long originalBehandlingId, Long behandlingId) {

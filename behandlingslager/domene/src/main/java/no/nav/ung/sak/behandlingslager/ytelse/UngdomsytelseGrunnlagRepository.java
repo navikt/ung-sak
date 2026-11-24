@@ -78,6 +78,25 @@ public class UngdomsytelseGrunnlagRepository {
         }
     }
 
+    /**
+     * Erstatter sats- og uttaksperiodene på {@code tilBehandlingId} med periodene på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ikke grunnlag, deaktiveres grunnlaget på {@code tilBehandlingId}.
+     * Brukes når en åpen behandling synkes med vedtatte data fra en annen behandling på fagsaken.
+     */
+    public void erstattGrunnlagMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        var fra = hentGrunnlag(fraBehandlingId);
+        if (fra.isEmpty()) {
+            deaktiverGrunnlag(tilBehandlingId);
+            return;
+        }
+        var til = hentGrunnlag(tilBehandlingId);
+        var builder = new UngdomsytelseGrunnlagBuilder(fra.get());
+        if (builder.erForskjellig(til.orElse(null), differ())) {
+            til.ifPresent(this::deaktiverEksisterende);
+            lagre(builder, tilBehandlingId);
+        }
+    }
+
     private DiffEntity differ() {
         TraverseGraph traverser = TraverseEntityGraphFactory.build();
         return new DiffEntity(traverser);

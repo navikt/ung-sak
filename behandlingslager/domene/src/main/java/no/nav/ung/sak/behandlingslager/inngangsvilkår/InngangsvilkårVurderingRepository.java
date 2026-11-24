@@ -246,6 +246,27 @@ public class InngangsvilkårVurderingRepository {
         entityManager.flush();
     }
 
+    /**
+     * Erstatter grunnlaget på {@code tilBehandlingId} med en kopi av grunnlaget på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ikke grunnlag, deaktiveres grunnlaget på {@code tilBehandlingId}.
+     */
+    public void erstattGrunnlagMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        var fra = hentEksisterendeGrunnlag(fraBehandlingId);
+        var til = hentEksisterendeGrunnlag(tilBehandlingId);
+        if (fra.isEmpty()) {
+            til.ifPresent(this::deaktiverEksisterende);
+            return;
+        }
+        var eksisterende = fra.get();
+        persister(til, new AktivitetspengerInngangsvilkårResultatGrunnlag(
+            tilBehandlingId,
+            eksisterende.getBistandsvilkårResultatHolder().orElse(null),
+            eksisterende.getAktivitetsvilkårResultatHolder().orElse(null),
+            eksisterende.getAndreLivsoppholdsytelserResultatHolder().orElse(null),
+            eksisterende.getBostedsvilkårResultatHolder().orElse(null)
+        ));
+    }
+
     private void deaktiverEksisterende(AktivitetspengerInngangsvilkårResultatGrunnlag grunnlag) {
         grunnlag.deaktiver();
         entityManager.persist(grunnlag);
