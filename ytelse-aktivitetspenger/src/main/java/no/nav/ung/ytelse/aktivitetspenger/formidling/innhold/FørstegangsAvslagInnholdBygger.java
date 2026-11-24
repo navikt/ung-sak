@@ -43,6 +43,10 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
     }
 
+    public static boolean erInngangsvilkårIMalen(VilkårType vilkårType) {
+        return vilkårType != VilkårType.AKTIVITETSVILKÅR && VILKÅR_I_MALEN.contains(vilkårType);
+    }
+
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
@@ -51,7 +55,7 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
             .map(DetaljertVilkårResultat::vilkårType)
             .collect(Collectors.toSet());
 
-        if (avslåtteVilkårTyper.stream().noneMatch(VILKÅR_I_MALEN::contains)) {
+        if (avslåtteVilkårTyper.stream().noneMatch(FørstegangsAvslagInnholdBygger::erInngangsvilkårIMalen)) {
             throw new IllegalStateException("Avslag for vilkårtyper ikke implementert: " + avslåtteVilkårTyper + ", behandlingId: " + behandling.getId());
         }
 

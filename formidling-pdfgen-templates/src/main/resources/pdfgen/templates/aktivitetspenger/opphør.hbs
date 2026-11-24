@@ -59,6 +59,19 @@
             {{> aktivitetspenger/footer/hjemmel paragraf="6"}}
         {{/with}}
 
+        {{#with aktivitet}}
+            <p>
+                Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
+            </p>
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
+            {{/if}}
+
+            {{> aktivitetspenger/footer/hjemmel paragraf="8"}}
+        {{/with}}
+
         {{#with andreLivsoppholdsytelser}}
             <p>
                 Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
