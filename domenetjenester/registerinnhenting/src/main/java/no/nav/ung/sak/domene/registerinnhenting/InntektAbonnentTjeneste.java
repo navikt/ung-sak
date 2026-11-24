@@ -2,7 +2,9 @@ package no.nav.ung.sak.domene.registerinnhenting;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlingerRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepository;
@@ -29,6 +31,7 @@ public class InntektAbonnentTjeneste {
     private InntektAbonnentKlient inntektAbonnentKlient;
     private FagsakTjeneste fagsakTjeneste;
     private TpsTjeneste tpsTjeneste;
+    private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
 
 
     public InntektAbonnentTjeneste() {
@@ -38,14 +41,46 @@ public class InntektAbonnentTjeneste {
     @Inject
     public InntektAbonnentTjeneste(InntektAbonnementRepository inntektAbonnementRepository,
                                    InntektAbonnentKlient inntektAbonnentKlient,
-                                   FagsakTjeneste fagsakTjeneste, TpsTjeneste tpsTjeneste) {
+                                   FagsakTjeneste fagsakTjeneste, TpsTjeneste tpsTjeneste,
+                                   ParallelleBehandlingerRepository parallelleBehandlingerRepository) {
         this.inntektAbonnementRepository = inntektAbonnementRepository;
         this.inntektAbonnentKlient = inntektAbonnentKlient;
         this.fagsakTjeneste = fagsakTjeneste;
         this.tpsTjeneste = tpsTjeneste;
+        this.parallelleBehandlingerRepository = parallelleBehandlingerRepository;
     }
 
-    public void opprettAbonnement(AktørId aktørId, Periode periode) {
+    /**
+     * Oppretter abonnement for kontrollperiodene i behandlingen, eller erstatter abonnementet til aktøren.
+     * Har fagsaken en annen åpen kontrollbehandling, eier den abonnementet, og behandlingen endrer det ikke.
+     */
+    public void opprettAbonnementForBehandling(BehandlingReferanse behandling, Periode periode) {
+        if (annenÅpenKontrollbehandlingEierAbonnementet(behandling)) {
+            log.info("Fagsaken har en annen åpen kontrollbehandling som eier inntektsabonnementet. Oppretter ikke abonnement for behandlingen.");
+            return;
+        }
+        opprettAbonnement(behandling.getAktørId(), periode);
+    }
+
+    /**
+     * Avslutter abonnementet til aktøren når behandlingen avsluttes.
+     * Har fagsaken en annen åpen kontrollbehandling, eier den abonnementet, og abonnementet beholdes.
+     */
+    public void avsluttAbonnementForAvsluttetBehandling(BehandlingReferanse behandling) {
+        if (annenÅpenKontrollbehandlingEierAbonnementet(behandling)) {
+            log.info("Fagsaken har en annen åpen kontrollbehandling som eier inntektsabonnementet. Beholder abonnementet.");
+            return;
+        }
+        avsluttAbonnentHvisFinnes(behandling.getAktørId());
+    }
+
+    private boolean annenÅpenKontrollbehandlingEierAbonnementet(BehandlingReferanse behandling) {
+        return parallelleBehandlingerRepository.finnIkkeAvsluttetKontrollbehandling(behandling.getFagsakId())
+            .filter(kontrollbehandling -> !kontrollbehandling.behandlingId().equals(behandling.getBehandlingId()))
+            .isPresent();
+    }
+
+    void opprettAbonnement(AktørId aktørId, Periode periode) {
         var eksisterendeAbonnement = inntektAbonnementRepository.hentAbonnementForAktør(aktørId).orElse(null);
         if (eksisterendeAbonnement != null) {
             if (eksisterendeAbonnement.getPeriode().tilPeriode().equals(periode)) {
@@ -94,7 +129,7 @@ public class InntektAbonnentTjeneste {
             .toList();
     }
 
-    public void avsluttAbonnentHvisFinnes(AktørId aktørId) {
+    void avsluttAbonnentHvisFinnes(AktørId aktørId) {
         inntektAbonnementRepository.hentAbonnementForAktør(aktørId)
             .ifPresent(this::avsluttAbonnement);
     }

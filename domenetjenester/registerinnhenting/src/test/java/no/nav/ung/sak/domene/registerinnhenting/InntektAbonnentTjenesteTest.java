@@ -1,11 +1,21 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallellBehandling;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlingerRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +40,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class InntektAbonnentTjenesteTest {
 
+    private static final Long FAGSAK_ID = 1L;
+    private static final Long ORDINÆR_BEHANDLING_ID = 10L;
+    private static final Long KONTROLLBEHANDLING_ID = 11L;
+
     @Mock
     private InntektAbonnementRepository inntektAbonnementRepository;
 
@@ -42,6 +56,9 @@ class InntektAbonnentTjenesteTest {
     @Mock
     private TpsTjeneste tpsTjeneste;
 
+    @Mock
+    private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
+
     private InntektAbonnentTjeneste inntektAbonnenentTjeneste;
 
     private AktørId aktørId;
@@ -53,7 +70,8 @@ class InntektAbonnentTjenesteTest {
             inntektAbonnementRepository,
             inntektAbonnentKlient,
             fagsakTjeneste,
-            tpsTjeneste
+            tpsTjeneste,
+            parallelleBehandlingerRepository
         );
 
         aktørId = new AktørId("1234567890123");
@@ -185,5 +203,73 @@ class InntektAbonnentTjenesteTest {
         verify(inntektAbonnentKlient).avsluttAbonnement(abonnementIdCaptor.capture());
         assertThat(abonnementIdCaptor.getValue()).isEqualTo(123456789L);
         verify(inntektAbonnementRepository).slettAbonnement(eksisterendeAbonnement);
+    }
+
+    @Test
+    void avslutning_av_ordinær_behandling_skal_beholde_abonnementet_når_fagsaken_har_åpen_kontrollbehandling() {
+        var ordinærBehandling = behandling(ORDINÆR_BEHANDLING_ID);
+        when(parallelleBehandlingerRepository.finnIkkeAvsluttetKontrollbehandling(FAGSAK_ID))
+            .thenReturn(Optional.of(åpenKontrollbehandling()));
+
+        inntektAbonnenentTjeneste.avsluttAbonnementForAvsluttetBehandling(ordinærBehandling);
+
+        verify(inntektAbonnentKlient, never()).avsluttAbonnement(anyLong());
+        verify(inntektAbonnementRepository, never()).slettAbonnement(any());
+    }
+
+    @Test
+    void avslutning_av_kontrollbehandlingen_skal_avslutte_abonnementet() {
+        var kontrollbehandling = behandling(KONTROLLBEHANDLING_ID);
+        var eksisterendeAbonnement = new InntektAbonnement("123", aktørId, periode, LocalDate.now().plusMonths(1));
+        when(parallelleBehandlingerRepository.finnIkkeAvsluttetKontrollbehandling(FAGSAK_ID))
+            .thenReturn(Optional.of(åpenKontrollbehandling()));
+        when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId)).thenReturn(Optional.of(eksisterendeAbonnement));
+
+        inntektAbonnenentTjeneste.avsluttAbonnementForAvsluttetBehandling(kontrollbehandling);
+
+        verify(inntektAbonnentKlient).avsluttAbonnement(123L);
+        verify(inntektAbonnementRepository).slettAbonnement(eksisterendeAbonnement);
+    }
+
+    @Test
+    void ordinær_behandling_skal_ikke_opprette_eller_erstatte_abonnementet_når_fagsaken_har_åpen_kontrollbehandling() {
+        var ordinærBehandling = behandling(ORDINÆR_BEHANDLING_ID);
+        when(parallelleBehandlingerRepository.finnIkkeAvsluttetKontrollbehandling(FAGSAK_ID))
+            .thenReturn(Optional.of(åpenKontrollbehandling()));
+
+        inntektAbonnenentTjeneste.opprettAbonnementForBehandling(ordinærBehandling, periode);
+
+        verifyNoInteractions(inntektAbonnementRepository, inntektAbonnentKlient);
+    }
+
+    @Test
+    void kontrollbehandlingen_skal_opprette_abonnement_for_egne_kontrollperioder() {
+        var kontrollbehandling = behandling(KONTROLLBEHANDLING_ID);
+        var fagsak = new Fagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId, new Saksnummer("SAK1"), periode.getFom(), periode.getFom().plusYears(1));
+        when(parallelleBehandlingerRepository.finnIkkeAvsluttetKontrollbehandling(FAGSAK_ID))
+            .thenReturn(Optional.of(åpenKontrollbehandling()));
+        when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId)).thenReturn(Optional.empty());
+        when(fagsakTjeneste.finnFagsakerForAktør(aktørId)).thenReturn(List.of(fagsak));
+        when(tpsTjeneste.hentFnr(aktørId)).thenReturn(Optional.of(new PersonIdent("12345678901")));
+        when(inntektAbonnentKlient.opprettAbonnement(any(), any(), any(), any(), any(), any(), anyInt())).thenReturn(42L);
+
+        inntektAbonnenentTjeneste.opprettAbonnementForBehandling(kontrollbehandling, periode);
+
+        var abonnementCaptor = ArgumentCaptor.forClass(InntektAbonnement.class);
+        verify(inntektAbonnementRepository).lagre(abonnementCaptor.capture());
+        assertThat(abonnementCaptor.getValue().getAbonnementId()).isEqualTo("42");
+        assertThat(abonnementCaptor.getValue().getPeriode().tilPeriode()).isEqualTo(periode);
+    }
+
+    private BehandlingReferanse behandling(Long behandlingId) {
+        var referanse = mock(BehandlingReferanse.class);
+        lenient().when(referanse.getFagsakId()).thenReturn(FAGSAK_ID);
+        lenient().when(referanse.getBehandlingId()).thenReturn(behandlingId);
+        lenient().when(referanse.getAktørId()).thenReturn(aktørId);
+        return referanse;
+    }
+
+    private static ParallellBehandling åpenKontrollbehandling() {
+        return new ParallellBehandling(KONTROLLBEHANDLING_ID, BehandlingType.KONTROLL, BehandlingStatus.UTREDES, null, BehandlingStegType.VURDER_KOMPLETTHET);
     }
 }

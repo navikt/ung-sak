@@ -79,7 +79,7 @@ public class AvsluttBehandling {
         behandlingVedtakEventPubliserer.fireEvent(vedtak, behandling);
 
         behandlingskontrollTjeneste.prosesserBehandlingGjenopptaHvisStegVenter(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
-        inntektAbonnentTjeneste.avsluttAbonnentHvisFinnes(behandling.getAktørId());
+        inntektAbonnentTjeneste.avsluttAbonnementForAvsluttetBehandling(ref);
 
         log.info("Har avsluttet behandling: {}", ref.getBehandlingUuid());
 
