@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellImpl;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.KontrollbehandlingBryter;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 
 @ApplicationScoped
@@ -19,7 +20,7 @@ public class ProsessModell {
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
-    public BehandlingModell førstegangsbehandling() {
+    public BehandlingModell førstegangsbehandling(KontrollbehandlingBryter kontrollbehandlingBryter) {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.AKTIVITETSPENGER);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG, StartpunktType.START)
@@ -38,7 +39,9 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.AKTIVITETSPENGER_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET, StartpunktType.VURDER_KOMPLETTHET)
-            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT)
+            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
+        medPortHvisBryterErPå(modellBuilder, kontrollbehandlingBryter);
+        modellBuilder
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
@@ -52,7 +55,7 @@ public class ProsessModell {
     @BehandlingTypeRef(BehandlingType.REVURDERING)
     @Produces
     @ApplicationScoped
-    public BehandlingModell revurdering() {
+    public BehandlingModell revurdering(KontrollbehandlingBryter kontrollbehandlingBryter) {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.REVURDERING, FagsakYtelseType.AKTIVITETSPENGER);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG, StartpunktType.START)
@@ -75,13 +78,50 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.AKTIVITETSPENGER_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET, StartpunktType.VURDER_KOMPLETTHET)
-            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT)
+            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
+        medPortHvisBryterErPå(modellBuilder, kontrollbehandlingBryter);
+        modellBuilder
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
         return modellBuilder.build();
+    }
+
+    /**
+     * Kontrollbehandlingen går bare gjennom stegene rundt inntektskontrollen. Vilkår, perioder og ytelsesgrunnlag
+     * kommer fra kopi og synkronisering av vedtatte data, så alle endringer starter i kompletthetssteget.
+     */
+    @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
+    @BehandlingTypeRef(BehandlingType.KONTROLL)
+    @Produces
+    @ApplicationScoped
+    public BehandlingModell kontroll() {
+        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.KONTROLL, FagsakYtelseType.AKTIVITETSPENGER);
+        modellBuilder
+            .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET, StartpunktType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT)
+            .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER)
+            .medSteg(BehandlingStegType.BEREGN_YTELSE)
+            .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
+            .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
+            .medSteg(BehandlingStegType.FATTE_VEDTAK)
+            .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
+        return modellBuilder.build();
+    }
+
+    /**
+     * Porten står i modellene for førstegangsbehandling og revurdering bare når bryteren er på. Ellers lagres verken
+     * stegkoden eller autopunktet for porten.
+     */
+    private static void medPortHvisBryterErPå(BehandlingModellImpl.BehandlingModellBuilder modellBuilder, KontrollbehandlingBryter kontrollbehandlingBryter) {
+        if (kontrollbehandlingBryter.erPå(FagsakYtelseType.AKTIVITETSPENGER)) {
+            modellBuilder.medSteg(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);
+        }
     }
 
 }

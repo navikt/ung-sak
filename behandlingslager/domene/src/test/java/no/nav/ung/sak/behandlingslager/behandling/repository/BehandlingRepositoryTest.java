@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -91,6 +93,18 @@ public class BehandlingRepositoryTest {
         assertThat(beh1.getFagsak()).isNotNull();
         assertThat(beh1.getFagsak().getSaksnummer()).isEqualTo(saksnummer);
 
+    }
+
+    @Test
+    public void fagsak_kan_ha_bare_én_åpen_kontrollbehandling() {
+        var fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.UNGDOMSYTELSE);
+        behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.KONTROLL, BehandlingStatus.AVSLUTTET);
+        behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.REVURDERING, BehandlingStatus.UTREDES);
+        behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.KONTROLL, BehandlingStatus.IVERKSETTER_VEDTAK);
+
+        assertThatThrownBy(() -> behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.KONTROLL, BehandlingStatus.UTREDES))
+            .isInstanceOf(PersistenceException.class)
+            .hasStackTraceContaining("uidx_behandling_aapen_kontroll_per_fagsak");
     }
 }
 
