@@ -16,6 +16,11 @@ public enum BehandlingType implements Kodeverdi {
      */
     FØRSTEGANGSSØKNAD("BT-002", "Førstegangsbehandling", "ae0034", 6, true),
     REVURDERING("BT-004", "Revurdering", "ae0028", 6, false),
+    /**
+     * Kontroll av inntekt, som kan gå parallelt med førstegangsbehandling og revurdering.
+     * Koden er foreløpig og må avtales med DVH og k9-los-api før typen tas i bruk.
+     */
+    KONTROLL("BT-012", "Kontrollbehandling", "BT-012", 6, false),
 
     // Klagebehandlinger og referanser brukt i klageløsning
     KLAGE("BT-003", "Klage", "ae0058", 10, false),
@@ -26,7 +31,8 @@ public enum BehandlingType implements Kodeverdi {
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;
 
-    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING);
+    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING, KONTROLL);
+    private static final Set<BehandlingType> ORDINÆRE_YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING);
 
     public static final String KODEVERK = "BEHANDLING_TYPE";
     private static final Map<String, BehandlingType> KODER = new LinkedHashMap<>();
@@ -109,6 +115,17 @@ public enum BehandlingType implements Kodeverdi {
 
     public boolean erYtelseBehandlingType() {
         return YTELSE_BEHANDLING_TYPER.contains(this);
+    }
+
+    /**
+     * Ytelsesbehandlinger som mottar søknader og hendelser. Kontrollbehandling er ytelsesbehandling, men ikke ordinær.
+     */
+    public static Set<BehandlingType> getOrdinæreYtelseBehandlingTyper() {
+        return ORDINÆRE_YTELSE_BEHANDLING_TYPER;
+    }
+
+    public boolean erOrdinærYtelseBehandlingType() {
+        return ORDINÆRE_YTELSE_BEHANDLING_TYPER.contains(this);
     }
 
     public int getBehandlingstidFristUker() {

@@ -104,7 +104,10 @@ public class Behandling extends BaseEntitet {
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
     private Fagsak fagsak;
 
-    @Column(name = "original_behandling_id", updatable = false)
+    /**
+     * Oppdateres bare via {@link #oppdaterOriginalBehandling(Behandling)} når parallelle behandlinger synkes.
+     */
+    @Column(name = "original_behandling_id")
     private Long originalBehandlingId;
 
     @Convert(converter = BehandlingStatusKodeverdiConverter.class)
@@ -593,6 +596,40 @@ public class Behandling extends BaseEntitet {
 
     public boolean erRevurdering() {
         return BehandlingType.REVURDERING.equals(getType());
+    }
+
+    public boolean erKontrollbehandling() {
+        return BehandlingType.KONTROLL.equals(getType());
+    }
+
+    /**
+     * Førstegangsbehandling eller revurdering. Kontrollbehandling er ytelsesbehandling, men ikke ordinær.
+     */
+    public boolean erOrdinærYtelseBehandling() {
+        return getType().erOrdinærYtelseBehandlingType();
+    }
+
+    /**
+     * Setter ny originalbehandling når en annen behandling på fagsaken er avsluttet mens denne var åpen
+     * (synk av parallelle behandlinger). Behandlingen skal da bygge på det nye vedtaket.
+     */
+    public void oppdaterOriginalBehandling(Behandling nyOriginalBehandling) {
+        Objects.requireNonNull(nyOriginalBehandling, "nyOriginalBehandling");
+        guardTilstandPåBehandling();
+        if (!BehandlingStatus.UTREDES.equals(getStatus())) {
+            throw new IllegalStateException("Kan bare oppdatere originalbehandling for behandling med status UTREDES, behandling " + id + " har status " + getStatus());
+        }
+        if (Objects.equals(id, nyOriginalBehandling.getId())) {
+            throw new IllegalArgumentException("Behandling " + id + " kan ikke være sin egen originalbehandling");
+        }
+        if (!Objects.equals(getFagsakId(), nyOriginalBehandling.getFagsakId())) {
+            throw new IllegalArgumentException("Originalbehandling " + nyOriginalBehandling.getId() + " tilhører en annen fagsak enn behandling " + id);
+        }
+        if (!nyOriginalBehandling.erYtelseBehandling() || !nyOriginalBehandling.erAvsluttet() || nyOriginalBehandling.erHenlagt()) {
+            throw new IllegalArgumentException("Originalbehandling må være en avsluttet ytelsesbehandling som ikke er henlagt, fikk behandling " + nyOriginalBehandling.getId()
+                + " med type " + nyOriginalBehandling.getType() + ", status " + nyOriginalBehandling.getStatus() + " og resultat " + nyOriginalBehandling.getBehandlingResultatType());
+        }
+        this.originalBehandlingId = nyOriginalBehandling.getId();
     }
 
     public boolean erYtelseBehandling() {

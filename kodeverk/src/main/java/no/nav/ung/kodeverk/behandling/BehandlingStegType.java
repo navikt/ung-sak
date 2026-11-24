@@ -15,6 +15,10 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStatus.UTREDES;
 public enum BehandlingStegType implements Kodeverdi {
 
     BEREGN_YTELSE("BERYT", "Beregn ytelse", UTREDES),
+    /**
+     * Port før {@link #BEREGN_YTELSE}: bare én behandling per fagsak kan være forbi porten og ikke avsluttet.
+     */
+    VURDER_PARALLELLE_BEHANDLINGER("VURDER_PARALLELLE_BEHANDLINGER", "Vurder parallelle behandlinger", UTREDES),
     FATTE_VEDTAK("FVEDSTEG", "Fatte Vedtak", BehandlingStatus.FATTER_VEDTAK),
     NAV_KONTOR_FORESLÅ_VILKÅR("NAV_KONTOR_FORESLÅ_VILKÅR_STEG", "Nav-kontor foreslå vilkår til beslutning", UTREDES),
     NAV_KONTOR_BESLUTTER_VILKÅR("NAV_KONTOR_BESLUTTE_VILKÅR_STEG", "Nav-kontor beslutte vilkår", BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR),
