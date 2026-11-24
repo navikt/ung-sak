@@ -28,9 +28,8 @@ public class HendelseInfo {
 
     @JsonProperty(value = "aktørIder")
     @Size(max = 100)
-    @Valid
     @NotNull
-    private List<AktørId> aktørIder = new ArrayList<>();
+    private List<@Valid AktørId> aktørIder = new ArrayList<>();
 
     @JsonProperty(value = "opprettet", required = true)
     @NotNull
