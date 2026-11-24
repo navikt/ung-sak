@@ -78,7 +78,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var førsteSatser = førsteSegment.getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
-        var utbetalingDto = opprettUtbetalingDto(behandling, tilVurdering);
+        var utbetalingDto = opprettUtbetalingDto(tilVurdering);
 
         var satsendringer = lagSatsEndringHendelser(satsTidslinje);
 
@@ -103,14 +103,11 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             .anyMatch(it -> it.avslagsårsak() == Avslagsårsak.SØKER_OVER_HØYESTE_ALDER);
     }
 
-    private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
-        var førsteTilkjentMåned = (tilkjentYtelseTimeline.isEmpty()
-            ? detaljertResultatTidslinje.getMinLocalDate()
-            : tilkjentYtelseTimeline.getMinLocalDate()).withDayOfMonth(1);
+    private UtbetalingDto opprettUtbetalingDto(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+        var førsteInnvilgetDato = detaljertResultatTidslinje.filterValue(it -> !it.erAvslåttEllerAvkortet()).getMinLocalDate();
         var dagensDato = bestemDagensDato();
 
-        var førstkommendeUtbetalingskjøring = førsteTilkjentMåned.plusMonths(1).plusDays(9);
+        var førstkommendeUtbetalingskjøring = førsteInnvilgetDato.plusMonths(1).withDayOfMonth(10);
         var erEtterbetaling = dagensDato.isAfter(førstkommendeUtbetalingskjøring);
 
         var månedNavn = MonthUtils.navnPåMåned(førstkommendeUtbetalingskjøring.getMonth());

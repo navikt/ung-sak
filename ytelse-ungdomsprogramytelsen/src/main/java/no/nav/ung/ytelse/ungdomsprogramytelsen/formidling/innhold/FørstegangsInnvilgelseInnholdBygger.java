@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.formidling.innhold.MonthUtils;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -63,7 +64,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         Long behandlingId = behandling.getId();
 
         var innvilgetTidslinje = detaljertResultatTidslinje
-            .filterValue(r -> erInnvilgelseMedUtbetaling(r, behandling.erManueltOpprettet()));
+            .filterValue(r -> erInnvilgelse(r, behandling.erManueltOpprettet()));
 
         var ytelseFom = innvilgetTidslinje.getMinLocalDate();
 
@@ -84,7 +85,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var erEtterbetaling = erEtterbetaling(innvilgetTidslinje);
 
         var sisteUtbetalingsdato = ytelseTom != null ? PeriodeBeregner.utledFremtidigUtbetalingsdato(ytelseTom, YearMonth.from(bestemDagensDato())) : null;
-
+        var førstkommendeUtbetalingskjøring = ytelseFom.plusMonths(1).withDayOfMonth(10);
+        var månedNavn = MonthUtils.navnPåMåned(førstkommendeUtbetalingskjøring.getMonth());
         return new TemplateInnholdResultat(TemplateType.INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
@@ -95,7 +97,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 null,
                 erEtterbetaling,
                 satsEndringHendelseDtos.isEmpty(),
-                sisteUtbetalingsdato));
+                sisteUtbetalingsdato,
+                månedNavn));
     }
 
     private boolean erEtterbetaling(LocalDateTimeline<DetaljertResultat> innvilgetTidslinje) {
@@ -119,10 +122,9 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             .orElse(null);
     }
 
-    private static boolean erInnvilgelseMedUtbetaling(DetaljertResultat r, boolean manueltOpprettet) {
-        boolean nyPeriode = r.harÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
+    private static boolean erInnvilgelse(DetaljertResultat r, boolean manueltOpprettet) {
+        return !r.erAvslåttEllerAvkortet() && r.harÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
             || (manueltOpprettet && r.harÅrsak(BehandlingÅrsakType.RE_SATS_ENDRING));
-        return nyPeriode && r.utbetalingsgrad().erSatt();
     }
 
     private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {

@@ -24,17 +24,14 @@
 
         {{#with utbetaling}}
             <p>
-                Pengene blir utbetalt én gang i måneden.
-                {{#if erEtterbetaling}}
-                    Den første utbetalingen får du innen fire dager, og deretter får du pengene innen den 12. hver måned.
+                Pengene får du utbetalt én gang i måneden.
+                {{#if etterbetaling}}
+                    Den første utbetalingen får du innen en uke, og deretter får du pengene innen den 12. hver måned.
                 {{else}}
                     Den første utbetalingen får du innen 12. {{månedNavn}}, og deretter får du pengene innen den 12. hver måned.
                 {{/if}}
-                {{#if sisteUtbetalingsdato}}
-                    Den siste utbetalingen får du før den {{sisteUtbetalingsdato}}.
-                {{/if}}
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.
             </p>
-            <p>Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.</p>
         {{/with}}
 
         <p>
