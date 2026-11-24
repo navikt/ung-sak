@@ -120,6 +120,18 @@ public class RevurderingTjeneste {
         return kontrollbehandling;
     }
 
+    /**
+     * Oppretter kontrollbehandling for kontroll av inntekt i én periode, for eksempel når saksbehandler ber om kontroll.
+     * Er behandlingen manuelt opprettet, får saksbehandler alltid aksjonspunkt for kontroll av inntekt, som i en manuelt
+     * opprettet revurdering for kontroll i dag.
+     */
+    public Behandling opprettKontrollbehandling(Behandling origBehandling, DatoIntervallEntitet periode, boolean manueltOpprettet) {
+        var årsak = BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT;
+        var kontrollbehandling = opprettKontrollbehandling(origBehandling, årsak, manueltOpprettet);
+        prosessTriggereRepository.leggTil(kontrollbehandling.getId(), Set.of(new Trigger(årsak, periode)));
+        return kontrollbehandling;
+    }
+
     public boolean kanKontrollbehandlingOpprettes(Fagsak fagsak) {
         return revurderingTjenesteFelles.kanKontrollbehandlingOpprettes(fagsak);
     }

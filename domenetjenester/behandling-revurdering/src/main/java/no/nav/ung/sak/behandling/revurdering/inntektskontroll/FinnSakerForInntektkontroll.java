@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,13 +93,28 @@ public class FinnSakerForInntektkontroll {
         return !relevantePerioderForKontroll.intersection(new LocalDateInterval(fom, tom)).isEmpty();
     }
 
+    /**
+     * Med kontrollbehandling kan fagsaken ha to åpne behandlinger, og måneden kan være markert for kontroll i en annen
+     * åpen behandling enn den som er opprettet sist.
+     */
     private boolean erIkkeAlleredeMarkertForKontroll(Behandling behandling, LocalDate fom, LocalDate tom) {
-        return relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId()).intersection(new LocalDateInterval(fom, tom)).isEmpty();
+        var behandlingIder = new LinkedHashSet<Long>();
+        behandlingIder.add(behandling.getId());
+        behandlingIder.addAll(behandlingRepository.hentÅpneBehandlingerIdForFagsakId(behandling.getFagsakId(), BehandlingType.getYtelseBehandlingTyper()));
+        return behandlingIder.stream()
+            .allMatch(id -> relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(id).intersection(new LocalDateInterval(fom, tom)).isEmpty());
     }
 
+    /**
+     * Siste vedtak sjekkes også. En åpen behandling får ikke kontrollen fra en kontrollbehandling som nettopp er vedtatt,
+     * før synken etter avslutning har kjørt.
+     */
     private boolean harIkkeUtførtKontroll(Behandling behandling, LocalDate fom, LocalDate tom) {
-        var kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
-        return kontrollertInntektTidslinje.intersection(new LocalDateInterval(fom, tom)).isEmpty();
+        var behandlingIder = new LinkedHashSet<Long>();
+        behandlingIder.add(behandling.getId());
+        behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId()).map(Behandling::getId).ifPresent(behandlingIder::add);
+        return behandlingIder.stream()
+            .allMatch(id -> tilkjentYtelseRepository.hentKontrollerInntektTidslinje(id).intersection(new LocalDateInterval(fom, tom)).isEmpty());
     }
 
     private Optional<Behandling> hentRelevantBehandling(Long fagsakId) {
