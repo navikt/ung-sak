@@ -114,7 +114,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
         historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
 
         behandlingProsesseringTjeneste = mock(BehandlingProsesseringTjeneste.class);
-        when(behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(any(), anyBoolean(), anyBoolean(), anyBoolean()))
+        when(behandlingProsesseringTjeneste.opprettTaskGruppeForSynkronisering(any()))
             .thenAnswer(invocation -> gjenopptaGruppe());
         fagsakProsessTaskRepository = mock(FagsakProsessTaskRepository.class);
         synkroniseringTaskOppretter = mock(SynkroniserÅpneBehandlingerTaskOppretter.class);
@@ -178,7 +178,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
         tjeneste.synkroniser(synkTask());
 
         var rekkefølge = inOrder(behandlingProsesseringTjeneste, ytelsesgrunnlagSynkroniserer, fagsakProsessTaskRepository);
-        rekkefølge.verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(kontroll, false, false, false);
+        rekkefølge.verify(behandlingProsesseringTjeneste).opprettTaskGruppeForSynkronisering(kontroll);
         rekkefølge.verify(ytelsesgrunnlagSynkroniserer).erstattYtelsesgrunnlagFraOrdinærBehandling(revurdering.getId(), kontroll.getId());
         rekkefølge.verify(fagsakProsessTaskRepository).lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(eq(kontroll.getFagsakId()), eq(kontroll.getId()), any(ProsessTaskGruppe.class));
     }
@@ -236,7 +236,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
 
         verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(revurdering, false);
         verify(behandlingProsesseringTjeneste, never()).opprettTasksForGjenopptaOppdaterFortsett(eq(kontroll), anyBoolean());
-        verify(behandlingProsesseringTjeneste, never()).opprettTaskGruppeForGjenopptaOppdaterFortsett(any(), anyBoolean(), anyBoolean(), anyBoolean());
+        verify(behandlingProsesseringTjeneste, never()).opprettTaskGruppeForSynkronisering(any());
         verify(fagsakProsessTaskRepository, never()).lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(anyLong(), anyLong(), any());
         assertThat(behandlingRepository.hentBehandling(revurdering.getId()).getOriginalBehandlingId()).contains(førstegangsbehandling.getId());
     }
@@ -266,7 +266,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
         tjeneste.synkroniser(synkTask());
 
         verify(synkroniseringTaskOppretter).opprett(kontroll.getFagsakId());
-        verify(behandlingProsesseringTjeneste, never()).opprettTaskGruppeForGjenopptaOppdaterFortsett(any(), anyBoolean(), anyBoolean(), anyBoolean());
+        verify(behandlingProsesseringTjeneste, never()).opprettTaskGruppeForSynkronisering(any());
         verify(fagsakProsessTaskRepository, never()).lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(anyLong(), anyLong(), any());
         verifyNoInteractions(ytelsesgrunnlagSynkroniserer);
         assertThat(behandlingRepository.hentBehandling(kontroll.getId()).getOriginalBehandlingId()).contains(førstegangsbehandling.getId());

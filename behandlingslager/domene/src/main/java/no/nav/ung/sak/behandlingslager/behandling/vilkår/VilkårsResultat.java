@@ -42,6 +42,10 @@ public class VilkårsResultat extends BaseEntitet {
         this.vilkårene = vilkårene;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Vilkårene getVilkårene() {
         return vilkårene;
     }

@@ -24,12 +24,14 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -123,6 +125,40 @@ class UngdomsytelseGrunnlagRepositoryTest {
         repository.erstattGrunnlagMedKopiFra(utenGrunnlag.getId(), mål.getId());
 
         assertThat(repository.hentGrunnlag(mål.getId()).isPresent()).isFalse();
+    }
+
+    @Test
+    void diff_på_avslått_uttak_ser_bort_fra_sats_og_tåler_grunnlag_uten_uttak() {
+        var august = new LocalDateInterval(LocalDate.of(2025, 8, 1), LocalDate.of(2025, 8, 31));
+        lagreBeregning(august, BigDecimal.TEN, BigDecimal.valueOf(50), hentSatstypeOgGrunnbeløp(Sats.HØY), 0, 0);
+        var utenUttak = aktivGrunnlagId();
+        repository.lagre(behandling.getId(), uttak(august, UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER));
+        var medAvslag = aktivGrunnlagId();
+        lagreBeregning(august, BigDecimal.ONE, BigDecimal.valueOf(50), hentSatstypeOgGrunnbeløp(Sats.HØY), 0, 0);
+        var medAvslagOgNySats = aktivGrunnlagId();
+        repository.lagre(behandling.getId(), uttak(august, null));
+        var utenAvslag = aktivGrunnlagId();
+
+        assertThat(diffAvslåttUttak(utenUttak, medAvslag).isEmpty()).isFalse();
+        assertThat(diffAvslåttUttak(medAvslag, medAvslagOgNySats).isEmpty()).isTrue();
+        assertThat(diffAvslåttUttak(medAvslagOgNySats, utenAvslag).isEmpty()).isFalse();
+        assertThat(diffAvslåttUttak(utenUttak, utenAvslag).isEmpty()).isTrue();
+    }
+
+    private Long aktivGrunnlagId() {
+        return (Long) repository.finnAktivGrunnlagId(behandling.getId()).getGrunnlagRef();
+    }
+
+    private DiffResult diffAvslåttUttak(Long id1, Long id2) {
+        assertThat(id1).isNotEqualTo(id2);
+        return repository.diffAvslåttUttak(EndringsresultatDiff.medDiff(UngdomsytelseGrunnlag.class, id1, id2));
+    }
+
+    private static UngdomsytelseUttakPerioder uttak(LocalDateInterval periode, UngdomsytelseUttakAvslagsårsak avslagsårsak) {
+        var uttak = new UngdomsytelseUttakPerioder(List.of(new UngdomsytelseUttakPeriode(periode.getFomDato(), periode.getTomDato(), avslagsårsak)));
+        uttak.setRegelInput("input");
+        uttak.setRegelSporing("sporing");
+        return uttak;
     }
 
     private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor, int antallBarn, int barnetilleggDagsats) {

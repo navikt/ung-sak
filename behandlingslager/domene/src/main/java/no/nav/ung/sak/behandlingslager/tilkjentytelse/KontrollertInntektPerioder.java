@@ -39,6 +39,10 @@ public class KontrollertInntektPerioder extends BaseEntitet {
     public KontrollertInntektPerioder() {
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public List<KontrollertInntektPeriode> getPerioder() {
         return perioder;
     }

@@ -116,10 +116,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
             gruppe.addNesteSekvensiell(registerdataOppdatererTask);
             if (innhentRegisterdataFørst) {
                 log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
-                leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, true);
+                leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, true, false);
             } else {
                 log.info("Sjekker om det har tilkommet nye søknader/inntektsmeldinger og annet for behandling: {}", behandling.getId());
-                leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true);
+                leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true, false);
             }
         }
         ProsessTaskData fortsettBehandlingTask;
@@ -218,6 +218,16 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     @Override
     public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker, boolean forceInnhentingAvRegisterdata) {
+        return opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, skalUtledeÅrsaker, forceInnhentingAvRegisterdata, false);
+    }
+
+    @Override
+    public ProsessTaskGruppe opprettTaskGruppeForSynkronisering(Behandling behandling) {
+        // Årsaker utledes ikke: aggregatene i det utvidede snapshotet har ingen årsaksutledere.
+        return opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, false, false, false, true);
+    }
+
+    private ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker, boolean forceInnhentingAvRegisterdata, boolean utvidetSnapshot) {
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
 
@@ -241,10 +251,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         if (behandling.erYtelseBehandling()) {
             if (forceInnhentingAvRegisterdata || skalHenteInnRegisterData(behandling)) {
                 log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
-                leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, skalUtledeÅrsaker);
+                leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, skalUtledeÅrsaker, utvidetSnapshot);
             } else {
                 log.info("Sjekker om det har tilkommet nye inntektsmeldinger for behandling: {}", behandlingId);
-                leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker);
+                leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker, utvidetSnapshot);
             }
         }
 
@@ -260,17 +270,19 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         return gruppe;
     }
 
-    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, ProsessTaskGruppe gruppe, boolean skalUtledeÅrsaker) {
+    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, ProsessTaskGruppe gruppe, boolean skalUtledeÅrsaker, boolean utvidetSnapshot) {
         leggTilInnhentRegisterdataTasks(behandling, gruppe);
-        leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker);
+        leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker, utvidetSnapshot);
     }
 
-    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, ProsessTaskGruppe gruppe, boolean skalUtledeÅrsaker) {
+    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, ProsessTaskGruppe gruppe, boolean skalUtledeÅrsaker, boolean utvidetSnapshot) {
         var diffOgReposisjoner = ProsessTaskData.forProsessTask(DiffOgReposisjonerTask.class);
         diffOgReposisjoner.setProperty(DiffOgReposisjonerTask.UTLED_ÅRSAKER, "" + skalUtledeÅrsaker);
         diffOgReposisjoner.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         try {
-            var snapshotFørInnhenting = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId());
+            var snapshotFørInnhenting = utvidetSnapshot
+                ? endringsresultatSjekker.opprettUtvidetEndringsresultatSnapshot(behandling.getId())
+                : endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId());
             diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(snapshotFørInnhenting));
         } catch (IOException e) {
             throw new RuntimeException("Feil ved serialisering av snapshot", e);

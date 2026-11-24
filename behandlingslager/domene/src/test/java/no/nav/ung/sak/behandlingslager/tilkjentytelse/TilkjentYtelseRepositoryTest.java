@@ -9,9 +9,11 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -28,6 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
 class TilkjentYtelseRepositoryTest {
+
+    private static final DatoIntervallEntitet AUGUST = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2025, 8, 1), LocalDate.of(2025, 8, 31));
+    private static final DatoIntervallEntitet SEPTEMBER = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2025, 9, 1), LocalDate.of(2025, 9, 30));
 
     @Inject
     private EntityManager entityManager;
@@ -61,14 +66,41 @@ class TilkjentYtelseRepositoryTest {
         assertThat(repository.hentKontrollertInntektPerioder(fra.getId())).isPresent();
     }
 
+    @Test
+    void diff_av_kontrollperioder_ser_bort_fra_rekkefølge_og_skala_og_fanger_endret_inntekt() {
+        var august = nyBehandling();
+        var augustOgSeptember = nyBehandling();
+        var septemberOgAugust = nyBehandling();
+        var endretInntekt = nyBehandling();
+        repository.lagre(august.getId(), List.of(kontrollperiode(AUGUST, BigDecimal.TEN)));
+        repository.lagre(augustOgSeptember.getId(), List.of(kontrollperiode(AUGUST, BigDecimal.TEN), kontrollperiode(SEPTEMBER, BigDecimal.ONE)));
+        repository.lagre(septemberOgAugust.getId(), List.of(kontrollperiode(SEPTEMBER, BigDecimal.ONE), kontrollperiode(AUGUST, new BigDecimal("10.00"))));
+        repository.lagre(endretInntekt.getId(), List.of(kontrollperiode(AUGUST, BigDecimal.TEN), kontrollperiode(SEPTEMBER, BigDecimal.TWO)));
+
+        assertThat(diffKontrollperioder(augustOgSeptember, septemberOgAugust).isEmpty()).isTrue();
+        assertThat(diffKontrollperioder(augustOgSeptember, endretInntekt).isEmpty()).isFalse();
+        assertThat(diffKontrollperioder(august, augustOgSeptember).isEmpty()).isFalse();
+    }
+
+    private DiffResult diffKontrollperioder(Behandling før, Behandling etter) {
+        var id1 = (Long) repository.finnAktivKontrollperioderId(før.getId()).getGrunnlagRef();
+        var id2 = (Long) repository.finnAktivKontrollperioderId(etter.getId()).getGrunnlagRef();
+        assertThat(id1).isNotEqualTo(id2);
+        return repository.diffKontrollperioder(EndringsresultatDiff.medDiff(KontrollertInntektPerioder.class, id1, id2));
+    }
+
     private Behandling nyBehandling() {
         return behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.REVURDERING, BehandlingStatus.UTREDES);
     }
 
     private static KontrollertInntektPeriode kontrollperiode() {
+        return kontrollperiode(AUGUST, BigDecimal.TEN);
+    }
+
+    private static KontrollertInntektPeriode kontrollperiode(DatoIntervallEntitet periode, BigDecimal inntekt) {
         return KontrollertInntektPeriode.ny()
-            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2025, 8, 1), LocalDate.of(2025, 8, 31)))
-            .medInntekt(BigDecimal.TEN)
+            .medPeriode(periode)
+            .medInntekt(inntekt)
             .medKilde(KontrollertInntektKilde.REGISTER)
             .build();
     }

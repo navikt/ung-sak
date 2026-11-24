@@ -55,6 +55,10 @@ public class UngdomsytelseGrunnlag {
     public UngdomsytelseGrunnlag() {
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public UngdomsytelseSatsPerioder getSatsPerioder() {
         return satsPerioder;
     }

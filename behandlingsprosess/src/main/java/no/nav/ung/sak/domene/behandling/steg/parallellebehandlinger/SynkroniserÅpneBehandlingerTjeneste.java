@@ -156,7 +156,7 @@ public class SynkroniserÅpneBehandlingerTjeneste {
         log.info("Oppdaterer behandling {} med vedtatte data fra behandling {}", mål.getId(), kilde.getId());
 
         // Snapshotet til diffen tas når gruppen bygges, og må derfor tas før kopieringen.
-        ProsessTaskGruppe gjenopptaGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(mål, false, false, false);
+        ProsessTaskGruppe gjenopptaGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForSynkronisering(mål);
         if (gjenopptaGruppe == null) {
             throw new IllegalStateException("Fikk ikke laget taskgruppe for å gjenoppta behandling " + mål.getId() + " etter synkronisering");
         }
