@@ -42,7 +42,15 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
 
     @Override
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
-        var årsaker = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId()).getBehandlingÅrsakerTyper();
+        var behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
+
+        // Kontrollbehandlingen eier bare kontrollen av inntekt. Programperiode og maksdato varsles fra ordinær behandling.
+        if (behandling.erKontrollbehandling()) {
+            kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
+            return;
+        }
+
+        var årsaker = behandling.getBehandlingÅrsakerTyper();
 
         // Rene varsel-om-opphør-ved-maksdato-behandlinger skal kun varsle om opphør, og ikke trigge
         // inntektskontroll eller programperiodeendring-varsling som del av opphør-behandlingsflyten.
