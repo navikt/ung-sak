@@ -345,13 +345,14 @@ public class FagsakRestTjeneste {
         }
         fagsakRepository.fjernIkkedigitalFlagg(fagsak.get().getId());
 
-        final Optional<Behandling> behandling = finnBehandlingSomKanSendesTilbakeTilStart(s.getVerdi());
-        if (behandling.isEmpty()) {
+        final List<Behandling> behandlinger = finnBehandlingerSomSendesTilbakeTilStart(s.getVerdi());
+        if (behandlinger.isEmpty()) {
             logger.warn("Kunne ikke finne åpen behandling for: {}", s.getVerdi());
-        } else {
+        }
+        for (Behandling behandling : behandlinger) {
             final ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
             prosessTaskData.setCallIdFraEksisterende();
-            prosessTaskData.setBehandling(fagsak.get().getId(), behandling.get().getId(), fagsak.get().getAktørId().getId());
+            prosessTaskData.setBehandling(fagsak.get().getId(), behandling.getId(), fagsak.get().getAktørId().getId());
             taskTjeneste.lagre(prosessTaskData);
         }
         return Response.ok().build();
@@ -430,19 +431,15 @@ public class FagsakRestTjeneste {
         }
     }
 
-    private Optional<Behandling> finnBehandlingSomKanSendesTilbakeTilStart(Saksnummer saksnummer) {
-        final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer)
+    /**
+     * Alle åpne ytelsesbehandlinger kjøres fra start, også kontrollbehandlingen. Kompletthet og kontroll av inntekt
+     * oppfører seg ulikt for brukere som ikke er digitale, og kontrollbehandlingen skal varsle digitalt når flagget er fjernet.
+     */
+    private List<Behandling> finnBehandlingerSomSendesTilbakeTilStart(Saksnummer saksnummer) {
+        return behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer)
             .stream()
             .filter(Behandling::erYtelseBehandling)
             .filter(b -> !b.erStatusFerdigbehandlet())
             .toList();
-
-        if (behandlinger.isEmpty()) {
-            return Optional.empty();
-        }
-        if (behandlinger.size() > 1) {
-            throw new IllegalStateException("Flere åpne behandlinger på én fagsak er ikke støttet i denne tasken ennå.");
-        }
-        return Optional.of(behandlinger.get(0));
     }
 }

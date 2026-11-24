@@ -402,6 +402,36 @@ class VurderAktivitetsvilkårStegTest {
             .hasMessageContaining("Forventer ikke avklaringer");
     }
 
+    @Test
+    void skal_innvilge_automatisk_når_forrige_ordinære_behandling_er_avslått_førstegangsbehandling_med_kontrollbehandling_imellom() {
+        var avslåttFørstegangsbehandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+            .leggTilVilkår(VilkårType.AKTIVITETSVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(FOM, TOM))
+            .lagre(entityManager);
+        var kontrollbehandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.KONTROLL)
+            .medOriginalBehandling(avslåttFørstegangsbehandling, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
+            .leggTilVilkår(VilkårType.AKTIVITETSVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(FOM, TOM))
+            .lagre(entityManager);
+        var revurdering = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(kontrollbehandling, BehandlingÅrsakType.NY_SØKT_PERIODE)
+            .leggTilVilkår(VilkårType.AKTIVITETSVILKÅR, Utfall.IKKE_VURDERT, new Periode(FOM, TOM))
+            .leggTilVilkår(VilkårType.ALDERSVILKÅR, Utfall.OPPFYLT, new Periode(FOM, TOM))
+            .leggTilVilkår(VilkårType.SØKNADSFRIST, Utfall.OPPFYLT, new Periode(FOM, TOM))
+            .lagre(entityManager);
+        var søktStartdato = new SøktStartdato(FOM, new JournalpostId("jp-vilkår"));
+        startdatoRepository.lagre(revurdering.getId(), List.of(søktStartdato));
+        startdatoRepository.lagreRelevanteSøknader(revurdering.getId(), new Startdatoer(List.of(søktStartdato)));
+        prosessTriggereRepository.leggTil(revurdering.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
+
+        var resultat = utførSteg(revurdering);
+
+        assertThat(resultat.getAksjonspunktListe()).isEmpty();
+        var vilkår = vilkårResultatRepository.hent(revurdering.getId()).getVilkår(VilkårType.AKTIVITETSVILKÅR).orElseThrow().getPerioder();
+        assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.OPPFYLT);
+    }
+
     private UUID finnReferanse(Set<VilkårPeriodeAvklaring> lagrede, LocalDate fom) {
         return lagrede.stream()
             .filter(a -> a.getPeriode().getFomDato().equals(fom))
