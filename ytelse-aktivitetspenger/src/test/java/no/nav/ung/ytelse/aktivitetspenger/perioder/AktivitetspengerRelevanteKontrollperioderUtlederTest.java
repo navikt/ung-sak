@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(CdiAwareExtension.class)
 class AktivitetspengerRelevanteKontrollperioderUtlederTest {
 
-    private static final YearMonth NOVEMBER = YearMonth.of(2026, 11);
+    private static final YearMonth JANUAR = YearMonth.of(2027, 1);
 
     @Inject
     private RelevanteKontrollperioderUtleder utleder;
@@ -32,45 +32,55 @@ class AktivitetspengerRelevanteKontrollperioderUtlederTest {
 
     @Test
     void skal_kontrollere_første_og_eneste_delvise_måned() {
-        var perioder = new LocalDateTimeline<>(NOVEMBER.atDay(10), NOVEMBER.atDay(20), NOVEMBER);
+        var perioder = new LocalDateTimeline<>(JANUAR.atDay(10), JANUAR.atDay(20), JANUAR);
 
         var resultat = utleder.utledPerioderRelevantForKontrollAvInntekt(perioder, FagsakYtelseType.AKTIVITETSPENGER);
 
-        assertThat(resultat).isEqualTo(new LocalDateTimeline<>(NOVEMBER.atDay(1), NOVEMBER.atEndOfMonth(),
+        assertThat(resultat).isEqualTo(new LocalDateTimeline<>(JANUAR.atDay(1), JANUAR.atEndOfMonth(),
             new RelevanteKontrollperioderUtleder.InfoOmRådata(false)));
     }
 
     @Test
+    void skal_frita_første_og_eneste_delvise_måned_før_januar_2027() {
+        var desember = YearMonth.of(2026, 12);
+        var perioder = new LocalDateTimeline<>(desember.atDay(10), desember.atDay(20), desember);
+
+        var resultat = utleder.utledPerioderRelevantForKontrollAvInntekt(perioder, FagsakYtelseType.AKTIVITETSPENGER);
+
+        assertThat(resultat.isEmpty()).isTrue();
+    }
+
+    @Test
     void skal_kontrollere_alle_måneder_også_etter_opphold() {
-        var desember = NOVEMBER.plusMonths(1);
-        var februar = NOVEMBER.plusMonths(3);
+        var februar = JANUAR.plusMonths(1);
+        var april = JANUAR.plusMonths(3);
         var perioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(NOVEMBER.atDay(1), NOVEMBER.atEndOfMonth(), NOVEMBER),
-            new LocalDateSegment<>(desember.atDay(1), desember.atDay(10), desember),
-            new LocalDateSegment<>(februar.atDay(1), februar.atEndOfMonth(), februar)));
+            new LocalDateSegment<>(JANUAR.atDay(1), JANUAR.atEndOfMonth(), JANUAR),
+            new LocalDateSegment<>(februar.atDay(1), februar.atDay(10), februar),
+            new LocalDateSegment<>(april.atDay(1), april.atEndOfMonth(), april)));
 
         var resultat = utleder.utledPerioderRelevantForKontrollAvInntekt(perioder, FagsakYtelseType.AKTIVITETSPENGER);
 
         assertThat(resultat).isEqualTo(new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(NOVEMBER.atDay(1), NOVEMBER.atEndOfMonth(), new RelevanteKontrollperioderUtleder.InfoOmRådata(true)),
-            new LocalDateSegment<>(desember.atDay(1), desember.atEndOfMonth(), new RelevanteKontrollperioderUtleder.InfoOmRådata(false)),
-            new LocalDateSegment<>(februar.atDay(1), februar.atEndOfMonth(), new RelevanteKontrollperioderUtleder.InfoOmRådata(true)))));
+            new LocalDateSegment<>(JANUAR.atDay(1), JANUAR.atEndOfMonth(), new RelevanteKontrollperioderUtleder.InfoOmRådata(true)),
+            new LocalDateSegment<>(februar.atDay(1), februar.atEndOfMonth(), new RelevanteKontrollperioderUtleder.InfoOmRådata(false)),
+            new LocalDateSegment<>(april.atDay(1), april.atEndOfMonth(), new RelevanteKontrollperioderUtleder.InfoOmRådata(true)))));
     }
 
     @Test
     void skal_utlede_delvis_første_måned_fra_behandlingens_vilkår() {
         var repositories = AktivitetspengerTestRepositories.lagAlleAktivitetspengerTestRepositoriesOgAbakusTjeneste(entityManager, null);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySats(NOVEMBER.atDay(10));
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySats(JANUAR.atDay(10));
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medSøknadDato(NOVEMBER.atDay(10))
+            .medSøknadDato(JANUAR.atDay(10))
             .medAktivitetspengerTestGrunnlag(scenario)
             .buildOgLagreMedAktivitspenger(repositories);
 
         var resultat = utleder.utledPerioderRelevantForKontrollAvInntekt(behandling.getId());
 
         assertThat(resultat.segmenter()).first().satisfies(segment -> {
-            assertThat(segment.getFom()).isEqualTo(NOVEMBER.atDay(1));
-            assertThat(segment.getTom()).isEqualTo(NOVEMBER.atEndOfMonth());
+            assertThat(segment.getFom()).isEqualTo(JANUAR.atDay(1));
+            assertThat(segment.getTom()).isEqualTo(JANUAR.atEndOfMonth());
             assertThat(segment.getValue().gjelderHelePerioden()).isFalse();
         });
     }

@@ -53,8 +53,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(CdiAwareExtension.class)
 class AktivitetspengerBeregnYtelseStegTest {
 
-    private static final LocalDate FOM = LocalDate.of(2026, 7, 1);
-    private static final LocalDate TOM = LocalDate.of(2026, 7, 31);
+    private static final LocalDate FOM = LocalDate.of(2027, 1, 1);
+    private static final LocalDate TOM = LocalDate.of(2027, 1, 31);
 
     @Inject
     private EntityManager entityManager;
@@ -146,7 +146,7 @@ class AktivitetspengerBeregnYtelseStegTest {
 
         var månedsvisUtleder = mock(MånedsvisTidslinjeUtleder.class);
         when(månedsvisUtleder.finnMånedsvisPeriodisertePerioder(behandlingId))
-            .thenReturn(new LocalDateTimeline<>(FOM, TOM, YearMonth.of(2026, 7)));
+            .thenReturn(new LocalDateTimeline<>(FOM, TOM, YearMonth.from(FOM)));
         var steg = new AktivitetspengerBeregnYtelseSteg(
             repositories.aktivitetspengerGrunnlagRepository(),
             repositories.tilkjentYtelseRepository(),
