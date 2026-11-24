@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -14,19 +15,22 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Engangsmigrering som lagrer vedtak for samordning for eksisterende saker.
  * <p>
  * Oppretter én {@link LagreVedtattYtelseTask} per fagsak, for siste iverksatte, ikke henlagte ytelsesbehandling.
- * Oppslag bruker bare aktivt vedtak, så eldre vedtak trengs ikke. Vedtak som ikke er ferdig iverksatt, lagres av
- * {@code VedtakFattetEventObserver} når iverksettingen er ferdig. Kan kjøres på nytt, siden lagringen er idempotent.
+ * Oppslag bruker bare aktivt vedtak, så eldre vedtak trengs ikke. Vedtak som allerede er lagret, hoppes over, og vedtak som
+ * ikke er ferdig iverksatt, lagres av {@code VedtakFattetEventObserver} når iverksettingen er ferdig. Lagringstaskene
+ * opprettes i én gruppe og kjøres parallelt. Kan kjøres på nytt.
  * <p>
  * Dryrun logger antall saker uten å opprette lagringstasker.
  */
@@ -44,6 +48,7 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
     private EntityManager entityManager;
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
+    private VedtakYtelseRepository vedtakYtelseRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     MigrerVedtattYtelseTilSamordningTask() {
@@ -54,10 +59,12 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
     public MigrerVedtattYtelseTilSamordningTask(EntityManager entityManager,
                                                 BehandlingRepository behandlingRepository,
                                                 BehandlingVedtakRepository behandlingVedtakRepository,
+                                                VedtakYtelseRepository vedtakYtelseRepository,
                                                 ProsessTaskTjeneste prosessTaskTjeneste) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
+        this.vedtakYtelseRepository = vedtakYtelseRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
@@ -66,15 +73,21 @@ public class MigrerVedtattYtelseTilSamordningTask implements ProsessTaskHandler 
         boolean dryRun = Boolean.parseBoolean(prosessTaskData.getPropertyValue(DRY_RUN));
 
         List<Fagsak> fagsaker = hentFagsaker();
+        Set<UUID> lagredeVedtak = vedtakYtelseRepository.hentVedtakReferanser(YTELSER);
         List<ProsessTaskData> lagringstasker = fagsaker.stream()
-            .flatMap(fagsak -> finnSisteIverksatteBehandling(fagsak).map(behandling -> lagringstask(fagsak, behandling)).stream())
+            .flatMap(fagsak -> finnSisteIverksatteBehandling(fagsak)
+                .filter(behandling -> !lagredeVedtak.contains(behandling.getUuid()))
+                .map(behandling -> lagringstask(fagsak, behandling))
+                .stream())
             .toList();
 
         if (dryRun) {
-            log.info("Dryrun: {} av {} saker har iverksatt vedtak som lagres for samordning.", lagringstasker.size(), fagsaker.size());
+            log.info("Dryrun: {} av {} saker mangler lagret vedtak for samordning.", lagringstasker.size(), fagsaker.size());
             return;
         }
-        lagringstasker.forEach(prosessTaskTjeneste::lagre);
+        if (!lagringstasker.isEmpty()) {
+            prosessTaskTjeneste.lagre(new ProsessTaskGruppe().addNesteParallell(lagringstasker));
+        }
         log.info("Opprettet lagring av vedtak for samordning for {} av {} saker.", lagringstasker.size(), fagsaker.size());
     }
 

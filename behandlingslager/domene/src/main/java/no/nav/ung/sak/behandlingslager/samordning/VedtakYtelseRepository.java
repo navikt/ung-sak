@@ -10,9 +10,11 @@ import no.nav.ung.sak.typer.Saksnummer;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -77,6 +79,15 @@ public class VedtakYtelseRepository {
             .setParameter("saksnummer", saksnummer)
             .setParameter("ytelseType", ytelseType)
             .getResultList();
+    }
+
+    /**
+     * @return referansene til alle lagrede vedtak for ytelsene, både aktive og inaktive
+     */
+    public Set<UUID> hentVedtakReferanser(Collection<FagsakYtelseType> ytelseTyper) {
+        return new HashSet<>(entityManager.createQuery("select v.vedtakReferanse from VedtakYtelse v where v.ytelseType in (:ytelseTyper)", UUID.class)
+            .setParameter("ytelseTyper", ytelseTyper)
+            .getResultList());
     }
 
     /**

@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
@@ -31,6 +34,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -44,6 +48,7 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
 
     private final BehandlingRepository behandlingRepository = mock();
     private final BehandlingVedtakRepository behandlingVedtakRepository = mock();
+    private final VedtakYtelseRepository vedtakYtelseRepository = mock();
     private final ProsessTaskTjeneste prosessTaskTjeneste = mock();
 
     private FagsakRepository fagsakRepository;
@@ -52,7 +57,7 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
     @BeforeEach
     void setUp() {
         fagsakRepository = new FagsakRepository(entityManager);
-        task = new MigrerVedtattYtelseTilSamordningTask(entityManager, behandlingRepository, behandlingVedtakRepository, prosessTaskTjeneste);
+        task = new MigrerVedtattYtelseTilSamordningTask(entityManager, behandlingRepository, behandlingVedtakRepository, vedtakYtelseRepository, prosessTaskTjeneste);
     }
 
     @Test
@@ -67,6 +72,42 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
         var tasker = lagredeTasker();
         assertThat(tasker).extracting(ProsessTaskData::getBehandlingId).containsExactlyInAnyOrder("102", "201");
         assertThat(tasker).extracting(ProsessTaskData::getTaskType).containsOnly(LagreVedtattYtelseTask.TASKTYPE);
+    }
+
+    @Test
+    void skal_lagre_alle_lagringstaskene_parallelt_i_én_gruppe() {
+        medBehandlinger(lagFagsak(FagsakYtelseType.UNGDOMSYTELSE), 101L);
+        medBehandlinger(lagFagsak(FagsakYtelseType.AKTIVITETSPENGER), 201L);
+
+        task.doTask(migrering(false));
+
+        assertThat(lagredeGrupper()).singleElement().satisfies(gruppe -> {
+            assertThat(gruppe.getTasks()).hasSize(2);
+            assertThat(gruppe.getTasks()).extracting(ProsessTaskGruppe.Entry::getSekvens).containsOnly(gruppe.getTasks().getFirst().getSekvens());
+        });
+    }
+
+    @Test
+    void skal_hoppe_over_saker_der_siste_vedtak_allerede_er_lagret() {
+        var lagret = lagFagsak(FagsakYtelseType.UNGDOMSYTELSE);
+        var nyereEnnLagret = lagFagsak(FagsakYtelseType.AKTIVITETSPENGER);
+        medBehandlinger(lagret, 101L);
+        medBehandlinger(nyereEnnLagret, 202L, 201L);
+        when(vedtakYtelseRepository.hentVedtakReferanser(MigrerVedtattYtelseTilSamordningTask.YTELSER)).thenReturn(Set.of(uuid(101L), uuid(201L)));
+
+        task.doTask(migrering(false));
+
+        assertThat(lagredeTasker()).extracting(ProsessTaskData::getBehandlingId).containsExactly("202");
+    }
+
+    @Test
+    void skal_ikke_lagre_tom_gruppe_når_alle_vedtak_er_lagret() {
+        medBehandlinger(lagFagsak(FagsakYtelseType.UNGDOMSYTELSE), 101L);
+        when(vedtakYtelseRepository.hentVedtakReferanser(MigrerVedtattYtelseTilSamordningTask.YTELSER)).thenReturn(Set.of(uuid(101L)));
+
+        task.doTask(migrering(false));
+
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
 
     @Test
@@ -112,6 +153,7 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
 
         task.doTask(migrering(true));
 
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
@@ -128,6 +170,7 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
             .map(id -> {
                 Behandling behandling = mock();
                 when(behandling.getId()).thenReturn(id);
+                when(behandling.getUuid()).thenReturn(uuid(id));
                 medIverksettingStatus(id, IverksettingStatus.IVERKSATT);
                 return behandling;
             })
@@ -141,10 +184,18 @@ class MigrerVedtattYtelseTilSamordningTaskTest {
         when(behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)).thenReturn(Optional.of(vedtak));
     }
 
-    private List<ProsessTaskData> lagredeTasker() {
-        var captor = ArgumentCaptor.forClass(ProsessTaskData.class);
+    private List<ProsessTaskGruppe> lagredeGrupper() {
+        var captor = ArgumentCaptor.forClass(ProsessTaskGruppe.class);
         verify(prosessTaskTjeneste, atLeast(0)).lagre(captor.capture());
         return captor.getAllValues();
+    }
+
+    private List<ProsessTaskData> lagredeTasker() {
+        return lagredeGrupper().stream().flatMap(g -> g.getTasks().stream()).map(ProsessTaskGruppe.Entry::getTask).toList();
+    }
+
+    private static UUID uuid(long behandlingId) {
+        return new UUID(0L, behandlingId);
     }
 
     private static ProsessTaskData migrering(boolean dryRun) {

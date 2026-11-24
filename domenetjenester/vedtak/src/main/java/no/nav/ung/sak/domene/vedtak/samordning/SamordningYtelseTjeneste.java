@@ -2,51 +2,34 @@ package no.nav.ung.sak.domene.vedtak.samordning;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.abakus.vedtak.ytelse.Aktør;
-import no.nav.abakus.vedtak.ytelse.Desimaltall;
-import no.nav.abakus.vedtak.ytelse.Kildesystem;
-import no.nav.abakus.vedtak.ytelse.Periode;
-import no.nav.abakus.vedtak.ytelse.Status;
-import no.nav.abakus.vedtak.ytelse.Ytelser;
-import no.nav.abakus.vedtak.ytelse.request.VedtakForPeriodeRequest;
-import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
-import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
-import no.nav.abakus.vedtak.ytelse.v1.anvisning.AnvistAndel;
-import no.nav.abakus.vedtak.ytelse.v1.anvisning.Inntektklasse;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelse;
 import no.nav.ung.sak.behandlingslager.samordning.VedtakYtelseRepository;
 import no.nav.ung.sak.behandlingslager.samordning.YtelseAnvist;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningPeriode;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningVedtak;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningVedtakRequest;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningVedtakResponse;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningYtelse;
 
-import java.math.BigDecimal;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
- * Henter lagrede AVP- og UPY-vedtak for samordning med andre ytelser, i abakus-formatet ({@link YtelseV1}).
+ * Henter lagrede AVP- og UPY-vedtak for samordning med andre ytelser.
  * <p>
- * Kun gjeldende (aktive) vedtak med minst én innvilget periode som overlapper forespørselen tas med.
- * Periodene kuttes ikke. Status utledes fra fagsakens nåværende status ved oppslag.
+ * Kun gjeldende (aktive) vedtak med minst én innvilget periode som overlapper forespørselen tas med. Periodene kuttes ikke.
  */
 @ApplicationScoped
 public class SamordningYtelseTjeneste {
 
-    private static final Map<FagsakYtelseType, Ytelser> STØTTEDE_YTELSER = Map.of(
-        FagsakYtelseType.UNGDOMSYTELSE, Ytelser.UNGDOMSYTELSE,
-        FagsakYtelseType.AKTIVITETSPENGER, Ytelser.AKTIVITETSPENGER);
+    private static final Map<FagsakYtelseType, SamordningYtelse> YTELSER = Map.of(
+        FagsakYtelseType.UNGDOMSYTELSE, SamordningYtelse.UNGDOMSPROGRAMYTELSE,
+        FagsakYtelseType.AKTIVITETSPENGER, SamordningYtelse.AKTIVITETSPENGER);
 
     private VedtakYtelseRepository vedtakYtelseRepository;
-    private FagsakRepository fagsakRepository;
     private AktørTjeneste aktørTjeneste;
 
     SamordningYtelseTjeneste() {
@@ -54,110 +37,46 @@ public class SamordningYtelseTjeneste {
     }
 
     @Inject
-    public SamordningYtelseTjeneste(VedtakYtelseRepository vedtakYtelseRepository,
-                                    FagsakRepository fagsakRepository,
-                                    AktørTjeneste aktørTjeneste) {
+    public SamordningYtelseTjeneste(VedtakYtelseRepository vedtakYtelseRepository, AktørTjeneste aktørTjeneste) {
         this.vedtakYtelseRepository = vedtakYtelseRepository;
-        this.fagsakRepository = fagsakRepository;
         this.aktørTjeneste = aktørTjeneste;
     }
 
-    public List<YtelseV1> hentVedtak(VedtakForPeriodeRequest request) {
-        var ytelseTyper = utledYtelseTyper(request.getYtelser());
-        if (ytelseTyper.isEmpty()) {
-            return List.of();
-        }
-        var aktørIder = utledAktørIder(request.getIdent());
+    public SamordningVedtakResponse hentVedtak(SamordningVedtakRequest request) {
+        var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
         if (aktørIder.isEmpty()) {
-            return List.of();
+            return new SamordningVedtakResponse(List.of());
         }
 
-        var forespurtPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(request.getPeriode().getFom(), request.getPeriode().getTom());
-        return vedtakYtelseRepository.hentAktiveVedtakSomOverlapper(aktørIder, ytelseTyper, forespurtPeriode.getFomDato(), forespurtPeriode.getTomDato())
+        var forespurtPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(request.fom(), request.tom());
+        var vedtak = vedtakYtelseRepository.hentAktiveVedtakSomOverlapper(aktørIder, YTELSER.keySet(), request.fom(), request.tom())
             .stream()
-            .filter(vedtak -> harAnvisningSomOverlapper(vedtak, forespurtPeriode))
-            .map(this::tilYtelseV1)
+            .filter(v -> harAnvisningSomOverlapper(v, forespurtPeriode))
+            .map(SamordningYtelseTjeneste::tilVedtak)
             .toList();
-    }
-
-    /**
-     * {@link VedtakForPeriodeRequest#ALLE_YTELSER} er standardverdien når konsumenten ikke oppgir ytelser,
-     * men den inneholder ikke UNG-ytelsene. Da tolkes forespørselen som «alle ytelser vi har», på samme måte som
-     * en tom liste.
-     */
-    static Set<FagsakYtelseType> utledYtelseTyper(Set<Ytelser> forespurteYtelser) {
-        if (forespurteYtelser == null || forespurteYtelser.isEmpty() || forespurteYtelser.equals(VedtakForPeriodeRequest.ALLE_YTELSER)) {
-            return EnumSet.copyOf(STØTTEDE_YTELSER.keySet());
-        }
-        return STØTTEDE_YTELSER.entrySet().stream()
-            .filter(e -> forespurteYtelser.contains(e.getValue()))
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toCollection(() -> EnumSet.noneOf(FagsakYtelseType.class)));
-    }
-
-    private Set<AktørId> utledAktørIder(Aktør ident) {
-        if (ident.erAktørId()) {
-            return Set.of(new AktørId(ident.getVerdi()));
-        }
-        return aktørTjeneste.hentAlleAktørIderForPersonIdent(new PersonIdent(ident.getVerdi()));
+        return new SamordningVedtakResponse(vedtak);
     }
 
     private static boolean harAnvisningSomOverlapper(VedtakYtelse vedtak, DatoIntervallEntitet forespurtPeriode) {
         return vedtak.getAnvisninger().stream().anyMatch(a -> a.getPeriode().overlapper(forespurtPeriode));
     }
 
-    private YtelseV1 tilYtelseV1(VedtakYtelse vedtak) {
-        var aktør = new Aktør();
-        aktør.setVerdi(vedtak.getAktørId().getId());
-
-        var ytelse = new YtelseV1();
-        ytelse.setAktør(aktør);
-        ytelse.setSaksnummer(vedtak.getSaksnummer().getVerdi());
-        ytelse.setYtelse(STØTTEDE_YTELSER.get(vedtak.getYtelseType()));
-        ytelse.setYtelseStatus(utledStatus(vedtak));
-        ytelse.setKildesystem(Kildesystem.UNGSAK);
-        ytelse.setVedtattTidspunkt(vedtak.getVedtattTidspunkt());
-        ytelse.setVedtakReferanse(vedtak.getVedtakReferanse().toString());
-        ytelse.setPeriode(tilPeriode(vedtak.getPeriode()));
-        ytelse.setAnvist(vedtak.getAnvisninger().stream().map(SamordningYtelseTjeneste::tilAnvisning).toList());
-        return ytelse;
+    private static SamordningVedtak tilVedtak(VedtakYtelse vedtak) {
+        return new SamordningVedtak(
+            YTELSER.get(vedtak.getYtelseType()),
+            vedtak.getSaksnummer().getVerdi(),
+            vedtak.getVedtakReferanse(),
+            vedtak.getVedtattTidspunkt(),
+            vedtak.getAnvisninger().stream().map(SamordningYtelseTjeneste::tilPeriode).toList());
     }
 
-    private Status utledStatus(VedtakYtelse vedtak) {
-        return fagsakRepository.hentSakGittSaksnummer(vedtak.getSaksnummer())
-            .map(Fagsak::getStatus)
-            .map(SamordningYtelseTjeneste::tilStatus)
-            .orElse(Status.UKJENT);
-    }
-
-    private static Status tilStatus(FagsakStatus status) {
-        return switch (status) {
-            case OPPRETTET, UNDER_BEHANDLING -> Status.UNDER_BEHANDLING;
-            case LØPENDE -> Status.LØPENDE;
-            case AVSLUTTET -> Status.AVSLUTTET;
-        };
-    }
-
-    private static Anvisning tilAnvisning(YtelseAnvist ytelseAnvist) {
-        var anvisning = new Anvisning();
-        anvisning.setPeriode(tilPeriode(ytelseAnvist.getPeriode()));
-        anvisning.setDagsats(ytelseAnvist.getDagsats().map(Desimaltall::new).orElse(null));
-        anvisning.setBeløp(ytelseAnvist.getBeløp().map(Desimaltall::new).orElse(null));
-        anvisning.setUtbetalingsgrad(ytelseAnvist.getUtbetalingsgrad().map(Desimaltall::new).orElse(null));
-        anvisning.setAndeler(ytelseAnvist.getDagsats()
-            .map(dagsats -> List.of(new AnvistAndel(null, null,
-                new Desimaltall(dagsats),
-                ytelseAnvist.getUtbetalingsgrad().map(Desimaltall::new).orElse(null),
-                new Desimaltall(BigDecimal.ZERO),
-                Inntektklasse.ARBEIDSTAKER_UTEN_FERIEPENGER)))
-            .orElse(List.of()));
-        return anvisning;
-    }
-
-    private static Periode tilPeriode(DatoIntervallEntitet intervall) {
-        var periode = new Periode();
-        periode.setFom(intervall.getFomDato());
-        periode.setTom(intervall.getTomDato());
-        return periode;
+    private static SamordningPeriode tilPeriode(YtelseAnvist anvisning) {
+        return new SamordningPeriode(
+            anvisning.getPeriode().getFomDato(),
+            anvisning.getPeriode().getTomDato(),
+            anvisning.getDagsats().orElse(null),
+            anvisning.getBeløp().orElse(null),
+            anvisning.getAntallBarn().orElse(null),
+            anvisning.getDagsatsBarnetillegg().orElse(null));
     }
 }

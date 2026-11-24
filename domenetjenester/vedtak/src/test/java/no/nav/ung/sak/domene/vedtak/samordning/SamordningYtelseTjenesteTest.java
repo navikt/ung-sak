@@ -20,14 +20,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import no.nav.abakus.vedtak.ytelse.Kildesystem;
-import no.nav.abakus.vedtak.ytelse.Status;
-import no.nav.abakus.vedtak.ytelse.Ytelser;
-import no.nav.abakus.vedtak.ytelse.request.VedtakForPeriodeRequest;
-import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
-import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -37,6 +30,11 @@ import no.nav.ung.sak.behandlingslager.samordning.YtelseAnvist;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningPeriode;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningVedtak;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningVedtakRequest;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningVedtakResponse;
+import no.nav.ung.sak.kontrakt.ekstern.samordning.SamordningYtelse;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -45,7 +43,7 @@ import no.nav.ung.sak.typer.Saksnummer;
 @ExtendWith(JpaExtension.class)
 class SamordningYtelseTjenesteTest {
 
-    private static final String FNR = "12345678901";
+    private static final PersonIdent FNR = new PersonIdent("12345678901");
     private static final LocalDate JAN_FOM = LocalDate.of(2026, 1, 1);
     private static final LocalDate JAN_TOM = LocalDate.of(2026, 1, 31);
     private static final LocalDate FEB_FOM = LocalDate.of(2026, 2, 1);
@@ -70,98 +68,75 @@ class SamordningYtelseTjenesteTest {
     void setUp() {
         fagsakRepository = new FagsakRepository(entityManager);
         vedtakYtelseRepository = new VedtakYtelseRepository(entityManager);
-        tjeneste = new SamordningYtelseTjeneste(vedtakYtelseRepository, fagsakRepository, aktørTjeneste);
+        tjeneste = new SamordningYtelseTjeneste(vedtakYtelseRepository, aktørTjeneste);
         aktørId = AktørId.dummy();
+        when(aktørTjeneste.hentAlleAktørIderForPersonIdent(FNR)).thenReturn(Set.of(aktørId));
     }
 
     @Test
-    void skal_returnere_gjeldende_vedtak_i_abakus_format_som_validerer() {
+    void skal_returnere_gjeldende_vedtak_med_perioder_og_barnetillegg() {
         var fagsak = lagFagsak(FagsakYtelseType.AKTIVITETSPENGER, aktørId);
-        fagsakRepository.oppdaterFagsakStatus(fagsak.getId(), FagsakStatus.LØPENDE);
         var vedtakReferanse = UUID.randomUUID();
         lagreVedtak(fagsak, vedtakReferanse, VEDTATT, DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, MAR_TOM),
-            beregnet(JAN_FOM, JAN_TOM, "800", "60", "9600"),
-            ikkeBeregnet(FEB_FOM, MAR_TOM));
+            beregnet(JAN_FOM, JAN_TOM, "800", "9600", 2, 74),
+            ikkeBeregnet(FEB_FOM, MAR_TOM, 2, 74));
 
-        var resultat = tjeneste.hentVedtak(forespørsel(aktørId.getId(), JAN_FOM, APR_TOM));
+        var resultat = tjeneste.hentVedtak(forespørsel(JAN_FOM, APR_TOM));
 
-        assertThat(resultat).singleElement().satisfies(ytelse -> {
-            assertThat(VALIDATOR.validate(ytelse)).isEmpty();
-            assertThat(ytelse.getAktør().getVerdi()).isEqualTo(aktørId.getId());
-            assertThat(ytelse.getSaksnummer()).isEqualTo(fagsak.getSaksnummer().getVerdi());
-            assertThat(ytelse.getYtelse()).isEqualTo(Ytelser.AKTIVITETSPENGER);
-            assertThat(ytelse.getYtelseStatus()).isEqualTo(Status.LØPENDE);
-            assertThat(ytelse.getKildesystem()).isEqualTo(Kildesystem.UNGSAK);
-            assertThat(ytelse.getVedtakReferanse()).isEqualTo(vedtakReferanse.toString());
-            assertThat(ytelse.getVedtattTidspunkt()).isEqualTo(VEDTATT);
-            assertThat(ytelse.getPeriode().getFom()).isEqualTo(JAN_FOM);
-            assertThat(ytelse.getPeriode().getTom()).isEqualTo(MAR_TOM);
-            assertThat(ytelse.getAnvist()).hasSize(2);
+        assertThat(VALIDATOR.validate(resultat)).isEmpty();
+        assertThat(resultat.vedtak()).singleElement().satisfies(vedtak -> {
+            assertThat(vedtak.ytelse()).isEqualTo(SamordningYtelse.AKTIVITETSPENGER);
+            assertThat(vedtak.saksnummer()).isEqualTo(fagsak.getSaksnummer().getVerdi());
+            assertThat(vedtak.vedtakReferanse()).isEqualTo(vedtakReferanse);
+            assertThat(vedtak.vedtattTidspunkt()).isEqualTo(VEDTATT);
+            assertThat(vedtak.perioder()).usingRecursiveComparison()
+                .withComparatorForType(BigDecimal::compareTo, BigDecimal.class)
+                .isEqualTo(List.of(
+                    new SamordningPeriode(JAN_FOM, JAN_TOM, new BigDecimal("800"), new BigDecimal("9600"), 2, 74),
+                    new SamordningPeriode(FEB_FOM, MAR_TOM, null, null, 2, 74)));
         });
     }
 
     @Test
-    void skal_mappe_beregnet_anvisning_med_andel_også_når_dagsats_er_0() {
+    void skal_returnere_perioder_med_0_kr() {
         var fagsak = lagFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId);
         lagreVedtak(fagsak, UUID.randomUUID(), VEDTATT, DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, JAN_TOM),
-            beregnet(JAN_FOM, JAN_TOM, "0", "0", "0"));
+            beregnet(JAN_FOM, JAN_TOM, "0", "0", 0, 0));
 
-        var anvisning = enesteAnvisning(tjeneste.hentVedtak(forespørsel(aktørId.getId(), JAN_FOM, JAN_TOM)));
+        var periode = enestePeriode(tjeneste.hentVedtak(forespørsel(JAN_FOM, JAN_TOM)));
 
-        assertThat(anvisning.getDagsats().getVerdi()).isZero();
-        assertThat(anvisning.getBeløp().getVerdi()).isZero();
-        assertThat(anvisning.getAndeler()).singleElement()
-            .satisfies(andel -> assertThat(andel.getDagsats().getVerdi()).isZero());
-    }
-
-    @Test
-    void skal_mappe_ikke_beregnet_anvisning_uten_dagsats_og_andeler() {
-        var fagsak = lagFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId);
-        lagreVedtak(fagsak, UUID.randomUUID(), VEDTATT, DatoIntervallEntitet.fraOgMedTilOgMed(FEB_FOM, MAR_TOM),
-            ikkeBeregnet(FEB_FOM, MAR_TOM));
-
-        var anvisning = enesteAnvisning(tjeneste.hentVedtak(forespørsel(aktørId.getId(), FEB_FOM, MAR_TOM)));
-
-        assertThat(anvisning.getDagsats()).isNull();
-        assertThat(anvisning.getBeløp()).isNull();
-        assertThat(anvisning.getUtbetalingsgrad()).isNull();
-        assertThat(anvisning.getAndeler()).isEmpty();
+        assertThat(periode.dagsats()).isZero();
+        assertThat(periode.beløp()).isZero();
     }
 
     @Test
     void skal_slå_opp_alle_aktørIder_for_fnr() {
         var historiskAktørId = AktørId.dummy();
-        when(aktørTjeneste.hentAlleAktørIderForPersonIdent(new PersonIdent(FNR))).thenReturn(Set.of(aktørId, historiskAktørId));
+        when(aktørTjeneste.hentAlleAktørIderForPersonIdent(FNR)).thenReturn(Set.of(aktørId, historiskAktørId));
         lagreVedtak(lagFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId), UUID.randomUUID(), VEDTATT,
             DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, JAN_TOM), ikkeBeregnet(JAN_FOM, JAN_TOM));
         lagreVedtak(lagFagsak(FagsakYtelseType.AKTIVITETSPENGER, historiskAktørId), UUID.randomUUID(), VEDTATT,
             DatoIntervallEntitet.fraOgMedTilOgMed(FEB_FOM, MAR_TOM), ikkeBeregnet(FEB_FOM, MAR_TOM));
 
-        var resultat = tjeneste.hentVedtak(forespørsel(FNR, JAN_FOM, APR_TOM));
+        var resultat = tjeneste.hentVedtak(forespørsel(JAN_FOM, APR_TOM));
 
-        assertThat(resultat).extracting(YtelseV1::getYtelse).containsExactlyInAnyOrder(Ytelser.UNGDOMSYTELSE, Ytelser.AKTIVITETSPENGER);
+        assertThat(resultat.vedtak()).extracting(SamordningVedtak::ytelse)
+            .containsExactlyInAnyOrder(SamordningYtelse.UNGDOMSPROGRAMYTELSE, SamordningYtelse.AKTIVITETSPENGER);
     }
 
     @Test
-    void skal_returnere_begge_ytelser_når_ytelser_ikke_er_oppgitt() {
-        lagreInnvilgelse(FagsakYtelseType.UNGDOMSYTELSE);
-        lagreInnvilgelse(FagsakYtelseType.AKTIVITETSPENGER);
+    void skal_returnere_tomt_svar_når_person_er_ukjent() {
+        when(aktørTjeneste.hentAlleAktørIderForPersonIdent(FNR)).thenReturn(Set.of());
 
-        var resultat = tjeneste.hentVedtak(VedtakForPeriodeRequest.requestFor(aktørId.getId(), JAN_FOM, JAN_TOM));
-
-        assertThat(resultat).extracting(YtelseV1::getYtelse).containsExactlyInAnyOrder(Ytelser.UNGDOMSYTELSE, Ytelser.AKTIVITETSPENGER);
+        assertThat(tjeneste.hentVedtak(forespørsel(JAN_FOM, APR_TOM)).vedtak()).isEmpty();
     }
 
     @Test
-    void skal_filtrere_på_oppgitte_ytelser() {
-        lagreInnvilgelse(FagsakYtelseType.UNGDOMSYTELSE);
-        lagreInnvilgelse(FagsakYtelseType.AKTIVITETSPENGER);
+    void skal_ikke_returnere_andre_ytelser() {
+        lagreVedtak(lagFagsak(FagsakYtelseType.OMSORGSPENGER, aktørId), UUID.randomUUID(), VEDTATT,
+            DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, JAN_TOM), ikkeBeregnet(JAN_FOM, JAN_TOM));
 
-        var kunAvp = tjeneste.hentVedtak(VedtakForPeriodeRequest.requestFor(aktørId.getId(), JAN_FOM, JAN_TOM, Set.of(Ytelser.AKTIVITETSPENGER)));
-        var andreYtelser = tjeneste.hentVedtak(VedtakForPeriodeRequest.requestFor(aktørId.getId(), JAN_FOM, JAN_TOM, Set.of(Ytelser.FORELDREPENGER)));
-
-        assertThat(kunAvp).extracting(YtelseV1::getYtelse).containsExactly(Ytelser.AKTIVITETSPENGER);
-        assertThat(andreYtelser).isEmpty();
+        assertThat(tjeneste.hentVedtak(forespørsel(JAN_FOM, APR_TOM)).vedtak()).isEmpty();
     }
 
     @Test
@@ -171,9 +146,9 @@ class SamordningYtelseTjenesteTest {
         var avslagsdato = LocalDate.of(2026, 2, 10);
         lagreVedtak(fagsak, UUID.randomUUID(), avslagsdato.atStartOfDay(), DatoIntervallEntitet.fraOgMedTilOgMed(avslagsdato, avslagsdato));
 
-        var resultat = tjeneste.hentVedtak(forespørsel(aktørId.getId(), JAN_FOM, APR_TOM));
+        var resultat = tjeneste.hentVedtak(forespørsel(JAN_FOM, APR_TOM));
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat.vedtak()).isEmpty();
     }
 
     @Test
@@ -183,41 +158,24 @@ class SamordningYtelseTjenesteTest {
         var gjeldende = UUID.randomUUID();
         lagreVedtak(fagsak, gjeldende, VEDTATT.plusDays(10), DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, MAR_TOM), ikkeBeregnet(JAN_FOM, MAR_TOM));
 
-        var resultat = tjeneste.hentVedtak(forespørsel(aktørId.getId(), JAN_FOM, APR_TOM));
+        var resultat = tjeneste.hentVedtak(forespørsel(JAN_FOM, APR_TOM));
 
-        assertThat(resultat).extracting(YtelseV1::getVedtakReferanse).containsExactly(gjeldende.toString());
+        assertThat(resultat.vedtak()).extracting(SamordningVedtak::vedtakReferanse).containsExactly(gjeldende);
     }
 
     @Test
-    void skal_ikke_returnere_vedtak_når_forespørselen_kun_treffer_hull_mellom_anvisningene() {
+    void skal_ikke_returnere_vedtak_når_forespørselen_kun_treffer_hull_mellom_periodene() {
         var fagsak = lagFagsak(FagsakYtelseType.AKTIVITETSPENGER, aktørId);
         lagreVedtak(fagsak, UUID.randomUUID(), VEDTATT, DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, APR_TOM),
             ikkeBeregnet(JAN_FOM, JAN_TOM),
             ikkeBeregnet(APR_FOM, APR_TOM));
 
-        var iHullet = tjeneste.hentVedtak(forespørsel(aktørId.getId(), FEB_FOM, MAR_TOM));
-        var overlapperAnvisning = tjeneste.hentVedtak(forespørsel(aktørId.getId(), MAR_TOM, APR_FOM));
+        var iHullet = tjeneste.hentVedtak(forespørsel(FEB_FOM, MAR_TOM));
+        var overlapperPeriode = tjeneste.hentVedtak(forespørsel(MAR_TOM, APR_FOM));
 
-        assertThat(iHullet).isEmpty();
-        assertThat(overlapperAnvisning).singleElement()
-            .satisfies(ytelse -> assertThat(ytelse.getAnvist()).as("periodene kuttes ikke").hasSize(2));
-    }
-
-    @Test
-    void skal_tolke_standardverdi_og_tom_liste_for_ytelser_som_begge_ung_ytelser() {
-        assertThat(SamordningYtelseTjeneste.utledYtelseTyper(VedtakForPeriodeRequest.ALLE_YTELSER))
-            .containsExactlyInAnyOrder(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER);
-        assertThat(SamordningYtelseTjeneste.utledYtelseTyper(null))
-            .containsExactlyInAnyOrder(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER);
-        assertThat(SamordningYtelseTjeneste.utledYtelseTyper(Set.of()))
-            .containsExactlyInAnyOrder(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER);
-        assertThat(SamordningYtelseTjeneste.utledYtelseTyper(Set.of(Ytelser.UNGDOMSYTELSE, Ytelser.FORELDREPENGER)))
-            .containsExactly(FagsakYtelseType.UNGDOMSYTELSE);
-    }
-
-    private void lagreInnvilgelse(FagsakYtelseType ytelseType) {
-        lagreVedtak(lagFagsak(ytelseType, aktørId), UUID.randomUUID(), VEDTATT,
-            DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, JAN_TOM), ikkeBeregnet(JAN_FOM, JAN_TOM));
+        assertThat(iHullet.vedtak()).isEmpty();
+        assertThat(overlapperPeriode.vedtak()).singleElement()
+            .satisfies(vedtak -> assertThat(vedtak.perioder()).as("periodene kuttes ikke").hasSize(2));
     }
 
     private Fagsak lagFagsak(FagsakYtelseType ytelseType, AktørId aktør) {
@@ -242,13 +200,13 @@ class SamordningYtelseTjenesteTest {
         vedtakYtelseRepository.lagre(builder.build());
     }
 
-    private static YtelseAnvist beregnet(LocalDate fom, LocalDate tom, String dagsats, String utbetalingsgrad, String beløp) {
+    private static YtelseAnvist beregnet(LocalDate fom, LocalDate tom, String dagsats, String beløp, int antallBarn, int dagsatsBarnetillegg) {
         return YtelseAnvist.builder(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .medDagsats(new BigDecimal(dagsats))
-            .medUtbetalingsgrad(new BigDecimal(utbetalingsgrad))
+            .medUtbetalingsgrad(BigDecimal.ZERO)
             .medBeløp(new BigDecimal(beløp))
-            .medAntallBarn(0)
-            .medDagsatsBarnetillegg(0)
+            .medAntallBarn(antallBarn)
+            .medDagsatsBarnetillegg(dagsatsBarnetillegg)
             .build();
     }
 
@@ -256,13 +214,21 @@ class SamordningYtelseTjenesteTest {
         return YtelseAnvist.builder(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)).build();
     }
 
-    private static VedtakForPeriodeRequest forespørsel(String ident, LocalDate fom, LocalDate tom) {
-        return VedtakForPeriodeRequest.requestFor(ident, fom, tom);
+    private static YtelseAnvist ikkeBeregnet(LocalDate fom, LocalDate tom, int antallBarn, int dagsatsBarnetillegg) {
+        return YtelseAnvist.builder(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
+            .medAntallBarn(antallBarn)
+            .medDagsatsBarnetillegg(dagsatsBarnetillegg)
+            .build();
     }
 
-    private static Anvisning enesteAnvisning(List<YtelseV1> resultat) {
-        assertThat(resultat).hasSize(1);
-        assertThat(resultat.getFirst().getAnvist()).hasSize(1);
-        return resultat.getFirst().getAnvist().getFirst();
+    private static SamordningVedtakRequest forespørsel(LocalDate fom, LocalDate tom) {
+        return new SamordningVedtakRequest(FNR, fom, tom);
+    }
+
+    private static SamordningPeriode enestePeriode(SamordningVedtakResponse resultat) {
+        assertThat(resultat.vedtak()).hasSize(1);
+        List<SamordningPeriode> perioder = resultat.vedtak().getFirst().perioder();
+        assertThat(perioder).hasSize(1);
+        return perioder.getFirst();
     }
 }

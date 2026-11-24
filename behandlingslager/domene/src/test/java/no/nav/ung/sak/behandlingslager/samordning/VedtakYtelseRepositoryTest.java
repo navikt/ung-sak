@@ -239,6 +239,23 @@ class VedtakYtelseRepositoryTest {
     }
 
     @Test
+    void skal_hente_referanser_til_alle_lagrede_vedtak_for_ytelsene() {
+        var inaktivt = innvilget(UUID.randomUUID(), VEDTATT, FOM, TOM);
+        var aktivt = innvilget(UUID.randomUUID(), VEDTATT.plusMonths(1), FOM, TOM);
+        var annenYtelse = vedtakBuilder(UUID.randomUUID(), VEDTATT, FagsakYtelseType.OMSORGSPENGER, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)).build();
+        repository.lagre(inaktivt);
+        repository.lagre(aktivt);
+        repository.lagre(annenYtelse);
+        entityManager.clear();
+
+        var referanser = repository.hentVedtakReferanser(Set.of(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER));
+
+        assertThat(referanser)
+            .contains(inaktivt.getVedtakReferanse(), aktivt.getVedtakReferanse())
+            .doesNotContain(annenYtelse.getVedtakReferanse());
+    }
+
+    @Test
     void skal_avvise_anvisning_utenfor_vedtaksperioden() {
         var builder = vedtakBuilder(UUID.randomUUID(), VEDTATT, FagsakYtelseType.UNGDOMSYTELSE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))
             .leggTilAnvisning(YtelseAnvist.builder(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM.plusDays(1))).build());
