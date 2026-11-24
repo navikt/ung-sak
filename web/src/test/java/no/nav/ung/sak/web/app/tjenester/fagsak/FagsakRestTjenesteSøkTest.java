@@ -5,6 +5,7 @@ import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
@@ -14,6 +15,8 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingOpprettingDto;
+import no.nav.ung.sak.kontrakt.behandling.SakRettigheterDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
 import no.nav.ung.sak.typer.AktørId;
@@ -82,6 +85,21 @@ class FagsakRestTjenesteSøkTest {
         var captor = ArgumentCaptor.forClass(ProsessTaskData.class);
         verify(taskTjeneste, times(2)).lagre(captor.capture());
         assertThat(captor.getAllValues()).extracting(ProsessTaskData::getBehandlingId).containsExactly("11", "12");
+    }
+
+    @Test
+    void rettigheter_tilbyr_ikke_kontrollbehandling_som_egen_behandlingstype() {
+        var saksnummer = new Saksnummer("ABC13");
+        var fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AKTØR_ID, saksnummer, LocalDate.now(), LocalDate.now().plusYears(1));
+        fagsak.setId(2L);
+        when(fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false)).thenReturn(Optional.of(fagsak));
+
+        var respons = tjeneste.hentRettigheter(new SaksnummerDto(saksnummer));
+
+        var typer = ((SakRettigheterDto) respons.getEntity()).getBehandlingTypeKanOpprettes().stream()
+            .map(BehandlingOpprettingDto::getBehandlingType)
+            .toList();
+        assertThat(typer).containsExactlyInAnyOrder(BehandlingType.FØRSTEGANGSSØKNAD, BehandlingType.REVURDERING, BehandlingType.KLAGE);
     }
 
     private static Behandling behandling(Long id, boolean ferdigbehandlet) {

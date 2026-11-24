@@ -245,7 +245,8 @@ public class FagsakRestTjeneste {
 
         var erAktivitetspenger = fagsak.get().getYtelseType() == FagsakYtelseType.AKTIVITETSPENGER;
 
-        var oppretting = BehandlingType.getYtelseBehandlingTyper().stream()
+        // Kontrollbehandling opprettes via revurdering med kontrollårsak, ikke som egen type i menyen
+        var oppretting = BehandlingType.getOrdinæreYtelseBehandlingTyper().stream()
             .map(bt -> new BehandlingOpprettingDto(bt, behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsakId, bt), perioderMedGjennomførtKontroll))
             .filter(dto -> !erAktivitetspenger || revurderingAktivitetspengerEnabled || dto.getBehandlingType() != BehandlingType.REVURDERING)
             .collect(Collectors.toList());

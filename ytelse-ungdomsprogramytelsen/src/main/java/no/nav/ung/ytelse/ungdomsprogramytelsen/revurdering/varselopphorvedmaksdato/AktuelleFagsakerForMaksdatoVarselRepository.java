@@ -58,7 +58,8 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
         String ungdomsytelseKode = FagsakYtelseType.UNGDOMSYTELSE.getKode();
         String varselOpphorKode = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
 
-        // BT-002 = FØRSTEGANGSSØKNAD, BT-004 = REVURDERING (BehandlingType.getYtelseBehandlingTyper())
+        // BT-002 = FØRSTEGANGSSØKNAD, BT-004 = REVURDERING (BehandlingType.getOrdinæreYtelseBehandlingTyper()).
+        // Kontrollbehandling (BT-012) endrer ikke programperioden og tas ikke med.
         String sql = """
                 select f.* from fagsak f
                 where f.ytelse_type = :ytelseType
