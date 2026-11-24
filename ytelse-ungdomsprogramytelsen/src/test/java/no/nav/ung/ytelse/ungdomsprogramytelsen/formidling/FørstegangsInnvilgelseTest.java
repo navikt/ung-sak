@@ -299,7 +299,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Fordi du fikk barn 6. mai 2025, får du 37 kroner mer for hvert barn fra denne datoen. Da får du 755 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fylte 25 år 8. mai 2025, får du mer penger fra denne datoen. Da får du 1 096 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden. \
-                Den første utbetalingen får du innen en uke, og deretter får du pengene innen den 12. hver måned. \
+                Den første utbetalingen får du innen fire dager, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
