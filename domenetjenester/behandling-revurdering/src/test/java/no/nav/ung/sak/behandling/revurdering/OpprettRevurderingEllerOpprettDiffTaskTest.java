@@ -256,7 +256,7 @@ class OpprettRevurderingEllerOpprettDiffTaskTest {
     }
 
     private OpprettRevurderingEllerOpprettDiffTask lagTask(boolean kontrollbehandlingPå) {
-        var ruting = new KontrollbehandlingRuting(behandlingRepository, parallelleBehandlingerRepository,
+        var ruting = new KontrollbehandlingRuting(behandlingRepository, parallelleBehandlingerRepository, prosessTriggereRepository,
             new KontrollbehandlingBryter(kontrollbehandlingPå, kontrollbehandlingPå));
         return new OpprettRevurderingEllerOpprettDiffTask(repositoryProvider.getFagsakRepository(), behandlingRepository,
             new BehandlingLåsRepository(entityManager), prosessTriggereRepository, fagsakLåsRepository,

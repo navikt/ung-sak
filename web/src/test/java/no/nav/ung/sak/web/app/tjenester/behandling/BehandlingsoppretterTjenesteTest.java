@@ -129,7 +129,7 @@ class BehandlingsoppretterTjenesteTest {
         var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste, revurderingTjenesteFelles, grunnlagKopierere, historikkinnslagRepository,
             prosessTriggereRepository, repositoryProvider.getBehandlingAnsvarligRepository(), behandlendeEnhetTjeneste,
             fagsakLåsRepository, bryter);
-        var ruting = new KontrollbehandlingRuting(behandlingRepository, parallelleBehandlingerRepository, bryter);
+        var ruting = new KontrollbehandlingRuting(behandlingRepository, parallelleBehandlingerRepository, prosessTriggereRepository, bryter);
         return new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, gyldigePerioderForRevurderingUtledere, behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository,
             new UnitTestLookupInstanceImpl<>(revurderingTjeneste), ruting);
     }

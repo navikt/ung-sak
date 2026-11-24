@@ -16,6 +16,7 @@ import no.nav.ung.sak.mottak.dokumentmottak.DokumentValidatorProvider;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.HåndterMottattDokumentTask;
 import no.nav.ung.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
+import no.nav.ung.sak.mottak.dokumentmottak.MottattDokumentRuting;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlingerRepository;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -78,6 +80,10 @@ class HåndterMottattDokumentTaskTest {
     private ProsessTriggereRepository prosessTriggereRepository;
     @Inject
     private MottatteDokumentRepository mottatteDokumentRepository;
+    @Inject
+    private MottattDokumentRuting mottattDokumentRuting;
+    @Inject
+    private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
     @Mock
     private SøknadParser søknadParser;
 
@@ -120,7 +126,9 @@ class HåndterMottattDokumentTaskTest {
             fagsakProsessTaskRepository,
             prosessTriggereRepository,
             mottatteDokumentRepository,
-            søknadParser
+            søknadParser,
+            mottattDokumentRuting,
+            parallelleBehandlingerRepository
         );
     }
 
