@@ -157,7 +157,6 @@ class AndreLivsoppholdsytelserOppgaveOppretterTest {
             etterlysning.getGrunnlagsreferanse(),
             DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
             årsak.getKode(),
-            "begrunnelse for avklaring",
             true,
             fritekstTilVarsel,
             null,

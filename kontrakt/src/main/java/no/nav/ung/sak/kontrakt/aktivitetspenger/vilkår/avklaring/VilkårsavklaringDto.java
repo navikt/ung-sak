@@ -14,7 +14,6 @@ public record VilkårsavklaringDto(
     @NotNull Avklaringtype avklaringtype,
     // ikkeOppfyltÅrsak og kilde har interfaces som implementeres av flere enum. Kontrakten har derfor String, og overlater casting til konsument
     @NotNull String ikkeOppfyltÅrsak,
-    String begrunnelse,
     @NotNull boolean skalSendeVarsel,
     String fritekstTilVarsel,
     String begrunnelseIkkeVarsel,

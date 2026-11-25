@@ -184,7 +184,7 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
                     false,
                     ikkeOppfyltÅrsak,
                     false,
-                    foreslåttAvklaring.getBegrunnelse(),
+                    null,
                     null,
                     foreslåttAvklaring.getVurdertAv(),
                     foreslåttAvklaring.getVurdertTidspunkt(),

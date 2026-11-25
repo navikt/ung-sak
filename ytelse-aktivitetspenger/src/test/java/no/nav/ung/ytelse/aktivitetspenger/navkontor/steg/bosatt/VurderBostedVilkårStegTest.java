@@ -579,7 +579,6 @@ class VurderBostedVilkårStegTest {
                 UUID.randomUUID(),
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
                 ikkeOppfyltÅrsak.getKode(),
-                "Begrunnelse for relevante fakta lagt til grunn i avklaring",
                 skalSendeVarsel,
                 skalSendeVarsel && BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak) ? "Fritekst til varselet" : null,
                 skalSendeVarsel ? null : "Fritekst for ikke varsling",

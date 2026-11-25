@@ -24,19 +24,19 @@ class VilkårsavklaringGrunnlagTest {
         var grunnlag = new VilkårsavklaringGrunnlag(1L, VilkårType.BOSTEDSVILKÅR);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
 
-        var førsteAvklaring = lagAvklaring(periode, "Første begrunnelse");
+        var førsteAvklaring = lagAvklaring(periode, "FØRSTE_ÅRSAK");
         grunnlag.setForeslåtteAvklaringer(Set.of(førsteAvklaring));
         var førsteSett = grunnlag.getForeslåtteAvklaringer();
 
-        var andreAvklaring = lagAvklaring(periode, "Andre begrunnelse");
+        var andreAvklaring = lagAvklaring(periode, "ANDRE_ÅRSAK");
         grunnlag.setForeslåtteAvklaringer(Set.of(andreAvklaring));
         var andreSett = grunnlag.getForeslåtteAvklaringer();
 
         assertThat(førsteSett).hasSize(1);
-        assertThat(førsteSett.iterator().next().getBegrunnelse()).isEqualTo("Første begrunnelse");
+        assertThat(førsteSett.iterator().next().getIkkeOppfyltÅrsakKode()).isEqualTo("FØRSTE_ÅRSAK");
 
         assertThat(andreSett).hasSize(1);
-        assertThat(andreSett.iterator().next().getBegrunnelse()).isEqualTo("Andre begrunnelse");
+        assertThat(andreSett.iterator().next().getIkkeOppfyltÅrsakKode()).isEqualTo("ANDRE_ÅRSAK");
     }
 
     @Test
@@ -44,11 +44,11 @@ class VilkårsavklaringGrunnlagTest {
         var grunnlag = new VilkårsavklaringGrunnlag(1L, VilkårType.BOSTEDSVILKÅR);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
 
-        var opprinnelig = lagAvklaring(periode, "begrunnelse");
+        var opprinnelig = lagAvklaring(periode, "IKKE_OPPFYLT_KODE");
         grunnlag.setForeslåtteAvklaringer(Set.of(opprinnelig));
 
         // Ny instans med identisk innhold skal ikke endre settet - referansen skal beholdes
-        grunnlag.setForeslåtteAvklaringer(Set.of(lagAvklaring(periode, "begrunnelse")));
+        grunnlag.setForeslåtteAvklaringer(Set.of(lagAvklaring(periode, "IKKE_OPPFYLT_KODE")));
 
         assertThat(grunnlag.getForeslåtteAvklaringer()).hasSize(1);
         assertThat(grunnlag.getForeslåtteAvklaringer().iterator().next().getReferanse()).isEqualTo(opprinnelig.getReferanse());
@@ -68,7 +68,7 @@ class VilkårsavklaringGrunnlagTest {
     void ferdigstillForeslåtteAvklaringer_skalKopiereForeslåttOverTilFerdigstilt() {
         var grunnlag = new VilkårsavklaringGrunnlag(1L, VilkårType.BOSTEDSVILKÅR);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
-        var avklaring = lagAvklaring(periode, "begrunnelse");
+        var avklaring = lagAvklaring(periode, "IKKE_OPPFYLT_KODE");
         grunnlag.setForeslåtteAvklaringer(Set.of(avklaring));
 
         grunnlag.ferdigstillForeslåtteAvklaringer();
@@ -86,7 +86,7 @@ class VilkårsavklaringGrunnlagTest {
     void nyttGrunnlagMedReferanserFra_skalDeleHolderreferanserForBådeForeslåtteOgFerdigstilte() {
         var grunnlag = new VilkårsavklaringGrunnlag(1L, VilkårType.BOSTEDSVILKÅR);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
-        grunnlag.setForeslåtteAvklaringer(Set.of(lagAvklaring(periode, "begrunnelse")));
+        grunnlag.setForeslåtteAvklaringer(Set.of(lagAvklaring(periode, "IKKE_OPPFYLT_KODE")));
         grunnlag.ferdigstillForeslåtteAvklaringer();
 
         var nyttGrunnlag = VilkårsavklaringGrunnlag.nyttGrunnlagMedReferanserFra(grunnlag);
@@ -105,7 +105,7 @@ class VilkårsavklaringGrunnlagTest {
     void nyttGrunnlagForBehandlingMedReferanserFra_skalIkkeInneholdeForeslåtteAvklaringer() {
         var grunnlag = new VilkårsavklaringGrunnlag(1L, VilkårType.BOSTEDSVILKÅR);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
-        grunnlag.setForeslåtteAvklaringer(Set.of(lagAvklaring(periode, "begrunnelse")));
+        grunnlag.setForeslåtteAvklaringer(Set.of(lagAvklaring(periode, "IKKE_OPPFYLT_KODE")));
         grunnlag.ferdigstillForeslåtteAvklaringer();
 
         var nyttGrunnlag = VilkårsavklaringGrunnlag.nyttGrunnlagForBehandlingMedReferanserFra(2L, grunnlag);
@@ -120,7 +120,7 @@ class VilkårsavklaringGrunnlagTest {
     void skal_bygge_tidslinje_av_foreslåtte_avklaringer() {
         var grunnlag = new VilkårsavklaringGrunnlag(1L, VilkårType.BOSTEDSVILKÅR);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
-        var avklaring = lagAvklaring(periode, "begrunnelse");
+        var avklaring = lagAvklaring(periode, "IKKE_OPPFYLT_KODE");
         grunnlag.setForeslåtteAvklaringer(Set.of(avklaring));
 
         var tidslinje = VilkårAvklaringHolder.byggAvklaringTidslinje(grunnlag.getForeslåtteAvklaringer());
@@ -130,12 +130,11 @@ class VilkårsavklaringGrunnlagTest {
         assertThat(tidslinje.stream().toList()).hasSize(1);
     }
 
-    private static VilkårPeriodeAvklaringForeslått lagAvklaring(DatoIntervallEntitet periode, String begrunnelse) {
+    private static VilkårPeriodeAvklaringForeslått lagAvklaring(DatoIntervallEntitet periode, String ikkeOppfyltÅrsak) {
         return new VilkårPeriodeAvklaringForeslått(
             UUID.randomUUID(),
             periode,
-            "IKKE_OPPFYLT_KODE",
-            begrunnelse,
+            ikkeOppfyltÅrsak,
             true,
             null,
             null,

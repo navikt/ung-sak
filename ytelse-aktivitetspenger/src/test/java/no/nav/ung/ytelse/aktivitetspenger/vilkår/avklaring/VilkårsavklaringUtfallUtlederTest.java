@@ -243,7 +243,6 @@ class VilkårsavklaringUtfallUtlederTest {
             UUID.randomUUID(),
             PERIODE,
             årsak.getKode(),
-            "begrunnelse",
             skalSendeVarsel,
             skalSendeVarsel ? "fritekst" : null,
             skalSendeVarsel ? null : "begrunnelse for ikke varsel",

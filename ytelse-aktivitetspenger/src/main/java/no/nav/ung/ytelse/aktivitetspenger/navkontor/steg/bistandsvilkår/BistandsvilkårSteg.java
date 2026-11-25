@@ -173,7 +173,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
                     false,
                     ikkeOppfyltÅrsak,
                     false,
-                    foreslåttAvklaring.getBegrunnelse(),
+                    null,
                     null,
                     foreslåttAvklaring.getVurdertAv(),
                     foreslåttAvklaring.getVurdertTidspunkt(),

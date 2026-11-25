@@ -152,28 +152,6 @@ class VurderFaktaOmAndreLivsoppholdsytelserOppdatererTest {
     }
 
     @Test
-    void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), ÅRSAK, "opprinnelig begrunnelse"));
-
-        var referanseFørstegang = hentSorterteAvklaringer().getFirst().getReferanse();
-
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), ÅRSAK, "rettet begrunnelse"));
-
-        assertThat(hentSorterteAvklaringer())
-            .extracting(VilkårPeriodeAvklaring::getBegrunnelse)
-            .as("den rettede begrunnelsen skal lagres")
-            .containsExactly("rettet begrunnelse");
-
-        assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId())).isEmpty();
-        assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER))
-            .extracting(Etterlysning::getGrunnlagsreferanse)
-            .as("begrunnelsen vises ikke for bruker, så varselet skal ikke sendes på nytt")
-            .containsExactly(referanseFørstegang);
-        verify(prosessTaskTjeneste, times(1)).lagre(any(ProsessTaskData.class));
-        assertEtterlysningerPekerPåAvklaringIAktivtGrunnlag();
-    }
-
-    @Test
     void endret_ytelse_i_varselet_skal_gi_ny_etterlysning() {
         oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), ÅRSAK));
         var referanseFørstegang = hentSorterteAvklaringer().getFirst().getReferanse();
@@ -311,16 +289,12 @@ class VurderFaktaOmAndreLivsoppholdsytelserOppdatererTest {
     }
 
     private static VurderFaktaOmAndreLivsoppholdsytelserDto dtoUtenVarsel(ÅpenPeriode periode, AndreLivsoppholdsytelserIkkeOppfyltÅrsak årsak) {
-        var avklaring = new AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(årsak, "begrunnelse", true, null, BEGRUNNELSE_IKKE_VARSEL, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
+        var avklaring = new AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(årsak, true, null, BEGRUNNELSE_IKKE_VARSEL, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
         return new VurderFaktaOmAndreLivsoppholdsytelserDto(List.of(new AndreLivsoppholdsytelserFaktaavklaringPeriodeDto(periode, avklaring)), "begrunnelse");
     }
 
     private static VurderFaktaOmAndreLivsoppholdsytelserDto dtoMedVarsel(ÅpenPeriode periode, AndreLivsoppholdsytelserIkkeOppfyltÅrsak årsak) {
-        return dtoMedVarsel(periode, årsak, "begrunnelse");
-    }
-
-    private static VurderFaktaOmAndreLivsoppholdsytelserDto dtoMedVarsel(ÅpenPeriode periode, AndreLivsoppholdsytelserIkkeOppfyltÅrsak årsak, String begrunnelse) {
-        var avklaring = new AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(årsak, begrunnelse, false, "Fritekst til varsel", null, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
+        var avklaring = new AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(årsak, false, "Fritekst til varsel", null, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
         return new VurderFaktaOmAndreLivsoppholdsytelserDto(List.of(new AndreLivsoppholdsytelserFaktaavklaringPeriodeDto(periode, avklaring)), "begrunnelse");
     }
 }

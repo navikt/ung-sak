@@ -158,28 +158,6 @@ class VurderFaktaOmAktivitetOppdatererTest {
     }
 
     @Test
-    void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET, "opprinnelig begrunnelse"));
-
-        var referanseFørstegang = hentSorterteAvklaringer().getFirst().getReferanse();
-
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET, "rettet begrunnelse"));
-
-        assertThat(hentSorterteAvklaringer())
-            .extracting(VilkårPeriodeAvklaring::getBegrunnelse)
-            .as("den rettede begrunnelsen skal lagres")
-            .containsExactly("rettet begrunnelse");
-
-        assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId())).isEmpty();
-        assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_AKTIVITET))
-            .extracting(Etterlysning::getGrunnlagsreferanse)
-            .as("begrunnelsen vises ikke for bruker, så varselet skal ikke sendes på nytt")
-            .containsExactly(referanseFørstegang);
-        verify(prosessTaskTjeneste, org.mockito.Mockito.times(1)).lagre(any(ProsessTaskData.class));
-        assertEtterlysningerPekerPåAvklaringIAktivtGrunnlag();
-    }
-
-    @Test
     void skal_lagre_avklaring_uten_varsel_uten_a_opprette_etterlysning() {
         oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET));
 
@@ -466,16 +444,12 @@ class VurderFaktaOmAktivitetOppdatererTest {
     }
 
     private static VurderFaktaOmAktivitetDto dtoUtenVarsel(ÅpenPeriode periode, AktivitetsvilkåretIkkeOppfyltÅrsak årsak) {
-        var vurdering = new AktivitetAvklaringIkkeOppfyltDto(årsak, "begrunnelse", true, null, BEGRUNNELSE_IKKE_VARSEL, AktivitetsavklaringKildeType.BRUKER, null);
+        var vurdering = new AktivitetAvklaringIkkeOppfyltDto(årsak, true, null, BEGRUNNELSE_IKKE_VARSEL, AktivitetsavklaringKildeType.BRUKER, null);
         return new VurderFaktaOmAktivitetDto(List.of(new AktivitetFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 
     private static VurderFaktaOmAktivitetDto dtoMedVarsel(ÅpenPeriode periode, AktivitetsvilkåretIkkeOppfyltÅrsak årsak) {
-        return dtoMedVarsel(periode, årsak, "begrunnelse");
-    }
-
-    private static VurderFaktaOmAktivitetDto dtoMedVarsel(ÅpenPeriode periode, AktivitetsvilkåretIkkeOppfyltÅrsak årsak, String begrunnelse) {
-        var vurdering = new AktivitetAvklaringIkkeOppfyltDto(årsak, begrunnelse, false, "Fritekst til varsel", null, AktivitetsavklaringKildeType.BRUKER, null);
+        var vurdering = new AktivitetAvklaringIkkeOppfyltDto(årsak, false, "Fritekst til varsel", null, AktivitetsavklaringKildeType.BRUKER, null);
         return new VurderFaktaOmAktivitetDto(List.of(new AktivitetFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 }

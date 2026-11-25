@@ -15,7 +15,6 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
  */
 public record BostedVurderingIkkeOppfyltDto(
     @NotNull BostedsvilkårIkkeOppfyltÅrsak fraflyttingsÅrsak,
-    @NotNull @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,
     /** Hvor Nav har fått opplysningene fra. */

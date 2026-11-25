@@ -7,13 +7,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * En bistandsavklaring slik den lagres: varslingsinnholdet ({@link BistandVarselInnhold}) sammen med
- * saksbehandlerens begrunnelser og sporingen av hvem som vurderte. Disse feltene er bevisst holdt utenfor
- * innholdet, siden de ikke vises for bruker og derfor ikke skal påvirke om et varsel må sendes på nytt.
+ * En bistandsavklaring slik den lagres.
  */
 public record BistandAvklaring(
     BistandVarselInnhold innhold,
-    String begrunnelse,
     String begrunnelseIkkeVarsel,
     String vurdertAv,
     LocalDateTime vurdertTidspunkt

@@ -405,7 +405,6 @@ class VurderAndreLivsoppholdsytelserStegTest {
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             årsak.getKode(),
-            "Begrunnelse for relevante fakta lagt til grunn i avklaring",
             skalSendeVarsel,
             skalSendeVarsel ? "Fritekst til varselet" : null,
             skalSendeVarsel ? null : "Begrunnelse for ikke varsling",

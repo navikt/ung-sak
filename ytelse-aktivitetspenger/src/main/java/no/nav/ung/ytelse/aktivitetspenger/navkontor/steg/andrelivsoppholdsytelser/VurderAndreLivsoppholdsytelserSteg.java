@@ -174,7 +174,7 @@ public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
                     false,
                     ikkeOppfyltÅrsak,
                     false,
-                    foreslåttAvklaring.getBegrunnelse(),
+                    null,
                     null,
                     foreslåttAvklaring.getFritekstTilVarsel(),
                     foreslåttAvklaring.getVurdertAv(),
