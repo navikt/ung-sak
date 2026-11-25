@@ -116,6 +116,17 @@ spec:
         - application: aktivitetspenger-sak-web
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
+        # Vedtatt ytelse (TSFF-3395), se EksternYtelseRestTjeneste
+        - application: behandlingsflyt
+          namespace: aap
+        - application: dp-oppslag-ytelser
+          namespace: teamdagpenger
+        - application: tiltakspenger-saksbehandling-api
+          namespace: tpts
+        - application: bidrag-grunnlag
+          namespace: bidrag
+        - application: azure-token-generator
+          namespace: nais
   gcp:
     sqlInstances:
       - type: POSTGRES_16

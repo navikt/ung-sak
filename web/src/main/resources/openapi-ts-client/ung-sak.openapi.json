@@ -4172,6 +4172,146 @@
         "required" : [ "perioder" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.ekstern.ytelse.BarnetilleggPeriode" : {
+        "properties" : {
+          "antallBarn" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "dagsatsBarnetillegg" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse" : {
+        "properties" : {
+          "vedtak" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.BarnetilleggVedtak"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "vedtak" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.BarnetilleggVedtak" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.BarnetilleggPeriode"
+            },
+            "type" : "array"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          },
+          "vedtakReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "vedtattTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "ytelse" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseType"
+          }
+        },
+        "required" : [ "perioder", "saksnummer", "vedtakReferanse", "vedtattTidspunkt", "ytelse" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.Ytelse" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelsePeriode"
+            },
+            "type" : "array"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          },
+          "vedtakReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "vedtattTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "ytelse" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseType"
+          }
+        },
+        "required" : [ "perioder", "saksnummer", "vedtakReferanse", "vedtattTidspunkt", "ytelse" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.YtelsePeriode" : {
+        "properties" : {
+          "beløp" : {
+            "type" : "number"
+          },
+          "dagsats" : {
+            "type" : "number"
+          },
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.YtelseRequest" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "ident" : {
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "ident", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.YtelseResponse" : {
+        "properties" : {
+          "vedtak" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.Ytelse"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "vedtak" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.YtelseType" : {
+        "enum" : [ "UNGDOMSPROGRAMYTELSE", "AKTIVITETSPENGER" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "UNGDOMSPROGRAMYTELSE", "AKTIVITETSPENGER" ]
+      },
       "ung.sak.kontrakt.etterlysning.EndreFristDto" : {
         "properties" : {
           "etterlysningEksternReferanse" : {
@@ -9058,6 +9198,64 @@
               }
             },
             "description" : "Innvilgede perioder. Tom liste dersom personen ikke har vedtak om aktivitetspenger."
+          }
+        },
+        "tags" : [ "ekstern" ]
+      }
+    },
+    "/api/ekstern/ytelse/v1/barnetillegg" : {
+      "post" : {
+        "description" : "Henter barnetillegg i gjeldende vedtak om aktivitetspenger og ungdomsprogramytelsen som overlapper forespurt periode. Kun for barnebidrag.",
+        "operationId" : "hentBarnetillegg",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse"
+                }
+              }
+            },
+            "description" : "Vedtak med perioder med barnetillegg. Tom liste dersom personen ikke har barnetillegg i perioden."
+          }
+        },
+        "tags" : [ "ekstern" ]
+      }
+    },
+    "/api/ekstern/ytelse/v1/vedtak" : {
+      "post" : {
+        "description" : "Henter gjeldende vedtak om aktivitetspenger og ungdomsprogramytelsen som overlapper forespurt periode, med alle periodene i vedtaket. Kun for andre ytelser i Nav.",
+        "operationId" : "hentVedtak",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseResponse"
+                }
+              }
+            },
+            "description" : "Vedtak med perioder. Tom liste dersom personen ikke har vedtak i perioden."
           }
         },
         "tags" : [ "ekstern" ]
