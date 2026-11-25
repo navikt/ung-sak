@@ -99,7 +99,7 @@ class VurderingAvBistandsvilkårEtterAvklaringOppdatererTest {
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         vilkårsavklaringGrunnlagRepository = new VilkårsavklaringGrunnlagRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(vilkårResultatRepository);
+        var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(inngangsvilkårVurderingTjeneste);
         historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
 
         oppdaterer = new VurderingAvBistandsvilkårEtterAvklaringOppdaterer(
