@@ -13,8 +13,14 @@ public record AndreLivsoppholdsytelserVurderingResultat(
     String fritekstVurderingBrev,
     String ytelseNavn,
     String vurdertAv,
-    LocalDateTime vurdertTidspunkt
+    LocalDateTime vurdertTidspunkt,
+    boolean skalSendeVarsel
 ) implements VilkårsvurderingResultat {
+
+    public AndreLivsoppholdsytelserVurderingResultat(boolean godkjent, IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering, String begrunnelse,
+                                                     String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+        this(godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, ytelseNavn, vurdertAv, vurdertTidspunkt, true);
+    }
 
     public static AndreLivsoppholdsytelserVurderingResultat fra(VilkårsvurderingResultat vurdering, String ytelseNavn) {
         return new AndreLivsoppholdsytelserVurderingResultat(
@@ -25,7 +31,8 @@ public record AndreLivsoppholdsytelserVurderingResultat(
             vurdering.fritekstVurderingBrev(),
             ytelseNavn,
             vurdering.vurdertAv(),
-            vurdering.vurdertTidspunkt()
+            vurdering.vurdertTidspunkt(),
+            vurdering.skalSendeVarsel()
         );
     }
 
