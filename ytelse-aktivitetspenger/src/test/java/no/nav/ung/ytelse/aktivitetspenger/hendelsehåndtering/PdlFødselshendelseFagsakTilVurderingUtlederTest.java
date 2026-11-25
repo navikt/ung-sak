@@ -7,6 +7,7 @@ import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
 import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
@@ -15,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
@@ -86,6 +88,32 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
 
         // Assert
         assertEquals(1, fagsakÅrsakOgPeriodeMap.size());
+        var fagsak = fagsakÅrsakOgPeriodeMap.keySet().iterator().next();
+        assertEquals(List.of(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
+                DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, fagsak.getPeriode().getTomDato()))),
+            fagsakÅrsakOgPeriodeMap.get(fagsak));
+    }
+
+    @Test
+    void skal_starte_triggerperiode_på_fagsakens_fom_når_barnet_er_født_før_fagsakperioden() {
+        // Arrange
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        LocalDate tom = fom.plusDays(300);
+        Behandling behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad().lagre(entityManager);
+        new FagsakRepository(entityManager).oppdaterPeriode(behandling.getFagsakId(), fom, tom);
+        String barnIdent = new FiktiveFnr().nesteFnr();
+        AktørId barnAktørId = AktørId.dummy();
+        LocalDate fødselsdato = fom.minusDays(21);
+        mockPDL(barnIdent, fødselsdato, barnAktørId);
+        FødselHendelse hendelse = lagFødselshendelse(behandling, barnIdent, fødselsdato);
+
+        // Act
+        Map<Fagsak, List<ÅrsakOgPerioder>> fagsakÅrsakOgPeriodeMap = utleder.finnFagsakerTilVurdering(hendelse);
+
+        // Assert
+        assertEquals(1, fagsakÅrsakOgPeriodeMap.size());
+        assertEquals(List.of(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))),
+            fagsakÅrsakOgPeriodeMap.values().iterator().next());
     }
 
     @Test
