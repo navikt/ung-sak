@@ -72,7 +72,7 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
     }
 
     AktivitetsvilkårResultatPeriode(AktivitetsvilkårResultatPeriode kilde) {
-        this(kilde.getPeriode(), kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
+        this(kilde.getPeriode(), kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null), kilde.skalSendeVarsel());
     }
 
     public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat, Regelsporing regelsporing) {

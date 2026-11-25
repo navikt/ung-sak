@@ -221,6 +221,7 @@ class VilkårsavklaringRestTjenesteTest {
             BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID.getKode(),
             "begrunnelse for vurdering",
             "fritekst til brev",
+            false,
             true,
             SAKSBEHANDLER,
             vurdertTidspunkt));
@@ -396,7 +397,8 @@ class VilkårsavklaringRestTjenesteTest {
             "fritekst til brev",
             SAKSBEHANDLER,
             vurdertTidspunkt,
-            null
+            null,
+            false
         );
     }
 
