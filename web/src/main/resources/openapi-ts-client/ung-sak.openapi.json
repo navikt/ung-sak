@@ -2342,7 +2342,7 @@
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           },
           "vurdering" : {
@@ -2532,7 +2532,7 @@
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           }
         },
@@ -2571,7 +2571,7 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           }
         },
@@ -2886,7 +2886,7 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           }
         },
@@ -3103,7 +3103,7 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           }
         },

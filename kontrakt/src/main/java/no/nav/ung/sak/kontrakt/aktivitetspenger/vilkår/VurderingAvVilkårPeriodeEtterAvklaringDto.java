@@ -28,11 +28,11 @@ public record VurderingAvVilkårPeriodeEtterAvklaringDto(
     @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String fritekstVurderingBrev,
 
-    boolean skalIkkeSendeVarsel
+    boolean skalSendeVarsel
 ) {
     @JsonIgnore
-    @AssertTrue(message = "fritekstVurderingBrev må være tom når skalIkkeSendeVarsel er true")
+    @AssertTrue(message = "fritekstVurderingBrev må være tom når skalSendeVarsel er false")
     public boolean isFritekstVurderingBrevGyldig() {
-        return !skalIkkeSendeVarsel || fritekstVurderingBrev == null || fritekstVurderingBrev.isBlank();
+        return skalSendeVarsel || fritekstVurderingBrev == null || fritekstVurderingBrev.isBlank();
     }
 }

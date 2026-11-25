@@ -243,7 +243,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT));
 
         var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
-            List.of(vurdering(JANUAR, false, "årsak annet uten fritekst", null, true)),
+            List.of(vurdering(JANUAR, false, "årsak annet uten fritekst", null, false)),
             årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.ANNET));
 
         assertThat(enesteSegment(resultat.vurderinger()).skalSendeVarsel()).isFalse();
@@ -254,7 +254,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT));
 
         assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
-            List.of(vurdering(JANUAR, false, "årsak annet", "tekst til brev", true)),
+            List.of(vurdering(JANUAR, false, "årsak annet", "tekst til brev", false)),
             årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.ANNET)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("fritekstVurderingBrev må være tom");
@@ -309,17 +309,17 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
-        return vurdering(periode, erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, false);
+        return vurdering(periode, erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, true);
     }
 
     private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse,
-                                                                       String fritekstVurderingBrev, boolean skalIkkeSendeVarsel) {
+                                                                       String fritekstVurderingBrev, boolean skalSendeVarsel) {
         return new VurderingAvVilkårPeriodeEtterAvklaringDto(
             new ÅpenPeriode(periode.getFom(), periode.getTom()),
             erVilkårOppfylt,
             begrunnelse,
             fritekstVurderingBrev,
-            skalIkkeSendeVarsel
+            skalSendeVarsel
         );
     }
 

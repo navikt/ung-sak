@@ -468,7 +468,7 @@ class VurderFaktaOmBostedOppdatererTest {
             BostedsavklaringKildeType.BRUKER,
             null
         );
-        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), vurdering, true);
+        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), vurdering, false);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
     }
 
@@ -485,7 +485,7 @@ class VurderFaktaOmBostedOppdatererTest {
             BostedsavklaringKildeType.BRUKER,
             null
         );
-        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(FOM, TOM), vurdering, !skalSendeVarsel);
+        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(FOM, TOM), vurdering, skalSendeVarsel);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
     }
 }

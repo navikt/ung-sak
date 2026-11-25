@@ -16,7 +16,7 @@ import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
 public record AktivitetAvklaringIkkeOppfyltDto(
     @NotNull AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
     @NotNull @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
-    boolean skalIkkeSendeVarsel,
+    boolean skalSendeVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,
     /** Hvor Nav har fått opplysningene fra. */
@@ -24,10 +24,6 @@ public record AktivitetAvklaringIkkeOppfyltDto(
     /** Påkrevd når kilde er ANNET. Skal ikke settes for andre kilder. */
     @Size(max = 1000) @Pattern(regexp = InputValideringRegex.FRITEKST) String kildeFritekst
 ) {
-
-    public boolean skalSendeVarsel() {
-        return !skalIkkeSendeVarsel;
-    }
 
     @JsonIgnore
     @AssertTrue(message = "fritekstTilVarsel er påkrevd når ikkeOppfyltÅrsak krever fritekst og varsel skal sendes")
@@ -39,7 +35,7 @@ public record AktivitetAvklaringIkkeOppfyltDto(
     }
 
     @JsonIgnore
-    @AssertTrue(message = "begrunnelseIkkeVarsel må settes når skalIkkeSendeVarsel er true, og skal ikke settes ellers")
+    @AssertTrue(message = "begrunnelseIkkeVarsel må settes når skalSendeVarsel er false, og skal ikke settes ellers")
     public boolean isBegrunnelseIkkeVarselGyldig() {
         if (skalSendeVarsel()) {
             return begrunnelseIkkeVarsel == null || begrunnelseIkkeVarsel.isBlank();

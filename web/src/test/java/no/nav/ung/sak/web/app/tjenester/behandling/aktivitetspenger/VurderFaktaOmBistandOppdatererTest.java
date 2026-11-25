@@ -460,7 +460,7 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     private static VurderFaktaOmBistandDto dtoUtenVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak) {
-        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, "begrunnelse", true, null, BEGRUNNELSE_IKKE_VARSEL, BistandsavklaringKildeType.BRUKER, null);
+        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, "begrunnelse", false, null, BEGRUNNELSE_IKKE_VARSEL, BistandsavklaringKildeType.BRUKER, null);
         return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 
@@ -469,7 +469,7 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     private static VurderFaktaOmBistandDto dtoMedVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse) {
-        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, begrunnelse, false, "Fritekst til varsel", null, BistandsavklaringKildeType.BRUKER, null);
+        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, begrunnelse, true, "Fritekst til varsel", null, BistandsavklaringKildeType.BRUKER, null);
         return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 }

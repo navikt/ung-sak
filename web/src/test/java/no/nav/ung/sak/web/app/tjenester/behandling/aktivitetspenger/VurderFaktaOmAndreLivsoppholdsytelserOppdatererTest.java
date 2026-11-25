@@ -314,7 +314,7 @@ class VurderFaktaOmAndreLivsoppholdsytelserOppdatererTest {
     }
 
     private static VurderFaktaOmAndreLivsoppholdsytelserDto dtoUtenVarsel(ÅpenPeriode periode, AndreLivsoppholdsytelserIkkeOppfyltÅrsak årsak) {
-        var avklaring = new AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(årsak, "begrunnelse", true, null, BEGRUNNELSE_IKKE_VARSEL, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
+        var avklaring = new AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(årsak, "begrunnelse", false, null, BEGRUNNELSE_IKKE_VARSEL, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
         return new VurderFaktaOmAndreLivsoppholdsytelserDto(List.of(new AndreLivsoppholdsytelserFaktaavklaringPeriodeDto(periode, avklaring)), "begrunnelse");
     }
 
@@ -323,7 +323,7 @@ class VurderFaktaOmAndreLivsoppholdsytelserOppdatererTest {
     }
 
     private static VurderFaktaOmAndreLivsoppholdsytelserDto dtoMedVarsel(ÅpenPeriode periode, AndreLivsoppholdsytelserIkkeOppfyltÅrsak årsak, String begrunnelse) {
-        var avklaring = new AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(årsak, begrunnelse, false, "Fritekst til varsel", null, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
+        var avklaring = new AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(årsak, begrunnelse, true, "Fritekst til varsel", null, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
         return new VurderFaktaOmAndreLivsoppholdsytelserDto(List.of(new AndreLivsoppholdsytelserFaktaavklaringPeriodeDto(periode, avklaring)), "begrunnelse");
     }
 }
