@@ -116,7 +116,6 @@ spec:
         - application: aktivitetspenger-sak-web
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
-        # Vedtatt ytelse (TSFF-3395), se EksternYtelseRestTjeneste
         - application: behandlingsflyt
           namespace: aap
         - application: dp-oppslag-ytelser
