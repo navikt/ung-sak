@@ -15,7 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposit
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.vedtak.brukerdialog.PubliserSakTilBrukerdialogTask;
-import no.nav.ung.sak.domene.vedtak.samordning.LagreVedtattYtelseTask;
+import no.nav.ung.sak.domene.vedtak.vedtattytelse.LagreVedtattYtelseTask;
 import no.nav.ung.sak.formidling.bestilling.VedtaksbrevbestillingTjeneste;
 import no.nav.ung.sak.formidling.bestilling.VurderVedtaksbrevTask;
 import no.nav.ung.sak.typer.AktørId;

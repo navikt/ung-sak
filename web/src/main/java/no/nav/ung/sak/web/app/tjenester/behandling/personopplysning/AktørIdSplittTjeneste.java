@@ -12,7 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.samordning.VedtakYtelseRepository;
+import no.nav.ung.sak.vedtattytelse.VedtakYtelseRepository;
 import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.typer.AktørId;
@@ -84,8 +84,8 @@ public class AktørIdSplittTjeneste {
         var brukerOppdaterteFagsaker = oppdaterFagsakForBruker(nyAktørId, gammelAktørId);
         oppdaterPoAggregat(nyAktørId, gammelAktørId);
         oppdaterNotatISak(nyAktørId, gammelAktørId);
-        var antallVedtakForSamordning = vedtakYtelseRepository.byttAktørId(gammelAktørId, nyAktørId);
-        logger.info("Oppdaterte {} vedtak for samordning", antallVedtakForSamordning);
+        var antallVedtak = vedtakYtelseRepository.byttAktørId(gammelAktørId, nyAktørId);
+        logger.info("Oppdaterte {} lagrede vedtak", antallVedtak);
         var personidenterSomSkalByttesUt = aktørIdForIdenterSomSkalByttes.map(aktørTjeneste::hentHistoriskePersonIdenterForAktørId)
             .orElse(Collections.emptySet());
 

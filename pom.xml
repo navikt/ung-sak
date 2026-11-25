@@ -389,7 +389,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>samordning</artifactId>
+                <artifactId>vedtatt-ytelse</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

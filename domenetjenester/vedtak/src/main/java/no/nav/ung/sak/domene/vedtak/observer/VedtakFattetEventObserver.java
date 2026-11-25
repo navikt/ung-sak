@@ -9,7 +9,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.domene.vedtak.brukerdialog.PubliserSakTilBrukerdialogTask;
-import no.nav.ung.sak.domene.vedtak.samordning.LagreVedtattYtelseTask;
+import no.nav.ung.sak.domene.vedtak.vedtattytelse.LagreVedtattYtelseTask;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {

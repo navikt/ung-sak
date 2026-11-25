@@ -49,7 +49,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>samordning</artifactId>
+            <artifactId>vedtatt-ytelse</artifactId>
         </dependency>
 
 		<!-- Kontrakter -->
