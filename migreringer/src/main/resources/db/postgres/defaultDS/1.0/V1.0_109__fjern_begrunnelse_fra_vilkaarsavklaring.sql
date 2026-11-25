@@ -1,5 +1,5 @@
 alter table vilkaar_periode_avklaring
-    drop column begrunnelse;
+    alter column begrunnelse drop not null;
 
 alter table vilkaar_periode_avklaring_foreslaatt
-    drop column begrunnelse;
+    alter column begrunnelse drop not null;

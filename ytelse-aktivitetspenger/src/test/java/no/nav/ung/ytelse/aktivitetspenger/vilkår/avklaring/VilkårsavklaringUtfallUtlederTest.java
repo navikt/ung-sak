@@ -43,6 +43,25 @@ class VilkårsavklaringUtfallUtlederTest {
             .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
 
         assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+        assertThat(utleder.utledBegrunnelse()).isEqualTo(
+            "Svarfrist utløpt. Saken behandles automatisk. Legger til grunn samme årsak som i varsel til bruker.");
+    }
+
+    @Test
+    void skal_vurderes_manuelt_når_etterlysning_mangler() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR,
+            avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true));
+
+        assertThat(utleder.utledUtfall()).containsExactly(VilkårsavklaringUtfall.VURDERES_MANUELT_ETTER_AVKLARING);
+    }
+
+    @Test
+    void skal_bygge_automatisk_begrunnelse_for_svar_uten_uttalelse() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, false));
+
+        assertThat(utleder.utledBegrunnelse()).isEqualTo(
+            "Oppgaven besvart uten uttalelse. Saken behandles automatisk. Legger til grunn samme årsak som i varsel til bruker.");
     }
 
     @Test

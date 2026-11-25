@@ -73,8 +73,20 @@ public class VilkårsavklaringUtfallUtleder {
         return etterlysning;
     }
 
+    public String utledBegrunnelse() {
+        if (!erUtløptEllerBesvartUtenUttalelse()) {
+            throw new IllegalStateException("Begrunnelse krever utløpt etterlysning eller svar uten uttalelse");
+        }
+        var årsakssetning = switch (etterlysning.status()) {
+            case UTLØPT -> "Svarfrist utløpt. ";
+            case MOTTATT_SVAR -> "Oppgaven besvart uten uttalelse. ";
+            default -> "";
+        };
+        return årsakssetning + "Saken behandles automatisk. Legger til grunn samme årsak som i varsel til bruker.";
+    }
+
     private boolean kanAvslåsAutomatisk() {
-        if (harMottattSvarMedUttalelse() || !foreslåttAvklaring.skalSendeVarsel()) {
+        if (!foreslåttAvklaring.skalSendeVarsel() || !erUtløptEllerBesvartUtenUttalelse()) {
             return false;
         }
         var ikkeOppfyltÅrsak = IkkeOppfyltDetaljertÅrsak.fraKode(vilkårType, foreslåttAvklaring.getIkkeOppfyltÅrsakKode());
@@ -89,10 +101,15 @@ public class VilkårsavklaringUtfallUtleder {
             || etterlysning.status() == EtterlysningStatus.VENTER);
     }
 
-    private boolean harMottattSvarMedUttalelse() {
-        return etterlysning != null
-            && etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
-            && etterlysning.uttalelseData() != null && etterlysning.uttalelseData().harUttalelse();
+    private boolean erUtløptEllerBesvartUtenUttalelse() {
+        if (etterlysning == null) {
+            return false;
+        }
+        return switch (etterlysning.status()) {
+            case UTLØPT -> true;
+            case MOTTATT_SVAR -> etterlysning.uttalelseData() == null || !etterlysning.uttalelseData().harUttalelse();
+            default -> false;
+        };
     }
 
     // Uttalelsens innhold er utelatt med vilje. Bare om deltakeren har uttalt seg, er relevant.

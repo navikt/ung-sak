@@ -168,7 +168,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                     false,
                     BostedsvilkårIkkeOppfyltÅrsak.fraKode(foreslåttAvklaring.getIkkeOppfyltÅrsakKode()),
                     false,
-                    null,
+                    s.getValue().utledBegrunnelse(),
                     null,
                     null,
                     foreslåttAvklaring.getVurdertTidspunkt(),
