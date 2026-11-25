@@ -2822,6 +2822,9 @@
           "ikkeOppfyltÅrsak" : {
             "type" : "string"
           },
+          "skalSendeVarsel" : {
+            "type" : "boolean"
+          },
           "vurdertAv" : {
             "type" : "string"
           },
@@ -2830,7 +2833,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "erManuellVurdering", "erVilkårOppfylt", "vurdertAv", "vurdertTidspunkt" ],
+        "required" : [ "erManuellVurdering", "erVilkårOppfylt", "skalSendeVarsel", "vurdertAv", "vurdertTidspunkt" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingOgAvklaringPeriodeDto" : {
