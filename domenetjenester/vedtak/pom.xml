@@ -47,6 +47,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>perioder</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>vedtatt-ytelse</artifactId>
+        </dependency>
 
 		<!-- Kontrakter -->
         <dependency>
