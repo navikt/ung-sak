@@ -16,7 +16,6 @@ import no.nav.ung.ytelse.aktivitetspenger.testdata.InngangsvilkårVurderingTestD
 import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -132,7 +131,6 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
     private static AktivitetspengerTestScenario.Builder innvilget24ÅrBle25ÅrBuilder(LocalDate fom, Beregningsgrunnlag beregningsgrunnlagVerdi, int antallBarn) {
         LocalDate tjuvefemårsdag = fom.plusDays(15);
         LocalDate fødselsdato = tjuvefemårsdag.minusYears(25);
-        LocalDate tom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth());
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
         var lavSats = lavSatsMedBarnBuilder(p.getFomDato(), antallBarn).build();
@@ -143,21 +141,14 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), new AktivitetspengerSatsPeriode(new LocalDateInterval(tjuvefemårsdag, p.getTomDato()), høySats))
         ));
 
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tjuvefemårsdag.minusDays(1), lavSats),
-            new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), høySats)
-        ));
-
         var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom, null, beregningsgrunnlagVerdi)
         ));
 
-        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, tom25årmnd);
-
         return førstegangsbehandlingBuilder(fom, fødselsdato)
             .medSatsperioder(satsperioder)
             .medBeregningsgrunnlag(beregningsgrunnlag)
-            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode));
+            .medTilkjentYtelse(LocalDateTimeline.empty());
     }
 
     private static AktivitetspengerTestScenario.Builder innvilgetMedÉnSatsBuilder(LocalDate fom, LocalDate fødselsdato, AktivitetspengerSatsGrunnlag sats) {
@@ -171,20 +162,14 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             new LocalDateSegment<>(fom, p.getTomDato(), new AktivitetspengerSatsPeriode(new LocalDateInterval(fom, p.getTomDato()), sats))
         ));
 
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, p.getTomDato(), sats)
-        ));
-
         var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom, null, beregningsgrunnlagVerdi)
         ));
 
-        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, fom.with(TemporalAdjusters.lastDayOfMonth()));
-
         return førstegangsbehandlingBuilder(fom, fødselsdato)
             .medSatsperioder(satsperioder)
             .medBeregningsgrunnlag(beregningsgrunnlag)
-            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode));
+            .medTilkjentYtelse(LocalDateTimeline.empty());
     }
 
     /**
@@ -361,16 +346,9 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             new LocalDateSegment<>(innvilgetPeriode, new AktivitetspengerSatsPeriode(innvilgetPeriode, høySats))
         ));
 
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(innvilgetPeriode, høySats);
-
         var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
         ));
-
-        // Tilkjent ytelse beregnes ut inneværende måned, men aldri lenger enn den avkortede sluttdatoen
-        LocalDate a = fom.with(TemporalAdjusters.lastDayOfMonth());
-        LocalDate tilkjentTom = a.isBefore(tom) ? a : tom;
-        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, tilkjentTom);
 
         var avkortetTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(innvilgetPeriode, VilkårUtfall.oppfylt()),
@@ -382,7 +360,7 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             .medSøknadsperioder(List.of(new Periode(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato())))
             .medSatsperioder(satsperioder)
             .medBeregningsgrunnlag(beregningsgrunnlag)
-            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode))
+            .medTilkjentYtelse(LocalDateTimeline.empty())
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(fagsakPeriode))));
 

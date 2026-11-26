@@ -315,6 +315,8 @@ spec:
       value: "PT1M"
     - name: BREVGENERERING_MAX_ANTALL_SAMTIDIGE
       value: "4"
+    - name: KONTROLL_FORSTE_MND_VIRKNIGSDATO
+      value: "2027-01"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

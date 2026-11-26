@@ -31,16 +31,15 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
         var detaljertResultat = resultatTidslinje.tilVurdering();
         boolean manueltOpprettet = behandling.erManueltOpprettet();
-        if (detaljertResultat.stream().anyMatch(it -> erInnvilgelseMedUtbetaling(it.getValue(), manueltOpprettet))) {
+        if (detaljertResultat.stream().anyMatch(it -> erInnvilgelse(it.getValue(), manueltOpprettet))) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.INNVILGELSE_DOK, førstegangsInnvilgelseInnholdBygger, "Automatisk brev ved ny innvilgelse. "));
         }
         return List.of();
     }
 
-    private static boolean erInnvilgelseMedUtbetaling(DetaljertResultat r, boolean manueltOpprettet) {
-        boolean nyPeriode = r.harÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
+    private static boolean erInnvilgelse(DetaljertResultat r, boolean manueltOpprettet) {
+        return !r.erAvslåttEllerAvkortet() && r.harÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
             || (manueltOpprettet && r.harÅrsak(BehandlingÅrsakType.RE_SATS_ENDRING));
-        return nyPeriode && r.utbetalingsgrad().erSatt();
     }
 
     @Override
