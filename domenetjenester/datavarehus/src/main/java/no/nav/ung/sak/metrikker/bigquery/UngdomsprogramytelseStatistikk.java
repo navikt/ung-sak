@@ -19,7 +19,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅ
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.inntektskontroll.KontrollertePerioderRecord;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.parallellbehandling.ParallellBehandlingVentRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.vedtaksprioritet.VedtaksprioritetVentRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
@@ -71,7 +71,7 @@ public class UngdomsprogramytelseStatistikk implements YtelseStatistikk {
             metrikk(EtterlysningRecord.ETTERLYSNING_TABELL, statistikkRepository.etterlysningData(YTELSE, sistKjørtTidspunkt)),
             metrikk(UttalelseRecord.UTTALELSE_TABELL, statistikkRepository.uttalelseData(YTELSE, sistKjørtTidspunkt, null)),
             metrikk(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, statistikkRepository.behandlingÅrsakStatistikk(YTELSE)),
-            metrikk(ParallellBehandlingVentRecord.PARALLELL_BEHANDLING_VENT_TABELL, statistikkRepository.parallellBehandlingVentStatistikk(YTELSE))
+            metrikk(VedtaksprioritetVentRecord.VEDTAKSPRIORITET_VENT_TABELL, statistikkRepository.vedtaksprioritetVentStatistikk(YTELSE))
         );
     }
 

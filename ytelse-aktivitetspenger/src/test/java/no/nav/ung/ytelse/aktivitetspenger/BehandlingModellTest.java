@@ -51,17 +51,17 @@ public class BehandlingModellTest {
         var påForAktivitetspenger = new KontrollbehandlingBryter(false, true);
         var påForUngdomsytelse = new KontrollbehandlingBryter(true, false);
 
-        assertThat(stegFørBeregnYtelse(prosessModell.førstegangsbehandling(påForAktivitetspenger))).isEqualTo(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);
-        assertThat(stegFørBeregnYtelse(prosessModell.revurdering(påForAktivitetspenger))).isEqualTo(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);
-        assertThat(prosessModell.førstegangsbehandling(påForUngdomsytelse).getAlleBehandlingStegTyper()).doesNotContain(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);
-        assertThat(prosessModell.revurdering(påForUngdomsytelse).getAlleBehandlingStegTyper()).doesNotContain(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);
+        assertThat(stegFørBeregnYtelse(prosessModell.førstegangsbehandling(påForAktivitetspenger))).isEqualTo(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
+        assertThat(stegFørBeregnYtelse(prosessModell.revurdering(påForAktivitetspenger))).isEqualTo(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
+        assertThat(prosessModell.førstegangsbehandling(påForUngdomsytelse).getAlleBehandlingStegTyper()).doesNotContain(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
+        assertThat(prosessModell.revurdering(påForUngdomsytelse).getAlleBehandlingStegTyper()).doesNotContain(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
     }
 
     @Test
     public void kontrollbehandling_har_ventepunkt_for_vedtaksprioritet_rett_før_beregning_av_ytelse_og_starter_alle_endringer_i_kompletthetssteget() {
         BehandlingModell modell = new ProsessModell().kontroll();
 
-        assertThat(stegFørBeregnYtelse(modell)).isEqualTo(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);
+        assertThat(stegFørBeregnYtelse(modell)).isEqualTo(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
         for (StartpunktType startpunkt : StartpunktType.values()) {
             assertThat(modell.finnBehandlingSteg(startpunkt)).as(startpunkt.getKode()).isEqualTo(BehandlingStegType.VURDER_KOMPLETTHET);
         }

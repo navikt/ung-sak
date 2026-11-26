@@ -35,32 +35,32 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
  * Autopunktet hopper tilbake til ventepunktet ved gjenopptakelse, så sjekken kjøres på nytt uansett hvordan
  * behandlingen tas av vent.
  */
-@BehandlingStegRef(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER)
+@BehandlingStegRef(BehandlingStegType.VURDER_VEDTAKSPRIORITET)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
-public class VurderParallelleBehandlingerSteg implements BehandlingSteg {
+public class VurderVedtaksprioritetSteg implements BehandlingSteg {
 
-    private static final Logger log = LoggerFactory.getLogger(VurderParallelleBehandlingerSteg.class);
-    private static final AksjonspunktDefinisjon VENTEPUNKT = AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING;
+    private static final Logger log = LoggerFactory.getLogger(VurderVedtaksprioritetSteg.class);
+    private static final AksjonspunktDefinisjon VENTEPUNKT = AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET;
 
     private BehandlingRepository behandlingRepository;
     private FagsakLåsRepository fagsakLåsRepository;
-    private ParallelleBehandlingerTjeneste parallelleBehandlingerTjeneste;
+    private VedtaksprioritetTjeneste vedtaksprioritetTjeneste;
     private SynkroniserÅpneBehandlingerTaskOppretter synkroniseringTaskOppretter;
 
-    VurderParallelleBehandlingerSteg() {
+    VurderVedtaksprioritetSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderParallelleBehandlingerSteg(BehandlingRepository behandlingRepository,
-                                            FagsakLåsRepository fagsakLåsRepository,
-                                            ParallelleBehandlingerTjeneste parallelleBehandlingerTjeneste,
-                                            SynkroniserÅpneBehandlingerTaskOppretter synkroniseringTaskOppretter) {
+    public VurderVedtaksprioritetSteg(BehandlingRepository behandlingRepository,
+                                      FagsakLåsRepository fagsakLåsRepository,
+                                      VedtaksprioritetTjeneste vedtaksprioritetTjeneste,
+                                      SynkroniserÅpneBehandlingerTaskOppretter synkroniseringTaskOppretter) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakLåsRepository = fagsakLåsRepository;
-        this.parallelleBehandlingerTjeneste = parallelleBehandlingerTjeneste;
+        this.vedtaksprioritetTjeneste = vedtaksprioritetTjeneste;
         this.synkroniseringTaskOppretter = synkroniseringTaskOppretter;
     }
 
@@ -76,13 +76,13 @@ public class VurderParallelleBehandlingerSteg implements BehandlingSteg {
 
         // Lesingene under går forbi Hibernate-sesjonen og ser det som er committet før låsen ble tatt.
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        if (!parallelleBehandlingerTjeneste.byggerPåSisteVedtak(fagsakId, behandlingId)) {
+        if (!vedtaksprioritetTjeneste.byggerPåSisteVedtak(fagsakId, behandlingId)) {
             log.info("Behandling {} i sak {} bygger ikke på siste vedtak, venter på synkronisering", behandlingId, behandling.getFagsak().getSaksnummer());
             synkroniseringTaskOppretter.opprettHvisIkkeFinnes(fagsakId);
             return settPåVent();
         }
 
-        var behandlingMedVedtaksprioritet = parallelleBehandlingerTjeneste.finnBehandlingMedVedtaksprioritet(behandling.getFagsakYtelseType(), fagsakId, behandlingId);
+        var behandlingMedVedtaksprioritet = vedtaksprioritetTjeneste.finnBehandlingMedVedtaksprioritet(behandling.getFagsakYtelseType(), fagsakId, behandlingId);
         if (behandlingMedVedtaksprioritet.isPresent()) {
             log.info("Behandling {} i sak {} venter på behandling {}, som har vedtaksprioritet", behandlingId, behandling.getFagsak().getSaksnummer(), behandlingMedVedtaksprioritet.get().behandlingId());
             return settPåVent();

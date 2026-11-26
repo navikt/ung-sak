@@ -53,7 +53,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.parallellbehandling.ParallellBehandlingVentRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.vedtaksprioritet.VedtaksprioritetVentRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.soknad.SøknadStatistikkRecord;
@@ -271,7 +271,7 @@ class BigQueryStatistikkRepositoryTest {
         assertThat(ungPerTabell.keySet()).containsExactlyInAnyOrder(
             "fagsak_status_v2", "behandling_status", "aksjonspunkter_status", "sats_statistikk",
             "behandlingsresultat_statistikk_v2", "etterlysning", "uttalelse", "behandling_årsak",
-            "parallelle_behandlinger_vent"
+            "vedtaksprioritet_vent"
         );
 
         // Og aktivitetspenger skal publisere til egne tabeller, inkludert søknadsstatistikk
@@ -279,7 +279,7 @@ class BigQueryStatistikkRepositoryTest {
             "aktivitetspenger_fagsak_status", "aktivitetspenger_behandling_status", "aktivitetspenger_aksjonspunkter_status",
             "aktivitetspenger_sats_statistikk", "aktivitetspenger_behandlingsresultat_statistikk", "aktivitetspenger_etterlysning",
             "aktivitetspenger_uttalelse", "aktivitetspenger_behandling_årsak", "aktivitetspenger_soknad_mottatt",
-            "aktivitetspenger_parallelle_behandlinger_vent"
+            "aktivitetspenger_vedtaksprioritet_vent"
         );
 
         // Og fagsak-status skal være separert per ytelse
@@ -334,11 +334,11 @@ class BigQueryStatistikkRepositoryTest {
         lagreBehandlingIVentepunktForVedtaksprioritet(fagsakAnnenYtelse, BehandlingType.KONTROLL, true);
 
         // Når vi henter statistikken for ventepunktet for vedtaksprioritet
-        Collection<ParallellBehandlingVentRecord> records = statistikkRepository.parallellBehandlingVentStatistikk(ytelse);
+        Collection<VedtaksprioritetVentRecord> records = statistikkRepository.vedtaksprioritetVentStatistikk(ytelse);
 
         // Så skal bare de ventende behandlingene for oppgitt ytelse telles, med ventetiden til den eldste
         assertThat(records).hasSize(1);
-        ParallellBehandlingVentRecord kontroll = records.iterator().next();
+        VedtaksprioritetVentRecord kontroll = records.iterator().next();
         assertThat(kontroll.ytelseType()).isEqualTo(ytelse);
         assertThat(kontroll.behandlingType()).isEqualTo(BehandlingType.KONTROLL);
         assertThat(kontroll.antall()).isEqualTo(2L);
@@ -347,8 +347,8 @@ class BigQueryStatistikkRepositoryTest {
 
     private Behandling lagreBehandlingIVentepunktForVedtaksprioritet(Fagsak fagsak, BehandlingType behandlingType, boolean venter) {
         Behandling behandling = byggBehandlingForFagsak(fagsak, behandlingType, BehandlingStatus.UTREDES);
-        new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER, BehandlingStegStatus.VENTER);
-        Aksjonspunkt ventepunkt = leggTilAksjonspunktPåBehandling(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING);
+        new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.VURDER_VEDTAKSPRIORITET, BehandlingStegStatus.VENTER);
+        Aksjonspunkt ventepunkt = leggTilAksjonspunktPåBehandling(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET);
         if (!venter) {
             new AksjonspunktTestSupport().setTilUtført(ventepunkt, "tatt av vent");
         }

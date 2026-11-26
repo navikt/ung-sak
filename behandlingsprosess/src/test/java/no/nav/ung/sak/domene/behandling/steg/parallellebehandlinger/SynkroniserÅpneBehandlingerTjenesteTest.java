@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.parallellebehandlinger;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.BEREGN_YTELSE;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET;
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_VEDTAKSPRIORITET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -125,8 +125,8 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
 
         var parallelleBehandlingerRepository = new ParallelleBehandlingerRepository(entityManager);
         tjeneste = new SynkroniserÅpneBehandlingerTjeneste(behandlingRepository, parallelleBehandlingerRepository,
-            new ParallelleBehandlingerTjeneste(parallelleBehandlingerRepository,
-                VurderParallelleBehandlingerStegTest.behandlingskontrollMedModell(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET)),
+            new VedtaksprioritetTjeneste(parallelleBehandlingerRepository,
+                VurderVedtaksprioritetStegTest.behandlingskontrollMedModell(VurderVedtaksprioritetStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET)),
             behandlingProsesseringTjeneste, fagsakProsessTaskRepository, synkroniseringTaskOppretter, relevanteKontrollperioderUtleder,
             historikkinnslagRepository, behandlingVedtakRepository, vilkårResultatRepository, uttalelseRepository, tilkjentYtelseRepository,
             new StartdatoRepository(entityManager), new PersonopplysningRepository(entityManager),
@@ -185,7 +185,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
 
     @Test
     void ordinær_behandling_får_bare_kontrolldata_fra_kontrollbehandling() {
-        var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
+        var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_VEDTAKSPRIORITET);
         settPåVentIVentepunktForVedtaksprioritet(revurdering);
         lagreVilkår(revurdering, fagsakFom.plusMonths(3));
         lagreUttalelse(revurdering, EndringType.ENDRET_PERIODE, 1);
@@ -228,7 +228,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
 
     @Test
     void behandling_som_bygger_på_siste_vedtak_og_venter_i_ventepunktet_for_vedtaksprioritet_tas_bare_av_vent() {
-        var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
+        var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_VEDTAKSPRIORITET);
         settPåVentIVentepunktForVedtaksprioritet(revurdering);
         var kontroll = nyBehandling(BehandlingType.KONTROLL, VURDER_KOMPLETTHET);
 
@@ -243,7 +243,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
 
     @Test
     void henlagt_kontrollbehandling_blir_ikke_kilde_og_ventende_behandling_tas_bare_av_vent() {
-        var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
+        var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_VEDTAKSPRIORITET);
         settPåVentIVentepunktForVedtaksprioritet(revurdering);
         var kontroll = nyBehandling(BehandlingType.KONTROLL, KONTROLLER_REGISTER_INNTEKT);
         lagreUttalelse(kontroll, EndringType.ENDRET_INNTEKT, 1);
@@ -385,7 +385,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
     }
 
     private void settPåVentIVentepunktForVedtaksprioritet(Behandling behandling) {
-        new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING, VURDER_PARALLELLE_BEHANDLINGER);
+        new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET, VURDER_VEDTAKSPRIORITET);
         lagreOgFlush(behandling);
     }
 

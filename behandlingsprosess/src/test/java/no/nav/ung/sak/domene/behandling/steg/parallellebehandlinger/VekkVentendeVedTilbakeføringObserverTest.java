@@ -10,7 +10,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGIS
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.SIMULER_OPPDRAG;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.START_STEG;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET;
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_VEDTAKSPRIORITET;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -74,14 +74,14 @@ class VekkVentendeVedTilbakeføringObserverTest {
         lagreOgFlush(førstegangsbehandling);
 
         revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, SIMULER_OPPDRAG);
-        kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
     }
 
     @Test
     void vekker_ventende_behandling_når_behandlingen_med_vedtaksprioritet_hopper_tilbake_til_før_ventepunktet() {
         settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
+        observer(VurderVedtaksprioritetStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
 
         verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(kontroll, false);
     }
@@ -90,7 +90,7 @@ class VekkVentendeVedTilbakeføringObserverTest {
     void vekker_ventende_behandling_når_behandlingen_med_vedtaksprioritet_hopper_tilbake_til_ventepunktet() {
         settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, FATTE_VEDTAK, VURDER_PARALLELLE_BEHANDLINGER));
+        observer(VurderVedtaksprioritetStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, FATTE_VEDTAK, VURDER_VEDTAKSPRIORITET));
 
         verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(kontroll, false);
     }
@@ -99,7 +99,7 @@ class VekkVentendeVedTilbakeføringObserverTest {
     void vekker_ikke_når_behandlingen_med_vedtaksprioritet_hopper_tilbake_til_et_steg_etter_ventepunktet() {
         settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, FATTE_VEDTAK, FORESLÅ_VEDTAK));
+        observer(VurderVedtaksprioritetStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, FATTE_VEDTAK, FORESLÅ_VEDTAK));
 
         verifiserIngenVekking();
     }
@@ -108,14 +108,14 @@ class VekkVentendeVedTilbakeføringObserverTest {
     void vekker_ikke_når_behandlingen_hopper_tilbake_fra_ventepunktet_for_vedtaksprioritet() {
         settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, VURDER_PARALLELLE_BEHANDLINGER, VURDER_KOMPLETTHET));
+        observer(VurderVedtaksprioritetStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, VURDER_VEDTAKSPRIORITET, VURDER_KOMPLETTHET));
 
         verifiserIngenVekking();
     }
 
     @Test
     void vekker_ikke_behandling_som_ikke_venter_i_ventepunktet_for_vedtaksprioritet() {
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
+        observer(VurderVedtaksprioritetStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
 
         verifiserIngenVekking();
     }
@@ -141,7 +141,7 @@ class VekkVentendeVedTilbakeføringObserverTest {
 
     private VekkVentendeVedTilbakeføringObserver observer(List<BehandlingStegType> modell, boolean bryterPå) {
         return new VekkVentendeVedTilbakeføringObserver(behandlingRepository, new ParallelleBehandlingerRepository(entityManager),
-            VurderParallelleBehandlingerStegTest.behandlingskontrollMedModell(modell), behandlingProsesseringTjeneste,
+            VurderVedtaksprioritetStegTest.behandlingskontrollMedModell(modell), behandlingProsesseringTjeneste,
             new KontrollbehandlingBryter(bryterPå, bryterPå));
     }
 
@@ -157,7 +157,7 @@ class VekkVentendeVedTilbakeføringObserverTest {
     }
 
     private void settPåVentIVentepunktForVedtaksprioritet(Behandling behandling) {
-        new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING, VURDER_PARALLELLE_BEHANDLINGER);
+        new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET, VURDER_VEDTAKSPRIORITET);
         lagreOgFlush(behandling);
     }
 

@@ -18,7 +18,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅ
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.inntektskontroll.KontrollertePerioderRecord;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.parallellbehandling.ParallellBehandlingVentRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.vedtaksprioritet.VedtaksprioritetVentRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.soknad.SøknadStatistikkRecord;
@@ -70,8 +70,8 @@ public class AktivitetspengerStatistikk implements YtelseStatistikk {
         AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "alder_og_kjønn");
     static final BigQueryTabell<KontrollertePerioderRecord> KONTROLLERTE_PERIODER_TABELL =
         KontrollertePerioderRecord.KONTROLLERTE_PERIODER_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "kontrollerte_inntekt_perioder");
-    static final BigQueryTabell<ParallellBehandlingVentRecord> PARALLELL_BEHANDLING_VENT_TABELL =
-        ParallellBehandlingVentRecord.PARALLELL_BEHANDLING_VENT_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "parallelle_behandlinger_vent");
+    static final BigQueryTabell<VedtaksprioritetVentRecord> VEDTAKSPRIORITET_VENT_TABELL =
+        VedtaksprioritetVentRecord.VEDTAKSPRIORITET_VENT_TABELL.medTabellnavn(AKTIVITETSPENGER_PREFIX + "vedtaksprioritet_vent");
 
     private BigQueryStatistikkRepository statistikkRepository;
     private EntityManager entityManager;
@@ -97,7 +97,7 @@ public class AktivitetspengerStatistikk implements YtelseStatistikk {
             metrikk(ETTERLYSNING_TABELL, statistikkRepository.etterlysningData(YTELSE, sistKjørtTidspunkt)),
             metrikk(UTTALELSE_TABELL, statistikkRepository.uttalelseData(YTELSE, sistKjørtTidspunkt, null)),
             metrikk(BEHANDLING_ÅRSAK_TABELL, statistikkRepository.behandlingÅrsakStatistikk(YTELSE)),
-            metrikk(PARALLELL_BEHANDLING_VENT_TABELL, statistikkRepository.parallellBehandlingVentStatistikk(YTELSE)),
+            metrikk(VEDTAKSPRIORITET_VENT_TABELL, statistikkRepository.vedtaksprioritetVentStatistikk(YTELSE)),
             metrikk(SøknadStatistikkRecord.AKTIVITETSPENGER_SØKNAD_TABELL, søknadStatistikk())
         );
     }

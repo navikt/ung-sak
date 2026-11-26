@@ -27,7 +27,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 public class VekkVentendeVedTilbakeføringObserver {
 
     private static final Logger log = LoggerFactory.getLogger(VekkVentendeVedTilbakeføringObserver.class);
-    private static final BehandlingStegType VENTEPUNKT_FOR_VEDTAKSPRIORITET = BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER;
+    private static final BehandlingStegType VENTEPUNKT_FOR_VEDTAKSPRIORITET = BehandlingStegType.VURDER_VEDTAKSPRIORITET;
 
     private BehandlingRepository behandlingRepository;
     private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
@@ -70,7 +70,7 @@ public class VekkVentendeVedTilbakeføringObserver {
 
         for (ParallellBehandling annen : parallelleBehandlingerRepository.hentAndreIkkeAvsluttedeYtelsesbehandlinger(behandling.getFagsakId(), behandling.getId())) {
             Behandling venter = behandlingRepository.hentBehandling(annen.behandlingId());
-            if (venter.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING)) {
+            if (venter.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET)) {
                 log.info("Behandling {} hoppet tilbake fra {} til {} og har ikke lenger vedtaksprioritet. Gjenopptar behandling {}",
                     behandling.getId(), fraSteg.getKode(), tilSteg.getKode(), venter.getId());
                 behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(venter, false);
@@ -80,14 +80,14 @@ public class VekkVentendeVedTilbakeføringObserver {
 
     /**
      * Behandlingen mister vedtaksprioriteten når den går fra et steg i eller etter
-     * {@link ParallelleBehandlingerTjeneste#FØRSTE_STEG_MED_VEDTAKSPRIORITET} til et steg før. Ventepunktet for
+     * {@link VedtaksprioritetTjeneste#FØRSTE_STEG_MED_VEDTAKSPRIORITET} til et steg før. Ventepunktet for
      * vedtaksprioritet sammenlignes aldri i modellen, siden det mangler i modellene for førstegangsbehandling og
      * revurdering når bryteren er av.
      */
     private boolean misterVedtaksprioritet(Behandling behandling, BehandlingStegType fraSteg, BehandlingStegType tilSteg) {
         var ytelseType = behandling.getFagsakYtelseType();
         var behandlingType = behandling.getType();
-        var referanse = ParallelleBehandlingerTjeneste.FØRSTE_STEG_MED_VEDTAKSPRIORITET;
+        var referanse = VedtaksprioritetTjeneste.FØRSTE_STEG_MED_VEDTAKSPRIORITET;
         boolean haddeVedtaksprioritet = behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, fraSteg, referanse) >= 0;
         boolean erIEllerFørVentepunktet = tilSteg == VENTEPUNKT_FOR_VEDTAKSPRIORITET || behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, tilSteg, referanse) < 0;
         return haddeVedtaksprioritet && erIEllerFørVentepunktet;

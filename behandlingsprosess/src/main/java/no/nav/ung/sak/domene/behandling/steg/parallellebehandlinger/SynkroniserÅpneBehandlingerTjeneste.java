@@ -69,7 +69,7 @@ public class SynkroniserÅpneBehandlingerTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
-    private ParallelleBehandlingerTjeneste parallelleBehandlingerTjeneste;
+    private VedtaksprioritetTjeneste vedtaksprioritetTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private SynkroniserÅpneBehandlingerTaskOppretter synkroniserÅpneBehandlingerTaskOppretter;
@@ -90,7 +90,7 @@ public class SynkroniserÅpneBehandlingerTjeneste {
     @Inject
     public SynkroniserÅpneBehandlingerTjeneste(BehandlingRepository behandlingRepository,
                                                ParallelleBehandlingerRepository parallelleBehandlingerRepository,
-                                               ParallelleBehandlingerTjeneste parallelleBehandlingerTjeneste,
+                                               VedtaksprioritetTjeneste vedtaksprioritetTjeneste,
                                                BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                                FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                                SynkroniserÅpneBehandlingerTaskOppretter synkroniserÅpneBehandlingerTaskOppretter,
@@ -105,7 +105,7 @@ public class SynkroniserÅpneBehandlingerTjeneste {
                                                @Any Instance<YtelsesgrunnlagSynkroniserer> ytelsesgrunnlagSynkroniserere) {
         this.behandlingRepository = behandlingRepository;
         this.parallelleBehandlingerRepository = parallelleBehandlingerRepository;
-        this.parallelleBehandlingerTjeneste = parallelleBehandlingerTjeneste;
+        this.vedtaksprioritetTjeneste = vedtaksprioritetTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.synkroniserÅpneBehandlingerTaskOppretter = synkroniserÅpneBehandlingerTaskOppretter;
@@ -129,7 +129,7 @@ public class SynkroniserÅpneBehandlingerTjeneste {
         List<Behandling> skalVekkes = new ArrayList<>();
         for (ParallellBehandling åpen : parallelleBehandlingerRepository.hentIkkeAvsluttedeYtelsesbehandlinger(fagsakId)) {
             Behandling behandling = behandlingRepository.hentBehandling(åpen.behandlingId());
-            if (kilde.isPresent() && !parallelleBehandlingerTjeneste.byggerPåSisteVedtak(fagsakId, åpen.behandlingId())) {
+            if (kilde.isPresent() && !vedtaksprioritetTjeneste.byggerPåSisteVedtak(fagsakId, åpen.behandlingId())) {
                 validerKanSynkroniseres(behandling, åpen);
                 skalSynkroniseres.add(behandling);
             } else if (venterIVentepunktForVedtaksprioritet(behandling)) {
@@ -197,10 +197,10 @@ public class SynkroniserÅpneBehandlingerTjeneste {
     }
 
     private void validerKanSynkroniseres(Behandling behandling, ParallellBehandling åpen) {
-        if (parallelleBehandlingerTjeneste.erForbiVentepunktForVedtaksprioritet(behandling.getFagsakYtelseType(), åpen)
+        if (vedtaksprioritetTjeneste.erForbiVentepunktForVedtaksprioritet(behandling.getFagsakYtelseType(), åpen)
             || behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).isPresent()) {
             throw new IllegalStateException("Behandling " + behandling.getId() + " bygger ikke på siste vedtak, men er forbi "
-                + ParallelleBehandlingerTjeneste.FØRSTE_STEG_MED_VEDTAKSPRIORITET.getKode() + " eller har vedtak. Behandlingen kan ikke synkroniseres.");
+                + VedtaksprioritetTjeneste.FØRSTE_STEG_MED_VEDTAKSPRIORITET.getKode() + " eller har vedtak. Behandlingen kan ikke synkroniseres.");
         }
     }
 
@@ -210,7 +210,7 @@ public class SynkroniserÅpneBehandlingerTjeneste {
     }
 
     private static boolean venterIVentepunktForVedtaksprioritet(Behandling behandling) {
-        return behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING);
+        return behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET);
     }
 
     private void lagHistorikkinnslag(Behandling kilde, Behandling mål) {

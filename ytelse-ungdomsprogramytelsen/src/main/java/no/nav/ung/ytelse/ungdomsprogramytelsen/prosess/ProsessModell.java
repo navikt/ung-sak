@@ -87,7 +87,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET, StartpunktType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
-            .medSteg(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER)
+            .medSteg(BehandlingStegType.VURDER_VEDTAKSPRIORITET)
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
@@ -102,7 +102,7 @@ public class ProsessModell {
      */
     private static void medVentepunktForVedtaksprioritetHvisBryterErPå(BehandlingModellImpl.BehandlingModellBuilder modellBuilder, KontrollbehandlingBryter kontrollbehandlingBryter) {
         if (kontrollbehandlingBryter.erPå(FagsakYtelseType.UNGDOMSYTELSE)) {
-            modellBuilder.medSteg(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);
+            modellBuilder.medSteg(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
         }
     }
 

@@ -10,7 +10,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGIS
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.SIMULER_OPPDRAG;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.START_STEG;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET;
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_VEDTAKSPRIORITET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -54,14 +54,14 @@ import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuil
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class VurderParallelleBehandlingerStegTest {
+class VurderVedtaksprioritetStegTest {
 
     /**
      * Rekkefølgen i modellene med ventepunktet for vedtaksprioritet. Steg som mangler, gir exception, som i
      * {@code BehandlingModellImpl.indexOf}.
      */
     static final List<BehandlingStegType> MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET = List.of(START_STEG, INNHENT_REGISTEROPP, VURDER_KOMPLETTHET, KONTROLLER_REGISTER_INNTEKT,
-        FORESLÅ_BEHANDLINGSRESULTAT, VURDER_PARALLELLE_BEHANDLINGER, BEREGN_YTELSE, SIMULER_OPPDRAG, FORESLÅ_VEDTAK, FATTE_VEDTAK, IVERKSETT_VEDTAK);
+        FORESLÅ_BEHANDLINGSRESULTAT, VURDER_VEDTAKSPRIORITET, BEREGN_YTELSE, SIMULER_OPPDRAG, FORESLÅ_VEDTAK, FATTE_VEDTAK, IVERKSETT_VEDTAK);
 
     @Inject
     private EntityManager entityManager;
@@ -70,7 +70,7 @@ class VurderParallelleBehandlingerStegTest {
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private SynkroniserÅpneBehandlingerTaskOppretter synkroniseringTaskOppretter;
-    private VurderParallelleBehandlingerSteg steg;
+    private VurderVedtaksprioritetSteg steg;
 
     private Behandling førstegangsbehandling;
     private LocalDateTime nesteVedtakstidspunkt = LocalDateTime.now().minusDays(1);
@@ -82,15 +82,15 @@ class VurderParallelleBehandlingerStegTest {
         behandlingVedtakRepository = new BehandlingVedtakRepository(entityManager, behandlingRepository);
         synkroniseringTaskOppretter = mock(SynkroniserÅpneBehandlingerTaskOppretter.class);
 
-        var tjeneste = new ParallelleBehandlingerTjeneste(new ParallelleBehandlingerRepository(entityManager), behandlingskontrollMedModell(MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET));
-        steg = new VurderParallelleBehandlingerSteg(behandlingRepository, new FagsakLåsRepository(entityManager), tjeneste, synkroniseringTaskOppretter);
+        var tjeneste = new VedtaksprioritetTjeneste(new ParallelleBehandlingerRepository(entityManager), behandlingskontrollMedModell(MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET));
+        steg = new VurderVedtaksprioritetSteg(behandlingRepository, new FagsakLåsRepository(entityManager), tjeneste, synkroniseringTaskOppretter);
 
         førstegangsbehandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
     }
 
     @Test
     void passerer_når_fagsaken_ikke_har_vedtak_og_ingen_andre_behandlinger() {
-        settSteg(førstegangsbehandling, VURDER_PARALLELLE_BEHANDLINGER);
+        settSteg(førstegangsbehandling, VURDER_VEDTAKSPRIORITET);
 
         var resultat = steg.utførSteg(kontekst(førstegangsbehandling));
 
@@ -101,7 +101,7 @@ class VurderParallelleBehandlingerStegTest {
     @Test
     void passerer_når_behandlingen_bygger_på_siste_vedtak() {
         avslutt(førstegangsbehandling);
-        var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
+        var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_VEDTAKSPRIORITET);
 
         var resultat = steg.utførSteg(kontekst(revurdering));
 
@@ -111,7 +111,7 @@ class VurderParallelleBehandlingerStegTest {
     @Test
     void venter_og_ber_om_synkronisering_når_behandlingen_ikke_bygger_på_siste_vedtak() {
         avslutt(førstegangsbehandling);
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, FORESLÅ_VEDTAK);
         avslutt(revurdering);
 
@@ -125,7 +125,7 @@ class VurderParallelleBehandlingerStegTest {
     void venter_på_annen_behandling_som_står_i_beregning() {
         avslutt(førstegangsbehandling);
         nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, BEREGN_YTELSE);
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
 
         var resultat = steg.utførSteg(kontekst(kontroll));
 
@@ -137,7 +137,7 @@ class VurderParallelleBehandlingerStegTest {
     void ser_annen_behandling_med_vedtaksprioritet_selv_om_sesjonen_har_gammel_tilstand() {
         avslutt(førstegangsbehandling);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_KOMPLETTHET);
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
 
         // Gitt at revurderingen har gått til beregning i en annen transaksjon etter at sesjonen lastet den
         entityManager.createNativeQuery("update behandling_steg_tilstand set behandling_steg = :steg where behandling_id = :id and aktiv = true")
@@ -156,7 +156,7 @@ class VurderParallelleBehandlingerStegTest {
         avslutt(førstegangsbehandling);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, FATTE_VEDTAK);
         settStatus(revurdering, BehandlingStatus.FATTER_VEDTAK);
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
 
         var resultat = steg.utførSteg(kontekst(kontroll));
 
@@ -165,7 +165,7 @@ class VurderParallelleBehandlingerStegTest {
 
     @Test
     void venter_på_originalbehandling_under_iverksetting() {
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
         lagreVedtak(førstegangsbehandling);
         settStatus(førstegangsbehandling, BehandlingStatus.IVERKSETTER_VEDTAK);
 
@@ -178,8 +178,8 @@ class VurderParallelleBehandlingerStegTest {
     @Test
     void passerer_når_annen_behandling_venter_i_ventepunktet_for_vedtaksprioritet() {
         avslutt(førstegangsbehandling);
-        nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_VEDTAKSPRIORITET);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
 
         var resultat = steg.utførSteg(kontekst(kontroll));
 
@@ -190,7 +190,7 @@ class VurderParallelleBehandlingerStegTest {
     void passerer_når_annen_behandling_står_før_ventepunktet_for_vedtaksprioritet() {
         avslutt(førstegangsbehandling);
         nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_KOMPLETTHET);
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
 
         var resultat = steg.utførSteg(kontekst(kontroll));
 
@@ -202,7 +202,7 @@ class VurderParallelleBehandlingerStegTest {
         avslutt(førstegangsbehandling);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, SIMULER_OPPDRAG);
         settResultat(revurdering, BehandlingResultatType.HENLAGT_MASKINELT);
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
 
         var resultat = steg.utførSteg(kontekst(kontroll));
 
@@ -212,7 +212,7 @@ class VurderParallelleBehandlingerStegTest {
     @Test
     void ny_kjøring_etter_vent_venter_igjen_til_behandlingen_med_vedtaksprioritet_er_avsluttet() {
         avslutt(førstegangsbehandling);
-        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
+        var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_VEDTAKSPRIORITET);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, SIMULER_OPPDRAG);
 
         assertVenter(steg.utførSteg(kontekst(kontroll)));
@@ -244,7 +244,7 @@ class VurderParallelleBehandlingerStegTest {
 
     private static void assertVenter(BehandleStegResultat resultat) {
         assertThat(resultat.getAksjonspunktResultater()).singleElement().satisfies(ap -> {
-            assertThat(ap.getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING);
+            assertThat(ap.getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET);
             assertThat(ap.getVenteårsak()).isEqualTo(Venteårsak.VENT_TIDLIGERE_BEHANDLING);
             assertThat(ap.getFrist()).isAfter(LocalDateTime.now());
         });

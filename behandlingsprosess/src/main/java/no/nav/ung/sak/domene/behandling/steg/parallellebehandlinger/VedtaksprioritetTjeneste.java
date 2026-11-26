@@ -20,7 +20,7 @@ import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlinge
  * Kallestedet må holde fagsaklåsen. Ellers kan svaret endre seg før transaksjonen er ferdig.
  */
 @Dependent
-public class ParallelleBehandlingerTjeneste {
+public class VedtaksprioritetTjeneste {
 
     /**
      * Referansesteg for om en behandling er forbi ventepunktet for vedtaksprioritet. Ventepunktet står ikke i modellene
@@ -32,13 +32,13 @@ public class ParallelleBehandlingerTjeneste {
     private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
-    ParallelleBehandlingerTjeneste() {
+    VedtaksprioritetTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public ParallelleBehandlingerTjeneste(ParallelleBehandlingerRepository parallelleBehandlingerRepository,
-                                          BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
+    public VedtaksprioritetTjeneste(ParallelleBehandlingerRepository parallelleBehandlingerRepository,
+                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
         this.parallelleBehandlingerRepository = parallelleBehandlingerRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
@@ -69,7 +69,7 @@ public class ParallelleBehandlingerTjeneste {
             return true;
         }
         BehandlingStegType aktivtSteg = behandling.aktivtSteg();
-        if (aktivtSteg == null || aktivtSteg == BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER) {
+        if (aktivtSteg == null || aktivtSteg == BehandlingStegType.VURDER_VEDTAKSPRIORITET) {
             return false;
         }
         return behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandling.behandlingType(), aktivtSteg, FØRSTE_STEG_MED_VEDTAKSPRIORITET) >= 0;

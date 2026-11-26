@@ -20,7 +20,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.parallellbehandling.ParallellBehandlingVentRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.vedtaksprioritet.VedtaksprioritetVentRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.uttalelse.UttalelseRecord;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -225,7 +225,7 @@ public class BigQueryStatistikkRepository {
      * steg. Over {@link #VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE} logges et varsel med behandlingId-er, uten
      * personopplysninger. Varselet fanger både en behandling som har vedtaksprioritet lenge, og synk som feiler over tid.
      */
-    Collection<ParallellBehandlingVentRecord> parallellBehandlingVentStatistikk(FagsakYtelseType ytelse) {
+    Collection<VedtaksprioritetVentRecord> vedtaksprioritetVentStatistikk(FagsakYtelseType ytelse) {
         String sql = """
             select b.id as behandling_id, b.behandling_type, st.opprettet_tid
              from aksjonspunkt a
@@ -243,9 +243,9 @@ public class BigQueryStatistikkRepository {
         }
         var nå = LocalDateTime.now();
         List<Ventende> ventende = query
-            .setParameter("ventepunkt", AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING.getKode())
+            .setParameter("ventepunkt", AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET.getKode())
             .setParameter("aapen", AksjonspunktStatus.OPPRETTET.getKode())
-            .setParameter("steg", BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER.getKode())
+            .setParameter("steg", BehandlingStegType.VURDER_VEDTAKSPRIORITET.getKode())
             .setParameter("ytelseType", ytelseKode(ytelse))
             .getResultStream()
             .map(t -> new Ventende(
@@ -268,7 +268,7 @@ public class BigQueryStatistikkRepository {
         return ventende.stream()
             .collect(Collectors.groupingBy(Ventende::behandlingType, TreeMap::new, Collectors.toList()))
             .entrySet().stream()
-            .map(e -> new ParallellBehandlingVentRecord(
+            .map(e -> new VedtaksprioritetVentRecord(
                 ytelse,
                 e.getKey(),
                 (long) e.getValue().size(),
