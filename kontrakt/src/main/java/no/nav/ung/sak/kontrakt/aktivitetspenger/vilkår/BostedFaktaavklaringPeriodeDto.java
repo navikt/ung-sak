@@ -1,8 +1,6 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 
@@ -11,31 +9,6 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
  */
 public record BostedFaktaavklaringPeriodeDto(
     @NotNull @Valid ÅpenPeriode periode,
-    @NotNull @Valid BostedVurderingIkkeOppfyltDto vurdering,
-    boolean skalIkkeSendeVarsel
+    @NotNull @Valid BostedVurderingIkkeOppfyltDto vurdering
 ) {
-
-    public boolean skalSendeVarsel() {
-        return !skalIkkeSendeVarsel;
-    }
-
-    @JsonIgnore
-    @AssertTrue(message = "begrunnelseIkkeVarsel skal kun settes når skalIkkeSendeVarsel er true")
-    public boolean isBegrunnelseIkkeVarselGyldig() {
-        if (skalIkkeSendeVarsel || vurdering == null) {
-            return true;
-        }
-        return vurdering.begrunnelseIkkeVarsel() == null || vurdering.begrunnelseIkkeVarsel().isBlank();
-    }
-
-    @JsonIgnore
-    @AssertTrue(message = "fritekstTilVarsel er påkrevd når fraflyttingsÅrsak krever fritekst og varsel skal sendes")
-    public boolean isFritekstTilVarselGyldig() {
-        if (vurdering == null || vurdering.fraflyttingsÅrsak() == null) {
-            return true; // dekkes av @NotNull på vurdering/fraflyttingsÅrsak
-        }
-        return !skalSendeVarsel() || !vurdering.fraflyttingsÅrsak().kreverFritekst()
-            || (vurdering.fritekstTilVarsel() != null && !vurdering.fritekstTilVarsel().isBlank());
-    }
-
 }

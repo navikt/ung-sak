@@ -162,7 +162,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         for (var avklaring : årsakTidslinje.segmenter()) {
             var ulikeVurderinger = vurdertTidslinje.intersection(avklaring.getLocalDateInterval()).stream()
                 .map(LocalDateSegment::getValue)
-                .map(v -> List.of(v.erVilkårOppfylt(), Objects.toString(v.begrunnelse(), ""), Objects.toString(v.fritekstVurderingBrev(), ""), v.skalIkkeSendeVarsel()))
+                .map(v -> List.of(v.erVilkårOppfylt(), Objects.toString(v.begrunnelse(), ""), Objects.toString(v.fritekstVurderingBrev(), ""), v.skalSendeVarsel()))
                 .distinct()
                 .toList();
             if (ulikeVurderinger.size() > 1) {
@@ -181,9 +181,9 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
                                                                      LocalDateTime vurdertTidspunkt) {
         var ikkeOppfyltÅrsak = vurdering.erVilkårOppfylt() ? null : årsakFraAvklaring;
 
-        if (vurdering.skalIkkeSendeVarsel()) {
+        if (!vurdering.skalSendeVarsel()) {
             if (vurdering.fritekstVurderingBrev() != null && !vurdering.fritekstVurderingBrev().isBlank()) {
-                throw new IllegalArgumentException("fritekstVurderingBrev må være tom når skalIkkeSendeVarsel er true. Gjelder periode: " + interval);
+                throw new IllegalArgumentException("fritekstVurderingBrev må være tom når skalSendeVarsel er false. Gjelder periode: " + interval);
             }
         } else if (ikkeOppfyltÅrsak != null && ikkeOppfyltÅrsak.kreverFritekst()) {
             if (vurdering.fritekstVurderingBrev() == null || vurdering.fritekstVurderingBrev().isBlank()) {
@@ -201,7 +201,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             vurdering.fritekstVurderingBrev(),
             vurdertAv,
             vurdertTidspunkt,
-            !vurdering.skalIkkeSendeVarsel());
+            vurdering.skalSendeVarsel());
 
         var periode = vurdering.periode();
         var lukketTom = lukkÅpenPeriode(periode, maksDatoIVilkårsperioden);

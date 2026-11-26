@@ -188,7 +188,7 @@ class VurderingAvBistandsvilkårEtterAvklaringOppdatererTest {
     }
 
     private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
-        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, false);
+        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev, true);
     }
 
     private static DatoIntervallEntitet tilDatoIntervallEntitet(Periode periode) {

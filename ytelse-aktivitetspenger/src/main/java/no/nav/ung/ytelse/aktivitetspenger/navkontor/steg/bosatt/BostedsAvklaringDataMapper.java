@@ -61,7 +61,7 @@ public final class BostedsAvklaringDataMapper {
         var innhold = new BostedVarselInnhold(
             new Periode(fom, tom),
             dto.vurdering().fraflyttingsÅrsak(),
-            dto.skalSendeVarsel(),
+            dto.vurdering().skalSendeVarsel(),
             dto.vurdering().fritekstTilVarsel(),
             dto.vurdering().kilde(),
             dto.vurdering().kildeFritekst(),

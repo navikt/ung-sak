@@ -2342,9 +2342,6 @@
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
           },
-          "skalIkkeSendeVarsel" : {
-            "type" : "boolean"
-          },
           "vurdering" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto"
           }
@@ -2457,6 +2454,9 @@
             "minLength" : 0,
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
+          },
+          "skalSendeVarsel" : {
+            "type" : "boolean"
           }
         },
         "required" : [ "begrunnelse", "fraflyttingsÅrsak", "kilde" ],
@@ -2532,7 +2532,7 @@
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           }
         },
@@ -2571,7 +2571,7 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           }
         },
@@ -2886,7 +2886,7 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           }
         },
@@ -3103,7 +3103,7 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
-          "skalIkkeSendeVarsel" : {
+          "skalSendeVarsel" : {
             "type" : "boolean"
           }
         },

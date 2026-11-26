@@ -469,7 +469,7 @@ class VurderFaktaOmAktivitetOppdatererTest {
     }
 
     private static VurderFaktaOmAktivitetDto dtoUtenVarsel(ÅpenPeriode periode, AktivitetsvilkåretIkkeOppfyltÅrsak årsak) {
-        var vurdering = new AktivitetAvklaringIkkeOppfyltDto(årsak, "begrunnelse", true, null, BEGRUNNELSE_IKKE_VARSEL, AktivitetsavklaringKildeType.BRUKER, null);
+        var vurdering = new AktivitetAvklaringIkkeOppfyltDto(årsak, "begrunnelse", false, null, BEGRUNNELSE_IKKE_VARSEL, AktivitetsavklaringKildeType.BRUKER, null);
         return new VurderFaktaOmAktivitetDto(List.of(new AktivitetFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 
@@ -478,7 +478,7 @@ class VurderFaktaOmAktivitetOppdatererTest {
     }
 
     private static VurderFaktaOmAktivitetDto dtoMedVarsel(ÅpenPeriode periode, AktivitetsvilkåretIkkeOppfyltÅrsak årsak, String begrunnelse) {
-        var vurdering = new AktivitetAvklaringIkkeOppfyltDto(årsak, begrunnelse, false, "Fritekst til varsel", null, AktivitetsavklaringKildeType.BRUKER, null);
+        var vurdering = new AktivitetAvklaringIkkeOppfyltDto(årsak, begrunnelse, true, "Fritekst til varsel", null, AktivitetsavklaringKildeType.BRUKER, null);
         return new VurderFaktaOmAktivitetDto(List.of(new AktivitetFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 }

@@ -463,12 +463,13 @@ class VurderFaktaOmBostedOppdatererTest {
         var vurdering = new BostedVurderingIkkeOppfyltDto(
             årsak,
             "begrunnelse",
+            false,
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
             BEGRUNNELSE_IKKE_VARSEL,
             BostedsavklaringKildeType.BRUKER,
             null
         );
-        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), vurdering, true);
+        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), vurdering);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
     }
 
@@ -480,12 +481,13 @@ class VurderFaktaOmBostedOppdatererTest {
         var vurdering = new BostedVurderingIkkeOppfyltDto(
             årsak,
             begrunnelse,
+            skalSendeVarsel,
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
             skalSendeVarsel ? null : BEGRUNNELSE_IKKE_VARSEL,
             BostedsavklaringKildeType.BRUKER,
             null
         );
-        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(FOM, TOM), vurdering, !skalSendeVarsel);
+        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(FOM, TOM), vurdering);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
     }
 }
