@@ -71,7 +71,7 @@ class AktivitetspengerBeregnYtelseStegTest {
             repositories.aktivitetspengerGrunnlagRepository(),
             repositories.tilkjentYtelseRepository(),
             månedsvisUtleder,
-            new AktivitetspengerInntektskontrollFritakUtleder());
+            new AktivitetspengerInntektskontrollFritakUtleder("2027-01"));
 
         steg.utførSteg(kontekst(behandling));
 
@@ -152,7 +152,7 @@ class AktivitetspengerBeregnYtelseStegTest {
             repositories.aktivitetspengerGrunnlagRepository(),
             repositories.tilkjentYtelseRepository(),
             månedsvisUtleder,
-            new AktivitetspengerInntektskontrollFritakUtleder());
+            new AktivitetspengerInntektskontrollFritakUtleder("2027-01"));
 
         steg.utførSteg(kontekst(behandling));
 
