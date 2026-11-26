@@ -49,7 +49,7 @@ public class StønadstatistikkHendelseMeldingProducer {
         @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName
     ) {
         Properties properties = new Properties();
-        properties.put(CommonClientConfigs.CLIENT_ID_CONFIG, "KP-" + ungTopic);
+        properties.put(CommonClientConfigs.CLIENT_ID_CONFIG, "KP-ung-sak-stonadstatistikk");
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, appNamespace + "." + appName);
         properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
         properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, aivenBootstrapServers);
