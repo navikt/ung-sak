@@ -20,7 +20,8 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 
 /**
- * Fersk lesing av behandlinger på en fagsak for porten og synken mellom parallelle behandlinger.
+ * Fersk lesing av behandlinger på en fagsak. Brukes av ventepunktet for vedtaksprioritet og synken mellom parallelle
+ * behandlinger.
  * <p>
  * Spørringene går direkte mot databasen og returnerer verdier, ikke managed entiteter. Hibernate-sesjonen kan ellers gi
  * gammel tilstand for behandlinger som er lastet tidligere i samme transaksjon. Kallestedet må holde fagsaklåsen

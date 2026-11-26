@@ -56,10 +56,10 @@ public class BigQueryStatistikkRepository {
     private static final Logger log = LoggerFactory.getLogger(BigQueryStatistikkRepository.class);
 
     /**
-     * En behandling som har passert porten, kan vente på saksbehandler og beslutter i flere dager. Over denne grensen
-     * står en behandling sannsynligvis fast.
+     * Behandlingen med vedtaksprioritet kan vente på saksbehandler og beslutter i flere dager. Over denne grensen står
+     * en behandling sannsynligvis fast.
      */
-    static final Duration PORT_VENTETID_VARSLINGSGRENSE = Duration.ofDays(7);
+    static final Duration VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE = Duration.ofDays(7);
 
     private final EntityManager entityManager;
 
@@ -217,13 +217,13 @@ public class BigQueryStatistikkRepository {
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
     /**
-     * Henter behandlinger som venter i porten for parallelle behandlinger, gruppert på behandlingstype, med antall og
+     * Henter behandlinger som venter i ventepunktet for vedtaksprioritet, gruppert på behandlingstype, med antall og
      * eldste ventetid i timer.
      * <p>
-     * Ventetiden regnes fra opprettet-tidspunktet til aktiv stegtilstand for porten. Raden gjenbrukes når porten kjøres
-     * på nytt etter vent, så tiden nullstilles bare når behandlingen hopper tilbake til et tidligere steg.
-     * Over {@link #PORT_VENTETID_VARSLINGSGRENSE} logges et varsel med behandlingId-er, uten personopplysninger.
-     * Varselet fanger både en behandling som holder porten lenge, og synk som feiler over tid.
+     * Ventetiden regnes fra opprettet-tidspunktet til aktiv stegtilstand for ventepunktet. Raden gjenbrukes når
+     * ventepunktet kjøres på nytt etter vent, så tiden nullstilles bare når behandlingen hopper tilbake til et tidligere
+     * steg. Over {@link #VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE} logges et varsel med behandlingId-er, uten
+     * personopplysninger. Varselet fanger både en behandling som har vedtaksprioritet lenge, og synk som feiler over tid.
      */
     Collection<ParallellBehandlingVentRecord> parallellBehandlingVentStatistikk(FagsakYtelseType ytelse) {
         String sql = """
@@ -234,7 +234,7 @@ public class BigQueryStatistikkRepository {
              inner join behandling_steg_tilstand st on st.behandling_id = b.id and st.aktiv = true
              where a.aksjonspunkt_def = :ventepunkt
              and a.aksjonspunkt_status = :aapen
-             and st.behandling_steg = :portsteg
+             and st.behandling_steg = :steg
              and f.ytelse_type = :ytelseType
             """;
 
@@ -245,7 +245,7 @@ public class BigQueryStatistikkRepository {
         List<Ventende> ventende = query
             .setParameter("ventepunkt", AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING.getKode())
             .setParameter("aapen", AksjonspunktStatus.OPPRETTET.getKode())
-            .setParameter("portsteg", BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER.getKode())
+            .setParameter("steg", BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER.getKode())
             .setParameter("ytelseType", ytelseKode(ytelse))
             .getResultStream()
             .map(t -> new Ventende(
@@ -255,13 +255,13 @@ public class BigQueryStatistikkRepository {
             .toList();
 
         var overGrensen = ventende.stream()
-            .filter(it -> it.ventetid().compareTo(PORT_VENTETID_VARSLINGSGRENSE) > 0)
+            .filter(it -> it.ventetid().compareTo(VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE) > 0)
             .map(Ventende::behandlingId)
             .sorted()
             .toList();
         if (!overGrensen.isEmpty()) {
-            log.warn("{} behandlinger for ytelse {} har ventet i porten for parallelle behandlinger lenger enn {}. Første behandlingId-er: {}",
-                overGrensen.size(), ytelse.getKode(), PORT_VENTETID_VARSLINGSGRENSE, overGrensen.stream().limit(10).toList());
+            log.warn("{} behandlinger for ytelse {} har ventet i ventepunktet for vedtaksprioritet lenger enn {}. Første behandlingId-er: {}",
+                overGrensen.size(), ytelse.getKode(), VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE, overGrensen.stream().limit(10).toList());
         }
 
         var opprettetTidspunkt = ZonedDateTime.now();

@@ -56,8 +56,11 @@ import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuil
 @ExtendWith(JpaExtension.class)
 class VurderParallelleBehandlingerStegTest {
 
-    /** Rekkefølgen i modellene med porten. Steg som mangler, gir exception, som i {@code BehandlingModellImpl.indexOf}. */
-    static final List<BehandlingStegType> MODELL_MED_PORT = List.of(START_STEG, INNHENT_REGISTEROPP, VURDER_KOMPLETTHET, KONTROLLER_REGISTER_INNTEKT,
+    /**
+     * Rekkefølgen i modellene med ventepunktet for vedtaksprioritet. Steg som mangler, gir exception, som i
+     * {@code BehandlingModellImpl.indexOf}.
+     */
+    static final List<BehandlingStegType> MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET = List.of(START_STEG, INNHENT_REGISTEROPP, VURDER_KOMPLETTHET, KONTROLLER_REGISTER_INNTEKT,
         FORESLÅ_BEHANDLINGSRESULTAT, VURDER_PARALLELLE_BEHANDLINGER, BEREGN_YTELSE, SIMULER_OPPDRAG, FORESLÅ_VEDTAK, FATTE_VEDTAK, IVERKSETT_VEDTAK);
 
     @Inject
@@ -79,14 +82,14 @@ class VurderParallelleBehandlingerStegTest {
         behandlingVedtakRepository = new BehandlingVedtakRepository(entityManager, behandlingRepository);
         synkroniseringTaskOppretter = mock(SynkroniserÅpneBehandlingerTaskOppretter.class);
 
-        var tjeneste = new ParallelleBehandlingerTjeneste(new ParallelleBehandlingerRepository(entityManager), behandlingskontrollMedModell(MODELL_MED_PORT));
+        var tjeneste = new ParallelleBehandlingerTjeneste(new ParallelleBehandlingerRepository(entityManager), behandlingskontrollMedModell(MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET));
         steg = new VurderParallelleBehandlingerSteg(behandlingRepository, new FagsakLåsRepository(entityManager), tjeneste, synkroniseringTaskOppretter);
 
         førstegangsbehandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
     }
 
     @Test
-    void slipper_forbi_når_fagsaken_ikke_har_vedtak_og_ingen_andre_behandlinger() {
+    void passerer_når_fagsaken_ikke_har_vedtak_og_ingen_andre_behandlinger() {
         settSteg(førstegangsbehandling, VURDER_PARALLELLE_BEHANDLINGER);
 
         var resultat = steg.utførSteg(kontekst(førstegangsbehandling));
@@ -96,7 +99,7 @@ class VurderParallelleBehandlingerStegTest {
     }
 
     @Test
-    void slipper_forbi_når_behandlingen_bygger_på_siste_vedtak() {
+    void passerer_når_behandlingen_bygger_på_siste_vedtak() {
         avslutt(førstegangsbehandling);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
 
@@ -131,7 +134,7 @@ class VurderParallelleBehandlingerStegTest {
     }
 
     @Test
-    void ser_annen_behandling_som_har_passert_porten_selv_om_sesjonen_har_gammel_tilstand() {
+    void ser_annen_behandling_med_vedtaksprioritet_selv_om_sesjonen_har_gammel_tilstand() {
         avslutt(førstegangsbehandling);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_KOMPLETTHET);
         var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
@@ -173,7 +176,7 @@ class VurderParallelleBehandlingerStegTest {
     }
 
     @Test
-    void slipper_forbi_når_annen_behandling_venter_i_porten() {
+    void passerer_når_annen_behandling_venter_i_ventepunktet_for_vedtaksprioritet() {
         avslutt(førstegangsbehandling);
         nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
         var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
@@ -184,7 +187,7 @@ class VurderParallelleBehandlingerStegTest {
     }
 
     @Test
-    void slipper_forbi_når_annen_behandling_står_før_porten() {
+    void passerer_når_annen_behandling_står_før_ventepunktet_for_vedtaksprioritet() {
         avslutt(førstegangsbehandling);
         nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, VURDER_KOMPLETTHET);
         var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
@@ -195,7 +198,7 @@ class VurderParallelleBehandlingerStegTest {
     }
 
     @Test
-    void henlagt_behandling_holder_ikke_porten() {
+    void henlagt_behandling_har_ikke_vedtaksprioritet() {
         avslutt(førstegangsbehandling);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, SIMULER_OPPDRAG);
         settResultat(revurdering, BehandlingResultatType.HENLAGT_MASKINELT);
@@ -207,7 +210,7 @@ class VurderParallelleBehandlingerStegTest {
     }
 
     @Test
-    void ny_kjøring_etter_vent_venter_igjen_til_behandlingen_som_holder_porten_er_avsluttet() {
+    void ny_kjøring_etter_vent_venter_igjen_til_behandlingen_med_vedtaksprioritet_er_avsluttet() {
         avslutt(førstegangsbehandling);
         var kontroll = nyBehandling(førstegangsbehandling, BehandlingType.KONTROLL, VURDER_PARALLELLE_BEHANDLINGER);
         var revurdering = nyBehandling(førstegangsbehandling, BehandlingType.REVURDERING, SIMULER_OPPDRAG);

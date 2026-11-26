@@ -126,7 +126,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
         var parallelleBehandlingerRepository = new ParallelleBehandlingerRepository(entityManager);
         tjeneste = new SynkroniserÅpneBehandlingerTjeneste(behandlingRepository, parallelleBehandlingerRepository,
             new ParallelleBehandlingerTjeneste(parallelleBehandlingerRepository,
-                VurderParallelleBehandlingerStegTest.behandlingskontrollMedModell(VurderParallelleBehandlingerStegTest.MODELL_MED_PORT)),
+                VurderParallelleBehandlingerStegTest.behandlingskontrollMedModell(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET)),
             behandlingProsesseringTjeneste, fagsakProsessTaskRepository, synkroniseringTaskOppretter, relevanteKontrollperioderUtleder,
             historikkinnslagRepository, behandlingVedtakRepository, vilkårResultatRepository, uttalelseRepository, tilkjentYtelseRepository,
             new StartdatoRepository(entityManager), new PersonopplysningRepository(entityManager),
@@ -186,7 +186,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
     @Test
     void ordinær_behandling_får_bare_kontrolldata_fra_kontrollbehandling() {
         var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
-        settPåVentIPorten(revurdering);
+        settPåVentIVentepunktForVedtaksprioritet(revurdering);
         lagreVilkår(revurdering, fagsakFom.plusMonths(3));
         lagreUttalelse(revurdering, EndringType.ENDRET_PERIODE, 1);
         lagreUttalelse(revurdering, EndringType.ENDRET_INNTEKT, 2);
@@ -227,9 +227,9 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
     }
 
     @Test
-    void behandling_som_bygger_på_siste_vedtak_og_venter_i_porten_tas_bare_av_vent() {
+    void behandling_som_bygger_på_siste_vedtak_og_venter_i_ventepunktet_for_vedtaksprioritet_tas_bare_av_vent() {
         var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
-        settPåVentIPorten(revurdering);
+        settPåVentIVentepunktForVedtaksprioritet(revurdering);
         var kontroll = nyBehandling(BehandlingType.KONTROLL, VURDER_KOMPLETTHET);
 
         tjeneste.synkroniser(synkTask());
@@ -244,7 +244,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
     @Test
     void henlagt_kontrollbehandling_blir_ikke_kilde_og_ventende_behandling_tas_bare_av_vent() {
         var revurdering = nyBehandling(BehandlingType.REVURDERING, VURDER_PARALLELLE_BEHANDLINGER);
-        settPåVentIPorten(revurdering);
+        settPåVentIVentepunktForVedtaksprioritet(revurdering);
         var kontroll = nyBehandling(BehandlingType.KONTROLL, KONTROLLER_REGISTER_INNTEKT);
         lagreUttalelse(kontroll, EndringType.ENDRET_INNTEKT, 1);
         tilkjentYtelseRepository.lagre(kontroll.getId(), List.of(kontrollperiode(BigDecimal.TEN)));
@@ -262,7 +262,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
     }
 
     @Test
-    void feiler_når_behandling_som_ikke_bygger_på_siste_vedtak_er_forbi_porten() {
+    void feiler_når_behandling_som_ikke_bygger_på_siste_vedtak_har_vedtaksprioritet() {
         var revurdering = nyBehandling(BehandlingType.REVURDERING, BEREGN_YTELSE);
         var kontroll = nyBehandling(BehandlingType.KONTROLL, KONTROLLER_REGISTER_INNTEKT);
         avslutt(kontroll);
@@ -384,7 +384,7 @@ class SynkroniserÅpneBehandlingerTjenesteTest {
             .build();
     }
 
-    private void settPåVentIPorten(Behandling behandling) {
+    private void settPåVentIVentepunktForVedtaksprioritet(Behandling behandling) {
         new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING, VURDER_PARALLELLE_BEHANDLINGER);
         lagreOgFlush(behandling);
     }

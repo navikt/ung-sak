@@ -8,10 +8,11 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 /**
  * Styrer om inntektskontroll skal kjøres i egen kontrollbehandling, per ytelse.
  * <p>
- * Med bryteren av opprettes ingen kontrollbehandlinger, porten for parallelle behandlinger står ikke i modellene for
+ * Med bryteren av opprettes ingen kontrollbehandlinger, ventepunktet for vedtaksprioritet står ikke i modellene for
  * førstegangsbehandling og revurdering, og ingen synk opprettes. Åpne kontrollbehandlinger fullføres likevel.
  * <p>
- * Slå bare av bryteren når ingen kontrollbehandling er åpen og ingen behandling står eller venter i porten.
+ * Slå bare av bryteren når ingen kontrollbehandling er åpen og ingen behandling står eller venter i ventepunktet for
+ * vedtaksprioritet.
  */
 @ApplicationScoped
 public class KontrollbehandlingBryter {

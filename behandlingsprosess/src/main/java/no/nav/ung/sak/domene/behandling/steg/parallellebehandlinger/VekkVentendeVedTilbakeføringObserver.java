@@ -18,7 +18,8 @@ import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlinge
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 /**
- * Vekker behandlinger som venter i porten når behandlingen som holder porten, hopper tilbake til før porten.
+ * Vekker behandlinger som venter i ventepunktet for vedtaksprioritet når behandlingen med vedtaksprioritet hopper
+ * tilbake til før ventepunktet.
  * <p>
  * Uten vekking ville de ventende behandlingene først gått videre ved fristen for autopunktet.
  */
@@ -26,7 +27,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 public class VekkVentendeVedTilbakeføringObserver {
 
     private static final Logger log = LoggerFactory.getLogger(VekkVentendeVedTilbakeføringObserver.class);
-    private static final BehandlingStegType PORTEN = BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER;
+    private static final BehandlingStegType VENTEPUNKT_FOR_VEDTAKSPRIORITET = BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER;
 
     private BehandlingRepository behandlingRepository;
     private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
@@ -54,22 +55,23 @@ public class VekkVentendeVedTilbakeføringObserver {
     public void vedTilbakeføring(@Observes BehandlingStegTilbakeføringEvent event) {
         BehandlingStegType fraSteg = event.getFraStegType();
         BehandlingStegType tilSteg = event.getTilStegType();
-        if (fraSteg == null || tilSteg == null || fraSteg == PORTEN) {
-            // Fra porten: behandlingen sto i porten og holdt den ikke. Gjelder også ny kjøring av porten etter vent.
+        if (fraSteg == null || tilSteg == null || fraSteg == VENTEPUNKT_FOR_VEDTAKSPRIORITET) {
+            // Fra ventepunktet: behandlingen sto der og hadde ikke vedtaksprioritet. Gjelder også ny kjøring av
+            // ventepunktet etter vent.
             return;
         }
         Behandling behandling = behandlingRepository.hentBehandling(event.getBehandlingId());
         if (!behandling.erYtelseBehandling() || !kontrollbehandlingBryter.erPå(behandling.getFagsakYtelseType())) {
             return;
         }
-        if (!slipperPorten(behandling, fraSteg, tilSteg)) {
+        if (!misterVedtaksprioritet(behandling, fraSteg, tilSteg)) {
             return;
         }
 
         for (ParallellBehandling annen : parallelleBehandlingerRepository.hentAndreIkkeAvsluttedeYtelsesbehandlinger(behandling.getFagsakId(), behandling.getId())) {
             Behandling venter = behandlingRepository.hentBehandling(annen.behandlingId());
             if (venter.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING)) {
-                log.info("Behandling {} hoppet tilbake fra {} til {} og holder ikke lenger porten. Gjenopptar behandling {}",
+                log.info("Behandling {} hoppet tilbake fra {} til {} og har ikke lenger vedtaksprioritet. Gjenopptar behandling {}",
                     behandling.getId(), fraSteg.getKode(), tilSteg.getKode(), venter.getId());
                 behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(venter, false);
             }
@@ -77,16 +79,17 @@ public class VekkVentendeVedTilbakeføringObserver {
     }
 
     /**
-     * Behandlingen slipper porten når den går fra et steg i eller etter {@link ParallelleBehandlingerTjeneste#FØRSTE_STEG_ETTER_PORTEN}
-     * til et steg før. Porten selv sammenlignes aldri i modellen, siden den mangler i modellene for førstegangsbehandling
-     * og revurdering når bryteren er av.
+     * Behandlingen mister vedtaksprioriteten når den går fra et steg i eller etter
+     * {@link ParallelleBehandlingerTjeneste#FØRSTE_STEG_MED_VEDTAKSPRIORITET} til et steg før. Ventepunktet for
+     * vedtaksprioritet sammenlignes aldri i modellen, siden det mangler i modellene for førstegangsbehandling og
+     * revurdering når bryteren er av.
      */
-    private boolean slipperPorten(Behandling behandling, BehandlingStegType fraSteg, BehandlingStegType tilSteg) {
+    private boolean misterVedtaksprioritet(Behandling behandling, BehandlingStegType fraSteg, BehandlingStegType tilSteg) {
         var ytelseType = behandling.getFagsakYtelseType();
         var behandlingType = behandling.getType();
-        var referanse = ParallelleBehandlingerTjeneste.FØRSTE_STEG_ETTER_PORTEN;
-        boolean varForbiPorten = behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, fraSteg, referanse) >= 0;
-        boolean erFørPorten = tilSteg == PORTEN || behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, tilSteg, referanse) < 0;
-        return varForbiPorten && erFørPorten;
+        var referanse = ParallelleBehandlingerTjeneste.FØRSTE_STEG_MED_VEDTAKSPRIORITET;
+        boolean haddeVedtaksprioritet = behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, fraSteg, referanse) >= 0;
+        boolean erIEllerFørVentepunktet = tilSteg == VENTEPUNKT_FOR_VEDTAKSPRIORITET || behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, tilSteg, referanse) < 0;
+        return haddeVedtaksprioritet && erIEllerFørVentepunktet;
     }
 }

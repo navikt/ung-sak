@@ -23,16 +23,17 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
 
 /**
- * Porten foran {@link BehandlingStegType#BEREGN_YTELSE}. Slipper bare én ytelsesbehandling per fagsak forbi, slik at
- * to åpne behandlinger aldri skriver tilkjent ytelse og sender til oppdrag samtidig.
+ * Ventepunkt for vedtaksprioritet, rett før {@link BehandlingStegType#BEREGN_YTELSE}. Bare én ytelsesbehandling per
+ * fagsak har vedtaksprioritet og kan gå videre, slik at to åpne behandlinger aldri skriver tilkjent ytelse og sender til
+ * oppdrag samtidig.
  * <p>
  * Behandlingen settes på vent når
  * <ul>
  * <li>den ikke bygger på siste vedtak. Da opprettes synkronisering av åpne behandlinger hvis den ikke finnes.</li>
- * <li>en annen åpen behandling på fagsaken er forbi porten.</li>
+ * <li>en annen åpen behandling på fagsaken har vedtaksprioritet.</li>
  * </ul>
- * Autopunktet hopper tilbake til porten ved gjenopptakelse, så sjekken kjøres på nytt uansett hvordan behandlingen tas
- * av vent.
+ * Autopunktet hopper tilbake til ventepunktet ved gjenopptakelse, så sjekken kjøres på nytt uansett hvordan
+ * behandlingen tas av vent.
  */
 @BehandlingStegRef(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER)
 @BehandlingTypeRef
@@ -68,7 +69,7 @@ public class VurderParallelleBehandlingerSteg implements BehandlingSteg {
         Long fagsakId = kontekst.getFagsakId();
         Long behandlingId = kontekst.getBehandlingId();
 
-        // Tasken holder allerede låsen på egen behandling. Låsrekkefølgen er behandling før fagsak, så porten låser
+        // Tasken holder allerede låsen på egen behandling. Låsrekkefølgen er behandling før fagsak, så steget låser
         // aldri andre behandlinger. Fagsaklåsen holdes til transaksjonen er ferdig, slik at sjekken og stegovergangen
         // skjer samlet og to behandlinger ikke kan passere samtidig.
         fagsakLåsRepository.taLås(fagsakId);
@@ -81,9 +82,9 @@ public class VurderParallelleBehandlingerSteg implements BehandlingSteg {
             return settPåVent();
         }
 
-        var behandlingForbiPorten = parallelleBehandlingerTjeneste.finnBehandlingSomHolderPorten(behandling.getFagsakYtelseType(), fagsakId, behandlingId);
-        if (behandlingForbiPorten.isPresent()) {
-            log.info("Behandling {} i sak {} venter på behandling {}, som er forbi porten", behandlingId, behandling.getFagsak().getSaksnummer(), behandlingForbiPorten.get().behandlingId());
+        var behandlingMedVedtaksprioritet = parallelleBehandlingerTjeneste.finnBehandlingMedVedtaksprioritet(behandling.getFagsakYtelseType(), fagsakId, behandlingId);
+        if (behandlingMedVedtaksprioritet.isPresent()) {
+            log.info("Behandling {} i sak {} venter på behandling {}, som har vedtaksprioritet", behandlingId, behandling.getFagsak().getSaksnummer(), behandlingMedVedtaksprioritet.get().behandlingId());
             return settPåVent();
         }
 

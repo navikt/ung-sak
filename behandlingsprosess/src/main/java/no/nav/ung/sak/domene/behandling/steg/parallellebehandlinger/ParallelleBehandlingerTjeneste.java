@@ -13,8 +13,9 @@ import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallellBehandling;
 import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlingerRepository;
 
 /**
- * Regler for porten foran {@link BehandlingStegType#BEREGN_YTELSE}: bare én ytelsesbehandling per fagsak kan være forbi
- * porten, og en behandling slipper bare forbi når den bygger på siste vedtak.
+ * Regler for vedtaksprioritet. Bare én ytelsesbehandling per fagsak kan ha vedtaksprioritet, det vil si være forbi
+ * ventepunktet for vedtaksprioritet rett før {@link BehandlingStegType#BEREGN_YTELSE}. En behandling går bare forbi
+ * ventepunktet når den bygger på siste vedtak.
  * <p>
  * Kallestedet må holde fagsaklåsen. Ellers kan svaret endre seg før transaksjonen er ferdig.
  */
@@ -22,10 +23,11 @@ import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlinge
 public class ParallelleBehandlingerTjeneste {
 
     /**
-     * Referansesteg for om en behandling er forbi porten. Porten står ikke i modellene for førstegangsbehandling og
-     * revurdering når bryteren er av, så porten selv kan ikke brukes i sammenligningen.
+     * Referansesteg for om en behandling er forbi ventepunktet for vedtaksprioritet. Ventepunktet står ikke i modellene
+     * for førstegangsbehandling og revurdering når bryteren er av, så ventepunktet selv kan ikke brukes i
+     * sammenligningen.
      */
-    public static final BehandlingStegType FØRSTE_STEG_ETTER_PORTEN = BehandlingStegType.BEREGN_YTELSE;
+    public static final BehandlingStegType FØRSTE_STEG_MED_VEDTAKSPRIORITET = BehandlingStegType.BEREGN_YTELSE;
 
     private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -42,21 +44,24 @@ public class ParallelleBehandlingerTjeneste {
     }
 
     /**
-     * Finner en annen åpen ytelsesbehandling på fagsaken som er forbi porten og dermed holder den.
+     * Finner en annen åpen ytelsesbehandling på fagsaken som er forbi ventepunktet for vedtaksprioritet og dermed har
+     * vedtaksprioritet.
      */
-    public Optional<ParallellBehandling> finnBehandlingSomHolderPorten(FagsakYtelseType ytelseType, Long fagsakId, Long behandlingId) {
+    public Optional<ParallellBehandling> finnBehandlingMedVedtaksprioritet(FagsakYtelseType ytelseType, Long fagsakId, Long behandlingId) {
         return parallelleBehandlingerRepository.hentAndreIkkeAvsluttedeYtelsesbehandlinger(fagsakId, behandlingId).stream()
-            .filter(b -> erForbiPorten(ytelseType, b))
+            .filter(b -> erForbiVentepunktForVedtaksprioritet(ytelseType, b))
             .findFirst();
     }
 
     /**
-     * En behandling er forbi porten når den står i eller etter {@link #FØRSTE_STEG_ETTER_PORTEN}, eller fatter eller
-     * iverksetter vedtak. Henlagte behandlinger holder aldri porten. De hopper fram til iverksetting uten å passere den.
+     * En behandling er forbi ventepunktet for vedtaksprioritet når den står i eller etter
+     * {@link #FØRSTE_STEG_MED_VEDTAKSPRIORITET}, eller fatter eller iverksetter vedtak. Henlagte behandlinger har aldri
+     * vedtaksprioritet. De hopper fram til iverksetting uten å passere ventepunktet.
      * <p>
-     * Sjekken bruker gjeldende modell. En behandling som passerte steget før porten fantes i modellen, regnes også som forbi.
+     * Sjekken bruker gjeldende modell. En behandling som passerte steget før ventepunktet fantes i modellen, regnes også
+     * som forbi.
      */
-    public boolean erForbiPorten(FagsakYtelseType ytelseType, ParallellBehandling behandling) {
+    public boolean erForbiVentepunktForVedtaksprioritet(FagsakYtelseType ytelseType, ParallellBehandling behandling) {
         if (behandling.erHenlagt()) {
             return false;
         }
@@ -67,7 +72,7 @@ public class ParallelleBehandlingerTjeneste {
         if (aktivtSteg == null || aktivtSteg == BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER) {
             return false;
         }
-        return behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandling.behandlingType(), aktivtSteg, FØRSTE_STEG_ETTER_PORTEN) >= 0;
+        return behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandling.behandlingType(), aktivtSteg, FØRSTE_STEG_MED_VEDTAKSPRIORITET) >= 0;
     }
 
     /**

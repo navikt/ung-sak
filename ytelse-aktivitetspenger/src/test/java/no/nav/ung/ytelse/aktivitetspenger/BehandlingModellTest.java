@@ -46,7 +46,7 @@ public class BehandlingModellTest {
     }
 
     @Test
-    public void porten_står_rett_før_beregning_av_ytelse_i_ordinære_modeller_bare_når_bryteren_for_ytelsen_er_på() {
+    public void ventepunkt_for_vedtaksprioritet_står_rett_før_beregning_av_ytelse_i_ordinære_modeller_bare_når_bryteren_for_ytelsen_er_på() {
         var prosessModell = new ProsessModell();
         var påForAktivitetspenger = new KontrollbehandlingBryter(false, true);
         var påForUngdomsytelse = new KontrollbehandlingBryter(true, false);
@@ -58,7 +58,7 @@ public class BehandlingModellTest {
     }
 
     @Test
-    public void kontrollbehandling_har_porten_rett_før_beregning_av_ytelse_og_starter_alle_endringer_i_kompletthetssteget() {
+    public void kontrollbehandling_har_ventepunkt_for_vedtaksprioritet_rett_før_beregning_av_ytelse_og_starter_alle_endringer_i_kompletthetssteget() {
         BehandlingModell modell = new ProsessModell().kontroll();
 
         assertThat(stegFørBeregnYtelse(modell)).isEqualTo(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);

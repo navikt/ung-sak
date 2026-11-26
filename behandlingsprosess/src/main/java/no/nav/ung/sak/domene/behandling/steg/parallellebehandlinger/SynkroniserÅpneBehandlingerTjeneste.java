@@ -42,8 +42,8 @@ import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
  * <p>
  * Kilden er siste avsluttede, ikke-henlagte ytelsesbehandling (A). For hver åpen behandling (B) som ikke bygger på A:
  * <ol>
- * <li>B må stå før porten og være uten vedtak. Ellers feiler synkroniseringen, fordi B da kan ha simulert eller beregnet
- * tilkjent ytelse mot en annen originalbehandling.</li>
+ * <li>B kan ikke ha vedtaksprioritet eller vedtak. Ellers feiler synkroniseringen, fordi B da kan ha simulert eller
+ * beregnet tilkjent ytelse mot en annen originalbehandling.</li>
  * <li>Taskgruppen for gjenoppta, diff og fortsett bygges. Snapshotet til diffen tas her, før kopieringen, slik at
  * diffen fanger endringene og avgjør tilbakehoppet med dagens startpunktutledning.</li>
  * <li>Data kopieres fra A til B etter eierskap, og eksisterende data på B erstattes. Kontrollbehandlingen eier
@@ -52,7 +52,7 @@ import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
  * <li>En kontrollbehandling uten måneder igjen å kontrollere får {@link HenleggKontrollbehandlingUtenMånederTask} først
  * i gruppen.</li>
  * </ol>
- * Behandlinger som bygger på A og venter i porten, tas bare av vent.
+ * Behandlinger som bygger på A og venter i ventepunktet for vedtaksprioritet, tas bare av vent.
  * <p>
  * Har en behandling uferdige tasker i rekkefølge, utsettes hele synkroniseringen til de er kjørt. Tasken feiler ikke,
  * fordi tasker som er laget etter synkroniseringen, ellers ville ventet på den og låst taskkøen på fagsaken.
@@ -130,9 +130,9 @@ public class SynkroniserÅpneBehandlingerTjeneste {
         for (ParallellBehandling åpen : parallelleBehandlingerRepository.hentIkkeAvsluttedeYtelsesbehandlinger(fagsakId)) {
             Behandling behandling = behandlingRepository.hentBehandling(åpen.behandlingId());
             if (kilde.isPresent() && !parallelleBehandlingerTjeneste.byggerPåSisteVedtak(fagsakId, åpen.behandlingId())) {
-                validerFørPorten(behandling, åpen);
+                validerKanSynkroniseres(behandling, åpen);
                 skalSynkroniseres.add(behandling);
-            } else if (venterIPorten(behandling)) {
+            } else if (venterIVentepunktForVedtaksprioritet(behandling)) {
                 skalVekkes.add(behandling);
             }
         }
@@ -147,7 +147,7 @@ public class SynkroniserÅpneBehandlingerTjeneste {
             synkroniser(kilde.orElseThrow(), behandling);
         }
         for (Behandling behandling : skalVekkes) {
-            log.info("Gjenopptar behandling {} som venter i porten", behandling.getId());
+            log.info("Gjenopptar behandling {} som venter i ventepunktet for vedtaksprioritet", behandling.getId());
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
         }
     }
@@ -196,11 +196,11 @@ public class SynkroniserÅpneBehandlingerTjeneste {
         }
     }
 
-    private void validerFørPorten(Behandling behandling, ParallellBehandling åpen) {
-        if (parallelleBehandlingerTjeneste.erForbiPorten(behandling.getFagsakYtelseType(), åpen)
+    private void validerKanSynkroniseres(Behandling behandling, ParallellBehandling åpen) {
+        if (parallelleBehandlingerTjeneste.erForbiVentepunktForVedtaksprioritet(behandling.getFagsakYtelseType(), åpen)
             || behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).isPresent()) {
             throw new IllegalStateException("Behandling " + behandling.getId() + " bygger ikke på siste vedtak, men er forbi "
-                + ParallelleBehandlingerTjeneste.FØRSTE_STEG_ETTER_PORTEN.getKode() + " eller har vedtak. Behandlingen kan ikke synkroniseres.");
+                + ParallelleBehandlingerTjeneste.FØRSTE_STEG_MED_VEDTAKSPRIORITET.getKode() + " eller har vedtak. Behandlingen kan ikke synkroniseres.");
         }
     }
 
@@ -209,7 +209,7 @@ public class SynkroniserÅpneBehandlingerTjeneste {
             .anyMatch(b -> !fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(fagsakId, b.getId(), null).isEmpty());
     }
 
-    private static boolean venterIPorten(Behandling behandling) {
+    private static boolean venterIVentepunktForVedtaksprioritet(Behandling behandling) {
         return behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING);
     }
 

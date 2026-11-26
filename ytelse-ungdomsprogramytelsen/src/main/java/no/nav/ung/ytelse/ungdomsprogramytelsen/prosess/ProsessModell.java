@@ -33,7 +33,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.UNGDOMSYTELSE_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET);
-        medPortHvisBryterErPå(modellBuilder, kontrollbehandlingBryter);
+        medVentepunktForVedtaksprioritetHvisBryterErPå(modellBuilder, kontrollbehandlingBryter);
         modellBuilder
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
@@ -61,7 +61,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET, StartpunktType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
-        medPortHvisBryterErPå(modellBuilder, kontrollbehandlingBryter);
+        medVentepunktForVedtaksprioritetHvisBryterErPå(modellBuilder, kontrollbehandlingBryter);
         modellBuilder
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
@@ -97,10 +97,10 @@ public class ProsessModell {
     }
 
     /**
-     * Porten står i modellene for førstegangsbehandling og revurdering bare når bryteren er på. Ellers lagres verken
-     * stegkoden eller autopunktet for porten.
+     * Ventepunktet for vedtaksprioritet står i modellene for førstegangsbehandling og revurdering bare når bryteren er
+     * på. Ellers lagres verken stegkoden eller autopunktet.
      */
-    private static void medPortHvisBryterErPå(BehandlingModellImpl.BehandlingModellBuilder modellBuilder, KontrollbehandlingBryter kontrollbehandlingBryter) {
+    private static void medVentepunktForVedtaksprioritetHvisBryterErPå(BehandlingModellImpl.BehandlingModellBuilder modellBuilder, KontrollbehandlingBryter kontrollbehandlingBryter) {
         if (kontrollbehandlingBryter.erPå(FagsakYtelseType.UNGDOMSYTELSE)) {
             modellBuilder.medSteg(BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER);
         }

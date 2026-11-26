@@ -14,7 +14,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 
 /**
  * Oppretter {@link SynkroniserÅpneBehandlingerTask} når en ytelsesbehandling avsluttes og fagsaken har andre åpne
- * ytelsesbehandlinger. Gjelder også henleggelse, slik at behandlinger som venter i porten, tas av vent.
+ * ytelsesbehandlinger. Gjelder også henleggelse, slik at behandlinger som venter i ventepunktet for vedtaksprioritet,
+ * tas av vent.
  * <p>
  * Tasken opprettes i samme transaksjon som avslutningen. Den lages når den avsluttede behandlingen er en
  * kontrollbehandling, når bryteren for ytelsen er på, eller når fagsaken har en åpen kontrollbehandling. Da får åpne

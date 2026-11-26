@@ -41,8 +41,8 @@ public class SynkroniserÅpneBehandlingerTaskOppretter {
     }
 
     /**
-     * Oppretter synkronisering bare hvis fagsaken ikke allerede har en uferdig synkronisering. Brukes fra porten, som
-     * kjøres på nytt ved hver gjenopptakelse.
+     * Oppretter synkronisering bare hvis fagsaken ikke allerede har en uferdig synkronisering. Brukes fra ventepunktet
+     * for vedtaksprioritet, som kjøres på nytt ved hver gjenopptakelse.
      */
     public void opprettHvisIkkeFinnes(Long fagsakId) {
         if (!fagsakProsessTaskRepository.finnesUferdigTaskForFagsak(fagsakId, SynkroniserÅpneBehandlingerTask.TASKTYPE)) {

@@ -49,8 +49,8 @@ import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuil
 @ExtendWith(JpaExtension.class)
 class VekkVentendeVedTilbakeføringObserverTest {
 
-    /** Modell for førstegangsbehandling og revurdering når bryteren er av: porten mangler. */
-    private static final List<BehandlingStegType> MODELL_UTEN_PORT = List.of(START_STEG, INNHENT_REGISTEROPP, VURDER_KOMPLETTHET, KONTROLLER_REGISTER_INNTEKT,
+    /** Modell for førstegangsbehandling og revurdering når bryteren er av: ventepunktet for vedtaksprioritet mangler. */
+    private static final List<BehandlingStegType> MODELL_UTEN_VENTEPUNKT_FOR_VEDTAKSPRIORITET = List.of(START_STEG, INNHENT_REGISTEROPP, VURDER_KOMPLETTHET, KONTROLLER_REGISTER_INNTEKT,
         FORESLÅ_BEHANDLINGSRESULTAT, BEREGN_YTELSE, SIMULER_OPPDRAG, FORESLÅ_VEDTAK, FATTE_VEDTAK, IVERKSETT_VEDTAK);
 
     @Inject
@@ -78,63 +78,63 @@ class VekkVentendeVedTilbakeføringObserverTest {
     }
 
     @Test
-    void vekker_ventende_behandling_når_holderen_hopper_tilbake_til_før_porten() {
-        settPåVentIPorten(kontroll);
+    void vekker_ventende_behandling_når_behandlingen_med_vedtaksprioritet_hopper_tilbake_til_før_ventepunktet() {
+        settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_PORT, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
-
-        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(kontroll, false);
-    }
-
-    @Test
-    void vekker_ventende_behandling_når_holderen_hopper_tilbake_til_porten() {
-        settPåVentIPorten(kontroll);
-
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_PORT, true).vedTilbakeføring(tilbakeføring(revurdering, FATTE_VEDTAK, VURDER_PARALLELLE_BEHANDLINGER));
+        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
 
         verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(kontroll, false);
     }
 
     @Test
-    void vekker_ikke_når_holderen_hopper_tilbake_til_et_steg_etter_porten() {
-        settPåVentIPorten(kontroll);
+    void vekker_ventende_behandling_når_behandlingen_med_vedtaksprioritet_hopper_tilbake_til_ventepunktet() {
+        settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_PORT, true).vedTilbakeføring(tilbakeføring(revurdering, FATTE_VEDTAK, FORESLÅ_VEDTAK));
+        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, FATTE_VEDTAK, VURDER_PARALLELLE_BEHANDLINGER));
+
+        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(kontroll, false);
+    }
+
+    @Test
+    void vekker_ikke_når_behandlingen_med_vedtaksprioritet_hopper_tilbake_til_et_steg_etter_ventepunktet() {
+        settPåVentIVentepunktForVedtaksprioritet(kontroll);
+
+        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, FATTE_VEDTAK, FORESLÅ_VEDTAK));
 
         verifiserIngenVekking();
     }
 
     @Test
-    void vekker_ikke_når_behandlingen_hopper_tilbake_fra_porten() {
-        settPåVentIPorten(kontroll);
+    void vekker_ikke_når_behandlingen_hopper_tilbake_fra_ventepunktet_for_vedtaksprioritet() {
+        settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_PORT, true).vedTilbakeføring(tilbakeføring(revurdering, VURDER_PARALLELLE_BEHANDLINGER, VURDER_KOMPLETTHET));
+        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, VURDER_PARALLELLE_BEHANDLINGER, VURDER_KOMPLETTHET));
 
         verifiserIngenVekking();
     }
 
     @Test
-    void vekker_ikke_behandling_som_ikke_venter_i_porten() {
-        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_PORT, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
+    void vekker_ikke_behandling_som_ikke_venter_i_ventepunktet_for_vedtaksprioritet() {
+        observer(VurderParallelleBehandlingerStegTest.MODELL_MED_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
 
         verifiserIngenVekking();
     }
 
     @Test
     void gjør_ingenting_når_bryteren_er_av() {
-        settPåVentIPorten(kontroll);
+        settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        observer(MODELL_UTEN_PORT, false).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
+        observer(MODELL_UTEN_VENTEPUNKT_FOR_VEDTAKSPRIORITET, false).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
 
         verifiserIngenVekking();
     }
 
     @Test
-    void sammenligner_aldri_mot_porten_i_modellen() {
-        settPåVentIPorten(kontroll);
+    void sammenligner_aldri_mot_ventepunktet_for_vedtaksprioritet_i_modellen() {
+        settPåVentIVentepunktForVedtaksprioritet(kontroll);
 
-        // Modellen uten port kaster exception ved oppslag på porten, som BehandlingModellImpl.indexOf.
-        observer(MODELL_UTEN_PORT, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
+        // Modellen uten ventepunktet for vedtaksprioritet kaster exception ved oppslag på ventepunktet, som BehandlingModellImpl.indexOf.
+        observer(MODELL_UTEN_VENTEPUNKT_FOR_VEDTAKSPRIORITET, true).vedTilbakeføring(tilbakeføring(revurdering, BEREGN_YTELSE, VURDER_KOMPLETTHET));
 
         verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(kontroll, false);
     }
@@ -156,7 +156,7 @@ class VekkVentendeVedTilbakeføringObserverTest {
         verify(behandlingProsesseringTjeneste, never()).opprettTasksForGjenopptaOppdaterFortsett(any(), anyBoolean());
     }
 
-    private void settPåVentIPorten(Behandling behandling) {
+    private void settPåVentIVentepunktForVedtaksprioritet(Behandling behandling) {
         new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING, VURDER_PARALLELLE_BEHANDLINGER);
         lagreOgFlush(behandling);
     }

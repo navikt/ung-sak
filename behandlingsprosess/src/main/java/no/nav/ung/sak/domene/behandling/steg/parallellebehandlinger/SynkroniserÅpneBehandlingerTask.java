@@ -16,7 +16,8 @@ import no.nav.ung.sak.behandlingslager.task.FagsakProsessTask;
  * Oppdaterer åpne ytelsesbehandlinger på fagsaken med vedtatte data fra siste avsluttede behandling, og tar dem av vent.
  * <p>
  * Tasken er tilstandsløs: kilden er alltid siste avsluttede, ikke-henlagte ytelsesbehandling når tasken kjører. Den
- * opprettes når en behandling avsluttes, og av porten når en behandling ikke bygger på siste vedtak.
+ * opprettes når en behandling avsluttes, og av ventepunktet for vedtaksprioritet når en behandling ikke bygger på siste
+ * vedtak.
  */
 @ApplicationScoped
 @ProsessTask(SynkroniserÅpneBehandlingerTask.TASKTYPE)

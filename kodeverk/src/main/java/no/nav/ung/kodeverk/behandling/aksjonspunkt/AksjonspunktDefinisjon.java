@@ -186,7 +186,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Satt på vent i påvente av brukers svar på aktivitetsavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_AKTIVITETSVILKÅR, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
-    // TILBAKE gjør at porten kjøres på nytt uansett hvordan behandlingen tas av vent. Fristen er et sikkerhetsnett.
+    // TILBAKE gjør at ventepunktet for vedtaksprioritet kjøres på nytt uansett hvordan behandlingen tas av vent. Fristen
+    // er et sikkerhetsnett.
     AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING_KODE, AksjonspunktType.AUTOPUNKT,
         "Satt på vent til en annen behandling i saken er avsluttet", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P1D", AVVENTER_ANNET),

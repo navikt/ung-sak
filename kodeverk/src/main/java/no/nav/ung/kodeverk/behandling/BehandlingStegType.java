@@ -16,7 +16,8 @@ public enum BehandlingStegType implements Kodeverdi {
 
     BEREGN_YTELSE("BERYT", "Beregn ytelse", UTREDES),
     /**
-     * Port før {@link #BEREGN_YTELSE}: bare én behandling per fagsak kan være forbi porten og ikke avsluttet.
+     * Ventepunkt for vedtaksprioritet før {@link #BEREGN_YTELSE}: bare én behandling per fagsak kan være forbi
+     * ventepunktet og ikke avsluttet.
      */
     VURDER_PARALLELLE_BEHANDLINGER("VURDER_PARALLELLE_BEHANDLINGER", "Vurder parallelle behandlinger", UTREDES),
     FATTE_VEDTAK("FVEDSTEG", "Fatte Vedtak", BehandlingStatus.FATTER_VEDTAK),

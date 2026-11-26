@@ -14,8 +14,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
- * Behandlinger som venter i porten for parallelle behandlinger (steg VURDER_PARALLELLE_BEHANDLINGER, autopunkt 7050).
- * Ventetiden regnes fra behandlingen kom til steget, og nullstilles ikke når porten kjøres på nytt etter vent.
+ * Behandlinger som venter i ventepunktet for vedtaksprioritet (steg VURDER_PARALLELLE_BEHANDLINGER, autopunkt 7050).
+ * Ventetiden regnes fra behandlingen kom til steget, og nullstilles ikke når steget kjøres på nytt etter vent.
  */
 public record ParallellBehandlingVentRecord(
     FagsakYtelseType ytelseType,

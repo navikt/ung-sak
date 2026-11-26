@@ -314,26 +314,26 @@ class BigQueryStatistikkRepositoryTest {
 
     @ParameterizedTest
     @EnumSource(value = FagsakYtelseType.class, names = {"UNGDOMSYTELSE", "AKTIVITETSPENGER"})
-    void skal_telle_behandlinger_som_venter_i_porten_med_eldste_ventetid(FagsakYtelseType ytelse) {
+    void skal_telle_behandlinger_som_venter_i_ventepunktet_for_vedtaksprioritet_med_eldste_ventetid(FagsakYtelseType ytelse) {
         Fagsak fagsakLengeVentende = byggFagsak(ytelse, FagsakStatus.LØPENDE);
         Fagsak fagsakNyligVentende = byggFagsak(ytelse, FagsakStatus.LØPENDE);
         Fagsak fagsakTattAvVent = byggFagsak(ytelse, FagsakStatus.LØPENDE);
         Fagsak fagsakAnnenYtelse = byggFagsak(annenYtelse(ytelse), FagsakStatus.LØPENDE);
         lagreFagsaker(List.of(fagsakLengeVentende, fagsakNyligVentende, fagsakTattAvVent, fagsakAnnenYtelse));
 
-        // Gitt to kontrollbehandlinger som venter i porten, der den ene kom dit for ni dager siden
-        Behandling lengeVentende = lagreBehandlingIPorten(fagsakLengeVentende, BehandlingType.KONTROLL, true);
-        lagreBehandlingIPorten(fagsakNyligVentende, BehandlingType.KONTROLL, true);
+        // Gitt to kontrollbehandlinger som venter i ventepunktet for vedtaksprioritet, der den ene kom dit for ni dager siden
+        Behandling lengeVentende = lagreBehandlingIVentepunktForVedtaksprioritet(fagsakLengeVentende, BehandlingType.KONTROLL, true);
+        lagreBehandlingIVentepunktForVedtaksprioritet(fagsakNyligVentende, BehandlingType.KONTROLL, true);
         entityManager.createNativeQuery("update behandling_steg_tilstand set opprettet_tid = :tid where behandling_id = :id and aktiv = true")
             .setParameter("tid", LocalDateTime.now().minusDays(9))
             .setParameter("id", lengeVentende.getId())
             .executeUpdate();
 
-        // Og en behandling som er tatt av vent i porten, og en som venter i porten for en annen ytelse
-        lagreBehandlingIPorten(fagsakTattAvVent, BehandlingType.FØRSTEGANGSSØKNAD, false);
-        lagreBehandlingIPorten(fagsakAnnenYtelse, BehandlingType.KONTROLL, true);
+        // Og en behandling som er tatt av vent i ventepunktet, og en som venter i ventepunktet for en annen ytelse
+        lagreBehandlingIVentepunktForVedtaksprioritet(fagsakTattAvVent, BehandlingType.FØRSTEGANGSSØKNAD, false);
+        lagreBehandlingIVentepunktForVedtaksprioritet(fagsakAnnenYtelse, BehandlingType.KONTROLL, true);
 
-        // Når vi henter statistikken for porten
+        // Når vi henter statistikken for ventepunktet for vedtaksprioritet
         Collection<ParallellBehandlingVentRecord> records = statistikkRepository.parallellBehandlingVentStatistikk(ytelse);
 
         // Så skal bare de ventende behandlingene for oppgitt ytelse telles, med ventetiden til den eldste
@@ -345,7 +345,7 @@ class BigQueryStatistikkRepositoryTest {
         assertThat(kontroll.eldsteVentetidTimer()).isBetween(9 * 24L, 9 * 24L + 1);
     }
 
-    private Behandling lagreBehandlingIPorten(Fagsak fagsak, BehandlingType behandlingType, boolean venter) {
+    private Behandling lagreBehandlingIVentepunktForVedtaksprioritet(Fagsak fagsak, BehandlingType behandlingType, boolean venter) {
         Behandling behandling = byggBehandlingForFagsak(fagsak, behandlingType, BehandlingStatus.UTREDES);
         new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, BehandlingStegType.VURDER_PARALLELLE_BEHANDLINGER, BehandlingStegStatus.VENTER);
         Aksjonspunkt ventepunkt = leggTilAksjonspunktPåBehandling(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_PARALLELL_BEHANDLING);
