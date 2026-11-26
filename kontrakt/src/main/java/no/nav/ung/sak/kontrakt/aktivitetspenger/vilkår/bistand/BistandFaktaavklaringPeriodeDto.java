@@ -12,9 +12,4 @@ public record BistandFaktaavklaringPeriodeDto(
     @NotNull @Valid ÅpenPeriode periode,
     @NotNull @Valid BistandAvklaringIkkeOppfyltDto avklaring
 ) {
-
-    public boolean skalSendeVarsel() {
-        return avklaring != null && avklaring.skalSendeVarsel();
-    }
-
 }

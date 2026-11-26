@@ -16,6 +16,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 public record BostedVurderingIkkeOppfyltDto(
     @NotNull BostedsvilkårIkkeOppfyltÅrsak fraflyttingsÅrsak,
     @NotNull @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
+    boolean skalSendeVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,
     /** Hvor Nav har fått opplysningene fra. */
@@ -23,6 +24,21 @@ public record BostedVurderingIkkeOppfyltDto(
     /** Påkrevd når kilde er ANNET. Skal ikke settes for andre kilder. */
     @Size(max = 1000) @Pattern(regexp = InputValideringRegex.FRITEKST) String kildeFritekst
 ) {
+    @JsonIgnore
+    @AssertTrue(message = "fritekstTilVarsel er påkrevd når fraflyttingsÅrsak krever fritekst og varsel skal sendes")
+    public boolean isFritekstTilVarselGyldig() {
+        if (fraflyttingsÅrsak == null || !skalSendeVarsel()) {
+            return true;
+        }
+        return !fraflyttingsÅrsak.kreverFritekst() || (fritekstTilVarsel != null && !fritekstTilVarsel.isBlank());
+    }
+
+    @JsonIgnore
+    @AssertTrue(message = "begrunnelseIkkeVarsel skal kun settes når skalSendeVarsel er false")
+    public boolean isBegrunnelseIkkeVarselGyldig() {
+        return !skalSendeVarsel() || begrunnelseIkkeVarsel == null || begrunnelseIkkeVarsel.isBlank();
+    }
+
     @JsonIgnore
     @AssertTrue(message = "kildeFritekst er påkrevd når kilde krever fritekst")
     public boolean isKildeFritekstGyldig() {
