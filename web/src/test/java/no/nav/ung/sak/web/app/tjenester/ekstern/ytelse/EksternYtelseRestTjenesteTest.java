@@ -1,5 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.ekstern.ytelse;
 
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.Ytelse;
@@ -10,6 +11,7 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.vedtattytelse.VedtakYtelseTjeneste;
+import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -58,6 +60,15 @@ class EksternYtelseRestTjenesteTest {
         var resultat = tjeneste.hentBarnetillegg(request);
 
         assertThat(resultat.vedtak()).isEmpty();
+    }
+
+    @Test
+    void skal_gi_fnr_som_abac_attributt_slik_at_gjenbruk_av_requesten_får_personsjekk() {
+        var gyldigRequest = new YtelseRequest(new PersonIdent("01419010029"), FOM, TOM);
+
+        var attributter = new AbacAttributtSupplier().apply(gyldigRequest);
+
+        assertThat(attributter.<String>getVerdier(StandardAbacAttributtType.FNR)).containsExactly("01419010029");
     }
 
     @Test

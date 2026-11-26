@@ -24,7 +24,7 @@ import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseRequest;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseResponse;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.vedtattytelse.VedtakYtelseTjeneste;
-import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
+import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.abac.EksterneSystemer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,7 @@ public class EksternYtelseRestTjeneste {
         })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public YtelseResponse hentVedtak(
-        @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) YtelseRequest request) {
+        @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) YtelseRequest request) {
         var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
         var respons = vedtakYtelseTjeneste.hentVedtak(aktørIder, new Periode(request.fom(), request.tom()));
         log.info("Eksternt system hentet vedtak. konsument={}, antallVedtak={}", SubjectHandler.getSubjectHandler().getUid(), respons.vedtak().size());
@@ -103,7 +103,7 @@ public class EksternYtelseRestTjeneste {
         })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public BarnetilleggResponse hentBarnetillegg(
-        @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) YtelseRequest request) {
+        @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) YtelseRequest request) {
         var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
         var respons = vedtakYtelseTjeneste.hentBarnetillegg(aktørIder, new Periode(request.fom(), request.tom()));
         log.info("Eksternt system hentet barnetillegg. konsument={}, antallVedtak={}", SubjectHandler.getSubjectHandler().getUid(), respons.vedtak().size());

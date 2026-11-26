@@ -85,6 +85,7 @@
 - Nye entiteter må registreres i `META-INF/pu-default.vedtattytelse.orm.xml` i modulen, ellers ser ikke Hibernate dem.
 - REST (`EksternYtelseRestTjeneste`, `EKSTERN_SYSTEM`): `POST /api/ekstern/ytelse/v1/vedtak` for AAP (`behandlingsflyt`), dagpenger (`dp-oppslag-ytelser`) og tiltakspenger (`tiltakspenger-saksbehandling-api`), og `POST /api/ekstern/ytelse/v1/barnetillegg` for barnebidrag (`bidrag-grunnlag`, i dev også `bidrag-grunnlag-feature`). Body `{ident, fom, tom}` for begge. Foreløpig bare i dev, inntil hjemmel er avklart. Prod-konstanter og inbound-regler kommer i egen PR. `azure-token-generator` har tilgang i dev for manuell testing og skal aldri inn i prod. Merk at apper i samme namespace (`k9saksbehandling`) alltid får `EKSTERN_SYSTEM`-tilgang via PepImpl, også i prod.
 - Systemkall auditlogges ikke, verken av k9-felles eller i ung-sak. Hvert oppslag gir en infologg med konsument og antall vedtak, som for TS. Aldri fnr eller aktørId.
+- `YtelseRequest` har `@StandardAbacAttributt(FNR)` og endepunktene bruker `AbacAttributtSupplier`, selv om `EKSTERN_SYSTEM` bare vurderes på token og ikke bruker attributtene. Da får requesten personsjekk hvis den gjenbrukes i et endepunkt for innloggede brukere. `RestApiAbacTest` sjekker ikke hvilken supplier som brukes.
 - Varsling av andre ytelser ved endring kommer senere. Logg aldri fnr/aktørId, bare saksnummer og antall.
 
 ## Tech Stack
