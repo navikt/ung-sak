@@ -307,6 +307,8 @@ spec:
       value: "PT30M"
     - name: HENT_INNTEKT_HENDElSER_INTERVALL
       value: "PT1M"
+    - name: KONTROLL_FORSTE_MND_VIRKNIGSDATO
+      value: "2026-07"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

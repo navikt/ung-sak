@@ -75,7 +75,7 @@ class UngBeregnYtelseStegTest {
         beregnYtelseSteg = new UngBeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,
             månedsvisTidslinjeUtleder,
-            new UngdomsytelseInntektskontrollFritakUtleder()
+            new UngdomsytelseInntektskontrollFritakUtleder("2027-01")
         );
     }
 
