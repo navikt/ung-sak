@@ -39,7 +39,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>12.2.10</felles.version>
+        <felles.version>12.3.0</felles.version>
         <swagger.version>2.2.53</swagger.version>
         <junit.version>6.1.2</junit.version>
         <k9format.version>14.1.2</k9format.version>
@@ -385,6 +385,11 @@
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>kabal</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>vedtatt-ytelse</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

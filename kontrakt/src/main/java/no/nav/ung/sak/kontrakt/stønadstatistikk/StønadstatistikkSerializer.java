@@ -34,16 +34,16 @@ public class StønadstatistikkSerializer {
             final String json = jsonWriter.toString();
 
             // Verifiserer at JSON er gyldig ved deserialisering:
-            Objects.requireNonNull(fromJson(json), "json-deserialisert");
+            Objects.requireNonNull(fromJson(json, object.getClass()), "json-deserialisert");
             return json;
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    public static StønadstatistikkHendelse fromJson(String json) {
+    public static <T extends StønadstatistikkHendelse> T fromJson(String json, Class<T> type) {
         try {
-            return objectMapper.readerFor(StønadstatistikkHendelse.class).readValue(json);
+            return objectMapper.readerFor(type).readValue(json);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
