@@ -21,4 +21,8 @@ public sealed interface VilkårsvurderingResultat permits GenereltVilkårsvurder
     String vurdertAv();
 
     LocalDateTime vurdertTidspunkt();
+
+    default boolean skalSendeVarsel() {
+        return true;
+    }
 }

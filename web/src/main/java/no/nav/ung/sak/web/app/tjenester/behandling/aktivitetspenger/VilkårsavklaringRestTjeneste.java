@@ -245,6 +245,7 @@ public class VilkårsavklaringRestTjeneste {
             v.ikkeOppfyltÅrsak() != null ? v.ikkeOppfyltÅrsak().getKode() : null,
             v.begrunnelse(),
             v.fritekstVurderingBrev(),
+            v.skalSendeVarsel(),
             v.erManuellVurdering(),
             v.vurdertAv(),
             v.vurdertTidspunkt());
