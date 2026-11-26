@@ -9,6 +9,7 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.IntegrasjonFeil;
 import no.nav.k9.felles.feil.deklarasjon.ManglerTilgangFeil;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -29,7 +30,8 @@ import java.util.concurrent.ExecutionException;
 public class StønadstatistikkHendelseMeldingProducer {
 
     private Producer<String, String> producer;
-    private String topic;
+    private String ungTopic;
+    private String aktivitetspengerTopic;
 
     public StønadstatistikkHendelseMeldingProducer() {
         // for CDI proxy
@@ -37,7 +39,8 @@ public class StønadstatistikkHendelseMeldingProducer {
 
     @Inject
     public StønadstatistikkHendelseMeldingProducer(
-        @KonfigVerdi(value = "kafka.stonadstatistikk.topic", defaultVerdi = "k9saksbehandling.aapen-ung-stonadstatistikk-v1") String topic,
+        @KonfigVerdi(value = "kafka.stonadstatistikk.topic", defaultVerdi = "k9saksbehandling.aapen-ung-stonadstatistikk-v1") String ungTopic,
+        @KonfigVerdi(value = "kafka.stonadstatistikk.aktivitetspenger.topic", defaultVerdi = "k9saksbehandling.aapen-aktivitetspenger-stonadstatistikk-v1") String aktivitetspengerTopic,
         @KonfigVerdi("KAFKA_BROKERS") String aivenBootstrapServers,
         @KonfigVerdi("KAFKA_TRUSTSTORE_PATH") String aivenTruststorePath,
         @KonfigVerdi("KAFKA_KEYSTORE_PATH") String aivenKeystorePath,
@@ -46,7 +49,7 @@ public class StønadstatistikkHendelseMeldingProducer {
         @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName
     ) {
         Properties properties = new Properties();
-        properties.put(CommonClientConfigs.CLIENT_ID_CONFIG, "KP-" + topic);
+        properties.put(CommonClientConfigs.CLIENT_ID_CONFIG, "KP-" + ungTopic);
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, appNamespace + "." + appName);
         properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
         properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, aivenBootstrapServers);
@@ -60,7 +63,8 @@ public class StønadstatistikkHendelseMeldingProducer {
         properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, aivenCredstorePassword);
         properties.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, aivenCredstorePassword);
         this.producer = createProducer(properties);
-        this.topic = topic;
+        this.ungTopic = ungTopic;
+        this.aktivitetspengerTopic = aktivitetspengerTopic;
     }
 
     public void flushAndClose() {
@@ -73,6 +77,7 @@ public class StønadstatistikkHendelseMeldingProducer {
     }
 
     private void runProducerWithSingleJson(ProducerRecord<String, String> record) {
+        String topic = record.topic();
         try {
             producer.send(record)
                 .get();
@@ -93,7 +98,12 @@ public class StønadstatistikkHendelseMeldingProducer {
         return new KafkaProducer<>(properties);
     }
 
-    public void send(String key, String value) {
+    public void send(FagsakYtelseType ytelseType, String key, String value) {
+        String topic = switch (ytelseType) {
+            case UNGDOMSYTELSE -> ungTopic;
+            case AKTIVITETSPENGER -> aktivitetspengerTopic;
+            default -> throw new IllegalArgumentException("Mangler stønadstatistikk-topic for ytelse " + ytelseType);
+        };
         runProducerWithSingleJson(new ProducerRecord<>(topic, key, value));
     }
 
