@@ -61,7 +61,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         var tilVurdering = tidslinje.tilVurdering();
-        var periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
+        var periode = tilVurdering.filterValue(r -> !r.erAvslåttEllerAvkortet() && r.ikkeVurderteVilkår().isEmpty());
 
         var ytelseFom = periode.getMinLocalDate();
 
@@ -78,7 +78,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var førsteSatser = førsteSegment.getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
-        var utbetalingDto = opprettUtbetalingDto(behandling, tilVurdering);
+        var utbetalingDto = opprettUtbetalingDto(tilVurdering);
 
         var satsendringer = lagSatsEndringHendelser(satsTidslinje);
 
@@ -103,15 +103,11 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             .anyMatch(it -> it.avslagsårsak() == Avslagsårsak.SØKER_OVER_HØYESTE_ALDER);
     }
 
-    private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
-        if (tilkjentYtelseTimeline.isEmpty()) {
-            throw new IllegalStateException("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
-        }
-        var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
+    private UtbetalingDto opprettUtbetalingDto(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+        var førsteInnvilgetDato = detaljertResultatTidslinje.filterValue(it -> !it.erAvslåttEllerAvkortet()).getMinLocalDate();
         var dagensDato = bestemDagensDato();
 
-        var førstkommendeUtbetalingskjøring = førsteTilkjentMåned.plusMonths(1).plusDays(9);
+        var førstkommendeUtbetalingskjøring = førsteInnvilgetDato.plusMonths(1).withDayOfMonth(10);
         var erEtterbetaling = dagensDato.isAfter(førstkommendeUtbetalingskjøring);
 
         var månedNavn = MonthUtils.navnPåMåned(førstkommendeUtbetalingskjøring.getMonth());

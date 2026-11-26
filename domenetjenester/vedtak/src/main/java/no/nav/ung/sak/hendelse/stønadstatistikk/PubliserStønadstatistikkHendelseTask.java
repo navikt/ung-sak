@@ -59,7 +59,7 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
         } else {
             logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
         }
-        meldingProducer.send(key, value);
+        meldingProducer.send(hendelse.ytelseType(), key, value);
         logger.info("Publisere hendelse til stønadstatistikk brukte {} ms for {}", (System.nanoTime() - t0) / 1_000_000, hendelse.ytelseType());
     }
 

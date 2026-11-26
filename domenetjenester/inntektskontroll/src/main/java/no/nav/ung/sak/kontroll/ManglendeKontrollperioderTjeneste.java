@@ -56,8 +56,8 @@ public class ManglendeKontrollperioderTjeneste {
     public NavigableSet<DatoIntervallEntitet> finnPerioderForManglendeKontroll(Behandling behandling) {
         final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandling.getId());
         final var intiellTidslinje = månedsvisTidslinjeUtleder.finnInitielleMånedsvisPeriodisertePerioder(behandling.getId());
-        final var påkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
-        final var initieltPåkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(intiellTidslinje);
+        final var påkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje, behandling.getFagsakYtelseType());
+        final var initieltPåkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(intiellTidslinje, behandling.getFagsakYtelseType());
 
         final var endretPåkrevdTidslinje = påkrevdKontrollTidslinje.disjoint(initieltPåkrevdKontrollTidslinje);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();

@@ -25,6 +25,7 @@ public class StønadstatistikkService {
     private Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste prosessTaskRepository;
+    private Set<FagsakYtelseType> aktiverteForYtelsetyper;
 
     StønadstatistikkService() {
         //for CDI proxy
@@ -33,14 +34,17 @@ public class StønadstatistikkService {
     @Inject
     public StønadstatistikkService(@Any Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger,
                                    BehandlingRepository behandlingRepository,
-                                   ProsessTaskTjeneste prosessTaskRepository) {
+                                   ProsessTaskTjeneste prosessTaskRepository,
+                                   @KonfigVerdi(value = "STONADSTATISTIKK_AKTIVITETSPENGER_ENABLED", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled) {
         this.stønadstatistikkHendelseBygger = stønadstatistikkHendelseBygger;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.aktiverteForYtelsetyper = aktivitetspengerEnabled
+            ? Set.of(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER)
+            : Set.of(FagsakYtelseType.UNGDOMSYTELSE);
     }
 
     public void publiserHendelse(Behandling behandling) {
-        Set<FagsakYtelseType> aktiverteForYtelsetyper = Set.of(FagsakYtelseType.UNGDOMSYTELSE);
         if (!aktiverteForYtelsetyper.contains(behandling.getFagsakYtelseType())) {
             log.info("Stønadstatistikk publisering er ikke aktivert for ytelse {}", behandling.getFagsakYtelseType());
             return;
