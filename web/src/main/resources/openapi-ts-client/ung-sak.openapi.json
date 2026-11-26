@@ -2339,12 +2339,6 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
-          },
           "begrunnelseIkkeVarsel" : {
             "maxLength" : 4000,
             "minLength" : 0,
@@ -2370,7 +2364,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "begrunnelse", "fraflyttingsÅrsak", "kilde" ],
+        "required" : [ "fraflyttingsÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.NavKontorBeslutterVilkårAksjonspunktDto" : {
@@ -2452,12 +2446,6 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.AktivitetAvklaringIkkeOppfyltDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
-          },
           "begrunnelseIkkeVarsel" : {
             "maxLength" : 4000,
             "minLength" : 0,
@@ -2486,7 +2474,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "begrunnelse", "ikkeOppfyltÅrsak", "kilde" ],
+        "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.AktivitetFaktaavklaringPeriodeDto" : {
@@ -2613,9 +2601,6 @@
         "properties" : {
           "avklaringtype" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Avklaringtype"
-          },
-          "begrunnelse" : {
-            "type" : "string"
           },
           "begrunnelseIkkeVarsel" : {
             "type" : "string"
@@ -2767,12 +2752,6 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandAvklaringIkkeOppfyltDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
-          },
           "begrunnelseIkkeVarsel" : {
             "maxLength" : 4000,
             "minLength" : 0,
@@ -2801,7 +2780,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "begrunnelse", "ikkeOppfyltÅrsak", "kilde" ],
+        "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto" : {
@@ -2984,12 +2963,6 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
-          },
           "begrunnelseIkkeVarsel" : {
             "maxLength" : 4000,
             "minLength" : 0,
@@ -3018,7 +2991,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "begrunnelse", "ikkeOppfyltÅrsak", "kilde" ],
+        "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserFaktaavklaringPeriodeDto" : {
