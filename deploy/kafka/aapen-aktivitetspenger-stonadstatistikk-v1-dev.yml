@@ -20,3 +20,6 @@ spec:
     - team: k9saksbehandling
       application: ung-sak
       access: write
+    - team: spenn
+      application: dvh-spenn-avp-kafka-konsument
+      access: read
