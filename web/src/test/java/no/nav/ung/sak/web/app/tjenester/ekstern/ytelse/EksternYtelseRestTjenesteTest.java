@@ -1,6 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.ekstern.ytelse;
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.Ytelse;
@@ -11,7 +10,6 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.vedtattytelse.VedtakYtelseTjeneste;
-import no.nav.ung.sak.web.server.abac.KallendeSystemUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,15 +25,12 @@ import static org.mockito.Mockito.when;
 
 class EksternYtelseRestTjenesteTest {
 
-    private static final String KONSUMENT = "dev-gcp:aap:behandlingsflyt";
     private static final LocalDate FOM = LocalDate.of(2026, 1, 1);
     private static final LocalDate TOM = LocalDate.of(2026, 12, 31);
 
     private final AktørTjeneste aktørTjeneste = mock(AktørTjeneste.class);
     private final VedtakYtelseTjeneste vedtakYtelseTjeneste = mock(VedtakYtelseTjeneste.class);
-    private final KallendeSystemUtleder kallendeSystemUtleder = mock(KallendeSystemUtleder.class);
-    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
-    private final EksternYtelseRestTjeneste tjeneste = new EksternYtelseRestTjeneste(aktørTjeneste, vedtakYtelseTjeneste, kallendeSystemUtleder, meterRegistry);
+    private final EksternYtelseRestTjeneste tjeneste = new EksternYtelseRestTjeneste(aktørTjeneste, vedtakYtelseTjeneste);
 
     private final PersonIdent ident = new PersonIdent("12345678901");
     private final Set<AktørId> aktørIder = Set.of(AktørId.dummy(), AktørId.dummy());
@@ -43,29 +38,26 @@ class EksternYtelseRestTjenesteTest {
 
     @BeforeEach
     void setUp() {
-        when(kallendeSystemUtleder.kallendeSystem()).thenReturn(KONSUMENT);
         when(aktørTjeneste.hentAlleAktørIderForPersonIdent(ident)).thenReturn(aktørIder);
     }
 
     @Test
-    void skal_hente_vedtak_for_alle_aktørIder_og_telle_oppslaget() {
+    void skal_hente_vedtak_for_alle_aktørIder() {
         var vedtak = new YtelseResponse(List.of(new Ytelse(YtelseType.AKTIVITETSPENGER, "SAK1", UUID.randomUUID(), LocalDateTime.now(), List.of())));
         when(vedtakYtelseTjeneste.hentVedtak(aktørIder, new Periode(FOM, TOM))).thenReturn(vedtak);
 
         var resultat = tjeneste.hentVedtak(request);
 
         assertThat(resultat).isSameAs(vedtak);
-        assertThat(antallOppslag("/v1/vedtak", "true")).isEqualTo(1.0);
     }
 
     @Test
-    void skal_hente_barnetillegg_og_telle_oppslaget() {
+    void skal_hente_barnetillegg() {
         when(vedtakYtelseTjeneste.hentBarnetillegg(aktørIder, new Periode(FOM, TOM))).thenReturn(new BarnetilleggResponse(List.of()));
 
         var resultat = tjeneste.hentBarnetillegg(request);
 
         assertThat(resultat.vedtak()).isEmpty();
-        assertThat(antallOppslag("/v1/barnetillegg", "false")).isEqualTo(1.0);
     }
 
     @Test
@@ -76,13 +68,5 @@ class EksternYtelseRestTjenesteTest {
         var resultat = tjeneste.hentVedtak(request);
 
         assertThat(resultat.vedtak()).isEmpty();
-        assertThat(antallOppslag("/v1/vedtak", "false")).isEqualTo(1.0);
-    }
-
-    private double antallOppslag(String endepunkt, String treff) {
-        var teller = meterRegistry.find(EksternYtelseRestTjeneste.METRIKK)
-            .tags("endepunkt", endepunkt, "konsument", KONSUMENT, "treff", treff)
-            .counter();
-        return teller == null ? 0 : teller.count();
     }
 }
