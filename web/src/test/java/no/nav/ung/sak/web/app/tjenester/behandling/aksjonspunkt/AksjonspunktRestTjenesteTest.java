@@ -31,6 +31,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetOgOverstyrteAksjonspunkterDto;
 import no.nav.ung.sak.kontrakt.behandling.revurdering.KontrollAvManueltOpprettetRevurderingsbehandlingDto;
 import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
 import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
@@ -113,6 +114,27 @@ public class AksjonspunktRestTjenesteTest {
             aksjonspunkt.add(new KontrollAvManueltOpprettetRevurderingsbehandlingDto());
             aksjonspunktRestTjeneste.bekreft(mock(HttpServletRequest.class), BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
         });
+    }
+
+    @Test
+    public void skal_ikke_bekrefte_aksjonspunkt_når_behandling_er_på_vent() throws URISyntaxException {
+        when(behandling.isBehandlingPåVent()).thenReturn(true);
+        Collection<BekreftetAksjonspunktDto> aksjonspunkt = new ArrayList<>();
+
+        Assertions.assertThrows(FunksjonellException.class, () ->
+            aksjonspunktRestTjeneste.bekreft(mock(HttpServletRequest.class),
+                BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt)));
+    }
+
+    @Test
+    public void skal_ikke_overstyre_aksjonspunkt_når_behandling_er_på_vent() throws URISyntaxException {
+        when(behandling.isBehandlingPåVent()).thenReturn(true);
+        var apDto = mock(BekreftetOgOverstyrteAksjonspunkterDto.class);
+        when(apDto.getBehandlingId()).thenReturn(behandlingId);
+        when(apDto.getBekreftedeAksjonspunktDtoer()).thenReturn(new ArrayList<>());
+
+        Assertions.assertThrows(FunksjonellException.class, () ->
+            aksjonspunktRestTjeneste.overstyr(mock(HttpServletRequest.class), apDto));
     }
 
     private AksjonspunktGodkjenningDto opprettetGodkjentAksjonspunkt(boolean godkjent) {

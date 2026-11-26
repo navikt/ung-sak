@@ -124,6 +124,9 @@ public class VedtaksbrevTjeneste {
         if (behandling.erAvsluttet()) {
             throw new IllegalArgumentException("Kan ikke endre vedtaksbrev på avsluttet behandling");
         }
+        if (behandling.isBehandlingPåVent()) {
+            throw new IllegalArgumentException("Kan ikke endre vedtaksbrev når behandlingen er på vent");
+        }
 
         VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegel.kjør(dto.behandlingId());
@@ -280,4 +283,3 @@ public class VedtaksbrevTjeneste {
             .toList();
     }
 }
-

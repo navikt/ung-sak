@@ -236,6 +236,9 @@ public class AksjonspunktRestTjeneste {
 
 
     private void validerBetingelserForAksjonspunkt(Behandling behandling, Collection<? extends AksjonspunktKode> aksjonspunktDtoer) {
+        if (behandling.isBehandlingPåVent()) {
+            throw AksjonspunktRestTjenesteFeil.FACTORY.kanIkkeLøseAksjonspunkterNårBehandlingPåVent(String.valueOf(behandling.getId())).toException();
+        }
         if (behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK) && !erFatteVedtakAkpt(aksjonspunktDtoer)) {
             throw AksjonspunktRestTjenesteFeil.FACTORY.totrinnsbehandlingErStartet(String.valueOf(behandling.getId())).toException();
         }

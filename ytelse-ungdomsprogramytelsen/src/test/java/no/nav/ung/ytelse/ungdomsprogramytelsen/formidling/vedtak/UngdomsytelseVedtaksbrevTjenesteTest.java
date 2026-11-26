@@ -6,6 +6,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevForhåndsvisInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
@@ -124,6 +125,30 @@ class UngdomsytelseVedtaksbrevTjenesteTest {
 
         //Brevet behandlingen kommer til å bruke skal være manuell brev
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(redigertHtml);
+    }
+
+    @Test
+    void skal_ikke_kunne_lagre_vedtaksbrev_når_behandling_er_på_vent() {
+        UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
+        new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT);
+        var behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+
+        assertThat(behandling.isBehandlingPåVent()).isTrue();
+        assertThatThrownBy(() -> vedtaksbrevTjeneste.lagreVedtaksbrev(
+            new VedtaksbrevValgRequest(
+                behandling.getId(),
+                false,
+                true,
+                "<h2>Manuell skrevet brev</h2>",
+                DokumentMalType.ENDRING_INNTEKT)
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("på vent");
+
+        VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
+        assertThat(response.vedtaksbrevValg().getFirst().redigert()).isFalse();
     }
 
 
