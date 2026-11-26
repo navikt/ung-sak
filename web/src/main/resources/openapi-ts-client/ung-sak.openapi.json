@@ -1447,9 +1447,9 @@
         "x-enum-varnames" : [ "BRUKER", "NAV", "ANNET" ]
       },
       "ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak" : {
-        "enum" : [ "ANNET", "AVKORTET", "UDEFINERT" ],
+        "enum" : [ "FRAVÆR_FRA_PLANLAGT_AKTIVITET", "AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN", "ANNET", "AVKORTET", "UDEFINERT" ],
         "type" : "string",
-        "x-enum-varnames" : [ "ANNET", "AVKORTET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "FRAVÆR_FRA_PLANLAGT_AKTIVITET", "AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN", "ANNET", "AVKORTET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType" : {
         "enum" : [ "BRUKER", "NAV", "ANNET" ],
@@ -1469,7 +1469,7 @@
       "ung.kodeverk.vilkår.Avslagsårsak" : {
         "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "3001", "3003", "3004", "3005", "3002", "3011", "4001", "9000", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED", "SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE", "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE", "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED", "IKKE_14A_VEDTAK", "AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK", "SØKER_ER_IKKE_MEDLEM", "AVKORTET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED", "SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE", "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE", "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED", "BISTANDSVILKÅR_GENERELL_AVSLAGSÅRSAK", "AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK", "SØKER_ER_IKKE_MEDLEM", "AVKORTET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.BistandsavklaringKildeType" : {
         "enum" : [ "BRUKER", "ANNET" ],
@@ -1477,9 +1477,9 @@
         "x-enum-varnames" : [ "BRUKER", "ANNET" ]
       },
       "ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak" : {
-        "enum" : [ "IKKE_14A_VEDTAK", "KOMMET_I_UTDANNING", "KOMMET_I_ARBEID", "ANNET", "AVKORTET", "UDEFINERT" ],
+        "enum" : [ "KOMMET_I_UTDANNING", "KOMMET_I_ARBEID", "ANNET", "AVKORTET", "UDEFINERT" ],
         "type" : "string",
-        "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "KOMMET_I_UTDANNING", "KOMMET_I_ARBEID", "ANNET", "AVKORTET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "KOMMET_I_UTDANNING", "KOMMET_I_ARBEID", "ANNET", "AVKORTET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.BostedsavklaringKildeType" : {
         "enum" : [ "BRUKER", "FOLKEREGISTER", "ANNET" ],

@@ -91,6 +91,10 @@ public class AktivitetOppgaveOppretter {
 
     static no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.aktivitet.AktivitetsvilkåretIkkeOppfyltÅrsak mapIkkeOppfyltÅrsak(AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak) {
         return switch (ikkeOppfyltÅrsak) {
+            case FRAVÆR_FRA_PLANLAGT_AKTIVITET ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.aktivitet.AktivitetsvilkåretIkkeOppfyltÅrsak.FRAVÆR_FRA_PLANLAGT_AKTIVITET;
+            case AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.aktivitet.AktivitetsvilkåretIkkeOppfyltÅrsak.AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN;
             case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.aktivitet.AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET;
             case UDEFINERT, AVKORTET -> throw new IllegalArgumentException("Ikke-støttet årsak for varsling: " + ikkeOppfyltÅrsak);
         };

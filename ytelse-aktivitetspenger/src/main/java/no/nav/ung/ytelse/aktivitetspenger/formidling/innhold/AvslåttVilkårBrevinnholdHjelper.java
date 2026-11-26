@@ -82,7 +82,6 @@ public class AvslåttVilkårBrevinnholdHjelper {
             case KOMMET_I_ARBEID -> Bistandsårsak.KOMMET_I_ARBEID;
             case KOMMET_I_UTDANNING -> Bistandsårsak.KOMMET_I_UTDANNING;
             case ANNET -> Bistandsårsak.ANNEN_ÅRSAK;
-            case IKKE_14A_VEDTAK -> Bistandsårsak.ANNEN_ÅRSAK;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };
         return new AvslåttBistand(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());
@@ -95,6 +94,8 @@ public class AvslåttVilkårBrevinnholdHjelper {
         var vurdering = avslag.vurdering();
         var årsak = årsakFra(vurdering, AktivitetsvilkåretIkkeOppfyltÅrsak.class);
         var brevårsak = switch (årsak) {
+            case FRAVÆR_FRA_PLANLAGT_AKTIVITET -> Aktivitetsårsak.FRAVÆR_FRA_PLANLAGT_AKTIVITET;
+            case AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN -> Aktivitetsårsak.AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN;
             case ANNET -> Aktivitetsårsak.ANNEN_ÅRSAK;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };

@@ -8,6 +8,8 @@ public record AvslåttAktivitet(
     Periode periode
 ) {
     public enum Aktivitetsårsak {
+        FRAVÆR_FRA_PLANLAGT_AKTIVITET,
+        AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN,
         ANNEN_ÅRSAK
     }
 }

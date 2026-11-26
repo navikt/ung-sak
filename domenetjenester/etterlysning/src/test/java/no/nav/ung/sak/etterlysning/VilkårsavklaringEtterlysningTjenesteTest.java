@@ -135,7 +135,7 @@ class VilkårsavklaringEtterlysningTjenesteTest {
 
     @Test
     void endret_aarsak_med_uendret_periode_skal_avbryte_og_opprette_ny_etterlysning() {
-        var tidligereAvklaring = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+        var tidligereAvklaring = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_UTDANNING, true);
         var etterlysningSomVenter = lagOgLagreEtterlysningSomVenterPåSvar(tidligereAvklaring);
 
         var medEndretÅrsak = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.AVKORTET, true);

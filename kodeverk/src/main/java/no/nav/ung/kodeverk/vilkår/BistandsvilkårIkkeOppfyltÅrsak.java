@@ -6,9 +6,6 @@ import java.util.Optional;
 
 public enum BistandsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
 
-    @Deprecated // Beholdes midlertidig for å ikke hindre testing i dev (Den eneste valgbare årsaken i frontend)
-    IKKE_14A_VEDTAK(Avslagsårsak.IKKE_14A_VEDTAK, true),
-
     KOMMET_I_UTDANNING(Avslagsårsak.IKKE_14A_VEDTAK, false),
     KOMMET_I_ARBEID(Avslagsårsak.IKKE_14A_VEDTAK, false),
     ANNET(Avslagsårsak.IKKE_14A_VEDTAK, true),

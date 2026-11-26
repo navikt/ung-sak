@@ -79,7 +79,7 @@ class BistandOppgaveOppretterTest {
     void avslag_gir_periode_dto_med_tom() {
         var etterlysning = etterlysning();
         stubAvklaring(etterlysning.getGrunnlagsreferanse(), Avklaringtype.AVSLAG,
-            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, "Ingen oppfølging registrert.",
+            BistandsvilkårIkkeOppfyltÅrsak.ANNET, "Ingen oppfølging registrert.",
             BistandsavklaringKildeType.BRUKER, null);
 
         oppretter.opprettOppgave(behandling, List.of(etterlysning), AKTØR_ID);
@@ -87,7 +87,7 @@ class BistandOppgaveOppretterTest {
         var dto = capturerOppgave();
         assertThat(dto.oppgavetypeData()).isEqualTo(new BekreftBistandOppgavetypeDataDto(
             FOM, TOM,
-            no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK,
+            no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak.ANNET,
             "Ingen oppfølging registrert.",
             no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsavklaringKildeType.BRUKER, null));
         assertThat(dto.journalføring().saksnummer().getVerdi()).isEqualTo("123");
@@ -97,7 +97,7 @@ class BistandOppgaveOppretterTest {
     void opphør_gir_opphørs_dto_uten_tom() {
         var etterlysning = etterlysning();
         stubAvklaring(etterlysning.getGrunnlagsreferanse(), Avklaringtype.OPPHØR,
-            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, "Oppfølgingsvedtaket er avsluttet.",
+            BistandsvilkårIkkeOppfyltÅrsak.ANNET, "Oppfølgingsvedtaket er avsluttet.",
             BistandsavklaringKildeType.ANNET, "veilederen din");
 
         oppretter.opprettOppgave(behandling, List.of(etterlysning), AKTØR_ID);
@@ -105,7 +105,7 @@ class BistandOppgaveOppretterTest {
         var dto = capturerOppgave();
         assertThat(dto.oppgavetypeData()).isEqualTo(new BekreftBistandOpphørOppgavetypeDataDto(
             FOM,
-            no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK,
+            no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak.ANNET,
             "Oppfølgingsvedtaket er avsluttet.",
             no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsavklaringKildeType.ANNET, "veilederen din"));
     }
@@ -122,21 +122,21 @@ class BistandOppgaveOppretterTest {
     }
 
     @Test
-    void manglende_fritekst_ved_ikke_14a_vedtak_kaster() {
+    void manglende_fritekst_ved_annet_kaster() {
         var etterlysning = etterlysning();
         stubAvklaring(etterlysning.getGrunnlagsreferanse(), Avklaringtype.AVSLAG,
-            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, null, BistandsavklaringKildeType.BRUKER, null);
+            BistandsvilkårIkkeOppfyltÅrsak.ANNET, null, BistandsavklaringKildeType.BRUKER, null);
 
         assertThatNullPointerException()
             .isThrownBy(() -> oppretter.opprettOppgave(behandling, List.of(etterlysning), AKTØR_ID))
-            .withMessageContaining("IKKE_14A_VEDTAK");
+            .withMessageContaining("ANNET");
     }
 
     @Test
     void ukjent_grunnlagsreferanse_kaster() {
         var etterlysning = etterlysning();
         stubAvklaring(UUID.randomUUID(), Avklaringtype.AVSLAG,
-            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, "Fritekst.", BistandsavklaringKildeType.BRUKER, null);
+            BistandsvilkårIkkeOppfyltÅrsak.ANNET, "Fritekst.", BistandsavklaringKildeType.BRUKER, null);
 
         assertThatIllegalStateException()
             .isThrownBy(() -> oppretter.opprettOppgave(behandling, List.of(etterlysning), AKTØR_ID))

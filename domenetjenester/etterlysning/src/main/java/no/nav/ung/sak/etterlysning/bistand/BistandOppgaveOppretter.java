@@ -91,7 +91,6 @@ public class BistandOppgaveOppretter {
 
     static no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak mapIkkeOppfyltÅrsak(BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak) {
         return switch (ikkeOppfyltÅrsak) {
-            case IKKE_14A_VEDTAK -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
             case KOMMET_I_UTDANNING -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_UTDANNING;
             case KOMMET_I_ARBEID -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID;
             case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bistand.BistandsvilkårIkkeOppfyltÅrsak.ANNET;

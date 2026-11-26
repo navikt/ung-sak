@@ -111,6 +111,38 @@ class AktivitetOppgaveOppretterTest {
     }
 
     @Test
+    void fravær_fra_planlagt_aktivitet_mappes_til_kontrakten() {
+        var etterlysning = etterlysning();
+        stubAvklaring(etterlysning.getGrunnlagsreferanse(), Avklaringtype.AVSLAG,
+            AktivitetsvilkåretIkkeOppfyltÅrsak.FRAVÆR_FRA_PLANLAGT_AKTIVITET, null,
+            AktivitetsavklaringKildeType.BRUKER, null);
+
+        oppretter.opprettOppgave(behandling, List.of(etterlysning), AKTØR_ID);
+
+        assertThat(capturerOppgave().oppgavetypeData()).isEqualTo(new BekreftAktivitetOppgavetypeDataDto(
+            FOM, TOM,
+            no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.aktivitet.AktivitetsvilkåretIkkeOppfyltÅrsak.FRAVÆR_FRA_PLANLAGT_AKTIVITET,
+            null,
+            no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.aktivitet.AktivitetsavklaringKildeType.BRUKER, null));
+    }
+
+    @Test
+    void avstår_fra_tilbud_om_arbeid_mappes_til_kontrakten() {
+        var etterlysning = etterlysning();
+        stubAvklaring(etterlysning.getGrunnlagsreferanse(), Avklaringtype.OPPHØR,
+            AktivitetsvilkåretIkkeOppfyltÅrsak.AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN, null,
+            AktivitetsavklaringKildeType.ANNET, "veilederen din");
+
+        oppretter.opprettOppgave(behandling, List.of(etterlysning), AKTØR_ID);
+
+        assertThat(capturerOppgave().oppgavetypeData()).isEqualTo(new BekreftAktivitetOpphørOppgavetypeDataDto(
+            FOM,
+            no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.aktivitet.AktivitetsvilkåretIkkeOppfyltÅrsak.AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN,
+            null,
+            no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.aktivitet.AktivitetsavklaringKildeType.ANNET, "veilederen din"));
+    }
+
+    @Test
     void avkortet_skal_aldri_varsles_og_kaster() {
         var etterlysning = etterlysning();
         stubAvklaring(etterlysning.getGrunnlagsreferanse(), Avklaringtype.AVSLAG,

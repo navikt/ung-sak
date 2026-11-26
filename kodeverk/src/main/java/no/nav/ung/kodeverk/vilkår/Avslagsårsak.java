@@ -49,7 +49,6 @@ public enum Avslagsårsak implements Kodeverdi {
     IKKE_14A_VEDTAK("3002", "Søker har ikke behov for bistand fra Nav",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("6"))),
 
-    //FIXME spesifikke avlagsårsaker for aktivitetsvilkåret er var ikke klare. Oppdater med faktiske årsaker når de er på plass
     AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK("3011", "Søker oppfyller ikke aktivitetsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("8"))),
 

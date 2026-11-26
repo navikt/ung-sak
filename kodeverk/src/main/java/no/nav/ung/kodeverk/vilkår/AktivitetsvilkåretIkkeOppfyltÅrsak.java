@@ -6,7 +6,8 @@ import java.util.Optional;
 
 public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
 
-    //FIXME spesifikke avlagsårsaker for aktivitetsvilkåret er var ikke klare. Oppdater med faktiske årsaker når de er på plass
+    FRAVÆR_FRA_PLANLAGT_AKTIVITET(Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK, false),
+    AVSTÅR_FRA_TILBUD_OM_ARBEID_UTEN_RIMELIG_GRUNN(Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK, false),
     ANNET(Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK, true),
     // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
     AVKORTET(Avslagsårsak.AVKORTET, false),
