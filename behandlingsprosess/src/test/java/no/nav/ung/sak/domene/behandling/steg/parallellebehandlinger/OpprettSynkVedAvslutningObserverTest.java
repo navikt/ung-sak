@@ -71,6 +71,18 @@ class OpprettSynkVedAvslutningObserverTest {
     }
 
     @Test
+    void oppretter_synk_når_kontrollbehandling_avsluttes_med_bryteren_av_og_fagsaken_har_åpen_ordinær_behandling() {
+        var kontrollbehandling = nyBehandling(BehandlingType.KONTROLL);
+        kontrollbehandling.avsluttBehandling();
+        behandlingRepository.lagre(kontrollbehandling, behandlingRepository.taSkriveLås(kontrollbehandling));
+        entityManager.flush();
+
+        observer(false).vedAvslutning(avsluttetEvent(kontrollbehandling));
+
+        verify(taskOppretter).opprett(kontrollbehandling.getFagsakId());
+    }
+
+    @Test
     void oppretter_ikke_synk_når_bryteren_er_av_og_fagsaken_ikke_har_åpen_kontrollbehandling() {
         nyBehandling(BehandlingType.REVURDERING);
 

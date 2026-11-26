@@ -16,8 +16,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
  * Oppretter {@link SynkroniserÅpneBehandlingerTask} når en ytelsesbehandling avsluttes og fagsaken har andre åpne
  * ytelsesbehandlinger. Gjelder også henleggelse, slik at behandlinger som venter i porten, tas av vent.
  * <p>
- * Tasken opprettes i samme transaksjon som avslutningen. Den lages bare når bryteren for ytelsen er på, eller når
- * fagsaken har en åpen kontrollbehandling. Da blir åpne kontrollbehandlinger fullført også etter at bryteren er slått av.
+ * Tasken opprettes i samme transaksjon som avslutningen. Den lages når den avsluttede behandlingen er en
+ * kontrollbehandling, når bryteren for ytelsen er på, eller når fagsaken har en åpen kontrollbehandling. Da får åpne
+ * ordinære behandlinger kontrollperiodene fra en avsluttet kontrollbehandling, og åpne kontrollbehandlinger blir
+ * fullført, også etter at bryteren er slått av.
  */
 @ApplicationScoped
 public class OpprettSynkVedAvslutningObserver {
@@ -53,7 +55,8 @@ public class OpprettSynkVedAvslutningObserver {
         if (parallelleBehandlingerRepository.hentAndreIkkeAvsluttedeYtelsesbehandlinger(fagsakId, behandling.getId()).isEmpty()) {
             return;
         }
-        if (kontrollbehandlingBryter.erPå(behandling.getFagsakYtelseType())
+        if (behandling.erKontrollbehandling()
+            || kontrollbehandlingBryter.erPå(behandling.getFagsakYtelseType())
             || parallelleBehandlingerRepository.finnIkkeAvsluttetKontrollbehandling(fagsakId).isPresent()) {
             log.info("Behandling {} er avsluttet. Oppretter synkronisering av åpne behandlinger på fagsaken", behandling.getId());
             synkroniserÅpneBehandlingerTaskOppretter.opprett(fagsakId);
