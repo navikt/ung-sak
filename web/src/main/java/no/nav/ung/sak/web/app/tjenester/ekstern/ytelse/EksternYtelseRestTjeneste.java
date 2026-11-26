@@ -26,8 +26,8 @@ import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseResponse;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.vedtattytelse.VedtakYtelseTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
-import no.nav.ung.sak.web.server.abac.EksternSystemAuditlogger;
 import no.nav.ung.sak.web.server.abac.EksterneSystemer;
+import no.nav.ung.sak.web.server.abac.KallendeSystemUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +36,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 /**
  * Vedtak om aktivitetspenger og ungdomsprogramytelsen for andre ytelser i Nav som skal samordnes mot dem. Kun maskin-til-maskin.
  * <p>
- * Tilgang avgjøres av ressurstypen {@code EKSTERN_SYSTEM} og listen med systemer på hvert endepunkt. Hvert oppslag auditlogges
- * med systemnavn og fnr, siden k9-felles ikke auditlogger systemkall.
+ * Tilgang avgjøres av ressurstypen {@code EKSTERN_SYSTEM} og listen med systemer på hvert endepunkt.
  */
 @Path(EksternYtelseRestTjeneste.BASE_PATH)
 @ApplicationScoped
@@ -54,7 +53,7 @@ public class EksternYtelseRestTjeneste {
 
     private AktørTjeneste aktørTjeneste;
     private VedtakYtelseTjeneste vedtakYtelseTjeneste;
-    private EksternSystemAuditlogger auditlogger;
+    private KallendeSystemUtleder kallendeSystemUtleder;
     private MeterRegistry meterRegistry;
 
     public EksternYtelseRestTjeneste() {
@@ -62,14 +61,14 @@ public class EksternYtelseRestTjeneste {
     }
 
     @Inject
-    public EksternYtelseRestTjeneste(AktørTjeneste aktørTjeneste, VedtakYtelseTjeneste vedtakYtelseTjeneste, EksternSystemAuditlogger auditlogger) {
-        this(aktørTjeneste, vedtakYtelseTjeneste, auditlogger, MetricsUtil.REGISTRY);
+    public EksternYtelseRestTjeneste(AktørTjeneste aktørTjeneste, VedtakYtelseTjeneste vedtakYtelseTjeneste, KallendeSystemUtleder kallendeSystemUtleder) {
+        this(aktørTjeneste, vedtakYtelseTjeneste, kallendeSystemUtleder, MetricsUtil.REGISTRY);
     }
 
-    EksternYtelseRestTjeneste(AktørTjeneste aktørTjeneste, VedtakYtelseTjeneste vedtakYtelseTjeneste, EksternSystemAuditlogger auditlogger, MeterRegistry meterRegistry) {
+    EksternYtelseRestTjeneste(AktørTjeneste aktørTjeneste, VedtakYtelseTjeneste vedtakYtelseTjeneste, KallendeSystemUtleder kallendeSystemUtleder, MeterRegistry meterRegistry) {
         this.aktørTjeneste = aktørTjeneste;
         this.vedtakYtelseTjeneste = vedtakYtelseTjeneste;
-        this.auditlogger = auditlogger;
+        this.kallendeSystemUtleder = kallendeSystemUtleder;
         this.meterRegistry = meterRegistry;
     }
 
@@ -94,7 +93,7 @@ public class EksternYtelseRestTjeneste {
         @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) YtelseRequest request) {
         var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
         var respons = vedtakYtelseTjeneste.hentVedtak(aktørIder, new Periode(request.fom(), request.tom()));
-        registrerOppslag(VEDTAK_PATH, request, respons.vedtak().size());
+        registrerOppslag(VEDTAK_PATH, respons.vedtak().size());
         return respons;
     }
 
@@ -117,13 +116,12 @@ public class EksternYtelseRestTjeneste {
         @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) YtelseRequest request) {
         var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
         var respons = vedtakYtelseTjeneste.hentBarnetillegg(aktørIder, new Periode(request.fom(), request.tom()));
-        registrerOppslag(BARNETILLEGG_PATH, request, respons.vedtak().size());
+        registrerOppslag(BARNETILLEGG_PATH, respons.vedtak().size());
         return respons;
     }
 
-    private void registrerOppslag(String endepunkt, YtelseRequest request, int antallVedtak) {
-        var konsument = auditlogger.kallendeSystem();
-        auditlogger.loggOppslag(konsument, BASE_PATH + endepunkt, request.ident());
+    private void registrerOppslag(String endepunkt, int antallVedtak) {
+        var konsument = kallendeSystemUtleder.kallendeSystem();
         meterRegistry.counter(METRIKK, "endepunkt", endepunkt, "konsument", konsument, "treff", String.valueOf(antallVedtak > 0)).increment();
         log.info("Eksternt system hentet vedtatt ytelse. konsument={}, endepunkt={}, antallVedtak={}", konsument, endepunkt, antallVedtak);
     }
