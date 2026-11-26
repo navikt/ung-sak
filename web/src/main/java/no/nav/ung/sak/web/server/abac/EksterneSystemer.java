@@ -10,6 +10,7 @@ public final class EksterneSystemer {
     public static final String DAGPENGER_DEV = "dev-gcp:teamdagpenger:dp-oppslag-ytelser";
     public static final String TILTAKSPENGER_DEV = "dev-gcp:tpts:tiltakspenger-saksbehandling-api";
     public static final String BIDRAG_DEV = "dev-gcp:bidrag:bidrag-grunnlag";
+    public static final String BIDRAG_FEATURE_DEV = "dev-gcp:bidrag:bidrag-grunnlag-feature";
 
     /** For manuell testing i dev med tokens fra azure-token-generator. Skal aldri finnes i prod. */
     public static final String AZURE_TOKEN_GENERATOR_DEV = "dev-gcp:nais:azure-token-generator";

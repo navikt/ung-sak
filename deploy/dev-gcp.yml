@@ -124,6 +124,8 @@ spec:
           namespace: tpts
         - application: bidrag-grunnlag
           namespace: bidrag
+        - application: bidrag-grunnlag-feature
+          namespace: bidrag
         - application: azure-token-generator
           namespace: nais
   gcp:

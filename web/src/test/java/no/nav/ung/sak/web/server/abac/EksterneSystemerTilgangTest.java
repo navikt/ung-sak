@@ -51,6 +51,7 @@ class EksterneSystemerTilgangTest {
         "dev-gcp:teamdagpenger:dp-oppslag-ytelser", Set.of(YTELSE_VEDTAK),
         "dev-gcp:tpts:tiltakspenger-saksbehandling-api", Set.of(YTELSE_VEDTAK),
         "dev-gcp:bidrag:bidrag-grunnlag", Set.of(YTELSE_BARNETILLEGG),
+        "dev-gcp:bidrag:bidrag-grunnlag-feature", Set.of(YTELSE_BARNETILLEGG),
         "dev-gcp:nais:azure-token-generator", Set.of(YTELSE_VEDTAK, YTELSE_BARNETILLEGG));
 
     private static final String AZURE_TOKEN_GENERATOR = ":nais:azure-token-generator";

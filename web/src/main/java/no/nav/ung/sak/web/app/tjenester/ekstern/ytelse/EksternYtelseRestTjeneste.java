@@ -98,6 +98,7 @@ public class EksternYtelseRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.EKSTERN_SYSTEM,
         eksterneSystemer = {
             EksterneSystemer.BIDRAG_DEV,
+            EksterneSystemer.BIDRAG_FEATURE_DEV,
             EksterneSystemer.AZURE_TOKEN_GENERATOR_DEV
         })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
