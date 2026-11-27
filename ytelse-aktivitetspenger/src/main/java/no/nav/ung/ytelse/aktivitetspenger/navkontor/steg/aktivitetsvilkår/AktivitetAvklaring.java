@@ -1,6 +1,10 @@
 package no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.aktivitetsvilkår;
 
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
+import no.nav.ung.sak.inngangsvilkår.avklaring.ForeslåttVilkårsavklaring;
+
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * En aktivitetsavklaring slik den lagres: varslingsinnholdet ({@link AktivitetVarselInnhold}) sammen med
@@ -13,5 +17,10 @@ public record AktivitetAvklaring(
     String begrunnelseIkkeVarsel,
     String vurdertAv,
     LocalDateTime vurdertTidspunkt
-) {
+) implements ForeslåttVilkårsavklaring {
+
+    @Override
+    public VilkårPeriodeAvklaringForeslått tilEntitet(UUID referanse) {
+        return AktivitetAvklaringDataMapper.mapTilVilkårPeriodeAvklaring(this, referanse);
+    }
 }

@@ -3,7 +3,6 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -12,19 +11,18 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsvarselInnhold;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
-import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedAvklaring;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedAvklaringTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedsAvklaringDataMapper;
 
 import java.time.LocalDateTime;
@@ -38,7 +36,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste;
-    private BostedAvklaringTjeneste bostedAvklaringTjeneste;
+    private VilkårsavklaringTjeneste vilkårsavklaringTjeneste;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     VurderFaktaOmBostedOppdaterer() {
@@ -49,12 +47,12 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     public VurderFaktaOmBostedOppdaterer(BehandlingRepository behandlingRepository,
                                          HistorikkinnslagRepository historikkinnslagRepository,
                                          VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste,
-                                         @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED) BostedAvklaringTjeneste bostedAvklaringTjeneste,
+                                         VilkårsavklaringTjeneste vilkårsavklaringTjeneste,
                                          InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårsavklaringEtterlysningTjeneste = vilkårsavklaringEtterlysningTjeneste;
-        this.bostedAvklaringTjeneste = bostedAvklaringTjeneste;
+        this.vilkårsavklaringTjeneste = vilkårsavklaringTjeneste;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
@@ -67,17 +65,17 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        bostedAvklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId,
+        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VilkårType.BOSTEDSVILKÅR);
+        vilkårsavklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId, VilkårType.BOSTEDSVILKÅR, vilkårsperioder,
             dto.getAvklaringer().stream().map(BostedFaktaavklaringPeriodeDto::periode).toList());
 
         // Opphør lukkes mot slutten av relevante vilkårsperioder, siden avklaringen kan gjelde en vilkårlig periode i den.
-        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VilkårType.BOSTEDSVILKÅR);
         if (vilkårsperioder.isEmpty()) {
             throw new IllegalStateException("Må ha relevante vilkårsperioder");
         }
         var maxTomDato = vilkårsperioder.getMaxLocalDate();
 
-        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = bostedAvklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId);
+        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = vilkårsavklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId, VilkårType.BOSTEDSVILKÅR, BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -90,7 +88,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             throw new IllegalArgumentException("Støtter kun lagring av én avklaring for bostedsvilkåret samtidig");
         }
 
-        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = bostedAvklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, nyeAvklaringer);
+        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = vilkårsavklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, VilkårType.BOSTEDSVILKÅR, nyeAvklaringer, BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold);
 
         inngangsvilkårVurderingTjeneste.nullstillOverlappendeVurderingOgGjenopprettTidligereVedBehov(param,
             VilkårType.BOSTEDSVILKÅR,

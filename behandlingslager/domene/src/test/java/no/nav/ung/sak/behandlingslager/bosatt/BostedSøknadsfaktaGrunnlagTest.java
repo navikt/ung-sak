@@ -33,10 +33,12 @@ class BostedSøknadsfaktaGrunnlagTest {
         assertThat(segmenter.get(0).getFom()).isEqualTo(fom1);
         assertThat(segmenter.get(0).getTom()).isEqualTo(fom2.minusDays(1));
         assertThat(segmenter.get(0).getValue().getJournalpostId()).isEqualTo("JP1");
+        assertThat(segmenter.get(0).getValue().isErBosattITrondheim()).isTrue();
 
         assertThat(segmenter.get(1).getFom()).isEqualTo(fom2);
         assertThat(segmenter.get(1).getTom()).isEqualTo(fom3.minusDays(1));
         assertThat(segmenter.get(1).getValue().getJournalpostId()).isEqualTo("JP2");
+        assertThat(segmenter.get(1).getValue().isErBosattITrondheim()).isFalse();
 
         assertThat(segmenter.get(2).getFom()).isEqualTo(fom3);
         assertThat(segmenter.get(2).getTom()).isEqualTo(LocalDateInterval.TIDENES_ENDE);

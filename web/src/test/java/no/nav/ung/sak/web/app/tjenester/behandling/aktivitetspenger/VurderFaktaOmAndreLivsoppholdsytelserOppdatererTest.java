@@ -29,6 +29,7 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnl
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderFaktaOmAndreLivsoppholdsytelserDto;
@@ -39,7 +40,6 @@ import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaringTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,10 +103,7 @@ class VurderFaktaOmAndreLivsoppholdsytelserOppdatererTest {
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        var avklaringTjeneste = new AndreLivsoppholdsytelserAvklaringTjeneste(
-            vilkårsavklaringGrunnlagRepository,
-            inngangsvilkårVurderingTjeneste,
-            vilkårResultatRepository);
+        var avklaringTjeneste = new VilkårsavklaringTjeneste(vilkårsavklaringGrunnlagRepository);
 
         oppdaterer = new VurderFaktaOmAndreLivsoppholdsytelserOppdaterer(
             behandlingRepository,

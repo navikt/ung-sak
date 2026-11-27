@@ -1,17 +1,18 @@
 package no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.foreslåvlkår;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -28,7 +29,8 @@ public class NavKontorForeslåVilkårSteg implements BehandlingSteg {
 
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingRepository behandlingRepository;
-    private List<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester;
+    private VilkårsavklaringTjeneste vilkårsavklaringTjeneste;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     NavKontorForeslåVilkårSteg() {
         // for CDI proxy
@@ -36,10 +38,11 @@ public class NavKontorForeslåVilkårSteg implements BehandlingSteg {
 
     @Inject
     public NavKontorForeslåVilkårSteg(BehandlingAnsvarligRepository behandlingAnsvarligRepository, BehandlingRepository behandlingRepository,
-                                      Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester) {
+                                      VilkårsavklaringTjeneste vilkårsavklaringTjeneste, InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingRepository = behandlingRepository;
-        this.alleVilkårsavklaringTjenester = VilkårsavklaringTjeneste.sortert(alleVilkårsavklaringTjenester);
+        this.vilkårsavklaringTjeneste = vilkårsavklaringTjeneste;
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
 
@@ -70,8 +73,9 @@ public class NavKontorForeslåVilkårSteg implements BehandlingSteg {
             // Det er fordi vi ikke kan gjøre en vurdering før brukeren har blitt varslet om forslaget og har hatt rett til å uttale seg.
             // Når behandlingen hopper tilbake fra foreslå vedtak, er det vilkårsperioden for tilsvarende den avklarte periode som settes til vurdering.
             // Vilkårsvurdering beholdes intakt, slik at saksbehandler kan redigere den foreslåtte vurderingen.
-            alleVilkårsavklaringTjenester.forEach(vilkårsavklaringTjeneste ->
-                vilkårsavklaringTjeneste.settVilkårsperioderTilIkkeVurdertForForeslåtteAvklaringer(kontekst.getBehandlingId())
+            VilkårsavklaringÅrsaker.alle().keySet().stream().sorted().forEach(vilkårType ->
+                inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(kontekst.getBehandlingId(), vilkårType,
+                    vilkårsavklaringTjeneste.hentPerioderForForeslåtteAvklaringer(kontekst.getBehandlingId(), vilkårType))
             );
         }
     }
