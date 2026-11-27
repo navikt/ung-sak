@@ -18,8 +18,9 @@ public enum Venteårsak implements Kodeverdi {
     FOR_TIDLIG_SOKNAD("FOR_TIDLIG_SOKNAD", "Venter pga for tidlig søknad", false, AVVENTER_ANNET_IKKE_SAKSBEHANDLINGSTID),
     VENT_INNTEKT_RAPPORTERINGSFRIST("VENT_INNTEKT_RAPPORTERINGSFRIST", "Inntekt rapporteringsfrist", false, AVVENTER_ARBEIDSGIVER),
     VENT_TIDLIGERE_BEHANDLING("VENT_TIDLIGERE_BEHANDLING", "Venter på iverksettelse av en tidligere behandling i denne saken", false, AVVENTER_ANNET),
-    VENTER_SVAR_TEAMS("VENTER_SVAR_TEAMS", "Sak meldt i Teams, venter på svar", true, AVVENTER_TEKNISK_FEIL),
+    VENTER_SVAR_TEAMS("VENTER_SVAR_TEAMS", "Sak meldt i porten, venter på svar", true, AVVENTER_TEKNISK_FEIL),
     ANNET("ANNET", "Annet", true, AVVENTER_ANNET),  //TODO?
+    VENT_OPPL_MEDLEMSKAP_UTLAND("VENT_OPPL_MEDLEMSKAP_UTLAND", "Venter på opplysninger om medlemskap/arbeid utenfor Norge", true, AVVENTER_ANNET),
 
     VENT_ØKONOMI("VENT_ØKONOMI", "Venter på økonomiløsningen", false, AVVENTER_ANNET),
     VENT_TILBAKEKREVING("VENT_TILBAKEKREVING", "Venter på tilbakekrevingsbehandling", true, AVVENTER_ANNET),
