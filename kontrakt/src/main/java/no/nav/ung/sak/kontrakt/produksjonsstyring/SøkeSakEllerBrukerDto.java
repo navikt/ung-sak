@@ -24,7 +24,7 @@ public class SøkeSakEllerBrukerDto {
 
     @JsonProperty(value = "searchString", required = true)
     @NotNull
-    @Pattern(regexp = "^[a-zA-Z0-9]*$")
+    @Pattern(regexp = "^[a-zA-Z0-9]+$")
     private String searchString;
 
     @JsonProperty(value = "ytelseType")
