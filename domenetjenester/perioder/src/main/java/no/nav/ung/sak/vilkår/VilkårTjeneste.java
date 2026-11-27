@@ -1,8 +1,6 @@
 package no.nav.ung.sak.vilkår;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
@@ -18,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -31,7 +28,6 @@ public class VilkårTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     protected VilkårTjeneste() {
         // CDI Proxy
@@ -39,11 +35,9 @@ public class VilkårTjeneste {
 
     @Inject
     public VilkårTjeneste(BehandlingRepository behandlingRepository,
-                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                           VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.vilkårsPerioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
     public Vilkårene hentVilkårResultat(Long behandlingId) {

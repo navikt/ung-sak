@@ -81,7 +81,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         manuelleVilkårRekkefølgeTjeneste = new ManuelleVilkårRekkefølgeTjeneste(new BehandlingModellRepository());
-        vilkårTjeneste = new VilkårTjeneste(behandlingRepository, perioderTilVurderingTjenester, vilkårResultatRepository);
+        vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårResultatRepository);
         historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
         steg = new ForutgåendeMedlemskapsvilkårSteg(
             vilkårResultatRepository,

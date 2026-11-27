@@ -538,7 +538,7 @@ class VurderBostedVilkårStegTest {
     }
 
     private VurderBostedVilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
-        var vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjenester, vilkårResultatRepository);
+        var vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårResultatRepository);
         var etterlysningTjeneste = new EtterlysningTjeneste(null, null) {
             @Override
             public List<EtterlysningData> hentGjeldendeEtterlysninger(Long behandlingId, Long fagsakId, EtterlysningType type) {

@@ -53,7 +53,7 @@ public class VilkårTjenesteTest {
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-        vilkårTjeneste = new VilkårTjeneste(behandlingRepository, null, vilkårResultatRepository);
+        vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårResultatRepository);
         fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, new AktørId(123L), new Saksnummer("987"), LocalDate.now(), LocalDate.now());
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
