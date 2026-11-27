@@ -64,7 +64,6 @@ public class MaksdatoEtterlysningTjeneste {
 
         LocalDate maksdato = ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElseThrow(() -> new IllegalStateException("Forventer at maksdato er satt"));
         DatoIntervallEntitet periode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
-        LocalDate tomDato = periode.getTomDato();
 
 
         var eksisterende = etterlysningRepository.hentSisteEtterlysning(
@@ -75,7 +74,7 @@ public class MaksdatoEtterlysningTjeneste {
             new EtterlysningStatusOgType(e.getStatus(), e.getType()),
             ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(e.getGrunnlagsreferanse())));
 
-        EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(tomDato, maksdato, LocalDate.now(),
+        EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput input = new EtterlysningForOpphørVedMaksdatoResultatUtleder.EtterlysningForMaksdatoInput(ungdomsprogramPeriodeGrunnlag, LocalDate.now(),
             etterlysningOgGrunnlag.orElse(null));
 
         // Utled resultat
