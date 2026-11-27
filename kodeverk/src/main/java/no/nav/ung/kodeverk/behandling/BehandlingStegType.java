@@ -15,6 +15,11 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStatus.UTREDES;
 public enum BehandlingStegType implements Kodeverdi {
 
     BEREGN_YTELSE("BERYT", "Beregn ytelse", UTREDES),
+    /**
+     * Ventepunkt for vedtaksprioritet før {@link #BEREGN_YTELSE}: bare én behandling per fagsak kan være forbi
+     * ventepunktet og ikke avsluttet.
+     */
+    VURDER_VEDTAKSPRIORITET("VURDER_VEDTAKSPRIORITET", "Vurder vedtaksprioritet", UTREDES),
     FATTE_VEDTAK("FVEDSTEG", "Fatte Vedtak", BehandlingStatus.FATTER_VEDTAK),
     NAV_KONTOR_FORESLÅ_VILKÅR("NAV_KONTOR_FORESLÅ_VILKÅR_STEG", "Nav-kontor foreslå vilkår til beslutning", UTREDES),
     NAV_KONTOR_BESLUTTER_VILKÅR("NAV_KONTOR_BESLUTTE_VILKÅR_STEG", "Nav-kontor beslutte vilkår", BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR),

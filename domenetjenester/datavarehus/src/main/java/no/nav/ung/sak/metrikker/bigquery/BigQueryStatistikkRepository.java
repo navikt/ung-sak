@@ -20,12 +20,16 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.vedtaksprioritet.VedtaksprioritetVentRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.uttalelse.UttalelseRecord;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -48,6 +52,14 @@ import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
  */
 @Dependent
 public class BigQueryStatistikkRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(BigQueryStatistikkRepository.class);
+
+    /**
+     * Behandlingen med vedtaksprioritet kan vente på saksbehandler og beslutter i flere dager. Over denne grensen står
+     * en behandling sannsynligvis fast.
+     */
+    static final Duration VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE = Duration.ofDays(7);
 
     private final EntityManager entityManager;
 
@@ -203,6 +215,66 @@ public class BigQueryStatistikkRepository {
                 ZonedDateTime.now()
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+    /**
+     * Henter behandlinger som venter i ventepunktet for vedtaksprioritet, gruppert på behandlingstype, med antall og
+     * eldste ventetid i timer.
+     * <p>
+     * Ventetiden regnes fra opprettet-tidspunktet til aktiv stegtilstand for ventepunktet. Raden gjenbrukes når
+     * ventepunktet kjøres på nytt etter vent, så tiden nullstilles bare når behandlingen hopper tilbake til et tidligere
+     * steg. Over {@link #VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE} logges et varsel med behandlingId-er, uten
+     * personopplysninger. Varselet fanger både en behandling som har vedtaksprioritet lenge, og synk som feiler over tid.
+     */
+    Collection<VedtaksprioritetVentRecord> vedtaksprioritetVentStatistikk(FagsakYtelseType ytelse) {
+        String sql = """
+            select b.id as behandling_id, b.behandling_type, st.opprettet_tid
+             from aksjonspunkt a
+             inner join behandling b on b.id = a.behandling_id
+             inner join fagsak f on f.id = b.fagsak_id
+             inner join behandling_steg_tilstand st on st.behandling_id = b.id and st.aktiv = true
+             where a.aksjonspunkt_def = :ventepunkt
+             and a.aksjonspunkt_status = :aapen
+             and st.behandling_steg = :steg
+             and f.ytelse_type = :ytelseType
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        record Ventende(Long behandlingId, BehandlingType behandlingType, Duration ventetid) {
+        }
+        var nå = LocalDateTime.now();
+        List<Ventende> ventende = query
+            .setParameter("ventepunkt", AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET.getKode())
+            .setParameter("aapen", AksjonspunktStatus.OPPRETTET.getKode())
+            .setParameter("steg", BehandlingStegType.VURDER_VEDTAKSPRIORITET.getKode())
+            .setParameter("ytelseType", ytelseKode(ytelse))
+            .getResultStream()
+            .map(t -> new Ventende(
+                t.get(0, Number.class).longValue(),
+                BehandlingType.fraKode(t.get(1, String.class)),
+                Duration.between(t.get(2, LocalDateTime.class), nå)))
+            .toList();
+
+        var overGrensen = ventende.stream()
+            .filter(it -> it.ventetid().compareTo(VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE) > 0)
+            .map(Ventende::behandlingId)
+            .sorted()
+            .toList();
+        if (!overGrensen.isEmpty()) {
+            log.warn("{} behandlinger for ytelse {} har ventet i ventepunktet for vedtaksprioritet lenger enn {}. Første behandlingId-er: {}",
+                overGrensen.size(), ytelse.getKode(), VEDTAKSPRIORITET_VENTETID_VARSLINGSGRENSE, overGrensen.stream().limit(10).toList());
+        }
+
+        var opprettetTidspunkt = ZonedDateTime.now();
+        return ventende.stream()
+            .collect(Collectors.groupingBy(Ventende::behandlingType, TreeMap::new, Collectors.toList()))
+            .entrySet().stream()
+            .map(e -> new VedtaksprioritetVentRecord(
+                ytelse,
+                e.getKey(),
+                (long) e.getValue().size(),
+                e.getValue().stream().map(Ventende::ventetid).max(Comparator.naturalOrder()).orElseThrow().toHours(),
+                opprettetTidspunkt))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
 

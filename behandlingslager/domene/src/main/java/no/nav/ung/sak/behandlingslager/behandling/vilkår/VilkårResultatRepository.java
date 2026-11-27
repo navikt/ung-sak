@@ -10,10 +10,13 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
+import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -53,6 +56,36 @@ public class VilkårResultatRepository {
         query.setParameter("behandlingId", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public EndringsresultatSnapshot finnAktivGrunnlagId(Long behandlingId) {
+        return hentVilkårsResultat(behandlingId)
+            .map(resultat -> EndringsresultatSnapshot.medSnapshot(VilkårsResultat.class, resultat.getId()))
+            .orElse(EndringsresultatSnapshot.utenSnapshot(VilkårsResultat.class));
+    }
+
+    /**
+     * Diff på gjeldende utfall og avslagsårsak per vilkår og periode. Begrunnelse, merknad og regelsporing er ikke med,
+     * så endringer bare i disse gir ingen diff.
+     */
+    public DiffResult diffUtfall(EndringsresultatDiff idEndring) {
+        var utfall1 = utfallPerVilkårsperiode((Long) idEndring.getGrunnlagId1());
+        var utfall2 = utfallPerVilkårsperiode((Long) idEndring.getGrunnlagId2());
+        return new DiffEntity(TraverseEntityGraphFactory.build()).diff(utfall1, utfall2);
+    }
+
+    private Map<String, String> utfallPerVilkårsperiode(Long vilkårsResultatId) {
+        var resultat = Objects.requireNonNull(entityManager.find(VilkårsResultat.class, vilkårsResultatId),
+            "Fant ikke vilkårsresultat med id " + vilkårsResultatId);
+        var utfall = new TreeMap<String, String>();
+        for (var vilkår : resultat.getVilkårene().getVilkårene()) {
+            for (var periode : vilkår.getPerioder()) {
+                var avslagsårsak = periode.getAvslagsårsak();
+                utfall.put(vilkår.getVilkårType().getKode() + "|" + periode.getFom() + "|" + periode.getTom(),
+                    periode.getGjeldendeUtfall().getKode() + "|" + (avslagsårsak != null ? avslagsårsak.getKode() : ""));
+            }
+        }
+        return utfall;
     }
 
     public Vilkårene hent(Long behandlingId) {
@@ -109,6 +142,23 @@ public class VilkårResultatRepository {
         var behandling = behandlingRepository.hentBehandling(tilBehandlingId);
         var fagsakPeriode = behandling.getFagsak().getPeriode();
 
+        lagre(tilBehandlingId, fraBehandlingVilkår.get(), fagsakPeriode);
+    }
+
+    /**
+     * Erstatter vilkårsresultatet på {@code tilBehandlingId} med en kopi av vilkårsresultatet på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ikke vilkårsresultat, deaktiveres resultatet på {@code tilBehandlingId}.
+     * Brukes når en åpen behandling synkes med vedtatte data fra en annen behandling på fagsaken.
+     */
+    public void erstattMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        Objects.requireNonNull(fraBehandlingId);
+        Objects.requireNonNull(tilBehandlingId);
+        var fraBehandlingVilkår = hentHvisEksisterer(fraBehandlingId);
+        if (fraBehandlingVilkår.isEmpty()) {
+            deaktiverVilkårsResultat(tilBehandlingId);
+            return;
+        }
+        var fagsakPeriode = behandlingRepository.hentBehandling(tilBehandlingId).getFagsak().getPeriode();
         lagre(tilBehandlingId, fraBehandlingVilkår.get(), fagsakPeriode);
     }
 

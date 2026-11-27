@@ -35,6 +35,12 @@ class AktivitetspengerInformasjonselementerUtlederTest {
     }
 
     @Test
+    void kontrollbehandling_med_kontroll_av_inntekt_skal_hente_aktivitetspengergrunnlag() {
+        assertThat(utleder.utled(BehandlingType.KONTROLL, List.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)))
+            .containsExactlyInAnyOrder(INNTEKT_AKTIVITETSPENGERGRUNNLAG, LIGNET_NÆRING);
+    }
+
+    @Test
     void uten_toggle_skal_hente_ungdomsytelsegrunnlag_som_før() {
         var utenToggle = new AktivitetspengerInformasjonselementerUtleder(false);
         assertThat(utenToggle.utled(BehandlingType.FØRSTEGANGSSØKNAD, List.of(BehandlingÅrsakType.NY_SØKT_PERIODE)))

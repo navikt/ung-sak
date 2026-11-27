@@ -15,8 +15,13 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInforma
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPerioder;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
@@ -42,6 +47,9 @@ public class EndringsresultatSjekker {
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
     private BehandlingRepository behandlingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
 
     private Instance<EndringStartpunktUtleder> startpunktUtledere;
 
@@ -57,7 +65,10 @@ public class EndringsresultatSjekker {
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    ProsessTriggereRepository prosessTriggereRepository,
                                    UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                   BehandlingRepository behandlingRepository) {
+                                   BehandlingRepository behandlingRepository,
+                                   VilkårResultatRepository vilkårResultatRepository,
+                                   TilkjentYtelseRepository tilkjentYtelseRepository,
+                                   UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.informasjonselementer = informasjonselementer;
         this.startpunktUtledere = startpunktUtledere;
@@ -66,6 +77,22 @@ public class EndringsresultatSjekker {
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.behandlingRepository = behandlingRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
+    }
+
+    /**
+     * Snapshot for synk av åpne behandlinger. Dekker i tillegg vilkårsresultat, kontrollperioder og ytelsesgrunnlag (UNG),
+     * som synken erstatter. Vanlig registerinnhenting bruker det ikke, fordi stegene selv endrer disse aggregatene.
+     * Diffen bruker utvidet snapshot når snapshotet før gjør det, se {@link #finnSporedeEndringerPåBehandlingsgrunnlag}.
+     */
+    public EndringsresultatSnapshot opprettUtvidetEndringsresultatSnapshot(Long behandlingId) {
+        var snapshot = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
+        snapshot.leggTil(vilkårResultatRepository.finnAktivGrunnlagId(behandlingId));
+        snapshot.leggTil(tilkjentYtelseRepository.finnAktivKontrollperioderId(behandlingId));
+        snapshot.leggTil(ungdomsytelseGrunnlagRepository.finnAktivGrunnlagId(behandlingId));
+        return snapshot;
     }
 
     public EndringsresultatSnapshot opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(Long behandlingId) {
@@ -112,7 +139,10 @@ public class EndringsresultatSjekker {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         // Del 1: Finn diff mellom grunnlagets id før og etter oppdatering
-        EndringsresultatSnapshot idSnapshotNå = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
+        boolean utvidetSnapshot = snapshotFør.inneholder(VilkårsResultat.class);
+        EndringsresultatSnapshot idSnapshotNå = utvidetSnapshot
+            ? opprettUtvidetEndringsresultatSnapshot(behandlingId)
+            : opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
         EndringsresultatDiff idDiff = idSnapshotNå.minus(snapshotFør);
 
         // Del 2: Transformer diff på grunnlagets id til diff på grunnlagets sporede endringer (@ChangeTracked)
@@ -145,6 +175,20 @@ public class EndringsresultatSjekker {
         var søknadDokumentTjeneste = SøknadDokumentTjeneste.finnTjeneste(søknadsDokumentTjenester, behandling.getFagsakYtelseType());
         søknadDokumentTjeneste.ifPresent(dokumentTjeneste -> idDiff.hentDelresultat(dokumentTjeneste.getGrunnlagsKlasse())
             .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> dokumentTjeneste.diffResultat(idEndring, kunSporedeEndringer))));
+
+        if (utvidetSnapshot) {
+            EndringStartpunktUtleder.finnUtleder(startpunktUtledere, VilkårsResultat.class, behandling.getFagsakYtelseType())
+                .flatMap(u -> idDiff.hentDelresultat(VilkårsResultat.class))
+                .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> vilkårResultatRepository.diffUtfall(idEndring)));
+
+            EndringStartpunktUtleder.finnUtleder(startpunktUtledere, KontrollertInntektPerioder.class, behandling.getFagsakYtelseType())
+                .flatMap(u -> idDiff.hentDelresultat(KontrollertInntektPerioder.class))
+                .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> tilkjentYtelseRepository.diffKontrollperioder(idEndring)));
+
+            EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsytelseGrunnlag.class, behandling.getFagsakYtelseType())
+                .flatMap(u -> idDiff.hentDelresultat(UngdomsytelseGrunnlag.class))
+                .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> ungdomsytelseGrunnlagRepository.diffAvslåttUttak(idEndring)));
+        }
 
         var utvidetBehandlingsgrunnlagTjeneste = DiffUtvidetBehandlingsgrunnlagTjeneste.finnTjeneste(behandling.getFagsakYtelseType());
         utvidetBehandlingsgrunnlagTjeneste.ifPresent(diffUtvidetBehandlingsgrunnlagTjeneste -> diffUtvidetBehandlingsgrunnlagTjeneste.leggTilDiffResultat(BehandlingReferanse.fra(behandling), idDiff, sporedeEndringerDiff));

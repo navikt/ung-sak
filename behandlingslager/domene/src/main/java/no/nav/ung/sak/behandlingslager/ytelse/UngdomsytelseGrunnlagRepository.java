@@ -1,7 +1,9 @@
 package no.nav.ung.sak.behandlingslager.ytelse;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
@@ -12,7 +14,10 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
+import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
@@ -78,6 +83,25 @@ public class UngdomsytelseGrunnlagRepository {
         }
     }
 
+    /**
+     * Erstatter sats- og uttaksperiodene på {@code tilBehandlingId} med periodene på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ikke grunnlag, deaktiveres grunnlaget på {@code tilBehandlingId}.
+     * Brukes når en åpen behandling synkes med vedtatte data fra en annen behandling på fagsaken.
+     */
+    public void erstattGrunnlagMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        var fra = hentGrunnlag(fraBehandlingId);
+        if (fra.isEmpty()) {
+            deaktiverGrunnlag(tilBehandlingId);
+            return;
+        }
+        var til = hentGrunnlag(tilBehandlingId);
+        var builder = new UngdomsytelseGrunnlagBuilder(fra.get());
+        if (builder.erForskjellig(til.orElse(null), differ())) {
+            til.ifPresent(this::deaktiverEksisterende);
+            lagre(builder, tilBehandlingId);
+        }
+    }
+
     private DiffEntity differ() {
         TraverseGraph traverser = TraverseEntityGraphFactory.build();
         return new DiffEntity(traverser);
@@ -94,6 +118,36 @@ public class UngdomsytelseGrunnlagRepository {
             .setParameter("id", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public EndringsresultatSnapshot finnAktivGrunnlagId(Long behandlingId) {
+        return hentGrunnlag(behandlingId)
+            .map(grunnlag -> EndringsresultatSnapshot.medSnapshot(UngdomsytelseGrunnlag.class, grunnlag.getId()))
+            .orElse(EndringsresultatSnapshot.utenSnapshot(UngdomsytelseGrunnlag.class));
+    }
+
+    /**
+     * Diff på perioder med avslag i uttak, som avgrenser ytelsesperioden. Endret sats gir ingen diff.
+     */
+    public DiffResult diffAvslåttUttak(EndringsresultatDiff idEndring) {
+        var avslag1 = avslagsårsakPerPeriode((Long) idEndring.getGrunnlagId1());
+        var avslag2 = avslagsårsakPerPeriode((Long) idEndring.getGrunnlagId2());
+        return differ().diff(avslag1, avslag2);
+    }
+
+    private Map<String, String> avslagsårsakPerPeriode(Long grunnlagId) {
+        var grunnlag = Objects.requireNonNull(entityManager.find(UngdomsytelseGrunnlag.class, grunnlagId),
+            "Fant ikke ytelsesgrunnlag med id " + grunnlagId);
+        var avslag = new TreeMap<String, String>();
+        if (grunnlag.getUttakPerioder() == null) {
+            return avslag;
+        }
+        grunnlag.getAvslagstidslinjeFraUttak()
+            .filterValue(uttak -> uttak.avslagsårsak() != null)
+            .compress()
+            .toSegments()
+            .forEach(s -> avslag.put(s.getFom() + "|" + s.getTom(), s.getValue().avslagsårsak().getKode()));
+        return avslag;
     }
 
     private void lagre(UngdomsytelseGrunnlagBuilder builder, Long behandlingId) {

@@ -62,7 +62,7 @@ public class VurderGReguleringKandidatTask extends FagsakProsessTask {
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
 
 
-        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(prosessTaskData.getFagsakId()).orElseThrow(() -> new IllegalStateException("Forventer å finne behandling"));
+        var sisteBehandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(prosessTaskData.getFagsakId()).orElseThrow(() -> new IllegalStateException("Forventer å finne behandling"));
 
         var perioderSomSkalGReguleres = PerioderForGReguleringUtleder.finnTjeneste(sisteBehandling.getFagsak().getYtelseType(), kandidaterForGReguleringTjeneste)
             .utledPerioderForGRegulering(sisteBehandling, periode);

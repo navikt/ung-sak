@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -60,6 +61,24 @@ public class EtterlysningProssesseringTjeneste {
         });
 
         etterlysningRepository.lagre(etterlysninger);
+    }
+
+    /**
+     * Avbryter alle etterlysninger på behandlingen som ikke er besvart, utløpt eller avbrutt.
+     * Oppgaven i ung-brukerdialog-api avbrytes for etterlysninger som er sendt. Etterlysninger som ikke er sendt
+     * ({@link EtterlysningStatus#OPPRETTET}), avbrytes uten kall, fordi oppgaven ikke finnes ennå.
+     */
+    public void avbrytÅpneEtterlysninger(Behandling behandling) {
+        var åpne = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(behandling.getId());
+        åpne.forEach(e -> {
+            var erSendt = e.getStatus() == EtterlysningStatus.VENTER;
+            e.setSkalAvbrytes();
+            if (!erSendt) {
+                e.avbryt();
+            }
+        });
+        etterlysningRepository.lagre(åpne);
+        settTilAvbrutt(behandling);
     }
 
     public void opprett(Behandling behandling, EtterlysningType etterlysningType) {

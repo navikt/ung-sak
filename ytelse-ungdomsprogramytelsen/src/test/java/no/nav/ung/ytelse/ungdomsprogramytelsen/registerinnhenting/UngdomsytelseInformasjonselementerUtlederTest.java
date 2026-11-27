@@ -23,4 +23,10 @@ class UngdomsytelseInformasjonselementerUtlederTest {
         assertThat(utleder.utled(BehandlingType.REVURDERING, List.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)))
             .containsExactly(INNTEKT_UNGDOMSYTELSEGRUNNLAG);
     }
+
+    @Test
+    void kontrollbehandling_med_kontroll_av_inntekt_skal_hente_ungdomsytelsegrunnlag() {
+        assertThat(utleder.utled(BehandlingType.KONTROLL, List.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)))
+            .containsExactly(INNTEKT_UNGDOMSYTELSEGRUNNLAG);
+    }
 }

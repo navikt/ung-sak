@@ -49,7 +49,7 @@ public class GyldigePerioderForRevurderingForVilkårsavklaring implements Gyldig
     }
 
     private ÅrsakOgPerioderDto utledPerioderForVilkår(long fagsakId, VilkårType vilkårType, BehandlingÅrsakType årsak) {
-        Optional<Behandling> sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+        Optional<Behandling> sisteBehandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsakId);
         List<Periode> perioder = sisteBehandling.map(b -> vilkårResultatRepository.hent(b.getId()))
             .stream()
             .map(v -> v.getVilkår(vilkårType))

@@ -8,7 +8,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
-import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -71,7 +70,7 @@ public class OpprettOppgaveEventObserver {
         List<Aksjonspunkt> åpneAksjonspunkt = filterAksjonspunkt(behandling.getÅpneAksjonspunkter(AksjonspunktType.MANUELL), event);
         if (!åpneAksjonspunkt.isEmpty()) {
             if (harAksjonspunkt(åpneAksjonspunkt, AksjonspunktDefinisjon.FATTER_VEDTAK)) {
-                oppgaveTjeneste.avsluttOppgaveOgStartTask(behandling, behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK, OpprettOppgaveGodkjennVedtakTask.TASKTYPE);
+                oppgaveTjeneste.avsluttOppgaveOgStartTask(behandling, OppgaveTjeneste.utledOppgaveÅrsak(behandling), OpprettOppgaveGodkjennVedtakTask.TASKTYPE);
             } else {
                 opprettOppgaveVedBehov(behandling);
             }
@@ -87,7 +86,7 @@ public class OpprettOppgaveEventObserver {
 
     private void opprettOppgaveVedBehov(Behandling behandling) {
         List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandling.getId());
-        Optional<OppgaveBehandlingKobling> aktivOppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK, oppgaveBehandlingKoblinger);
+        Optional<OppgaveBehandlingKobling> aktivOppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(OppgaveTjeneste.utledOppgaveÅrsak(behandling), oppgaveBehandlingKoblinger);
         if (!aktivOppgave.isPresent()) {
             ProsessTaskData enkeltTask = opprettProsessTaskData(behandling, new TaskType(OpprettOppgaveForBehandlingTask.TASKTYPE));
             enkeltTask.setCallIdFraEksisterende();

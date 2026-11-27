@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.*;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -29,6 +30,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     public static final String SEKVENSNUMMER_KEY = "sekvensnummer";
 
     private static final Logger log = LoggerFactory.getLogger(HentInntektHendelserTask.class);
+    private static final BehandlingType[] YTELSE_BEHANDLING_TYPER = BehandlingType.getYtelseBehandlingTyper().toArray(BehandlingType[]::new);
 
     private InntektAbonnentTjeneste inntektAbonnentTjeneste;
     private FagsakTjeneste fagsakTjeneste;
@@ -113,7 +115,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
             .flatMap(hendelse -> fagsakTjeneste.finnFagsakerForAktør(hendelse.aktørId()).stream()
                 .filter(Fagsak::erÅpen)
                 .filter(fagsak -> fagsak.getPeriode().overlapper(hendelse.periode().getFom(), hendelse.periode().getTom())))
-            .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
+            .flatMap(fagsak -> behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId(), YTELSE_BEHANDLING_TYPER).stream())
             .filter(this::venterPåInntektUttalelse)
             .distinct()
             .toList();

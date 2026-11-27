@@ -10,7 +10,11 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellRepository;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.KontrollbehandlingBryter;
+import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.prosess.ProsessModell;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -49,12 +53,38 @@ public class BehandlingModellTest {
     public static Stream<Arguments> provideArguments(){
         List<Arguments> params = new ArrayList<>();
         List<FagsakYtelseType> ytelseTyper = List.of(FagsakYtelseType.UNGDOMSYTELSE);
-        List<BehandlingType> behandlingTyper = List.of(BehandlingType.FØRSTEGANGSSØKNAD, BehandlingType.REVURDERING);
+        List<BehandlingType> behandlingTyper = List.of(BehandlingType.FØRSTEGANGSSØKNAD, BehandlingType.REVURDERING, BehandlingType.KONTROLL);
         for (FagsakYtelseType a : ytelseTyper) {
             for (BehandlingType b : behandlingTyper) {
                 params.add(Arguments.of( a, b ) );
             }
         }
         return params.stream();
+    }
+
+    @Test
+    public void ventepunkt_for_vedtaksprioritet_står_rett_før_beregning_av_ytelse_i_ordinære_modeller_bare_når_bryteren_for_ytelsen_er_på() {
+        var prosessModell = new ProsessModell();
+        var påForUngdomsytelse = new KontrollbehandlingBryter(true, false);
+        var påForAktivitetspenger = new KontrollbehandlingBryter(false, true);
+
+        assertThat(stegFørBeregnYtelse(prosessModell.førstegangsbehandling(påForUngdomsytelse))).isEqualTo(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
+        assertThat(stegFørBeregnYtelse(prosessModell.revurdering(påForUngdomsytelse))).isEqualTo(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
+        assertThat(prosessModell.førstegangsbehandling(påForAktivitetspenger).getAlleBehandlingStegTyper()).doesNotContain(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
+        assertThat(prosessModell.revurdering(påForAktivitetspenger).getAlleBehandlingStegTyper()).doesNotContain(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
+    }
+
+    @Test
+    public void kontrollbehandling_har_ventepunkt_for_vedtaksprioritet_rett_før_beregning_av_ytelse_og_starter_alle_endringer_i_kompletthetssteget() {
+        BehandlingModell modell = new ProsessModell().kontroll();
+
+        assertThat(stegFørBeregnYtelse(modell)).isEqualTo(BehandlingStegType.VURDER_VEDTAKSPRIORITET);
+        for (StartpunktType startpunkt : StartpunktType.values()) {
+            assertThat(modell.finnBehandlingSteg(startpunkt)).as(startpunkt.getKode()).isEqualTo(BehandlingStegType.VURDER_KOMPLETTHET);
+        }
+    }
+
+    private static BehandlingStegType stegFørBeregnYtelse(BehandlingModell modell) {
+        return modell.finnForrigeSteg(BehandlingStegType.BEREGN_YTELSE).getBehandlingStegType();
     }
 }

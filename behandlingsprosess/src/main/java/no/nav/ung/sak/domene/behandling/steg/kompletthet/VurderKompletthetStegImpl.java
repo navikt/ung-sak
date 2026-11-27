@@ -98,7 +98,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         if (relevantekontrollperioder.isEmpty()) {
             log.info("Behandlingen har ingen relevante kontrollperioder for inntekt, hopper over opprettelse av inntekt abonnement.");
         } else {
-            inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId(), new Periode(relevantekontrollperioder.getMinLocalDate(), relevantekontrollperioder.getMaxLocalDate()));
+            inntektAbonnentTjeneste.opprettAbonnementForBehandling(behandlingReferanse, new Periode(relevantekontrollperioder.getMinLocalDate(), relevantekontrollperioder.getMaxLocalDate()));
         }
 
         // Steg 2: Utled aksjonspunkter

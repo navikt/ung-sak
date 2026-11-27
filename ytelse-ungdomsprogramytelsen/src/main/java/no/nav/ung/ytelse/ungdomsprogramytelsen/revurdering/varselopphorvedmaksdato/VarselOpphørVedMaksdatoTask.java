@@ -82,7 +82,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
     private ProsessTaskData opprettTask(Fagsak fagsak) {
         Long fagsakId = fagsak.getId();
-        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+        var sisteBehandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsakId);
         if (sisteBehandling.isEmpty()) {
             return null;
         }

@@ -45,6 +45,10 @@ public class UngdomsytelseRegisterinnhentingTaskUtleder implements UtvidetRegist
         if (behandling.getFagsakYtelseType() != FagsakYtelseType.UNGDOMSYTELSE) {
             return false;
         }
+        if (behandling.erKontrollbehandling()) {
+            // Kontrollbehandlingen bygger på vedtatt programperiode, som kopieres og synkes fra andre behandlinger
+            return false;
+        }
         return !behandling.erRevurdering() || BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
     }
 

@@ -58,8 +58,12 @@ public class BehandlingRevurderingRepository {
         return Collections.emptyList();
     }
 
-    public Optional<Behandling> hentSisteBehandling(Long fagsakId) {
-        return behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+    /**
+     * Siste ordinære ytelsesbehandling. Kontrollbehandlinger er ikke med, fordi de går parallelt med ordinære behandlinger.
+     * Ordinære behandlinger følger etter hverandre, så sortering på opprettet tidspunkt gir riktig svar.
+     */
+    public Optional<Behandling> hentSisteOrdinæreBehandling(Long fagsakId) {
+        return behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsakId);
     }
 
     private List<Long> finnHenlagteBehandlingerEtter(Long fagsakId, Behandling sisteInnvilgede) {

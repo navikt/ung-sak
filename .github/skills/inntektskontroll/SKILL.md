@@ -20,6 +20,8 @@ At the start of each month, the applicants are notified to report their income f
 On the 8th of each month, the income control process starts. Ung-sak runs the scheduled task `OpprettRevurderingForInntektskontrollBatchTask` which starts the process of income control for all relevant cases (fagsaker).
 This creates a new `Behandling` (of type revurdering) for relevant `Fagsak` and this revurdering is flagged for income control by creating a `ProsessTrigger` with the `BehandlingÅrsakType` `RE-KONTROLL-REGISTER-INNTEKT`.
 
+With `KONTROLLBEHANDLING_UNG_ENABLED` or `KONTROLLBEHANDLING_AVP_ENABLED` on, the control runs in a kontrollbehandling (`BehandlingType.KONTROLL`) instead of a revurdering, in parallel with the ordinary behandling. `KontrollbehandlingRuting` decides where the control and the income reporting go. Months for the same fagsak are collected in one open kontrollbehandling. The kontrollbehandling only runs the steps around the control (`VURDER_KOMPLETTHET`, `KONTROLLER_REGISTER_INNTEKT`), and gets vilkår, periods and ytelsesgrunnlag from the last vedtak. When a behandling is avsluttet, the other open behandlinger are synchronised. A kontrollbehandling without months left after synchronisation is henlagt. See «Domain Notes: Kontrollbehandling» in `AGENTS.md`.
+
 The income control process checks the reported income against the income information from a-ordningen. Determining the right income is a two-step process:
 1) Creating a notification of discrepancy (forhåndsvarsel) in case of a discrepancy between the income from a-ordningen and the reported income from the applicant
 2) Determining the right income

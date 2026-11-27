@@ -15,6 +15,7 @@ import java.util.List;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class UngEtterlysningOppretterTest {
@@ -91,5 +92,18 @@ class UngEtterlysningOppretterTest {
         verify(kontrollerInntektEtterlysningTjeneste, never()).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         verify(maksdatoEtterlysningTjeneste, never()).opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
+    }
+
+    @Test
+    void skalBareTriggeInntektskontroll_forKontrollbehandling() {
+        when(behandling.erKontrollbehandling()).thenReturn(true);
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+
+        oppretter.opprettEtterlysninger(behandlingReferanse);
+
+        verify(kontrollerInntektEtterlysningTjeneste).opprettEtterlysninger(behandlingReferanse);
+        verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+        verify(maksdatoEtterlysningTjeneste, never()).opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
+        verifyNoInteractions(opphevelseAvOpphørEtterlysningHåndterer);
     }
 }

@@ -53,6 +53,24 @@ public class RevurderingTjenesteFelles {
         return fagsakRevurdering.kanRevurderingOpprettes(fagsak);
     }
 
+    public boolean kanKontrollbehandlingOpprettes(Fagsak fagsak) {
+        return fagsakRevurdering.kanKontrollbehandlingOpprettes(fagsak);
+    }
+
+    /**
+     * Om behandlingen er siste vedtak på fagsaken: avsluttet, ikke henlagt og siste ytelsesbehandling sortert på
+     * vedtakstidspunkt. En nyere behandling under iverksetting gjør at behandlingen ikke lenger er siste vedtak.
+     */
+    public boolean erSisteVedtak(Behandling behandling) {
+        if (!behandling.erYtelseBehandling() || !behandling.erAvsluttet() || behandling.erHenlagt()) {
+            return false;
+        }
+        return behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId())
+            .map(Behandling::getId)
+            .filter(behandling.getId()::equals)
+            .isPresent();
+    }
+
     public void kopierVilkårsresultat(Behandling origBehandling, Behandling revurdering, BehandlingskontrollKontekst kontekst) {
         Long originalBehandlingId = origBehandling.getId();
         vilkårResultatRepository.kopier(originalBehandlingId, revurdering.getId());

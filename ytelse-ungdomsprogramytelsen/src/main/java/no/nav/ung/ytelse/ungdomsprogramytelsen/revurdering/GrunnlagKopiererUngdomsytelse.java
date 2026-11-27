@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
@@ -25,6 +26,7 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
     private StartdatoRepository startdatoRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private UttalelseRepository uttalelseRepository;
+    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
 
     public GrunnlagKopiererUngdomsytelse() {
         // for CDI proxy
@@ -33,13 +35,15 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererUngdomsytelse(BehandlingRepositoryProvider repositoryProvider,
                                          InntektArbeidYtelseTjeneste iayTjeneste,
-                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, StartdatoRepository startdatoRepository, TilkjentYtelseRepository tilkjentYtelseRepository, UttalelseRepository uttalelseRepository) {
+                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, StartdatoRepository startdatoRepository, TilkjentYtelseRepository tilkjentYtelseRepository, UttalelseRepository uttalelseRepository,
+                                         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.startdatoRepository = startdatoRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.uttalelseRepository = uttalelseRepository;
+        this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
 
@@ -52,6 +56,10 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
         startdatoRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         tilkjentYtelseRepository.kopierKontrollPerioder(originalBehandlingId, nyBehandlingId);
         uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
+        if (ny.erKontrollbehandling()) {
+            // Kontrollbehandlingen beregner ikke sats og uttak, og bruker vedtatte perioder fra originalbehandlingen
+            ungdomsytelseGrunnlagRepository.erstattGrunnlagMedKopiFra(originalBehandlingId, nyBehandlingId);
+        }
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);

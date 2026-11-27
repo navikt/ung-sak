@@ -23,6 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.ung.sak.etterlysning.EtterlysningProssesseringTjeneste;
 import no.nav.ung.sak.kontrakt.dokument.BestillBrevDtoGammel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,7 @@ public class HenleggBehandlingTjeneste {
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester;
+    private EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste;
 
     public HenleggBehandlingTjeneste() {
         // for CDI proxy
@@ -56,7 +58,8 @@ public class HenleggBehandlingTjeneste {
                                      FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                      ProsessTaskTjeneste prosessTaskRepository,
                                      MottatteDokumentRepository mottatteDokumentRepository,
-                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester) {
+                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester,
+                                     EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -65,6 +68,7 @@ public class HenleggBehandlingTjeneste {
         this.historikkinnslagRepository = repositoryProvider.getHistorikkinnslagRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.henleggelsePostopsTjenester = henleggelsePostopsTjenester;
+        this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
     }
 
     public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
@@ -106,6 +110,11 @@ public class HenleggBehandlingTjeneste {
     private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, HistorikkAktør historikkAktør) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+
+        if (behandling.erKontrollbehandling()) {
+            // Deltakeren skal ikke sitte igjen med en oppgave som ingen behandling tar imot svar på.
+            etterlysningProssesseringTjeneste.avbrytÅpneEtterlysninger(behandling);
+        }
 
         behandlingskontrollTjeneste.henleggBehandling(kontekst, årsakKode);
 

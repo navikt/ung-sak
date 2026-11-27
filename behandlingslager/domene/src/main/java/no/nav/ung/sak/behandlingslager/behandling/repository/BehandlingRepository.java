@@ -158,6 +158,15 @@ public class BehandlingRepository {
     }
 
     /**
+     * Hent siste ordinære ytelsesbehandling (førstegangsbehandling eller revurdering) for angitt {@link Fagsak#id}.
+     * Kontrollbehandlinger er ikke med. De går parallelt med ordinære behandlinger, så sortering på opprettet tidspunkt
+     * ville gitt en kontrollbehandling som siste behandling.
+     */
+    public Optional<Behandling> hentSisteOrdinæreYtelsesBehandlingForFagsakId(Long fagsakId) {
+        return finnSisteBehandling(fagsakId, BehandlingType.getOrdinæreYtelseBehandlingTyper(), false);
+    }
+
+    /**
      * Hent siste behandling for angitt {@link Fagsak#id} og behandling type
      */
     public Optional<Behandling> hentSisteBehandlingAvBehandlingTypeForFagsakId(Long fagsakId, BehandlingType behandlingType) {

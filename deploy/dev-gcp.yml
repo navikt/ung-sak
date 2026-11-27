@@ -287,6 +287,10 @@ spec:
       value: "true"
     - name: REVURDERING_AVP_ENABLED
       value: "true"
+    - name: KONTROLLBEHANDLING_UNG_ENABLED
+      value: "false"
+    - name: KONTROLLBEHANDLING_AVP_ENABLED
+      value: "false"
     - name: INTEGRASJON_KABAL
       value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED

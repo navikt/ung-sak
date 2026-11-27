@@ -53,6 +53,20 @@ public class OppgittForutgåendeMedlemskapRepository {
         });
     }
 
+    /**
+     * Erstatter grunnlaget på {@code tilBehandlingId} med en kopi av grunnlaget på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ikke grunnlag, deaktiveres grunnlaget på {@code tilBehandlingId}.
+     */
+    public void erstattGrunnlagMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        var fra = hentEksisterendeGrunnlag(fraBehandlingId);
+        var til = hentEksisterendeGrunnlag(tilBehandlingId);
+        if (fra.isEmpty()) {
+            til.ifPresent(this::deaktiverEksisterende);
+            return;
+        }
+        persister(til, new OppgittForutgåendeMedlemskapGrunnlag(tilBehandlingId, fra.get().getHolder()));
+    }
+
     private void persister(Optional<OppgittForutgåendeMedlemskapGrunnlag> eksisterendeGrunnlag, OppgittForutgåendeMedlemskapGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
         entityManager.persist(nyttGrunnlag);

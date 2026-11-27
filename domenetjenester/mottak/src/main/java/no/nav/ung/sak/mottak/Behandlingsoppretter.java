@@ -94,6 +94,15 @@ public class Behandlingsoppretter {
         return revurdering;
     }
 
+    /**
+     * Oppretter kontrollbehandling fra siste vedtak. Originalbehandlingen må være avsluttet, og fagsaken kan ikke ha en
+     * kontrollbehandling som ikke er avsluttet.
+     */
+    public Behandling opprettKontrollbehandling(Behandling origBehandling, BehandlingÅrsakType årsak) {
+        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(revurderingTjenester, origBehandling.getFagsakYtelseType()).orElseThrow();
+        return revurderingTjeneste.opprettKontrollbehandling(origBehandling, årsak, false);
+    }
+
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         henleggBehandling(sisteYtelseBehandling);
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(sisteYtelseBehandling.getType())) {
@@ -131,7 +140,7 @@ public class Behandlingsoppretter {
     }
 
     public Behandling opprettNyFørstegangsbehandlingFraTidligereSøknad(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Behandling behandlingMedSøknad) {
-        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteBehandling(fagsak.getId());
+        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteOrdinæreBehandling(fagsak.getId());
         boolean harÅpenBehandling = !(sisteYtelsesbehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(Boolean.TRUE));
         Behandling behandling = harÅpenBehandling
             ? oppdaterBehandlingViaHenleggelse(sisteYtelsesbehandling.get(), behandlingÅrsakType)
@@ -147,7 +156,7 @@ public class Behandlingsoppretter {
     }
 
     public Optional<Behandling> sisteHenlagteFørstegangsbehandling(Fagsak fagsak) {
-        Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        Optional<Behandling> behandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandling.isPresent()
             && behandling.get().erStatusFerdigbehandlet()
             && behandling.get().erHenlagt()) {

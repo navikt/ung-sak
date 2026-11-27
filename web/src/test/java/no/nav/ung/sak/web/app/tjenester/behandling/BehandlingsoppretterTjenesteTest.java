@@ -3,8 +3,10 @@ package no.nav.ung.sak.web.app.tjenester.behandling;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.exception.FunksjonellException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
@@ -13,6 +15,7 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandling.revurdering.GrunnlagKopierer;
+import no.nav.ung.sak.behandling.revurdering.KontrollbehandlingRuting;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjenesteFelles;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -27,7 +30,10 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.KontrollbehandlingBryter;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlingerRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -93,6 +99,12 @@ class BehandlingsoppretterTjenesteTest {
     private PersonopplysningRepository personopplysningRepository;
 
     @Inject
+    private FagsakLåsRepository fagsakLåsRepository;
+
+    @Inject
+    private ParallelleBehandlingerRepository parallelleBehandlingerRepository;
+
+    @Inject
     @Any
     private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
 
@@ -110,10 +122,16 @@ class BehandlingsoppretterTjenesteTest {
     void setUp() {
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
         when(behandlendeEnhetTjeneste.finnBehandlendeEnheterFor(any())).thenReturn(Map.of(BehandlingDel.SENTRAL, new OrganisasjonsEnhet("1234", "Nav Test")));
+        behandlingsoppretterTjeneste = lagTjeneste(new KontrollbehandlingBryter(false, false));
+    }
+
+    private BehandlingsoppretterTjeneste lagTjeneste(KontrollbehandlingBryter bryter) {
         var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste, revurderingTjenesteFelles, grunnlagKopierere, historikkinnslagRepository,
-            prosessTriggereRepository, repositoryProvider.getBehandlingAnsvarligRepository(), behandlendeEnhetTjeneste);
-        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, gyldigePerioderForRevurderingUtledere, behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository,
-            new UnitTestLookupInstanceImpl<>(revurderingTjeneste));
+            prosessTriggereRepository, repositoryProvider.getBehandlingAnsvarligRepository(), behandlendeEnhetTjeneste,
+            fagsakLåsRepository, bryter);
+        var ruting = new KontrollbehandlingRuting(behandlingRepository, parallelleBehandlingerRepository, prosessTriggereRepository, bryter);
+        return new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, gyldigePerioderForRevurderingUtledere, behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository,
+            new UnitTestLookupInstanceImpl<>(revurderingTjeneste), ruting);
     }
 
     @Test
@@ -150,6 +168,65 @@ class BehandlingsoppretterTjenesteTest {
         Set<Trigger> triggere = prosessTriggere.get().getTriggere();
         assertEquals(1, triggere.size());
         assertEquals(triggere.iterator().next().getPeriode(), fagsak.getPeriode());
+    }
+
+    @Test
+    void skalOppretteKontrollbehandlingVedManuellKontrollNårBryterErPå() {
+        behandlingsoppretterTjeneste = lagTjeneste(new KontrollbehandlingBryter(true, false));
+        behandling = opprettRevurderingsKandidat(FagsakYtelseType.UNGDOMSYTELSE);
+        Fagsak fagsak = behandling.getFagsak();
+        var periode = lagreKontrollertPeriode(behandling);
+
+        var kontrollbehandling = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Optional.of(periode));
+
+        assertEquals(BehandlingType.KONTROLL, kontrollbehandling.getType());
+        assertEquals(behandling.getId(), kontrollbehandling.getOriginalBehandlingId().orElseThrow());
+        assertTrue(kontrollbehandling.getBehandlingÅrsaker().stream()
+            .anyMatch(å -> å.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT && å.erManueltOpprettet()));
+        var triggere = prosessTriggereRepository.hentGrunnlag(kontrollbehandling.getId()).orElseThrow().getTriggere();
+        assertEquals(Set.of(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, periode)), triggere);
+    }
+
+    @Test
+    void skalOppretteKontrollbehandlingVedSidenAvÅpenOrdinærBehandling() {
+        behandlingsoppretterTjeneste = lagTjeneste(new KontrollbehandlingBryter(true, false));
+        behandling = opprettRevurderingsKandidat(FagsakYtelseType.UNGDOMSYTELSE);
+        Fagsak fagsak = behandling.getFagsak();
+        var periode = lagreKontrollertPeriode(behandling);
+        var revurdering = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_SATS_ENDRING, Optional.empty());
+
+        var kontrollbehandling = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Optional.of(periode));
+
+        assertTrue(revurdering.erRevurdering());
+        assertEquals(BehandlingType.KONTROLL, kontrollbehandling.getType());
+        assertEquals(Set.of(revurdering.getId(), kontrollbehandling.getId()),
+            Set.copyOf(behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsak.getId(), BehandlingType.getYtelseBehandlingTyper())));
+    }
+
+    @Test
+    void skalAvviseManuellKontrollNårKontrollbehandlingIkkeErAvsluttet() {
+        behandlingsoppretterTjeneste = lagTjeneste(new KontrollbehandlingBryter(true, false));
+        behandling = opprettRevurderingsKandidat(FagsakYtelseType.UNGDOMSYTELSE);
+        Fagsak fagsak = behandling.getFagsak();
+        var periode = lagreKontrollertPeriode(behandling);
+        behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Optional.of(periode));
+
+        var feil = assertThrows(FunksjonellException.class, () ->
+            behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Optional.of(periode)));
+
+        assertEquals("FP-663488", feil.getKode());
+    }
+
+    @Test
+    void skalAvviseManuellKontrollMedGenerellFeilNårFagsakManglerVedtak() {
+        behandlingsoppretterTjeneste = lagTjeneste(new KontrollbehandlingBryter(true, false));
+        behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE).lagre(repositoryProvider);
+        Fagsak fagsak = behandling.getFagsak();
+
+        var feil = assertThrows(FunksjonellException.class, () ->
+            behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Optional.of(fagsak.getPeriode())));
+
+        assertEquals("FP-663487", feil.getKode());
     }
 
     @Test
@@ -196,6 +273,14 @@ class BehandlingsoppretterTjenesteTest {
 
         assertThrows(IllegalArgumentException.class, () ->
             behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, årsak, Optional.of(periodeUtenfor)));
+    }
+
+    private DatoIntervallEntitet lagreKontrollertPeriode(Behandling behandling) {
+        var periode = behandling.getFagsak().getPeriode();
+        tilkjentYtelseRepository.lagre(behandling.getId(), List.of(
+            KontrollertInntektPeriode.ny().medPeriode(periode).medInntekt(BigDecimal.ZERO).medKilde(KontrollertInntektKilde.REGISTER).build()
+        ));
+        return periode;
     }
 
     private Behandling opprettRevurderingsKandidat(FagsakYtelseType ytelseType) {

@@ -77,6 +77,16 @@ public class AktivitetspengerGrunnlagRepository {
         });
     }
 
+    /**
+     * Erstatter grunnlaget på {@code tilBehandlingId} med en kopi av grunnlaget på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ikke grunnlag, deaktiveres grunnlaget på {@code tilBehandlingId}.
+     */
+    public void erstattGrunnlagMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        var fra = hentGrunnlag(fraBehandlingId);
+        hentGrunnlag(tilBehandlingId).ifPresent(this::deaktiverEksisterende);
+        fra.ifPresent(original -> lagre(new AktivitetspengerGrunnlagBuilder(original), tilBehandlingId));
+    }
+
     public Optional<AktivitetspengerGrunnlag> hentGrunnlag(Long behandlingId) {
         var query = entityManager.createQuery(
                 "SELECT bg FROM AktivitetspengerGrunnlag bg WHERE bg.behandlingId=:id AND bg.aktiv = true",

@@ -91,6 +91,21 @@ public class VilkårsavklaringGrunnlagRepository {
         entityManager.flush();
     }
 
+    /**
+     * Erstatter grunnlagene for alle vilkårstyper på {@code tilBehandlingId} med kopier av grunnlagene på
+     * {@code fraBehandlingId}. Mangler grunnlag for en vilkårstype på {@code fraBehandlingId}, deaktiveres grunnlaget
+     * for typen på {@code tilBehandlingId}. Foreslåtte avklaringer følger ikke med, som ved kopiering.
+     */
+    public void erstattGrunnlagMedKopiFra(Long fraBehandlingId, Long tilBehandlingId) {
+        for (VilkårType vilkårType : VilkårType.values()) {
+            var fra = hentGrunnlagHvisEksisterer(fraBehandlingId, vilkårType);
+            hentGrunnlagHvisEksisterer(tilBehandlingId, vilkårType).ifPresent(this::deaktiverEksisterende);
+            fra.ifPresent(eksisterende ->
+                entityManager.persist(VilkårsavklaringGrunnlag.nyttGrunnlagForBehandlingMedReferanserFra(tilBehandlingId, eksisterende)));
+        }
+        entityManager.flush();
+    }
+
     private void deaktiverEksisterende(VilkårsavklaringGrunnlag gr) {
         gr.deaktiver();
         entityManager.persist(gr);

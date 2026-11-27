@@ -18,6 +18,7 @@ import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.Vilkårsutfallsporing;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -227,19 +228,26 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
             return true;
         }
 
-        var originalBehandlingId = behandling.getOriginalBehandlingId();
-        if (originalBehandlingId.isEmpty()) {
+        var originalBehandling = finnOrdinærOriginalbehandling(behandling);
+        if (originalBehandling.isEmpty() || originalBehandling.get().getType() != BehandlingType.FØRSTEGANGSSØKNAD) {
             return false;
         }
 
-        var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId.get());
-        if (originalBehandling.getType() != BehandlingType.FØRSTEGANGSSØKNAD) {
-            return false;
-        }
-
-        return vilkårTjeneste.samletVilkårsresultat(originalBehandling.getId())
+        return vilkårTjeneste.samletVilkårsresultat(originalBehandling.get().getId())
             .filterValue(utfall -> utfall.getSamletUtfall() == Utfall.OPPFYLT)
             .isEmpty();
+    }
+
+    /**
+     * Kontrollbehandlinger vurderer ikke vilkår og har vilkårsresultatet fra behandlingen de bygger på. Derfor følges
+     * kjeden forbi kontrollbehandlinger til ordinær behandling.
+     */
+    private Optional<Behandling> finnOrdinærOriginalbehandling(Behandling behandling) {
+        var original = behandling.getOriginalBehandlingId().map(behandlingRepository::hentBehandling);
+        while (original.isPresent() && original.get().erKontrollbehandling()) {
+            original = original.get().getOriginalBehandlingId().map(behandlingRepository::hentBehandling);
+        }
+        return original;
     }
 
     private void automatiskInnvilgAktivitetsvilkåret(Long behandlingId, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {

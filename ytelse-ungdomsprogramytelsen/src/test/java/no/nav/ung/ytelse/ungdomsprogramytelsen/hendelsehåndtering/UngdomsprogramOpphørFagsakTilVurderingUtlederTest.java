@@ -13,9 +13,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -232,6 +234,37 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(tidligereOpphørsdato.plusDays(1), OPPHØRSDATO));
     }
 
+
+    @Test
+    void skal_bruke_åpen_ordinær_behandling_og_ikke_nyere_kontrollbehandling() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO.plusDays(1)))));
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        // Åpen revurdering der opphøret allerede er registrert
+        var behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
+        behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
+        ungdomsprogramPeriodeRepository.lagre(revurdering.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO))));
+        entityManager.flush();
+
+        // Kontrollbehandling opprettet senere, med kopi av vedtatt programperiode
+        var kontrollbehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.KONTROLL).build();
+        behandlingRepository.lagre(kontrollbehandling, behandlingRepository.taSkriveLås(kontrollbehandling));
+        ungdomsprogramPeriodeRepository.lagre(kontrollbehandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO.plusDays(1)))));
+        entityManager.flush();
+        assertThat(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(behandling.getFagsakId()).orElseThrow().getId()).isEqualTo(kontrollbehandling.getId());
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
+    }
 
     @Test
     void skal_returnere_årsak_dersom_ungdomsprogramperiode_sluttdato_er_etter_opphørsdato() {

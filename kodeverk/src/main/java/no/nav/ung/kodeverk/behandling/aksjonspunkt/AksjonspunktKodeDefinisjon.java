@@ -24,6 +24,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_LIVSOPPHOLDSYTELSE_UTTALELSE_KODE = "7043";
     public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_AKTIVITET_UTTALELSE_KODE = "7044";
 
+    public static final String AUTO_SATT_PÅ_VENT_VEDTAKSPRIORITET_KODE = "7050";
+
 
     public static final String FATTER_VEDTAK_KODE = "5016";
 

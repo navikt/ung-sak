@@ -44,6 +44,13 @@ public interface BehandlingProsesseringTjeneste {
 
     ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker, boolean forceregisterinnhenting);
 
+    /**
+     * Taskgruppe for gjenopptak etter synk av åpne behandlinger. Som {@link #opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling, boolean, boolean, boolean)}
+     * uten ny callId, årsaksutledning eller tvungen registerinnhenting. Snapshotet tas når gruppen lages, så gruppen må lages før dataene erstattes.
+     * Snapshotet dekker også vilkårsresultat, kontrollperioder og ytelsesgrunnlag, som synken erstatter.
+     */
+    ProsessTaskGruppe opprettTaskGruppeForSynkronisering(Behandling behandling);
+
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
 
     List<String> utledRegisterinnhentingTaskTyper(Behandling behandling);

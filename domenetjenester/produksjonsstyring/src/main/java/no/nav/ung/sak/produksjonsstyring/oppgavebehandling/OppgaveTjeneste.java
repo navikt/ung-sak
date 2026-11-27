@@ -183,8 +183,12 @@ public class OppgaveTjeneste {
 
     public String opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(String behandlingId, String beskrivelse, boolean høyPrioritet, int fristDager) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK;
+        OppgaveÅrsak oppgaveÅrsak = utledOppgaveÅrsak(behandling);
         return opprettOppgave(behandling, oppgaveÅrsak, beskrivelse, hentPrioritetKode(høyPrioritet), fristDager);
+    }
+
+    public static OppgaveÅrsak utledOppgaveÅrsak(Behandling behandling) {
+        return behandling.erRevurdering() || behandling.erKontrollbehandling() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK;
     }
 
     private String opprettOppgave(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String beskrivelse, Prioritet prioritet, int fristDager) {

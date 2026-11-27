@@ -53,7 +53,7 @@ class VarselOpphørVedMaksdatoTaskTest {
         var maksdato = LocalDate.now().plusWeeks(2);
 
         mockLøpendeFagsaker(List.of(fagsak));
-        when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
 
         task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
@@ -78,7 +78,7 @@ class VarselOpphørVedMaksdatoTaskTest {
         var fagsak = lagFagsak(1L, "1234567890123");
 
         mockLøpendeFagsaker(List.of(fagsak));
-        when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.empty());
+        when(behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.empty());
 
         task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
@@ -91,7 +91,7 @@ class VarselOpphørVedMaksdatoTaskTest {
         var behandling = lagBehandling(fagsak, 100L);
 
         mockLøpendeFagsaker(List.of(fagsak));
-        when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.empty());
 
         task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));

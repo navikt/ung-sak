@@ -8,16 +8,21 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
+import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 
 import java.math.BigDecimal;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -103,6 +108,25 @@ public class TilkjentYtelseRepository {
         eksisterende.ifPresent(kontrollertInntektGrunnlag -> lagreNyttGrunnlag(nyBehandlingId, kontrollertInntektGrunnlag.getKontrollertInntektPerioder()));
     }
 
+    /**
+     * Erstatter kontrollperiodene på {@code tilBehandlingId} med kontrollperiodene på {@code fraBehandlingId}.
+     * Har {@code fraBehandlingId} ingen kontrollperioder, deaktiveres grunnlaget på {@code tilBehandlingId}.
+     * Brukes når en åpen behandling synkes med vedtatte data fra en annen behandling på fagsaken.
+     */
+    public void erstattKontrollPerioderMedKopiFra(long fraBehandlingId, long tilBehandlingId) {
+        var fra = hentKontrollertInntektGrunnlag(fraBehandlingId);
+        var til = hentKontrollertInntektGrunnlag(tilBehandlingId);
+        if (fra.isEmpty()) {
+            til.ifPresent(this::deaktiver);
+            return;
+        }
+        var perioder = fra.get().getKontrollertInntektPerioder();
+        if (til.isPresent() && Objects.equals(til.get().getKontrollertInntektPerioder(), perioder)) {
+            return;
+        }
+        lagreNyttGrunnlag(tilBehandlingId, perioder);
+    }
+
     public void gjenopprettTilOriginal(Long originalBehandlingId, Long behandlingId) {
         kopierKontrollPerioder(originalBehandlingId, behandlingId);
     }
@@ -133,6 +157,42 @@ public class TilkjentYtelseRepository {
 
     public Optional<KontrollertInntektPerioder> hentKontrollertInntektPerioder(Long behandlingId) {
         return hentKontrollertInntektGrunnlag(behandlingId).map(KontrollertInntektGrunnlag::getKontrollertInntektPerioder);
+    }
+
+    /**
+     * Snapshot er knyttet til periodene, ikke til grunnlaget. Erstatning ved synk deler periodene med kilden,
+     * så id-en er uendret når kilden og målet har samme perioder.
+     */
+    public EndringsresultatSnapshot finnAktivKontrollperioderId(Long behandlingId) {
+        return hentKontrollertInntektPerioder(behandlingId)
+            .map(perioder -> EndringsresultatSnapshot.medSnapshot(KontrollertInntektPerioder.class, perioder.getId()))
+            .orElse(EndringsresultatSnapshot.utenSnapshot(KontrollertInntektPerioder.class));
+    }
+
+    /**
+     * Diff på verdiene som brukes i tilkjent ytelse og vedtaksbrev, per periode. Begrunnelse og rapportert inntekt og
+     * registerinntekt er ikke med, så endringer bare i disse gir ingen diff.
+     */
+    public DiffResult diffKontrollperioder(EndringsresultatDiff idEndring) {
+        var kontroll1 = kontrollPerPeriode((Long) idEndring.getGrunnlagId1());
+        var kontroll2 = kontrollPerPeriode((Long) idEndring.getGrunnlagId2());
+        return differ().diff(kontroll1, kontroll2);
+    }
+
+    // Periodene har verken indeksnøkkel eller equals. Som liste ville to ulike instanser alltid gitt diff.
+    private Map<String, String> kontrollPerPeriode(Long kontrollperioderId) {
+        var perioder = Objects.requireNonNull(entityManager.find(KontrollertInntektPerioder.class, kontrollperioderId),
+            "Fant ikke kontrollperioder med id " + kontrollperioderId);
+        var kontroll = new TreeMap<String, String>();
+        for (var p : perioder.getPerioder()) {
+            kontroll.put(p.getPeriode().getFomDato() + "|" + p.getPeriode().getTomDato(),
+                beløp(p.getInntekt()) + "|" + beløp(p.getYtelse()) + "|" + p.getKilde().getKode() + "|" + p.getErManueltVurdert());
+        }
+        return kontroll;
+    }
+
+    private static String beløp(BigDecimal beløp) {
+        return beløp == null ? "" : beløp.stripTrailingZeros().toPlainString();
     }
 
     public Optional<KontrollertInntektGrunnlag> hentKontrollertInntektGrunnlag(Long behandlingId) {

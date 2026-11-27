@@ -70,7 +70,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
             // Ignorer opphørshendelse dersom opphørsdato == maksdato (naturlig avslutning).
             // Deltaker-appen setter sluttdato = maksdato automatisk. Ung-sak trenger ikke opprette revurdering.
-            Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(relevantFagsak.get().getId());
+            Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(relevantFagsak.get().getId());
             if (behandlingOpt.isEmpty()) {
                 logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
                 continue;
@@ -97,7 +97,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     }
 
     private DatoIntervallEntitet utledPeriode(Fagsak fagsak, LocalDate nyTomdato) {
-        var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        var behandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
 
         final var tidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
 

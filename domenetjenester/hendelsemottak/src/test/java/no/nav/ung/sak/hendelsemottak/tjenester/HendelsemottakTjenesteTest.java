@@ -3,6 +3,7 @@ package no.nav.ung.sak.hendelsemottak.tjenester;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
@@ -96,6 +97,25 @@ class HendelsemottakTjenesteTest {
         assertThat(periode.getTomDato()).isEqualTo(FAGSAK_TOM);
         assertThat(periode.getFomDato()).isEqualTo(opphørsdato);
         assertThat(årsakOgPeriode.behandlingÅrsak()).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+    }
+
+    @Test
+    void skal_knytte_revurdering_task_til_ordinær_behandling_når_kontrollbehandling_er_opprettet_senere() {
+        var kontrollbehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.KONTROLL).build();
+        behandlingRepository.lagre(kontrollbehandling, behandlingRepository.taSkriveLås(kontrollbehandling));
+        assertThat(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow().getId()).isEqualTo(kontrollbehandling.getId());
+
+        var opphørsdato = LocalDate.now().plusDays(10);
+        List<ÅrsakOgPerioder> årsakerOgPerioder = List.of(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(opphørsdato, fagsak.getPeriode().getTomDato()))));
+        when(fagsakerTilVurderingUtleder.finnFagsakerTilVurdering(any())).thenReturn(Map.of(fagsak, årsakerOgPerioder));
+        var opphørHendelse = new UngdomsprogramOpphørHendelse(new HendelseInfo.Builder().medHendelseId("hendelse1").medOpprettet(LocalDateTime.now()).leggTilAktør(AKTØR_ID).build(),
+            opphørsdato);
+
+        hendelsemottakTjeneste.mottaHendelse(opphørHendelse);
+        // Henleggelse av kontrollbehandlingen sletter uferdige tasker som er knyttet til den
+        fagsakProsessTaskRepository.ryddProsessTasks(fagsak.getId(), kontrollbehandling.getId());
+
+        assertThat(fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(fagsak.getId(), behandling.getId(), null).size()).isEqualTo(1);
     }
 
 }

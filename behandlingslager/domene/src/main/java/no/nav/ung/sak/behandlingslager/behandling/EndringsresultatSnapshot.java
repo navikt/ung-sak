@@ -98,6 +98,10 @@ public class EndringsresultatSnapshot {
         return this;
     }
 
+    public boolean inneholder(Class<?> klasse) {
+        return children.stream().anyMatch(c -> klasse.equals(c.grunnlagKlasse));
+    }
+
     @Override
     public String toString() {
         return "Endringer{" +

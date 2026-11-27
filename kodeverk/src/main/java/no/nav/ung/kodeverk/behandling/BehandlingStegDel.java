@@ -37,6 +37,7 @@ public final class BehandlingStegDel {
             case AKTIVITETSPENGER_BEREGNING -> BehandlingDel.SENTRAL;
             case VURDER_KOMPLETTHET -> BehandlingDel.SENTRAL;
             case KONTROLLER_REGISTER_INNTEKT -> BehandlingDel.SENTRAL;
+            case VURDER_VEDTAKSPRIORITET -> BehandlingDel.SENTRAL;
             case BEREGN_YTELSE -> BehandlingDel.SENTRAL;
             case SIMULER_OPPDRAG -> BehandlingDel.SENTRAL;
             case FORESLÅ_VEDTAK -> BehandlingDel.SENTRAL;

@@ -411,14 +411,66 @@ class FinnSakerForInntektkontrollTest {
     }
 
     private void avsluttSomVedtatt(Behandling b) {
+        avsluttSomVedtatt(b, LocalDateTime.of(ÅR, 9, 1, 0, 0));
+    }
+
+    private void avsluttSomVedtatt(Behandling b, LocalDateTime vedtakstidspunkt) {
         b.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         b.avsluttBehandling();
         behandlingRepository.lagreOgClear(b, behandlingRepository.taSkriveLås(b));
         var vedtak = BehandlingVedtak.builder(b.getId())
-            .medVedtakstidspunkt(LocalDateTime.of(ÅR, 9, 1, 0, 0))
+            .medVedtakstidspunkt(vedtakstidspunkt)
             .medAnsvarligSaksbehandler("system")
             .build();
         behandlingVedtakRepository.lagre(vedtak, behandlingRepository.taSkriveLås(b));
+    }
+
+    @Test
+    void skal_ikke_finne_fagsak_når_åpen_kontrollbehandling_har_trigger_og_ordinær_behandling_er_opprettet_sist() {
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(anyLong())).thenReturn(new LocalDateTimeline<>(LANGT_BAK, TIDENES_ENDE, true));
+        avsluttSomVedtatt(behandling);
+        var kontrollbehandling = lagreÅpenBehandling(BehandlingType.KONTROLL, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+        var revurdering = lagreÅpenBehandling(BehandlingType.REVURDERING, BehandlingÅrsakType.RE_SATS_ENDRING);
+        settOpprettetFør(kontrollbehandling);
+        when(prosessTriggerPeriodeUtleder.utledTidslinje(kontrollbehandling.getId()))
+            .thenReturn(new LocalDateTimeline<>(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER, Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)));
+
+        assertEquals(revurdering.getId(), behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(revurdering.getFagsakId()).orElseThrow().getId());
+        assertEquals(0, finnFagsakerForInntektskontrollISeptember().size());
+    }
+
+    @Test
+    void skal_ikke_finne_fagsak_når_vedtatt_kontrollbehandling_har_kontrollert_inntekt_før_åpen_behandling_er_synket() {
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(anyLong())).thenReturn(new LocalDateTimeline<>(LANGT_BAK, TIDENES_ENDE, true));
+        avsluttSomVedtatt(behandling);
+        var kontrollbehandling = lagreÅpenBehandling(BehandlingType.KONTROLL, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+        var revurdering = lagreÅpenBehandling(BehandlingType.REVURDERING, BehandlingÅrsakType.RE_SATS_ENDRING);
+        settOpprettetFør(kontrollbehandling);
+        tilkjentYtelseRepository.lagre(kontrollbehandling.getId(), List.of(KontrollertInntektPeriode.ny()
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER))
+            .medKilde(KontrollertInntektKilde.REGISTER)
+            .medInntekt(BigDecimal.valueOf(1000))
+            .build()));
+        avsluttSomVedtatt(behandlingRepository.hentBehandling(kontrollbehandling.getId()), LocalDateTime.of(ÅR, 10, 8, 0, 0));
+
+        assertEquals(revurdering.getId(), behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(revurdering.getFagsakId()).orElseThrow().getId());
+        assertEquals(0, finnFagsakerForInntektskontrollISeptember().size());
+    }
+
+    private Behandling lagreÅpenBehandling(BehandlingType type, BehandlingÅrsakType årsak) {
+        var ny = Behandling.fraTidligereBehandling(behandling, type)
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(årsak))
+            .build();
+        behandlingRepository.lagreOgClear(ny, behandlingRepository.taSkriveLås(ny));
+        return behandlingRepository.hentBehandling(ny.getId());
+    }
+
+    // opprettet_tid har millisekundpresisjon, så rekkefølgen settes eksplisitt
+    private void settOpprettetFør(Behandling tidligst) {
+        entityManager.createNativeQuery("update behandling set opprettet_tid = opprettet_tid - interval '1 minute' where id = :id")
+            .setParameter("id", tidligst.getId())
+            .executeUpdate();
+        entityManager.clear();
     }
 
 

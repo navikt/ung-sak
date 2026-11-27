@@ -21,6 +21,7 @@ import no.nav.ung.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.kontroll.ParallelleBehandlingerRepository;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.*;
@@ -29,6 +30,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
 import no.nav.ung.sak.mottak.dokumentmottak.*;
+import no.nav.ung.sak.mottak.dokumentmottak.MottattDokumentRuting.MottakendeBehandling;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,8 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
     private final SøknadRepository søknadRepository;
     private final MottatteDokumentRepository mottatteDokumentRepository;
     private final SøknadParser søknadParser;
+    private final MottattDokumentRuting mottattDokumentRuting;
+    private final ParallelleBehandlingerRepository parallelleBehandlingerRepository;
 
 
     @Inject
@@ -66,7 +70,9 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
                                                 FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                                 ProsessTriggereRepository prosessTriggereRepository,
                                                 MottatteDokumentRepository mottatteDokumentRepository,
-                                                SøknadParser søknadParser) {
+                                                SøknadParser søknadParser,
+                                                MottattDokumentRuting mottattDokumentRuting,
+                                                ParallelleBehandlingerRepository parallelleBehandlingerRepository) {
         this.mottakere = mottakere;
         this.behandlingsoppretter = behandlingsoppretter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -79,6 +85,8 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
+        this.mottattDokumentRuting = mottattDokumentRuting;
+        this.parallelleBehandlingerRepository = parallelleBehandlingerRepository;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottatteDokumenter) {
@@ -86,12 +94,20 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
         if (mottattDokument.isEmpty()) {
             return;
         }
+        mottattDokumentRuting.fordel(fagsak, mottattDokument)
+            .forEach((mottaker, dokumenter) -> mottaDokument(fagsak, mottaker, dokumenter));
+    }
+
+    private void mottaDokument(Fagsak fagsak, MottakendeBehandling mottaker, List<MottattDokument> mottattDokument) {
         var brevkodeMap = mottattDokument
             .stream()
             .collect(Collectors.groupingBy(MottattDokument::getType));
         var triggere = getTriggere(mottattDokument, fagsak);
 
-        var resultat = finnEllerOpprettBehandling(fagsak, triggere);
+        var resultat = switch (mottaker) {
+            case ORDINÆR -> finnEllerOpprettBehandling(fagsak, triggere);
+            case KONTROLL -> finnEllerOpprettKontrollbehandling(fagsak, triggere);
+        };
 
         ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
         if (resultat.nyopprettet) {
@@ -158,7 +174,7 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
 
     private BehandlingMedOpprettelseResultat finnEllerOpprettBehandling(Fagsak fagsak, List<Trigger> triggere) {
         var fagsakId = fagsak.getId();
-        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteBehandling(fagsak.getId());
+        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteOrdinæreBehandling(fagsak.getId());
 
         if (sisteYtelsesbehandling.isEmpty()) {
             // ingen tidligere behandling - Opprett ny førstegangsbehandling
@@ -192,6 +208,32 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
         }
 
 
+    }
+
+    /**
+     * Kontrollbehandling som ikke er avsluttet, får dokumentene. Finnes ingen, opprettes kontrollbehandling fra siste vedtak.
+     * Er siste vedtak under iverksetting, prøves mottaket på nytt senere, fordi kontrollbehandling bare opprettes fra
+     * avsluttet behandling.
+     */
+    private BehandlingMedOpprettelseResultat finnEllerOpprettKontrollbehandling(Fagsak fagsak, List<Trigger> triggere) {
+        var fagsakId = fagsak.getId();
+        var åpenKontrollbehandling = parallelleBehandlingerRepository.finnIkkeAvsluttetKontrollbehandling(fagsakId)
+            .map(it -> behandlingRepository.hentBehandling(it.behandlingId()));
+        if (åpenKontrollbehandling.isPresent()) {
+            var kontrollbehandling = åpenKontrollbehandling.get();
+            sjekkBehandlingKanLåses(kontrollbehandling);
+            sjekkBehandlingKanHoppesTilbake(kontrollbehandling);
+            sjekkBehandlingHarIkkeÅpneTasks(kontrollbehandling);
+            return BehandlingMedOpprettelseResultat.eksisterendeBehandling(kontrollbehandling);
+        }
+        var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId)
+            .orElseThrow(() -> new IllegalStateException("Kan ikke opprette kontrollbehandling på fagsak " + fagsakId + " uten vedtak"));
+        if (sisteVedtak.erUnderIverksettelse()) {
+            throw DokumentmottakMidlertidigFeil.FACTORY.behandlingUnderIverksettingAvventerKnytteMottattDokumentTilBehandling(sisteVedtak.getId()).toException();
+        }
+        log.info("Oppretter kontrollbehandling for fagsak {} fra behandling {}", fagsakId, sisteVedtak.getId());
+        var kontrollbehandling = behandlingsoppretter.opprettKontrollbehandling(sisteVedtak, triggere.getFirst().behandlingÅrsak());
+        return BehandlingMedOpprettelseResultat.nyBehandling(kontrollbehandling);
     }
 
     public void lagreDokumenter(Map<Brevkode, List<MottattDokument>> mottattDokument, Behandling behandling) {

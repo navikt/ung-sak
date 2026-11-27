@@ -21,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -90,6 +92,57 @@ public class FagsakRevurderingTest {
     }
 
     @Test
+    public void kanOppretteRevurderingNårBareKontrollbehandlingErÅpen() {
+        var ungFagsak = lagUngFagsak();
+        var vedtak = lagBehandling(ungFagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.AVSLUTTET);
+        var kontrollbehandling = lagBehandling(ungFagsak, BehandlingType.KONTROLL, BehandlingStatus.UTREDES);
+        when(behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(ungFagsak.getSaksnummer())).thenReturn(List.of(vedtak, kontrollbehandling));
+        when(behandlingRepository.hentÅpneBehandlingerForFagsakId(ungFagsak.getId())).thenReturn(List.of(kontrollbehandling));
+
+        var tjeneste = new FagsakRevurdering(behandlingRepository);
+
+        assertThat(tjeneste.kanRevurderingOpprettes(ungFagsak)).isTrue();
+        assertThat(tjeneste.kanKontrollbehandlingOpprettes(ungFagsak)).isFalse();
+    }
+
+    @Test
+    public void kanOppretteKontrollbehandlingNårBareOrdinærBehandlingErÅpen() {
+        var ungFagsak = lagUngFagsak();
+        var vedtak = lagBehandling(ungFagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.AVSLUTTET);
+        var revurdering = lagBehandling(ungFagsak, BehandlingType.REVURDERING, BehandlingStatus.UTREDES);
+        when(behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(ungFagsak.getSaksnummer())).thenReturn(List.of(vedtak, revurdering));
+        when(behandlingRepository.hentÅpneBehandlingerForFagsakId(ungFagsak.getId())).thenReturn(List.of(revurdering));
+
+        var tjeneste = new FagsakRevurdering(behandlingRepository);
+
+        assertThat(tjeneste.kanRevurderingOpprettes(ungFagsak)).isFalse();
+        assertThat(tjeneste.kanKontrollbehandlingOpprettes(ungFagsak)).isTrue();
+    }
+
+    @Test
+    public void kanIkkeOppretteKontrollbehandlingNårKontrollbehandlingErUnderIverksetting() {
+        var ungFagsak = lagUngFagsak();
+        var vedtak = lagBehandling(ungFagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.AVSLUTTET);
+        var kontrollbehandling = lagBehandling(ungFagsak, BehandlingType.KONTROLL, BehandlingStatus.IVERKSETTER_VEDTAK);
+        when(behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(ungFagsak.getSaksnummer())).thenReturn(List.of(vedtak, kontrollbehandling));
+
+        var tjeneste = new FagsakRevurdering(behandlingRepository);
+
+        assertThat(tjeneste.kanKontrollbehandlingOpprettes(ungFagsak)).isFalse();
+    }
+
+    @Test
+    public void kanIkkeOppretteKontrollbehandlingUtenVedtak() {
+        var ungFagsak = lagUngFagsak();
+        var førstegangsbehandling = lagBehandling(ungFagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
+        when(behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(ungFagsak.getSaksnummer())).thenReturn(List.of(førstegangsbehandling));
+
+        var tjeneste = new FagsakRevurdering(behandlingRepository);
+
+        assertThat(tjeneste.kanKontrollbehandlingOpprettes(ungFagsak)).isFalse();
+    }
+
+    @Test
     public void behandlingerSkalSorteresSynkendePåAvsluttetDato(){
         Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
         LocalDateTime now = LocalDateTime.now();
@@ -118,5 +171,15 @@ public class FagsakRevurderingTest {
 
         assertThat(sorterteBehandlinger.get(0).getAvsluttetDato()).isNull();
         assertThat(sorterteBehandlinger.get(0).getOpprettetDato()).isEqualTo(now.withNano(0));
+    }
+
+    private static Fagsak lagUngFagsak() {
+        var ungFagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE).medSaksnummer(new Saksnummer("3")).build();
+        Whitebox.setInternalState(ungFagsak, "id", 3L);
+        return ungFagsak;
+    }
+
+    private static Behandling lagBehandling(Fagsak fagsak, BehandlingType type, BehandlingStatus status) {
+        return Behandling.nyBehandlingFor(fagsak, type).medBehandlingStatus(status).build();
     }
 }

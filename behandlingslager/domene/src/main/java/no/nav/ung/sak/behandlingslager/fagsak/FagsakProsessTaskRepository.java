@@ -147,6 +147,21 @@ public class FagsakProsessTaskRepository {
         return tilProsessTask(resultList);
     }
 
+    /**
+     * Sjekker om fagsaken har en uferdig task av gitt type, også tasker uten behandling. Koblingen i FAGSAK_PROSESS_TASK
+     * fjernes når tasken er ferdig eller suspendert, så en kobling betyr at tasken ikke er ferdig.
+     */
+    public boolean finnesUferdigTaskForFagsak(Long fagsakId, String taskType) {
+        Objects.requireNonNull(fagsakId, "fagsakId");
+        Objects.requireNonNull(taskType, "taskType");
+        return !getEntityManager().createQuery("select fpt.id from FagsakProsessTask fpt where fpt.fagsakId=:fagsakId and fpt.taskType=:taskType", Long.class)
+            .setParameter("fagsakId", fagsakId)
+            .setParameter("taskType", taskType)
+            .setMaxResults(1)
+            .getResultList()
+            .isEmpty();
+    }
+
     public String lagreNyGruppe(ProsessTaskData taskData) {
         Optional.ofNullable(MDC.get("prosess_steg")).ifPresent(v -> taskData.setProperty("parent.steg", v));
         return prosessTaskTjeneste.lagre(taskData);

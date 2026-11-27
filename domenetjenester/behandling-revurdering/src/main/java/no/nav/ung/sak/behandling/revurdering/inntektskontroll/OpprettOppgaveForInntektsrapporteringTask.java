@@ -104,7 +104,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
      * @return
      */
     private boolean harYtelseIDelAvPerioden(Fagsak fagsak, LocalDate fom, LocalDate tom) {
-        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalStateException("Fant ikke behandling"));
+        var sisteBehandling = behandlingRepository.hentSisteOrdinæreYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalStateException("Fant ikke behandling"));
         LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(sisteBehandling.getId());
         LocalDateInterval månedForRapportering = new LocalDateInterval(fom, tom);
         return overlapperPeriodeDelvisMedProgramtidslinje(månedForRapportering, månedsvisTidslinje);
