@@ -96,10 +96,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         return vilkårPeriodeSet;
     }
 
-    @Override
-    public int maksMellomliggendePeriodeAvstand() {
-        return 0;
-    }
+
 
     @Override
     public Set<VilkårType> definerendeVilkår() {

@@ -30,7 +30,6 @@ public class VilkårResultatBuilder {
     private static final Logger log = LoggerFactory.getLogger(VilkårResultatBuilder.class);
 
     private Vilkårene kladd = new Vilkårene();
-    private int mellomliggendePeriodeAvstand = 0;
     private KantIKantVurderer kantIKantVurderer = new IngenVurdering();
     private boolean built;
     private LocalDateInterval boundry = new LocalDateInterval(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
@@ -61,14 +60,6 @@ public class VilkårResultatBuilder {
             vilkårBuilder.medFullstendigTidslinje(fullstendigTidslinje);
         }
         return vilkårBuilder;
-    }
-
-    public VilkårResultatBuilder medMaksMellomliggendePeriodeAvstand(int mellomliggendePeriodeAvstand) {
-        if (mellomliggendePeriodeAvstand < 0) {
-            throw new IllegalArgumentException("Må være positivt");
-        }
-        this.mellomliggendePeriodeAvstand = mellomliggendePeriodeAvstand;
-        return this;
     }
 
     public VilkårResultatBuilder medKantIKantVurderer(KantIKantVurderer vurderer) {
@@ -132,7 +123,6 @@ public class VilkårResultatBuilder {
         vilkår.stream()
             .map(type -> hentBuilderFor(type)
                 .medType(type)
-                .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand)
                 .medKantIKantVurderer(kantIKantVurderer))
             .peek(v -> intervaller.forEach(p -> v.leggTil(v.hentBuilderFor(p.getFomDato(), p.getTomDato()).medUtfall(Utfall.IKKE_VURDERT))))
             .forEach(this::leggTil);
@@ -143,7 +133,6 @@ public class VilkårResultatBuilder {
         vilkårPeriodeMap.forEach((k, v) -> {
             var builder = hentBuilderFor(k)
                 .medType(k)
-                .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand)
                 .medKantIKantVurderer(kantIKantVurderer);
             v.forEach(periode -> builder.leggTil(builder.hentBuilderFor(periode.getFomDato(), periode.getTomDato()).medUtfall(Utfall.IKKE_VURDERT)));
             leggTil(builder);

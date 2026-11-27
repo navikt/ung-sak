@@ -45,8 +45,6 @@ public interface VilkårsPerioderTilVurderingTjeneste {
     }
     Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId);
 
-    int maksMellomliggendePeriodeAvstand();
-
     default KantIKantVurderer getKantIKantVurderer() {
         return new DefaultKantIKantVurderer();
     }

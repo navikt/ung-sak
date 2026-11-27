@@ -30,7 +30,6 @@ public class VilkårBuilder {
     private LocalDateTimeline<WrappedVilkårPeriode> vilkårTidslinje;
     private LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje = null;
     private boolean bygget = false;
-    private int mellomliggendePeriodeAvstand = 0;
 
     /**
      * @deprecated bygger ugyldig vilkår.
@@ -76,16 +75,6 @@ public class VilkårBuilder {
         }
     }
 
-    boolean erMellomliggendePeriode(LocalDate firstDate, LocalDate secondDate) {
-        final long avstand;
-        if (firstDate.isBefore(secondDate)) {
-            avstand = ChronoUnit.DAYS.between(firstDate, secondDate);
-        } else {
-            avstand = ChronoUnit.DAYS.between(secondDate, firstDate);
-        }
-        return avstand > 0 && avstand < mellomliggendePeriodeAvstand;
-    }
-
     public VilkårBuilder medKantIKantVurderer(KantIKantVurderer vurderer) {
         Objects.requireNonNull(vurderer);
         this.kantIKantVurderer = vurderer;
@@ -110,14 +99,6 @@ public class VilkårBuilder {
     public VilkårBuilder medType(VilkårType type) {
         validerBuilder();
         vilkåret.setVilkårType(type);
-        return this;
-    }
-
-    public VilkårBuilder medMaksMellomliggendePeriodeAvstand(int mellomliggendePeriodeAvstand) {
-        if (mellomliggendePeriodeAvstand < 0) {
-            throw new IllegalArgumentException("Må være positivt");
-        }
-        this.mellomliggendePeriodeAvstand = mellomliggendePeriodeAvstand;
         return this;
     }
 
@@ -198,18 +179,6 @@ public class VilkårBuilder {
         return new LocalDateSegment<>(di, aktivitetPeriode);
     }
 
-    private void kobleSammenMellomliggendeVilkårsPerioder() {
-        var mellomliggendeSegmenter = new TreeSet<DatoIntervallEntitet>();
-        LocalDate tom = null;
-        for (LocalDateSegment<WrappedVilkårPeriode> periode : vilkårTidslinje.segmenter()) {
-            if (tom != null && erMellomliggendePeriode(tom, periode.getFom())) {
-                mellomliggendeSegmenter.add(DatoIntervallEntitet.fraOgMedTilOgMed(tom, periode.getFom().minusDays(1)));
-            }
-            tom = periode.getTom();
-        }
-
-        mellomliggendeSegmenter.forEach(it -> this.leggTil(this.hentBuilderFor(it.getFomDato(), it.getTomDato())));
-    }
 
     private WrappedVilkårPeriode opprettHoldKonsistens(LocalDateSegment<WrappedVilkårPeriode> segment) {
         return new WrappedVilkårPeriode(new VilkårPeriodeBuilder(segment.getValue().getVilkårPeriode())
@@ -248,9 +217,6 @@ public class VilkårBuilder {
 
         if (dummy) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke bygge en dummy");
-        }
-        if (!vilkårTidslinje.isContinuous()) {
-            kobleSammenMellomliggendeVilkårsPerioder();
         }
         if (fagsakTidslinje != null) {
             var tidslinjeSomFaltBort = vilkårTidslinje.disjoint(fagsakTidslinje);
@@ -361,9 +327,6 @@ public class VilkårBuilder {
             throw new IllegalStateException("Ikke dummy så kan ikke hente ut ");
         }
         bygget = true;
-        if (!vilkårTidslinje.isContinuous()) {
-            kobleSammenMellomliggendeVilkårsPerioder();
-        }
 
         var vilkårsPerioderRaw = vilkårTidslinje
             .segmenter()
