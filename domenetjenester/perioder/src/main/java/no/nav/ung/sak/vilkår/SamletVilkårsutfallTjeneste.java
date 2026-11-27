@@ -44,7 +44,7 @@ public final class SamletVilkårsutfallTjeneste {
         var timeline = new LocalDateTimeline<List<VilkårUtfall>>(List.of());
 
         for (var e : timelinePerVilkår.entrySet()) {
-            LocalDateTimeline<VilkårUtfall> utfallTimeline = e.getValue().mapValue(v -> new VilkårUtfall(e.getKey(), v.getAvslagsårsak(), v.getUtfall()));
+            LocalDateTimeline<VilkårUtfall> utfallTimeline = e.getValue().mapValue(v -> new VilkårUtfall(e.getKey(), v.getAvslagsårsak(), v.getGjeldendeUtfall()));
             timeline = timeline.crossJoin(utfallTimeline.compress(), StandardCombinators::allValues);
         }
 
