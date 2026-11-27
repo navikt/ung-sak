@@ -26,6 +26,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.ForutgåendeMedlemska
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.ekstern.tilleggsstonader.TilleggsstonaderRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.ekstern.ytelse.EksternYtelseRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.etterlysning.EtterlysningRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
@@ -97,6 +98,7 @@ public class RestImplementationClasses {
         classes.add(KlageRestTjeneste.class);
 
         classes.add(TilleggsstonaderRestTjeneste.class);
+        classes.add(EksternYtelseRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);

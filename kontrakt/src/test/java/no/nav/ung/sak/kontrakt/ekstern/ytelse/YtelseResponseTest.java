@@ -18,7 +18,7 @@ class YtelseResponseTest {
 
     @Test
     void skal_validere_vedtak_og_perioder_i_listene() {
-        var periodeUtenTom = new YtelsePeriode(LocalDate.of(2026, 1, 1), null, null, null, null, null);
+        var periodeUtenTom = new YtelsePeriode(LocalDate.of(2026, 1, 1), null, null, null);
         var vedtakUtenYtelse = new Ytelse(null, "SAK1", UUID.randomUUID(), LocalDateTime.now(), List.of(periodeUtenTom));
 
         var feil = validator.validate(new YtelseResponse(List.of(vedtakUtenYtelse)));
@@ -29,9 +29,20 @@ class YtelseResponseTest {
 
     @Test
     void gyldig_svar_skal_ikke_gi_valideringsfeil() {
-        var periode = new YtelsePeriode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31), null, null, 0, 0);
+        var periode = new YtelsePeriode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31), null, null);
         var vedtak = new Ytelse(YtelseType.AKTIVITETSPENGER, "SAK1", UUID.randomUUID(), LocalDateTime.now(), List.of(periode));
 
         assertThat(validator.validate(new YtelseResponse(List.of(vedtak)))).extracting(ConstraintViolation::getMessage).isEmpty();
+    }
+
+    @Test
+    void skal_validere_barnetilleggsvedtak_og_perioder_i_listene() {
+        var periodeUtenFom = new BarnetilleggPeriode(null, LocalDate.of(2026, 1, 31), 2, 74);
+        var vedtakUtenSaksnummer = new BarnetilleggVedtak(YtelseType.UNGDOMSPROGRAMYTELSE, null, UUID.randomUUID(), LocalDateTime.now(), List.of(periodeUtenFom));
+
+        var feil = validator.validate(new BarnetilleggResponse(List.of(vedtakUtenSaksnummer)));
+
+        assertThat(feil).extracting(f -> f.getPropertyPath().toString())
+            .containsExactlyInAnyOrder("vedtak[0].saksnummer", "vedtak[0].perioder[0].fom");
     }
 }

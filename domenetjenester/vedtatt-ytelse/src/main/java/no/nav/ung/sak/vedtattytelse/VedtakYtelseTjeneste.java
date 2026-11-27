@@ -2,8 +2,13 @@ package no.nav.ung.sak.vedtattytelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggPeriode;
+import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse;
+import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggVedtak;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.Ytelse;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelsePeriode;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseResponse;
@@ -17,8 +22,10 @@ import java.util.Map;
 /**
  * Henter lagrede AVP- og UPY-vedtak for en person.
  * <p>
- * Kun gjeldende (aktive) vedtak med minst én innvilget periode som overlapper forespørselen tas med. Periodene kuttes ikke.
+ * Kun gjeldende (aktive) vedtak med minst én periode som overlapper forespørselen tas med. Periodene kuttes ikke.
  * Kalleren slår opp alle aktørIder for personen, også historiske, slik at modulen ikke er avhengig av PDL.
+ * <p>
+ * Vedtak og barnetillegg hentes hver for seg, slik at konsumenter bare får opplysningene de har behov for.
  */
 @ApplicationScoped
 public class VedtakYtelseTjeneste {
@@ -48,6 +55,21 @@ public class VedtakYtelseTjeneste {
         return new YtelseResponse(vedtak);
     }
 
+    /**
+     * Barnetillegg i gjeldende vedtak. Bare perioder med barnetillegg tas med, og like perioder som følger etter hverandre
+     * slås sammen, siden anvisningene også er splittet på dagsats. Bare vedtak med minst én barnetilleggsperiode som
+     * overlapper forespørselen tas med.
+     */
+    public BarnetilleggResponse hentBarnetillegg(Collection<AktørId> aktørIder, Periode periode) {
+        var forespurtPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
+        var vedtak = vedtakYtelseRepository.hentAktiveVedtakSomOverlapper(aktørIder, YTELSER.keySet(), periode.getFom(), periode.getTom())
+            .stream()
+            .map(VedtakYtelseTjeneste::tilBarnetilleggVedtak)
+            .filter(v -> v.perioder().stream().anyMatch(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.fom(), p.tom()).overlapper(forespurtPeriode)))
+            .toList();
+        return new BarnetilleggResponse(vedtak);
+    }
+
     private static boolean harAnvisningSomOverlapper(VedtakYtelse vedtak, DatoIntervallEntitet forespurtPeriode) {
         return vedtak.getAnvisninger().stream().anyMatch(a -> a.getPeriode().overlapper(forespurtPeriode));
     }
@@ -66,8 +88,33 @@ public class VedtakYtelseTjeneste {
             anvisning.getPeriode().getFomDato(),
             anvisning.getPeriode().getTomDato(),
             anvisning.getDagsats().orElse(null),
-            anvisning.getBeløp().orElse(null),
-            anvisning.getAntallBarn().orElse(null),
-            anvisning.getDagsatsBarnetillegg().orElse(null));
+            anvisning.getBeløp().orElse(null));
+    }
+
+    private static BarnetilleggVedtak tilBarnetilleggVedtak(VedtakYtelse vedtak) {
+        var segmenter = vedtak.getAnvisninger().stream()
+            .filter(a -> a.getAntallBarn().orElse(0) > 0)
+            .map(VedtakYtelseTjeneste::tilBarnetilleggSegment)
+            .toList();
+        var perioder = new LocalDateTimeline<>(segmenter).compress().toSegments().stream()
+            .map(s -> new BarnetilleggPeriode(s.getFom(), s.getTom(), s.getValue().antallBarn(), s.getValue().dagsatsBarnetillegg()))
+            .toList();
+        return new BarnetilleggVedtak(
+            YTELSER.get(vedtak.getYtelseType()),
+            vedtak.getSaksnummer().getVerdi(),
+            vedtak.getVedtakReferanse(),
+            vedtak.getVedtattTidspunkt(),
+            perioder);
+    }
+
+    private static LocalDateSegment<Barnetillegg> tilBarnetilleggSegment(YtelseAnvist anvisning) {
+        // Antall barn og dagsats lagres alltid sammen
+        var dagsats = anvisning.getDagsatsBarnetillegg()
+            .orElseThrow(() -> new IllegalStateException("Anvisning med barnetillegg mangler dagsats for barnetillegg: " + anvisning.getPeriode()));
+        return new LocalDateSegment<>(anvisning.getPeriode().getFomDato(), anvisning.getPeriode().getTomDato(),
+            new Barnetillegg(anvisning.getAntallBarn().orElseThrow(), dagsats));
+    }
+
+    private record Barnetillegg(int antallBarn, int dagsatsBarnetillegg) {
     }
 }
