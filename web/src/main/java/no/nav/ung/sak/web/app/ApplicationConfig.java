@@ -16,6 +16,7 @@ import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 import no.nav.ung.sak.web.server.caching.CacheControlFeature;
 import no.nav.ung.sak.web.server.typedresponse.TypedResponseFeature;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
@@ -48,6 +49,8 @@ public class ApplicationConfig extends ResourceConfig {
 
     public ApplicationConfig() {
         register(DynamicJacksonJsonProvider.class); // Denne må registrerast før anna OpenAPI oppsett for å fungere.
+        // Hindrer at Jersey auto-registrerer JacksonFeature med egne mappere, som svarer 400 i text/plain i stedet for å bruke KnownExceptionMappers.
+        register(JacksonFeature.withoutExceptionMappers());
         final var resolvedOpenAPI = resolveOpenAPI();
         register(new no.nav.openapi.spec.utils.openapi.OpenApiResource(resolvedOpenAPI));
 
