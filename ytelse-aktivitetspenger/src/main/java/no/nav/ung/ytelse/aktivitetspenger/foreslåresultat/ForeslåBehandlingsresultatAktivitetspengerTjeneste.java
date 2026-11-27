@@ -107,7 +107,7 @@ public class Foresl책BehandlingsresultatAktivitetspengerTjeneste extends Foresl�
         DatoIntervallEntitet maksPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(tilVurdering.getMinLocalDate(), tilVurdering.getMaxLocalDate());
         LocalDateTimeline<Vilk책rUtfallSamlet> samletVilk책rutfall = SamletVilk책rsutfallTjeneste.samleVilk책rUtfall(vilk책rene, maksPeriode);
         var vurderteUtfall = samletVilk책rutfall.intersection(tilVurdering);
-        return vurderteUtfall.stream()
+        return !vurderteUtfall.isEmpty() && vurderteUtfall.stream()
             .allMatch(it -> it.getValue().getSamletUtfall() == Utfall.IKKE_OPPFYLT);
     }
 

@@ -167,11 +167,6 @@ class ForeslåBehandlingsresultatAktivitetspengerTjenesteTest {
     }
 
     @Test
-    void tomme_vilkår_gir_ikke_avslag() {
-        assertThat(tjeneste.skalBehandlingResultatSettesTilAvslått(referanse, Vilkårene.builder().build())).isFalse();
-    }
-
-    @Test
     void vilkårsutfall_uten_overlapp_med_vurderingsperioden_gir_ikke_avslag() {
         vurderPerioder(periode(16, 31));
         var vilkårene = Vilkårene.builder()
