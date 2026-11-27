@@ -1,8 +1,6 @@
 package no.nav.ung.sak.inngangsvilkår.avklaring;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -26,13 +24,13 @@ import java.util.stream.Collectors;
 public class VilkårsavklaringOgVurderingTidslinjeUtleder {
 
     private final InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
-    private final Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
+    private final VilkårsavklaringTjeneste vilkårsavklaringTjeneste;
 
     @Inject
     public VilkårsavklaringOgVurderingTidslinjeUtleder(InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
-                                                       @Any Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
+                                                       VilkårsavklaringTjeneste vilkårsavklaringTjeneste) {
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
-        this.vilkårsavklaringTjenester = vilkårsavklaringTjenester;
+        this.vilkårsavklaringTjeneste = vilkårsavklaringTjeneste;
     }
 
     public LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> utled(long behandlingId) {
@@ -50,8 +48,7 @@ public class VilkårsavklaringOgVurderingTidslinjeUtleder {
                                                                                   LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vurderingTidslinje,
                                                                                   VilkårType vilkårType,
                                                                                   BehandlingÅrsakType behandlingÅrsakType) {
-        var vilkårsavklaring = VilkårsavklaringTjeneste.finnForÅrsak(vilkårsavklaringTjenester, behandlingÅrsakType)
-            .flatMap(it -> it.hentSenesteForeslåtteAvklaringForBehandling(behandlingId));
+        var vilkårsavklaring = vilkårsavklaringTjeneste.hentSenesteForeslåtteAvklaringForBehandling(behandlingId, vilkårType);
         if (vilkårsavklaring.isEmpty()) {
             return LocalDateTimeline.empty();
         }

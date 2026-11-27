@@ -155,7 +155,6 @@ class AktivitetOppgaveOppretterTest {
             referanse,
             DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
             årsak.getKode(),
-            "Begrunnelse.",
             true,
             fritekstTilVarsel,
             null,

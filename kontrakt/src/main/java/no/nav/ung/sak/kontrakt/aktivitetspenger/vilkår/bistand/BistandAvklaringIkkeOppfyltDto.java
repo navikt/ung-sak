@@ -15,7 +15,6 @@ import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
  */
 public record BistandAvklaringIkkeOppfyltDto(
     @NotNull BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
-    @NotNull @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     boolean skalIkkeSendeVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,

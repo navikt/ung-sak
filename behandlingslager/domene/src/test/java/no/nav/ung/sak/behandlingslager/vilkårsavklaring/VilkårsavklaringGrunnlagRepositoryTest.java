@@ -94,7 +94,7 @@ class VilkårsavklaringGrunnlagRepositoryTest {
         assertThat(avklaringer).hasSize(1);
         assertThat(avklaringer.getFirst().getReferanse()).isEqualTo(opprinneligAvklaring.getReferanse());
 
-        var endretAvklaring = lagAvklaring(FOM, TOM, "ny begrunnelse");
+        var endretAvklaring = lagAvklaring(FOM, TOM, "NY_IKKE_OPPFYLT_KODE");
         repository.lagreForeslåtteAvklaringer(behandling.getId(), VILKÅR_TYPE, Set.of(endretAvklaring));
         var avklaringerEtterEndring = hentSorterteAvklaringer();
         assertThat(avklaringerEtterEndring).hasSize(1);
@@ -259,15 +259,14 @@ class VilkårsavklaringGrunnlagRepositoryTest {
     }
 
     private VilkårPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom) {
-        return lagAvklaring(fom, tom, "begrunnelse for hvorfor det ikke varsles");
+        return lagAvklaring(fom, tom, "IKKE_OPPFYLT_KODE");
     }
 
-    private VilkårPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, String begrunnelse) {
+    private VilkårPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, String ikkeOppfyltÅrsak) {
         return new VilkårPeriodeAvklaringForeslått(
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-            "IKKE_OPPFYLT_KODE",
-            begrunnelse,
+            ikkeOppfyltÅrsak,
             false,
             null,
             "begrunnelse for hvorfor det ikke varsles",

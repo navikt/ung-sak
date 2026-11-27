@@ -227,7 +227,6 @@ public class VilkårsavklaringRestTjeneste {
             a.getPeriode().tilPeriode(),
             a.getAvklaringtype(),
             a.getIkkeOppfyltÅrsakKode(),
-            a.getBegrunnelse(),
             a.skalSendeVarsel(),
             a.getFritekstTilVarsel(),
             a.getBegrunnelseIkkeVarsel(),

@@ -357,7 +357,6 @@ class VilkårsavklaringRestTjenesteTest {
                 referanse,
                 tilDatoIntervallEntitet(periode),
                 årsak.getKode(),
-                "begrunnelse for avklaring",
                 true,
                 årsak.kreverFritekst() ? "fritekst til varsel" : null,
                 null,

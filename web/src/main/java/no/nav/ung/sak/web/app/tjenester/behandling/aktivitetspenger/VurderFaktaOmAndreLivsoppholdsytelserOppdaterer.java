@@ -3,7 +3,6 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -12,20 +11,19 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsvarselInnhold;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
-import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderFaktaOmAndreLivsoppholdsytelserDto;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaringDataMapper;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.andrelivsoppholdsytelser.AndreLivsoppholdsytelserAvklaringTjeneste;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,7 +38,7 @@ public class VurderFaktaOmAndreLivsoppholdsytelserOppdaterer implements Aksjonsp
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste;
-    private AndreLivsoppholdsytelserAvklaringTjeneste andreLivsoppholdsytelserAvklaringTjeneste;
+    private VilkårsavklaringTjeneste vilkårsavklaringTjeneste;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     VurderFaktaOmAndreLivsoppholdsytelserOppdaterer() {
@@ -51,12 +49,12 @@ public class VurderFaktaOmAndreLivsoppholdsytelserOppdaterer implements Aksjonsp
     public VurderFaktaOmAndreLivsoppholdsytelserOppdaterer(BehandlingRepository behandlingRepository,
                                                            HistorikkinnslagRepository historikkinnslagRepository,
                                                            VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste,
-                                                           @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE) AndreLivsoppholdsytelserAvklaringTjeneste andreLivsoppholdsytelserAvklaringTjeneste,
+                                                           VilkårsavklaringTjeneste vilkårsavklaringTjeneste,
                                                            InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårsavklaringEtterlysningTjeneste = vilkårsavklaringEtterlysningTjeneste;
-        this.andreLivsoppholdsytelserAvklaringTjeneste = andreLivsoppholdsytelserAvklaringTjeneste;
+        this.vilkårsavklaringTjeneste = vilkårsavklaringTjeneste;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
@@ -69,17 +67,17 @@ public class VurderFaktaOmAndreLivsoppholdsytelserOppdaterer implements Aksjonsp
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        andreLivsoppholdsytelserAvklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId,
+        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VILKÅR_TYPE);
+        vilkårsavklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId, VILKÅR_TYPE, vilkårsperioder,
             dto.getAvklaringer().stream().map(AndreLivsoppholdsytelserFaktaavklaringPeriodeDto::periode).toList());
 
         // Opphør lukkes mot slutten av relevante vilkårsperioder, siden avklaringen kan gjelde en vilkårlig periode i den.
-        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VILKÅR_TYPE);
         if (vilkårsperioder.isEmpty()) {
             throw new IllegalStateException("Må ha relevante vilkårsperioder");
         }
         var maxTomDato = vilkårsperioder.getMaxLocalDate();
 
-        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = andreLivsoppholdsytelserAvklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId);
+        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = vilkårsavklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId, VILKÅR_TYPE, AndreLivsoppholdsytelserAvklaringDataMapper::mapTilAvklaringInnhold);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -92,7 +90,7 @@ public class VurderFaktaOmAndreLivsoppholdsytelserOppdaterer implements Aksjonsp
             throw new IllegalArgumentException("Støtter kun lagring av én avklaring for vilkåret om andre livsoppholdsytelser samtidig");
         }
 
-        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = andreLivsoppholdsytelserAvklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, nyeAvklaringer);
+        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = vilkårsavklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, VILKÅR_TYPE, nyeAvklaringer, AndreLivsoppholdsytelserAvklaringDataMapper::mapTilAvklaringInnhold);
 
         inngangsvilkårVurderingTjeneste.nullstillOverlappendeVurderingOgGjenopprettTidligereVedBehov(param,
             VILKÅR_TYPE,

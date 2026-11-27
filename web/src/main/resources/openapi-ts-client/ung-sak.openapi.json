@@ -1323,11 +1323,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
       },
-      "ung.kodeverk.bosatt.Kilde" : {
-        "enum" : [ "SØKNAD", "SAKSBEHANDLER" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "SØKNAD", "SAKSBEHANDLER" ]
-      },
       "ung.kodeverk.dokument.DokumentMalType" : {
         "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_INNTEKT_UTEN_REDUKSJON", "ENDRING_HØY_SATS", "FORLENGET_PERIODE", "INGEN_ENDRING", "OPPHOR", "OPPHOR_VED_MAKSDATO", "OPPHOR_OPPHEVET", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV", "KLAGAV", "KLAGOV", "VEDMED" ],
         "type" : "string",
@@ -2298,45 +2293,6 @@
         "required" : [ "erVilkårInnvilget", "perioderVurdert" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto" : {
-        "properties" : {
-          "avklaringtype" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Avklaringtype"
-          },
-          "begrunnelse" : {
-            "type" : "string"
-          },
-          "begrunnelseIkkeVarsel" : {
-            "type" : "string"
-          },
-          "erBosatt" : {
-            "type" : "boolean"
-          },
-          "foreslåttPeriode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
-          },
-          "fritekstTilVarsel" : {
-            "type" : "string"
-          },
-          "ikkeOppfyltÅrsak" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
-          },
-          "kanRedigeres" : {
-            "type" : "boolean"
-          },
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsavklaringKildeType"
-          },
-          "kildeFritekst" : {
-            "type" : "string"
-          },
-          "skalSendeVarsel" : {
-            "type" : "boolean"
-          }
-        },
-        "required" : [ "erBosatt" ],
-        "type" : "object"
-      },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto" : {
         "properties" : {
           "periode" : {
@@ -2354,27 +2310,9 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagPeriodeDto" : {
         "properties" : {
-          "avklaring" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto"
-          },
-          "erBosattITrondheim" : {
-            "type" : "boolean"
-          },
           "fom" : {
             "format" : "date",
             "type" : "string"
-          },
-          "harUttalelse" : {
-            "type" : "boolean"
-          },
-          "ikkeOppfyltÅrsak" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
-          },
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.bosatt.Kilde"
-          },
-          "resultat" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto"
           },
           "søknadOppgittErBosattITrondheim" : {
             "type" : "boolean"
@@ -2382,12 +2320,9 @@
           "tom" : {
             "format" : "date",
             "type" : "string"
-          },
-          "uttalelseTekst" : {
-            "type" : "string"
           }
         },
-        "required" : [ "erBosattITrondheim", "fom", "kilde" ],
+        "required" : [ "fom", "søknadOppgittErBosattITrondheim" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDto" : {
@@ -2402,38 +2337,8 @@
         "required" : [ "perioder" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto" : {
-        "properties" : {
-          "begrunnelse" : {
-            "type" : "string"
-          },
-          "erBosatt" : {
-            "type" : "boolean"
-          },
-          "friteksttilBrev" : {
-            "type" : "string"
-          },
-          "ikkeOppfyltÅrsak" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
-          },
-          "manuellVurdering" : {
-            "type" : "boolean"
-          },
-          "vurdertAv" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "erBosatt", "manuellVurdering", "vurdertAv" ],
-        "type" : "object"
-      },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
-          },
           "begrunnelseIkkeVarsel" : {
             "maxLength" : 4000,
             "minLength" : 0,
@@ -2459,7 +2364,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "begrunnelse", "fraflyttingsÅrsak", "kilde" ],
+        "required" : [ "fraflyttingsÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.NavKontorBeslutterVilkårAksjonspunktDto" : {
@@ -2541,12 +2446,6 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.AktivitetAvklaringIkkeOppfyltDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
-          },
           "begrunnelseIkkeVarsel" : {
             "maxLength" : 4000,
             "minLength" : 0,
@@ -2575,7 +2474,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "begrunnelse", "ikkeOppfyltÅrsak", "kilde" ],
+        "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.AktivitetFaktaavklaringPeriodeDto" : {
@@ -2702,9 +2601,6 @@
         "properties" : {
           "avklaringtype" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Avklaringtype"
-          },
-          "begrunnelse" : {
-            "type" : "string"
           },
           "begrunnelseIkkeVarsel" : {
             "type" : "string"
@@ -2856,12 +2752,6 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandAvklaringIkkeOppfyltDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
-          },
           "begrunnelseIkkeVarsel" : {
             "maxLength" : 4000,
             "minLength" : 0,
@@ -2890,7 +2780,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "begrunnelse", "ikkeOppfyltÅrsak", "kilde" ],
+        "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto" : {
@@ -3073,12 +2963,6 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto" : {
         "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
-          },
           "begrunnelseIkkeVarsel" : {
             "maxLength" : 4000,
             "minLength" : 0,
@@ -3107,7 +2991,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "begrunnelse", "ikkeOppfyltÅrsak", "kilde" ],
+        "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserFaktaavklaringPeriodeDto" : {
@@ -4171,6 +4055,146 @@
         },
         "required" : [ "perioder" ],
         "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.BarnetilleggPeriode" : {
+        "properties" : {
+          "antallBarn" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "dagsatsBarnetillegg" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse" : {
+        "properties" : {
+          "vedtak" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.BarnetilleggVedtak"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "vedtak" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.BarnetilleggVedtak" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.BarnetilleggPeriode"
+            },
+            "type" : "array"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          },
+          "vedtakReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "vedtattTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "ytelse" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseType"
+          }
+        },
+        "required" : [ "perioder", "saksnummer", "vedtakReferanse", "vedtattTidspunkt", "ytelse" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.Ytelse" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelsePeriode"
+            },
+            "type" : "array"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          },
+          "vedtakReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "vedtattTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "ytelse" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseType"
+          }
+        },
+        "required" : [ "perioder", "saksnummer", "vedtakReferanse", "vedtattTidspunkt", "ytelse" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.YtelsePeriode" : {
+        "properties" : {
+          "beløp" : {
+            "type" : "number"
+          },
+          "dagsats" : {
+            "type" : "number"
+          },
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.YtelseRequest" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "ident" : {
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "ident", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.YtelseResponse" : {
+        "properties" : {
+          "vedtak" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.Ytelse"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "vedtak" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.ytelse.YtelseType" : {
+        "enum" : [ "UNGDOMSPROGRAMYTELSE", "AKTIVITETSPENGER" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "UNGDOMSPROGRAMYTELSE", "AKTIVITETSPENGER" ]
       },
       "ung.sak.kontrakt.etterlysning.EndreFristDto" : {
         "properties" : {
@@ -9058,6 +9082,64 @@
               }
             },
             "description" : "Innvilgede perioder. Tom liste dersom personen ikke har vedtak om aktivitetspenger."
+          }
+        },
+        "tags" : [ "ekstern" ]
+      }
+    },
+    "/api/ekstern/ytelse/v1/barnetillegg" : {
+      "post" : {
+        "description" : "Henter barnetillegg i gjeldende vedtak om aktivitetspenger og ungdomsprogramytelsen som overlapper forespurt periode. Kun for barnebidrag.",
+        "operationId" : "hentBarnetillegg",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse"
+                }
+              }
+            },
+            "description" : "Vedtak med perioder med barnetillegg. Tom liste dersom personen ikke har barnetillegg i perioden."
+          }
+        },
+        "tags" : [ "ekstern" ]
+      }
+    },
+    "/api/ekstern/ytelse/v1/vedtak" : {
+      "post" : {
+        "description" : "Henter gjeldende vedtak om aktivitetspenger og ungdomsprogramytelsen som overlapper forespurt periode, med alle periodene i vedtaket. Kun for andre ytelser i Nav.",
+        "operationId" : "hentVedtak",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.ytelse.YtelseResponse"
+                }
+              }
+            },
+            "description" : "Vedtak med perioder. Tom liste dersom personen ikke har vedtak i perioden."
           }
         },
         "tags" : [ "ekstern" ]

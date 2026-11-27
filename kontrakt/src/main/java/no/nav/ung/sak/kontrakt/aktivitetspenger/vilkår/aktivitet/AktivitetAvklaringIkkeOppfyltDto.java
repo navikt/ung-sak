@@ -15,7 +15,6 @@ import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
  */
 public record AktivitetAvklaringIkkeOppfyltDto(
     @NotNull AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
-    @NotNull @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     boolean skalIkkeSendeVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,
