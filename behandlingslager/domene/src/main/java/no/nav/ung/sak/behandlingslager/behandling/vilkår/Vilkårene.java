@@ -1,40 +1,20 @@
 package no.nav.ung.sak.behandlingslager.behandling.vilkår;
 
-import static java.util.stream.Collectors.joining;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.hibernate.annotations.BatchSize;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import org.hibernate.annotations.BatchSize;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 @Entity(name = "Vilkårene")
 @Table(name = "VR_VILKAR_RESULTAT")
@@ -49,7 +29,7 @@ public class Vilkårene extends BaseEntitet {
     private long versjon;
 
     // CascadeType.ALL + orphanRemoval=true må til for at Vilkår skal bli slettet fra databasen ved fjerning fra HashSet
-    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "vilkar_resultat_id", nullable = false)
     @BatchSize(size = 20)
     private Set<Vilkår> vilkårne = new HashSet<>();
@@ -65,7 +45,9 @@ public class Vilkårene extends BaseEntitet {
         }
     }
 
-    /** Oppretter vilkårne fra eksisternede, men med avkapping ifht. angitt boundry. */
+    /**
+     * Oppretter vilkårne fra eksisternede, men med avkapping ifht. angitt boundry.
+     */
     Vilkårene(Collection<Vilkår> vilkår, LocalDateInterval boundry) {
         this.vilkårne = vilkår.stream().map(v -> new VilkårBuilder(v, boundry).build()).collect(Collectors.toCollection(LinkedHashSet::new));
     }
@@ -120,13 +102,6 @@ public class Vilkårene extends BaseEntitet {
         return Objects.hash(getVilkårene());
     }
 
-    public boolean getHarAvslåtteVilkårsPerioder() {
-        return getVilkårene()
-            .stream()
-            .map(Vilkår::getPerioder)
-            .flatMap(Collection::stream)
-            .anyMatch(vp -> Utfall.IKKE_OPPFYLT.equals(vp.getGjeldendeUtfall()));
-    }
 
     public Optional<Vilkår> getVilkår(VilkårType vilkårType) {
         return vilkårne.stream().filter(v -> Objects.equals(vilkårType, v.getVilkårType())).findAny();
@@ -151,21 +126,6 @@ public class Vilkårene extends BaseEntitet {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> map = new EnumMap<>(VilkårType.class);
         vilkårne.forEach(v -> map.put(v.getVilkårType(), getVilkårTimeline(v.getVilkårType(), maksPeriode.getFomDato(), maksPeriode.getTomDato())));
         return map;
-    }
-
-    public Map<VilkårType, Set<Avslagsårsak>> getVilkårMedAvslagsårsaker() {
-        Map<VilkårType, Set<Avslagsårsak>> result = new EnumMap<>(VilkårType.class);
-        for (Vilkår vilkår : vilkårne) {
-            var avslagsårsaker = vilkår.getPerioder().stream()
-                .map(VilkårPeriode::getAvslagsårsak)
-                .filter(Objects::nonNull)
-                .filter(it -> !Avslagsårsak.UDEFINERT.equals(it))
-                .collect(Collectors.toSet());
-            if (!avslagsårsaker.isEmpty()) {
-                result.put(vilkår.getVilkårType(), avslagsårsaker);
-            }
-        }
-        return result;
     }
 
     public LocalDateTimeline<Boolean> getAlleIntervaller() {

@@ -1,14 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.vilkår;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -112,34 +105,18 @@ public class VilkårBuilder {
         return this;
     }
 
-    public boolean harDataPåPeriode(DatoIntervallEntitet periode) {
-        return vilkårTidslinje.intersection(periode.toLocalDateInterval())
-            .segmenter()
-            .stream()
-            .anyMatch(it -> Objects.nonNull(it.getValue()));
-    }
-
-    public VilkårBuilder tilbakestill(DatoIntervallEntitet periode) {
-        return tilbakestill(periode, true);
-    }
-
-    public VilkårBuilder tilbakestill(DatoIntervallEntitet periode, boolean justerUtfallForForInntilliggendePerioder ) {
+    public VilkårBuilder tilbakestill(DatoIntervallEntitet periode ) {
         validerBuilder();
-
-        tilbakestill(new TreeSet<>(Set.of(periode)), justerUtfallForForInntilliggendePerioder);
+        tilbakestill(new TreeSet<>(Set.of(periode)));
         return this;
     }
 
-    public VilkårBuilder tilbakestill(NavigableSet<DatoIntervallEntitet> perioder, boolean justerUtfallForForInntilliggendePerioder) {
+    public VilkårBuilder tilbakestill(NavigableSet<DatoIntervallEntitet> perioder) {
         validerBuilder();
         for (DatoIntervallEntitet periode : perioder) {
             var segment = new LocalDateSegment<WrappedVilkårPeriode>(periode.getFomDato(), periode.getTomDato(), null);
             var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
-
             this.vilkårTidslinje = vilkårTidslinje.disjoint(periodeTidslinje);
-        }
-        if (justerUtfallForForInntilliggendePerioder) {
-            justereUtfallVedTilbakestilling(perioder);
         }
         return this;
     }
@@ -219,10 +196,7 @@ public class VilkårBuilder {
             throw new IllegalStateException("[Utvikler feil] Kan ikke bygge en dummy");
         }
         if (fagsakTidslinje != null) {
-            var tidslinjeSomFaltBort = vilkårTidslinje.disjoint(fagsakTidslinje);
             vilkårTidslinje = vilkårTidslinje.intersection(fagsakTidslinje);
-            var periodeneSomFaltBort = TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeSomFaltBort.filterValue(Objects::nonNull));
-            justereUtfallVedTilbakestilling(periodeneSomFaltBort);
         }
         bygget = true;
         var vilkårsPerioderRaw = vilkårTidslinje
@@ -241,30 +215,6 @@ public class VilkårBuilder {
     VilkårBuilder medFullstendigTidslinje(LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje) {
         this.fagsakTidslinje = fagsakTidslinje;
         return this;
-    }
-
-    private void justereUtfallVedTilbakestilling(NavigableSet<DatoIntervallEntitet> tilbakestiltePerioder) {
-        var datoerSomOverlapperBakover = tilbakestiltePerioder.stream()
-            .map(DatoIntervallEntitet::getFomDato)
-            .map(it -> it.minusDays(1))
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it, it))
-            .collect(Collectors.toSet());
-        var datoerSomOverlapperFremover = tilbakestiltePerioder.stream()
-            .map(DatoIntervallEntitet::getTomDato)
-            .map(it -> it.plusDays(1))
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it, it))
-            .collect(Collectors.toSet());
-
-        var datoerSomOverlapper = new HashSet<>(datoerSomOverlapperBakover);
-        datoerSomOverlapper.addAll(datoerSomOverlapperFremover);
-
-        for (DatoIntervallEntitet datoIntervallEntitet : datoerSomOverlapper) {
-            if (harDataPåPeriode(datoIntervallEntitet)) {
-                var periodeBuilder = hentBuilderFor(datoIntervallEntitet)
-                    .medUtfall(Utfall.IKKE_VURDERT);
-                leggTil(periodeBuilder);
-            }
-        }
     }
 
     private NavigableSet<VilkårPeriode> sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(NavigableSet<VilkårPeriode> vilkårsPerioderRaw) {
