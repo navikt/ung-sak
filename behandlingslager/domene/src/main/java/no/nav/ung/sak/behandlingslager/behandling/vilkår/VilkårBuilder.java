@@ -259,7 +259,6 @@ public class VilkårBuilder {
             justereUtfallVedTilbakestilling(periodeneSomFaltBort);
         }
         bygget = true;
-        vilkårTidslinje = vilkårTidslinje.compress();
         var vilkårsPerioderRaw = vilkårTidslinje
             .segmenter()
             .stream()
