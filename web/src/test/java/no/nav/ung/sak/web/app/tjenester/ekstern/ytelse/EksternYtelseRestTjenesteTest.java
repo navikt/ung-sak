@@ -1,8 +1,11 @@
 package no.nav.ung.sak.web.app.tjenester.ekstern.ytelse;
 
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse;
+import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggVedtak;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.Ytelse;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseRequest;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseResponse;
@@ -12,8 +15,10 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.vedtattytelse.VedtakYtelseTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +34,7 @@ class EksternYtelseRestTjenesteTest {
 
     private static final LocalDate FOM = LocalDate.of(2026, 1, 1);
     private static final LocalDate TOM = LocalDate.of(2026, 12, 31);
+    private static final String KONSUMENT = "dev-gcp:tiltakspenger:tiltakspenger-saksbehandling-api";
 
     private final AktørTjeneste aktørTjeneste = mock(AktørTjeneste.class);
     private final VedtakYtelseTjeneste vedtakYtelseTjeneste = mock(VedtakYtelseTjeneste.class);
@@ -41,6 +47,15 @@ class EksternYtelseRestTjenesteTest {
     @BeforeEach
     void setUp() {
         when(aktørTjeneste.hentAlleAktørIderForPersonIdent(ident)).thenReturn(aktørIder);
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker(KONSUMENT);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SubjectHandlerUtils.reset();
+        SubjectHandlerUtils.unsetSubjectHandler();
+        MDC.clear();
     }
 
     @Test
@@ -51,6 +66,41 @@ class EksternYtelseRestTjenesteTest {
         var resultat = tjeneste.hentVedtak(request);
 
         assertThat(resultat).isSameAs(vedtak);
+    }
+
+    @Test
+    void skal_legge_konsument_endepunkt_og_saksnumre_i_mdc_ved_oppslag_av_vedtak() {
+        when(vedtakYtelseTjeneste.hentVedtak(aktørIder, new Periode(FOM, TOM))).thenReturn(new YtelseResponse(List.of(
+            new Ytelse(YtelseType.UNGDOMSPROGRAMYTELSE, "SAK2", UUID.randomUUID(), LocalDateTime.now(), List.of()),
+            new Ytelse(YtelseType.AKTIVITETSPENGER, "SAK1", UUID.randomUUID(), LocalDateTime.now(), List.of()))));
+
+        tjeneste.hentVedtak(request);
+
+        assertThat(MDC.get("prosess_konsument")).isEqualTo(KONSUMENT);
+        assertThat(MDC.get("prosess_endepunkt")).isEqualTo("/ekstern/ytelse/v1/vedtak");
+        assertThat(MDC.get("prosess_saksnummer")).isEqualTo("SAK1,SAK2");
+    }
+
+    @Test
+    void skal_legge_saksnummer_i_mdc_ved_oppslag_av_barnetillegg() {
+        when(vedtakYtelseTjeneste.hentBarnetillegg(aktørIder, new Periode(FOM, TOM))).thenReturn(new BarnetilleggResponse(List.of(
+            new BarnetilleggVedtak(YtelseType.AKTIVITETSPENGER, "SAK1", UUID.randomUUID(), LocalDateTime.now(), List.of()))));
+
+        tjeneste.hentBarnetillegg(request);
+
+        assertThat(MDC.get("prosess_konsument")).isEqualTo(KONSUMENT);
+        assertThat(MDC.get("prosess_endepunkt")).isEqualTo("/ekstern/ytelse/v1/barnetillegg");
+        assertThat(MDC.get("prosess_saksnummer")).isEqualTo("SAK1");
+    }
+
+    @Test
+    void skal_ikke_legge_saksnummer_i_mdc_uten_treff() {
+        when(vedtakYtelseTjeneste.hentVedtak(aktørIder, new Periode(FOM, TOM))).thenReturn(new YtelseResponse(List.of()));
+
+        tjeneste.hentVedtak(request);
+
+        assertThat(MDC.get("prosess_konsument")).isEqualTo(KONSUMENT);
+        assertThat(MDC.get("prosess_saksnummer")).isNull();
     }
 
     @Test

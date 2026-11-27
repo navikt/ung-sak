@@ -17,13 +17,15 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse;
+import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggVedtak;
+import no.nav.ung.sak.kontrakt.ekstern.ytelse.Ytelse;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseRequest;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseResponse;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.vedtattytelse.VedtakYtelseTjeneste;
+import no.nav.ung.sak.web.app.tjenester.ekstern.EksterntKallLoggkontekst;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.abac.EksterneSystemer;
 import org.slf4j.Logger;
@@ -80,9 +82,11 @@ public class EksternYtelseRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public YtelseResponse hentVedtak(
         @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) YtelseRequest request) {
+        EksterntKallLoggkontekst.leggTilKall(BASE_PATH + VEDTAK_PATH);
         var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
         var respons = vedtakYtelseTjeneste.hentVedtak(aktørIder, new Periode(request.fom(), request.tom()));
-        log.info("Eksternt system hentet vedtak. konsument={}, antallVedtak={}", SubjectHandler.getSubjectHandler().getUid(), respons.vedtak().size());
+        EksterntKallLoggkontekst.leggTilSaksnumre(respons.vedtak().stream().map(Ytelse::saksnummer).toList());
+        log.info("Eksternt system hentet vedtak. antallVedtak={}", respons.vedtak().size());
         return respons;
     }
 
@@ -104,9 +108,11 @@ public class EksternYtelseRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public BarnetilleggResponse hentBarnetillegg(
         @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) YtelseRequest request) {
+        EksterntKallLoggkontekst.leggTilKall(BASE_PATH + BARNETILLEGG_PATH);
         var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
         var respons = vedtakYtelseTjeneste.hentBarnetillegg(aktørIder, new Periode(request.fom(), request.tom()));
-        log.info("Eksternt system hentet barnetillegg. konsument={}, antallVedtak={}", SubjectHandler.getSubjectHandler().getUid(), respons.vedtak().size());
+        EksterntKallLoggkontekst.leggTilSaksnumre(respons.vedtak().stream().map(BarnetilleggVedtak::saksnummer).toList());
+        log.info("Eksternt system hentet barnetillegg. antallVedtak={}", respons.vedtak().size());
         return respons;
     }
 }
