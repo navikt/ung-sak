@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.IngenVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.kontroll.InntektskontrollFritakUtleder;
 import no.nav.ung.sak.domene.behandling.steg.beregnytelse.BeregnYtelseSteg;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.ytelse.BeregnetSats;
@@ -38,6 +39,7 @@ public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private InntektskontrollFritakUtleder inntektskontrollFritakUtleder;
 
     public AktivitetspengerBeregnYtelseSteg() {
     }
@@ -45,10 +47,12 @@ public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
     @Inject
     public AktivitetspengerBeregnYtelseSteg(AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
                                             TilkjentYtelseRepository tilkjentYtelseRepository,
-                                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+                                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+                                            @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) InntektskontrollFritakUtleder inntektskontrollFritakUtleder) {
         this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+        this.inntektskontrollFritakUtleder = inntektskontrollFritakUtleder;
     }
 
     @Override
@@ -71,7 +75,7 @@ public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
 
         // Utfør reduksjon og map til tilkjent ytelse
         final var konfigurasjon = new InntektsreduksjonKonfigurasjon(REDUKSJONSFAKTOR_ARBEIDSINNTEKT, REDUKSJONSFAKTOR_YTELSE);
-        final var tilkjentYtelseTidslinje = new LagTilkjentYtelse(konfigurasjon).lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
+        final var tilkjentYtelseTidslinje = new LagTilkjentYtelse(konfigurasjon, inntektskontrollFritakUtleder).lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelInput = lagRegelInput(aktivSatsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);
