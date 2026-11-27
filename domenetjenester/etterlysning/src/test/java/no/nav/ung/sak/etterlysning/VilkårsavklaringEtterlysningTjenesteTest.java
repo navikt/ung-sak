@@ -203,7 +203,6 @@ class VilkårsavklaringEtterlysningTjenesteTest {
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             årsak.getKode(),
-            "begrunnelse",
             skalSendeVarsel,
             null,
             skalSendeVarsel ? null : "begrunnelse for at det ikke varsles",

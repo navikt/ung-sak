@@ -178,7 +178,6 @@ class VilkårsavklaringKombinasjonTest {
             UUID.randomUUID(),
             PERIODE,
             årsak.getKode(),
-            "begrunnelse",
             true,
             "fritekst til varsel",
             null,

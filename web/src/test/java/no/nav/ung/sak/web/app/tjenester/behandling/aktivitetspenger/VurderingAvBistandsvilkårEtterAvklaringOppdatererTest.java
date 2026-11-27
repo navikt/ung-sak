@@ -172,7 +172,6 @@ class VurderingAvBistandsvilkårEtterAvklaringOppdatererTest {
                 UUID.randomUUID(),
                 DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()),
                 årsak.getKode(),
-                "begrunnelse for avklaring",
                 true,
                 årsak.kreverFritekst() ? "fritekst til varsel" : null,
                 null,

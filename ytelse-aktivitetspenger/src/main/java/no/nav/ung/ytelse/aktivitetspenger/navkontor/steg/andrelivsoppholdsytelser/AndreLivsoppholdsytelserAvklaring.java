@@ -8,7 +8,6 @@ import java.util.UUID;
 
 public record AndreLivsoppholdsytelserAvklaring(
     AndreLivsoppholdsytelserVarselInnhold innhold,
-    String begrunnelse,
     String begrunnelseIkkeVarsel,
     String vurdertAv,
     LocalDateTime vurdertTidspunkt

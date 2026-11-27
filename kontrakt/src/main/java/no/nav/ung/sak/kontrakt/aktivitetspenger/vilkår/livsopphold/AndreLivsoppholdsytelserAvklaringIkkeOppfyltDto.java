@@ -11,7 +11,6 @@ import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 
 public record AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(
     @NotNull AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
-    @NotNull @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     boolean skalIkkeSendeVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,

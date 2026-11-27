@@ -37,7 +37,6 @@ public final class AndreLivsoppholdsytelserAvklaringDataMapper {
             referanse,
             innhold.hentPeriodeSomDatoIntervallEntitet(),
             innhold.ikkeOppfyltÅrsak().getKode(),
-            avklaring.begrunnelse(),
             innhold.skalSendeVarsel(),
             innhold.fritekstTilVarsel(),
             avklaring.begrunnelseIkkeVarsel(),
@@ -68,6 +67,6 @@ public final class AndreLivsoppholdsytelserAvklaringDataMapper {
             avklaringtype
         );
 
-        return new AndreLivsoppholdsytelserAvklaring(innhold, dto.avklaring().begrunnelse(), dto.avklaring().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
+        return new AndreLivsoppholdsytelserAvklaring(innhold, dto.avklaring().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
     }
 }

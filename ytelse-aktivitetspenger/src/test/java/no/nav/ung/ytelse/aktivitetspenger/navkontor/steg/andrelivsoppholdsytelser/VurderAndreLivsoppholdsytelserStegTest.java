@@ -153,6 +153,8 @@ class VurderAndreLivsoppholdsytelserStegTest {
         assertThat(vurdering.isGodkjent()).isFalse();
         assertThat(vurdering.getIkkeOppfyltÅrsak()).isEqualTo(AUTOMATISERBAR_ÅRSAK);
         assertThat(vurdering.isManuellVurdering()).isFalse();
+        assertThat(vurdering.getBegrunnelse()).isEqualTo(
+            "Oppgaven besvart uten uttalelse. Saken behandles automatisk. Legger til grunn samme årsak som i varsel til bruker.");
 
         var json = new VilkårJsonObjectMapper();
         var regelsporing = vurdering.getRegelsporing().orElseThrow();
@@ -224,6 +226,17 @@ class VurderAndreLivsoppholdsytelserStegTest {
     void skal_ikke_avslå_automatisk_nar_det_er_valgt_a_ikke_varsle() {
         var behandling = opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE);
         lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, AUTOMATISERBAR_ÅRSAK, false);
+
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_OPPHØR);
+        assertThat(hentVurderinger(behandling)).isEmpty();
+    }
+
+    @Test
+    void skal_opprette_manuelt_aksjonspunkt_nar_etterlysning_mangler() {
+        var behandling = opprettBehandlingMedVilkårOgPeriode(BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE);
+        lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, AUTOMATISERBAR_ÅRSAK, true);
 
         var resultat = utførSteg(behandling);
 
@@ -405,7 +418,6 @@ class VurderAndreLivsoppholdsytelserStegTest {
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             årsak.getKode(),
-            "Begrunnelse for relevante fakta lagt til grunn i avklaring",
             skalSendeVarsel,
             skalSendeVarsel ? "Fritekst til varselet" : null,
             skalSendeVarsel ? null : "Begrunnelse for ikke varsling",

@@ -37,9 +37,6 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
     @Column(name = "ikke_oppfylt_aarsak", updatable = false)
     private String ikkeOppfyltÅrsakKode;
 
-    @Column(name = "begrunnelse", updatable = false)
-    private String begrunnelse;
-
     @Column(name = "skal_sende_varsel", updatable = false)
     private boolean skalSendeVarsel;
 
@@ -77,7 +74,6 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
         this.periode = nyPeriode.toRange();
         this.referanse = annenAvklaring.getReferanse();
         this.ikkeOppfyltÅrsakKode = annenAvklaring.getIkkeOppfyltÅrsakKode();
-        this.begrunnelse = annenAvklaring.getBegrunnelse();
         this.skalSendeVarsel = annenAvklaring.skalSendeVarsel();
         this.fritekstTilVarsel = annenAvklaring.getFritekstTilVarsel();
         this.begrunnelseIkkeVarsel = annenAvklaring.getBegrunnelseIkkeVarsel();
@@ -110,11 +106,6 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
     @Override
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
-    }
-
-    @Override
-    public String getBegrunnelse() {
-        return begrunnelse;
     }
 
     @Override
@@ -159,7 +150,6 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
         if (!(o instanceof VilkårPeriodeAvklaringFerdigstilt that)) return false;
         return getPeriode().equals(that.getPeriode())
             && Objects.equals(ikkeOppfyltÅrsakKode, that.ikkeOppfyltÅrsakKode)
-            && Objects.equals(begrunnelse, that.begrunnelse)
             && skalSendeVarsel == that.skalSendeVarsel
             && Objects.equals(fritekstTilVarsel, that.fritekstTilVarsel)
             && Objects.equals(begrunnelseIkkeVarsel, that.begrunnelseIkkeVarsel)
@@ -172,7 +162,7 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), ikkeOppfyltÅrsakKode, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, kildeKode, kildeFritekst, vurdertAv, vurdertTidspunkt, avklaringtype);
+        return Objects.hash(getPeriode(), ikkeOppfyltÅrsakKode, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, kildeKode, kildeFritekst, vurdertAv, vurdertTidspunkt, avklaringtype);
     }
 
     @Override

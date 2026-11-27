@@ -145,28 +145,6 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     @Test
-    void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
-        var opprinnelig = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "opprinnelig begrunnelse");
-        vilkårsavklaringTjeneste.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(konverterTilBostedAvklaringPeriode(opprinnelig, behandling)), BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold);
-
-        oppdater(dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "rettet begrunnelse"));
-
-        assertThat(hentSorterteAvklaringer())
-            .extracting(VilkårPeriodeAvklaring::getBegrunnelse)
-            .as("den rettede begrunnelsen skal lagres")
-            .containsExactly("rettet begrunnelse");
-
-        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId()))
-            .as("begrunnelsen vises ikke for bruker, så varselet skal ikke sendes på nytt")
-            .isEmpty();
-        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
-    }
-
-    private static BostedAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
-        return BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now());
-    }
-
-    @Test
     void skal_fjerne_vilkårsvurdering_og_vilkårresultat_for_periode_ved_lagring_av_forslag() {
         var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.ANNET, false);
         var param = new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto);
@@ -456,10 +434,13 @@ class VurderFaktaOmBostedOppdatererTest {
             .toList();
     }
 
+    private static BostedAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
+        return BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now());
+    }
+
     private static VurderFaktaOmBostedDto dtoUtenVarsel(Periode periode, BostedsvilkårIkkeOppfyltÅrsak årsak) {
         var vurdering = new BostedVurderingIkkeOppfyltDto(
             årsak,
-            "begrunnelse",
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
             BEGRUNNELSE_IKKE_VARSEL,
             BostedsavklaringKildeType.BRUKER,
@@ -470,13 +451,8 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     private static VurderFaktaOmBostedDto dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak årsak, boolean skalSendeVarsel) {
-        return dtoMedEnAvklaring(årsak, skalSendeVarsel, "begrunnelse");
-    }
-
-    private static VurderFaktaOmBostedDto dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak årsak, boolean skalSendeVarsel, String begrunnelse) {
         var vurdering = new BostedVurderingIkkeOppfyltDto(
             årsak,
-            begrunnelse,
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
             skalSendeVarsel ? null : BEGRUNNELSE_IKKE_VARSEL,
             BostedsavklaringKildeType.BRUKER,

@@ -77,7 +77,7 @@ class VilkårsavklaringTjenesteTest {
     @ParameterizedTest
     @EnumSource(Vilkår.class)
     void skal_lagre_foreslatt_avklaring_kun_paa_angitt_vilkaar(Vilkår vilkår) {
-        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM), "begrunnelse")), vilkår.mapper);
+        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM))), vilkår.mapper);
 
         assertThat(tjeneste.hentForeslåtteAvklaringerSomInnhold(behandling.getId(), vilkår.type, vilkår.mapper).keySet())
             .extracting(VilkårsvarselInnhold::ikkeOppfyltÅrsak)
@@ -92,7 +92,7 @@ class VilkårsavklaringTjenesteTest {
     @ParameterizedTest
     @EnumSource(Vilkår.class)
     void skal_hente_seneste_avklaring_for_behandling(Vilkår vilkår) {
-        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM), "begrunnelse")), vilkår.mapper);
+        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM))), vilkår.mapper);
 
         var senesteAvklaring = tjeneste.hentSenesteForeslåtteAvklaringForBehandling(behandling.getId(), vilkår.type).orElseThrow();
 
@@ -105,7 +105,7 @@ class VilkårsavklaringTjenesteTest {
     @Test
     void skal_ferdigstille_foreslatte_avklaringer_for_alle_vilkaar() {
         for (var vilkår : Vilkår.values()) {
-            tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM), "begrunnelse")), vilkår.mapper);
+            tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM))), vilkår.mapper);
         }
 
         tjeneste.ferdigstillForeslåtteAvklaringer(behandling.getId());
@@ -121,24 +121,11 @@ class VilkårsavklaringTjenesteTest {
 
     @ParameterizedTest
     @EnumSource(Vilkår.class)
-    void skal_gjenbruke_referanse_naar_kun_begrunnelsen_er_endret(Vilkår vilkår) {
-        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM), "begrunnelse")), vilkår.mapper);
-        var opprinneligReferanse = hentReferanser(vilkår).getFirst();
-
-        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM), "ny begrunnelse")), vilkår.mapper);
-
-        assertThat(hentReferanser(vilkår))
-            .as("begrunnelsen vises ikke for bruker, så referansen etterlysningen peker på skal overleve")
-            .containsExactly(opprinneligReferanse);
-    }
-
-    @ParameterizedTest
-    @EnumSource(Vilkår.class)
     void skal_gi_ny_referanse_naar_varselet_er_endret(Vilkår vilkår) {
-        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM), "begrunnelse")), vilkår.mapper);
+        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM))), vilkår.mapper);
         var opprinneligReferanse = hentReferanser(vilkår).getFirst();
 
-        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM.minusDays(1)), "begrunnelse")), vilkår.mapper);
+        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), vilkår.type, Set.of(lagAvklaring(vilkår, new Periode(FOM, TOM.minusDays(1)))), vilkår.mapper);
 
         assertThat(hentReferanser(vilkår))
             .as("endret periode endrer varselet, og brukeren må varsles på nytt")
@@ -160,18 +147,18 @@ class VilkårsavklaringTjenesteTest {
             .toList();
     }
 
-    private static ForeslåttVilkårsavklaring lagAvklaring(Vilkår vilkår, Periode periode, String begrunnelse) {
+    private static ForeslåttVilkårsavklaring lagAvklaring(Vilkår vilkår, Periode periode) {
         var vurdertTidspunkt = LocalDateTime.now();
         return switch (vilkår) {
             case AKTIVITET -> new AktivitetAvklaring(new AktivitetVarselInnhold(periode, AktivitetsvilkåretIkkeOppfyltÅrsak.ANNET, true, null,
-                AktivitetsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG), begrunnelse, null, "A12345", vurdertTidspunkt);
+                AktivitetsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG), null, "A12345", vurdertTidspunkt);
             case BOSTED -> new BostedAvklaring(new BostedVarselInnhold(periode, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, null,
-                BostedsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG), begrunnelse, null, "A12345", vurdertTidspunkt);
+                BostedsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG), null, "A12345", vurdertTidspunkt);
             case BISTAND -> new BistandAvklaring(new BistandVarselInnhold(periode, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, null,
-                BistandsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG), begrunnelse, null, "A12345", vurdertTidspunkt);
+                BistandsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG), null, "A12345", vurdertTidspunkt);
             case ANDRE_LIVSOPPHOLDSYTELSER -> new AndreLivsoppholdsytelserAvklaring(new AndreLivsoppholdsytelserVarselInnhold(periode,
                 AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_UFØRETRYGD, true, null,
-                AndreLivsoppholdsytelserAvklaringKildeType.NAV, null, Avklaringtype.AVSLAG), begrunnelse, null, "A12345", vurdertTidspunkt);
+                AndreLivsoppholdsytelserAvklaringKildeType.NAV, null, Avklaringtype.AVSLAG), null, "A12345", vurdertTidspunkt);
         };
     }
 

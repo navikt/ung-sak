@@ -40,7 +40,6 @@ public final class BostedsAvklaringDataMapper {
             referanse,
             innhold.hentPeriodeSomDatoIntervallEntitet(),
             innhold.ikkeOppfyltÅrsak().getKode(),
-            bostedAvklaring.begrunnelse(),
             innhold.skalSendeVarsel(),
             innhold.fritekstTilVarsel(),
             bostedAvklaring.begrunnelseIkkeVarsel(),
@@ -68,6 +67,6 @@ public final class BostedsAvklaringDataMapper {
             avklaringtype
         );
 
-        return new BostedAvklaring(innhold, dto.vurdering().begrunnelse(), dto.vurdering().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
+        return new BostedAvklaring(innhold, dto.vurdering().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
     }
 }

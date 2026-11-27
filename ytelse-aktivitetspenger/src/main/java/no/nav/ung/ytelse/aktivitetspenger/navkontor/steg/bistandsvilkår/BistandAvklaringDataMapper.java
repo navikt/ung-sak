@@ -37,7 +37,6 @@ public final class BistandAvklaringDataMapper {
             referanse,
             innhold.hentPeriodeSomDatoIntervallEntitet(),
             innhold.ikkeOppfyltÅrsak().getKode(),
-            avklaring.begrunnelse(),
             innhold.skalSendeVarsel(),
             innhold.fritekstTilVarsel(),
             avklaring.begrunnelseIkkeVarsel(),
@@ -65,7 +64,7 @@ public final class BistandAvklaringDataMapper {
             avklaringtype
         );
 
-        return new BistandAvklaring(innhold, dto.avklaring().begrunnelse(), dto.avklaring().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
+        return new BistandAvklaring(innhold, dto.avklaring().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
     }
 
 }

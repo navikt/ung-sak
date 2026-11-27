@@ -158,28 +158,6 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     @Test
-    void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, "opprinnelig begrunnelse"));
-
-        var referanseFørstegang = hentSorterteAvklaringer().getFirst().getReferanse();
-
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, "rettet begrunnelse"));
-
-        assertThat(hentSorterteAvklaringer())
-            .extracting(VilkårPeriodeAvklaring::getBegrunnelse)
-            .as("den rettede begrunnelsen skal lagres")
-            .containsExactly("rettet begrunnelse");
-
-        assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId())).isEmpty();
-        assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BISTAND))
-            .extracting(Etterlysning::getGrunnlagsreferanse)
-            .as("begrunnelsen vises ikke for bruker, så varselet skal ikke sendes på nytt")
-            .containsExactly(referanseFørstegang);
-        verify(prosessTaskTjeneste, org.mockito.Mockito.times(1)).lagre(any(ProsessTaskData.class));
-        assertEtterlysningerPekerPåAvklaringIAktivtGrunnlag();
-    }
-
-    @Test
     void skal_lagre_avklaring_uten_varsel_uten_a_opprette_etterlysning() {
         oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
 
@@ -457,16 +435,12 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     private static VurderFaktaOmBistandDto dtoUtenVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak) {
-        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, "begrunnelse", true, null, BEGRUNNELSE_IKKE_VARSEL, BistandsavklaringKildeType.BRUKER, null);
+        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, true, null, BEGRUNNELSE_IKKE_VARSEL, BistandsavklaringKildeType.BRUKER, null);
         return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 
     private static VurderFaktaOmBistandDto dtoMedVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak) {
-        return dtoMedVarsel(periode, årsak, "begrunnelse");
-    }
-
-    private static VurderFaktaOmBistandDto dtoMedVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse) {
-        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, begrunnelse, false, "Fritekst til varsel", null, BistandsavklaringKildeType.BRUKER, null);
+        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, false, "Fritekst til varsel", null, BistandsavklaringKildeType.BRUKER, null);
         return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 }

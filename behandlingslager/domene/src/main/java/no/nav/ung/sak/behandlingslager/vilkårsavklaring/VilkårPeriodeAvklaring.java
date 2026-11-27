@@ -23,8 +23,6 @@ public interface VilkårPeriodeAvklaring {
 
     String getKildeFritekst();
 
-    String getBegrunnelse();
-
     boolean skalSendeVarsel();
 
     String getFritekstTilVarsel();
