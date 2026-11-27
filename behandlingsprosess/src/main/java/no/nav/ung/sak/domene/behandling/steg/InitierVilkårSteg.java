@@ -62,10 +62,8 @@ public class InitierVilkårSteg implements BehandlingSteg {
         VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null)).medBoundry(behandling.getFagsak().getPeriode(), true);
 
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
-        int utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utledRådataTilUtledningAvVilkårsperioder(behandling.getId());
-        vilkårBuilder.medMaksMellomliggendePeriodeAvstand(utledetAvstand)
-            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
+        vilkårBuilder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .leggTilIkkeVurderteVilkår(vilkårPeriodeMap);
         var vilkårResultat = vilkårBuilder.build();
 

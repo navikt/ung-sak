@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.foreslåresultat;
 
-import java.util.List;
+import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,6 +23,8 @@ import no.nav.ung.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandling
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
+import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
+import no.nav.ung.sak.vilkår.SamletVilkårsutfallTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -50,6 +52,14 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
     @Override
     protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var timeline = finnTidslinjeTilVurdering(behandlingId);
+        if (timeline.isEmpty()) {
+            return behandling.getFagsak().getPeriode();
+        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(timeline.getMinLocalDate(), timeline.getMaxLocalDate());
+    }
+
+    private LocalDateTimeline<Boolean> finnTidslinjeTilVurdering(Long behandlingId) {
         var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
         var timeline = new LocalDateTimeline<Boolean>(List.of());
 
@@ -59,10 +69,7 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
                 StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN
             );
         }
-        if (timeline.isEmpty()) {
-            return behandling.getFagsak().getPeriode();
-        }
-        return DatoIntervallEntitet.fraOgMedTilOgMed(timeline.getMinLocalDate(), timeline.getMaxLocalDate());
+        return timeline;
     }
 
     /**
@@ -77,6 +84,28 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
         return VilkårsavklaringÅrsaker.alle().entrySet().stream()
             .filter(entry -> behandlingÅrsaker.contains(entry.getValue()))
             .anyMatch(entry -> harOpphørMedAvslag(ref.getBehandlingId(), vilkårene, entry.getKey()));
+    }
+
+    @Override
+    protected boolean skalBehandlingResultatSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
+        var behandlingId = ref.getBehandlingId();
+        if (harKunAvslåttVilkårutfallIVurdertePerioder(vilkårene, behandlingId)) {
+            return true;
+        }
+        return skalAvslåsBasertPåAndreForhold(ref);
+    }
+
+    private boolean harKunAvslåttVilkårutfallIVurdertePerioder(Vilkårene vilkårene, Long behandlingId) {
+        LocalDateTimeline<Boolean> tilVurdering = finnTidslinjeTilVurdering(behandlingId);
+        if (tilVurdering.isEmpty()) {
+            // ingen perioder til vurdering
+            return false;
+        }
+        DatoIntervallEntitet maksPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(tilVurdering.getMinLocalDate(), tilVurdering.getMaxLocalDate());
+        LocalDateTimeline<VilkårUtfallSamlet> samletVilkårutfall = SamletVilkårsutfallTjeneste.samleVilkårUtfall(vilkårene, maksPeriode);
+        var vurderteUtfall = samletVilkårutfall.intersection(tilVurdering);
+        return !vurderteUtfall.isEmpty() && vurderteUtfall.stream()
+            .allMatch(it -> it.getValue().getSamletUtfall() == Utfall.IKKE_OPPFYLT);
     }
 
     private boolean harOpphørMedAvslag(Long behandlingId, Vilkårene vilkårene, VilkårType vilkårType) {

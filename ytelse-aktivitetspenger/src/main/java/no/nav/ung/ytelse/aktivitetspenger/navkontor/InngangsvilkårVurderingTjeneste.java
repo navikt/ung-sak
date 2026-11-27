@@ -198,7 +198,7 @@ public class InngangsvilkårVurderingTjeneste {
 
     public void settVilkårResultatIkkeVurdertForPeriode(VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, SequencedCollection<DatoIntervallEntitet> perioder) {
         var resultatBuilderForVilkår = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-        resultatBuilderForVilkår.tilbakestill(new TreeSet<>(perioder), false);
+        resultatBuilderForVilkår.tilbakestill(new TreeSet<>(perioder));
         perioder.forEach(periode -> resultatBuilderForVilkår.leggTil(new VilkårPeriodeBuilder()
             .medPeriode(periode)
             .medUtfall(Utfall.IKKE_VURDERT)));

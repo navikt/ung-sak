@@ -137,12 +137,6 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     }
 
     @Override
-    public int maksMellomliggendePeriodeAvstand() {
-        return 0;
-    }
-
-
-    @Override
     public KantIKantVurderer getKantIKantVurderer() {
         //for at ny søknad skal vurderes uten å gjenåpne perioder fra tidligere behandlinger
         return new IngenVurdering();

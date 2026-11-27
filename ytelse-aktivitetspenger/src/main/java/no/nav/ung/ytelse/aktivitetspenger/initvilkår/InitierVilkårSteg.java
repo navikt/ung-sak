@@ -57,15 +57,13 @@ public class InitierVilkårSteg implements BehandlingSteg {
         VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null)).medBoundry(behandling.getFagsak().getPeriode(), true);
 
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
-        int utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utledRådataTilUtledningAvVilkårsperioder(behandling.getId());
 
         //sletter perioder som inngår i ny søknad, for å fjerne vurderinger, begrunnelse og splitt av periode fra tidligere behandlinger
         //periodene legges til igjen rett under
         vilkårPeriodeMap.forEach(vilkårBuilder::slettPerioder);
 
-        vilkårBuilder.medMaksMellomliggendePeriodeAvstand(utledetAvstand)
-            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
+        vilkårBuilder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .leggTilIkkeVurderteVilkår(vilkårPeriodeMap);
         var vilkårResultat = vilkårBuilder.build();
 

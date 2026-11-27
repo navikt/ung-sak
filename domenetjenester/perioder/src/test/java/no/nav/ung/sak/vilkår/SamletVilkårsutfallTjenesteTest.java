@@ -23,34 +23,66 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.atIndex;
 
-public class VilkårTjenesteSamletUtfallTest {
+public class SamletVilkårsutfallTjenesteTest {
+
+    @Test
+    void tomme_vilkår_gir_tom_tidslinje() {
+        assertThat(SamletVilkårsutfallTjeneste.samleVilkårUtfall(Vilkårene.builder().build())).isEmpty();
+    }
+
+    @Test
+    void utleder_maksperiode_fra_vilkårene() {
+        var vilkårene = Vilkårene.builder()
+            .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR)
+                .leggTil(new VilkårPeriodeBuilder().medPeriode("2026-01-01", "2026-01-31").medUtfall(Utfall.OPPFYLT)))
+            .leggTil(new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
+                .leggTil(new VilkårPeriodeBuilder().medPeriode("2026-01-10", "2026-02-28").medUtfall(Utfall.IKKE_OPPFYLT)))
+            .build();
+
+        var resultat = SamletVilkårsutfallTjeneste.samleVilkårUtfall(vilkårene);
+
+        var overlapp = LocalDateInterval.parseFrom("2026-01-10", "2026-01-31");
+        assertThat(resultat.getLocalDateIntervals()).containsExactly(overlapp);
+        assertThat(resultat.getSegment(overlapp).getValue().getSamletUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
+        assertThat(resultat.getSegment(overlapp).getValue().getUnderliggendeVilkårUtfall()).hasSize(2);
+    }
+
+    @Test
+    void avgrenser_utfall_til_maksperioden() {
+        var vilkårene = Vilkårene.builder()
+            .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR)
+                .leggTil(new VilkårPeriodeBuilder().medPeriode("2026-01-01", "2026-01-31").medUtfall(Utfall.OPPFYLT)))
+            .build();
+        var maksPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20));
+
+        var resultat = SamletVilkårsutfallTjeneste.samleVilkårUtfall(vilkårene, maksPeriode);
+
+        assertThat(resultat.getLocalDateIntervals()).containsExactly(maksPeriode.toLocalDateInterval());
+        assertThat(resultat.getSegment(maksPeriode.toLocalDateInterval()).getValue().getSamletUtfall()).isEqualTo(Utfall.OPPFYLT);
+    }
 
     @Test
     void ingen_samlet_utfall() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
             VilkårType.ALDERSVILKÅR, toTimeline(List.of()),
             VilkårType.UNGDOMSPROGRAMVILKÅRET, toTimeline(List.of()));
-        var output = vilkårTjeneste.samletVilkårUtfall(input, input.keySet());
+        var output = SamletVilkårsutfallTjeneste.samletVilkårUtfall(input, input.keySet());
         assertThat(output).isEmpty();
     }
 
     @Test
     void har_samlet_utfall_ikke_oppfylt_når_ett_ikke_er_det() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
-        LocalDate f1 = LocalDate.now(), t1 = f1.plusDays(10);
-        LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
+        LocalDate f1 = LocalDate.of(2026, 1, 1), t1 = f1.plusDays(10);
+        LocalDate f2 = f1.plusDays(1), t2 = f2.plusDays(10);
 
         var vilkårene = Vilkårene.builder()
             .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR).leggTil(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT)))
             .leggTil(new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET).leggTil(new VilkårPeriodeBuilder().medPeriode(f2, t2).medUtfall(Utfall.IKKE_OPPFYLT)))
             .build();
 
-        var output = vilkårTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(f1, t2));
+        var output = SamletVilkårsutfallTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(f1, t2));
 
         assertThat(output).isNotEmpty();
 
@@ -73,14 +105,12 @@ public class VilkårTjenesteSamletUtfallTest {
         LocalDate mindato = allePerioder.getMinLocalDate();
         LocalDate maksdato = allePerioder.getMaxLocalDate();
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         var vilkårene = Vilkårene.builder()
             .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR).leggTil(new VilkårPeriodeBuilder().medPeriode(t.get(0).d0, t.get(1).d1).medUtfall(Utfall.OPPFYLT)))
             .leggTil(new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET).leggTil(new VilkårPeriodeBuilder().medPeriode(t.get(1).d0, t.get(1).d1).medUtfall(Utfall.OPPFYLT)))
             .build();
 
-        var output = vilkårTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato));
+        var output = SamletVilkårsutfallTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato));
         assertThat(output).isNotEmpty();
 
         // sjekk intervaller ok
@@ -98,8 +128,6 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_begge_vilkårene_med_flere_overlappende_perioder_IKKE_OPPFYLT() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         var vilkårene = Vilkårene.builder()
             .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2020-08-01", "9999-12-31").medUtfall(Utfall.IKKE_OPPFYLT)))
@@ -111,7 +139,7 @@ public class VilkårTjenesteSamletUtfallTest {
         var allePerioder = vilkårene.getAlleIntervaller();
         LocalDate mindato = allePerioder.getMinLocalDate();
         LocalDate maksdato = allePerioder.getMaxLocalDate();
-        var output = vilkårTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato));
+        var output = SamletVilkårsutfallTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato));
         assertThat(output).isNotEmpty();
 
         var outputIntervaller = List.copyOf(output.getLocalDateIntervals());
@@ -150,8 +178,6 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_begge_vilkårene_med_flere_overlappende_perioder_OPPFYLT() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         var vilkårene = Vilkårene.builder()
             .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2020-08-01", "9999-12-31").medUtfall(Utfall.OPPFYLT)))
@@ -163,7 +189,7 @@ public class VilkårTjenesteSamletUtfallTest {
         var allePerioder = vilkårene.getAlleIntervaller();
         LocalDate mindato = allePerioder.getMinLocalDate();
         LocalDate maksdato = allePerioder.getMaxLocalDate();
-        var output = vilkårTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato));
+        var output = SamletVilkårsutfallTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato));
         assertThat(output).isNotEmpty();
 
         var outputIntervaller = List.copyOf(output.getLocalDateIntervals());
@@ -201,10 +227,8 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_minst_omsorgfor_vilkår() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
-        LocalDate f1 = LocalDate.now(), t1 = f1.plusDays(10);
-        LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
+        LocalDate f1 = LocalDate.of(2026, 1, 1), t1 = f1.plusDays(10);
+        LocalDate f2 = f1.plusDays(1), t2 = f2.plusDays(10);
 
         var vilkårOmsorgFor = List.of(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT).build());
         var vilkårUNGDOMSPROGRAMVILKÅRET = List.of(new VilkårPeriodeBuilder().medPeriode(f2, t2).medUtfall(Utfall.IKKE_OPPFYLT).build());
@@ -212,7 +236,7 @@ public class VilkårTjenesteSamletUtfallTest {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
             VilkårType.ALDERSVILKÅR, toTimeline(vilkårOmsorgFor),
             VilkårType.UNGDOMSPROGRAMVILKÅRET, toTimeline(vilkårUNGDOMSPROGRAMVILKÅRET));
-        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.ALDERSVILKÅR));
+        var output = SamletVilkårsutfallTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.ALDERSVILKÅR));
 
         assertThat(output).isNotEmpty();
 
@@ -233,10 +257,8 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_minst_UNGDOMSPROGRAMVILKÅRET_vilkår() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
-        LocalDate f1 = LocalDate.now(), t1 = f1.plusDays(10);
-        LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
+        LocalDate f1 = LocalDate.of(2026, 1, 1), t1 = f1.plusDays(10);
+        LocalDate f2 = f1.plusDays(1), t2 = f2.plusDays(10);
 
         var vilkårOmsorgFor = List.of(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT).build());
         var vilkårUNGDOMSPROGRAMVILKÅRET = List.of(
@@ -246,7 +268,7 @@ public class VilkårTjenesteSamletUtfallTest {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
             VilkårType.ALDERSVILKÅR, toTimeline(vilkårOmsorgFor),
             VilkårType.UNGDOMSPROGRAMVILKÅRET, toTimeline(vilkårUNGDOMSPROGRAMVILKÅRET));
-        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET));
+        var output = SamletVilkårsutfallTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET));
 
         assertThat(output).isNotEmpty();
 

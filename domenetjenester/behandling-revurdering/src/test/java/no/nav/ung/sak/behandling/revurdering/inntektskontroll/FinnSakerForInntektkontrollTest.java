@@ -18,7 +18,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -110,7 +109,7 @@ class FinnSakerForInntektkontrollTest {
         finnSakerForInntektkontroll = new FinnSakerForInntektkontroll(
             behandlingRepository,
             fagsakRepository,
-            new VilkårTjeneste(behandlingRepository, null, vilkårResultatRepository),
+            new VilkårTjeneste(behandlingRepository, vilkårResultatRepository),
             tilkjentYtelseRepository,
             new RelevanteKontrollperioderUtleder(
                 new UnitTestLookupInstanceImpl<>(prosessTriggerPeriodeUtleder),
