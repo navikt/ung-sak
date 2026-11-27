@@ -89,6 +89,8 @@ spec:
         - application: ung-sak
         - application: kabal-api
           namespace: klage
+        - application: entra-proxy
+          namespace: sikkerhetstjenesten
         - application: ung-tilbake
       external:
         - host: "dokarkiv.prod-fss-pub.nais.io"
@@ -229,6 +231,10 @@ spec:
       value: api://prod-gcp.k9saksbehandling.ung-brukerdialog-api/.default
     - name: SIF_ABAC_PDP_SCOPE
       value: api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default
+    - name: ENTRA_PROXY_URL
+      value: http://entra-proxy.sikkerhetstjenesten/api/v1
+    - name: ENTRA_PROXY_SCOPE
+      value: api://prod-gcp.sikkerhetstjenesten.entra-proxy/.default
     - name: SIF_ABAC_PDP_UNG_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
     - name: SIF_ABAC_PDP_AKTIVITETSPENGER_URL
@@ -286,6 +292,8 @@ spec:
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
     - name: ENABLE_BREV_ANSVARLIG_UNG
+      value: "false"
+    - name: ENTRA_PROXY_ENABLED
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "true"
