@@ -100,10 +100,14 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
 
     private boolean harKunAvslåttVilkårutfallIVurdertePerioder(Vilkårene vilkårene, Long behandlingId) {
         LocalDateTimeline<Boolean> tilVurdering = finnTidslinjeTilVurdering(behandlingId);
+        if (tilVurdering.isEmpty()) {
+            // ingen perioder til vurdering
+            return false;
+        }
         DatoIntervallEntitet maksPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(tilVurdering.getMinLocalDate(), tilVurdering.getMaxLocalDate());
         LocalDateTimeline<VilkårUtfallSamlet> samletVilkårutfall = SamletVilkårsutfallTjeneste.samleVilkårUtfall(vilkårene, maksPeriode);
         var vurderteUtfall = samletVilkårutfall.intersection(tilVurdering);
-        return !vurderteUtfall.isEmpty() && vurderteUtfall.stream()
+        return vurderteUtfall.stream()
             .allMatch(it -> it.getValue().getSamletUtfall() == Utfall.IKKE_OPPFYLT);
     }
 
