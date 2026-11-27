@@ -84,7 +84,6 @@ class VilkårAvklaringHolderTest {
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             "IKKE_OPPFYLT_KODE",
-            "begrunnelse",
             false,
             null,
             "begrunnelse for hvorfor det ikke varsles",

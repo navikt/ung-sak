@@ -43,17 +43,19 @@ class AktivitetspengerPerioderTjenesteTest {
     void skal_gi_tom_liste_når_bruker_ikke_har_fagsak() {
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(AktørId.dummy()), HELE_ÅRET);
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat.perioder()).isEmpty();
+        assertThat(resultat.saksnumre()).isEmpty();
     }
 
     @Test
     void skal_gi_innvilget_periode_fra_gjeldende_vedtak() {
         var aktørId = AktørId.dummy();
-        opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
+        var behandling = opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
-        assertThat(resultat).containsExactly(new Periode(FOM, TOM));
+        assertThat(resultat.perioder()).containsExactly(new Periode(FOM, TOM));
+        assertThat(resultat.saksnumre()).containsExactly(behandling.getFagsak().getSaksnummer());
     }
 
     @Test
@@ -63,7 +65,8 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat.perioder()).isEmpty();
+        assertThat(resultat.saksnumre()).isEmpty();
     }
 
     @Test
@@ -77,7 +80,7 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
-        assertThat(resultat).containsExactly(new Periode(FOM, opphørsdato.minusDays(1)));
+        assertThat(resultat.perioder()).containsExactly(new Periode(FOM, opphørsdato.minusDays(1)));
     }
 
     @Test
@@ -91,7 +94,7 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
-        assertThat(resultat).containsExactly(new Periode(nyFom, TOM));
+        assertThat(resultat.perioder()).containsExactly(new Periode(nyFom, TOM));
     }
 
     @Test
@@ -106,7 +109,7 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
-        assertThat(resultat).containsExactly(new Periode(FOM, TOM));
+        assertThat(resultat.perioder()).containsExactly(new Periode(FOM, TOM));
     }
 
     /**
@@ -124,7 +127,7 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31)));
 
-        assertThat(resultat).containsExactly(new Periode(FOM, TOM));
+        assertThat(resultat.perioder()).containsExactly(new Periode(FOM, TOM));
     }
 
     /**
@@ -142,7 +145,8 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(TOM.plusDays(1), TOM.plusMonths(1)));
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat.perioder()).isEmpty();
+        assertThat(resultat.saksnumre()).isEmpty();
     }
 
     /**
@@ -160,7 +164,7 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), FOM.minusDays(1)));
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat.perioder()).isEmpty();
     }
 
     /**
@@ -178,7 +182,7 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), FOM));
 
-        assertThat(resultat).containsExactly(new Periode(FOM, TOM));
+        assertThat(resultat.perioder()).containsExactly(new Periode(FOM, TOM));
     }
 
     /**
@@ -196,7 +200,7 @@ class AktivitetspengerPerioderTjenesteTest {
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), LocalDate.of(2026, 3, 31)));
 
-        assertThat(resultat).containsExactly(new Periode(FOM, TOM));
+        assertThat(resultat.perioder()).containsExactly(new Periode(FOM, TOM));
     }
 
     @Test
@@ -205,12 +209,59 @@ class AktivitetspengerPerioderTjenesteTest {
         var historiskAktørId = AktørId.dummy();
         var senereFom = TOM.plusDays(1);
         var senereTom = LocalDate.of(2026, 9, 30);
-        opprettAvsluttetBehandling(historiskAktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
-        opprettAvsluttetBehandling(gjeldendeAktørId, null, vilkår(senereFom, senereTom, Utfall.OPPFYLT), 1);
+        var historisk = opprettAvsluttetBehandling(historiskAktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
+        var gjeldende = opprettAvsluttetBehandling(gjeldendeAktørId, null, vilkår(senereFom, senereTom, Utfall.OPPFYLT), 1);
 
         var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(gjeldendeAktørId, historiskAktørId), HELE_ÅRET);
 
-        assertThat(resultat).containsExactly(new Periode(FOM, senereTom));
+        assertThat(resultat.perioder()).containsExactly(new Periode(FOM, senereTom));
+        assertThat(resultat.saksnumre()).containsExactlyInAnyOrder(historisk.getFagsak().getSaksnummer(), gjeldende.getFagsak().getSaksnummer());
+    }
+
+    /**
+     * Fagsaken med den tidligste perioden er med i saksnumrene, siden perioden er slått sammen med den som overlapper.
+     * <pre>
+     * Fagsak 1 (5. jan - 30. jun)   |-----------|
+     * Fagsak 2 (1. jul - 30. sep)               |-----|
+     * Forespurt (august)                           |--|
+     * Returnert                     |-----------------|   (fagsak 1 og 2)
+     * </pre>
+     */
+    @Test
+    void skal_gi_saksnumre_for_alle_fagsaker_i_sammenslått_periode() {
+        var aktørId1 = AktørId.dummy();
+        var aktørId2 = AktørId.dummy();
+        var senereTom = LocalDate.of(2026, 9, 30);
+        var fagsak1 = opprettAvsluttetBehandling(aktørId1, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
+        var fagsak2 = opprettAvsluttetBehandling(aktørId2, null, vilkår(TOM.plusDays(1), senereTom, Utfall.OPPFYLT), 1);
+
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId1, aktørId2), new Periode(LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31)));
+
+        assertThat(resultat.perioder()).containsExactly(new Periode(FOM, senereTom));
+        assertThat(resultat.saksnumre()).containsExactlyInAnyOrder(fagsak1.getFagsak().getSaksnummer(), fagsak2.getFagsak().getSaksnummer());
+    }
+
+    /**
+     * Fagsaker uten innvilget periode i det som returneres, er ikke med i saksnumrene.
+     * <pre>
+     * Fagsak 1 (5. jan - 30. jun)   |-----------|
+     * Fagsak 2 (1. sep - 30. sep)                     |--|
+     * Forespurt (september)                           |--|
+     * Returnert                                       |--|   (bare fagsak 2)
+     * </pre>
+     */
+    @Test
+    void skal_ikke_gi_saksnummer_for_fagsak_uten_periode_i_svaret() {
+        var aktørId1 = AktørId.dummy();
+        var aktørId2 = AktørId.dummy();
+        var september = new Periode(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+        opprettAvsluttetBehandling(aktørId1, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
+        var fagsak2 = opprettAvsluttetBehandling(aktørId2, null, vilkår(september.getFom(), september.getTom(), Utfall.OPPFYLT), 1);
+
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId1, aktørId2), september);
+
+        assertThat(resultat.perioder()).containsExactly(september);
+        assertThat(resultat.saksnumre()).containsExactly(fagsak2.getFagsak().getSaksnummer());
     }
 
     private record VilkårData(Periode periode, Utfall utfall) {

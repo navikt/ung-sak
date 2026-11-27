@@ -209,7 +209,6 @@ class VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdatererTest {
                 UUID.randomUUID(),
                 DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()),
                 årsak.getKode(),
-                "begrunnelse for avklaring",
                 true,
                 fritekstTilVarsel,
                 null,

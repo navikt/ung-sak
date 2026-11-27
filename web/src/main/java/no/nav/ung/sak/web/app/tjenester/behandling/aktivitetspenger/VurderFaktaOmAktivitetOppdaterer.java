@@ -3,7 +3,6 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -12,20 +11,19 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsvarselInnhold;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
-import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.AktivitetFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.VurderFaktaOmAktivitetDto;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.aktivitetsvilkår.AktivitetAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.aktivitetsvilkår.AktivitetAvklaringDataMapper;
-import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.aktivitetsvilkår.AktivitetAvklaringTjeneste;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -38,7 +36,7 @@ public class VurderFaktaOmAktivitetOppdaterer implements AksjonspunktOppdaterer<
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste;
-    private AktivitetAvklaringTjeneste aktivitetAvklaringTjeneste;
+    private VilkårsavklaringTjeneste vilkårsavklaringTjeneste;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     VurderFaktaOmAktivitetOppdaterer() {
@@ -49,12 +47,12 @@ public class VurderFaktaOmAktivitetOppdaterer implements AksjonspunktOppdaterer<
     public VurderFaktaOmAktivitetOppdaterer(BehandlingRepository behandlingRepository,
                                             HistorikkinnslagRepository historikkinnslagRepository,
                                             VilkårsavklaringEtterlysningTjeneste vilkårsavklaringEtterlysningTjeneste,
-                                            @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_AKTIVITET) AktivitetAvklaringTjeneste aktivitetAvklaringTjeneste,
+                                            VilkårsavklaringTjeneste vilkårsavklaringTjeneste,
                                             InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårsavklaringEtterlysningTjeneste = vilkårsavklaringEtterlysningTjeneste;
-        this.aktivitetAvklaringTjeneste = aktivitetAvklaringTjeneste;
+        this.vilkårsavklaringTjeneste = vilkårsavklaringTjeneste;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
@@ -67,17 +65,17 @@ public class VurderFaktaOmAktivitetOppdaterer implements AksjonspunktOppdaterer<
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        aktivitetAvklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId,
+        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VilkårType.AKTIVITETSVILKÅR);
+        vilkårsavklaringTjeneste.validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(behandlingId, VilkårType.AKTIVITETSVILKÅR, vilkårsperioder,
             dto.getAvklaringer().stream().map(AktivitetFaktaavklaringPeriodeDto::periode).toList());
 
         // Opphør lukkes mot slutten av vilkårsperiodene, siden avklaringen kan gjelde en vilkårlig periode i den.
-        var vilkårsperioder = inngangsvilkårVurderingTjeneste.getVilkårTimelineUtenAvkortet(behandlingId, VilkårType.AKTIVITETSVILKÅR);
         if (vilkårsperioder.isEmpty()) {
             throw new IllegalStateException("Må ha vilkårsperioder");
         }
         var maxTomDato = vilkårsperioder.getMaxLocalDate();
 
-        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = aktivitetAvklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId);
+        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = vilkårsavklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId, VilkårType.AKTIVITETSVILKÅR, AktivitetAvklaringDataMapper::mapTilAktivitetAvklaringInnhold);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -90,7 +88,7 @@ public class VurderFaktaOmAktivitetOppdaterer implements AksjonspunktOppdaterer<
             throw new IllegalArgumentException("Støtter kun lagring av én avklaring for aktivitetsvilkåret samtidig");
         }
 
-        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = aktivitetAvklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, nyeAvklaringer);
+        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = vilkårsavklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, VilkårType.AKTIVITETSVILKÅR, nyeAvklaringer, AktivitetAvklaringDataMapper::mapTilAktivitetAvklaringInnhold);
 
         inngangsvilkårVurderingTjeneste.nullstillOverlappendeVurderingOgGjenopprettTidligereVedBehov(param,
             VilkårType.AKTIVITETSVILKÅR,

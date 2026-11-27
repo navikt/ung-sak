@@ -256,7 +256,6 @@ class AktivitetspengerVilkårsPerioderTilVurderingTjenesteTest {
                 UUID.randomUUID(),
                 periode,
                 BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM.getKode(),
-                "begrunnelse",
                 true,
                 "fritekst",
                 null,

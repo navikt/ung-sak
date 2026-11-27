@@ -4,6 +4,7 @@ import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsvarselInnhold;
 import no.nav.ung.sak.typer.Periode;
 
 import java.util.Map;

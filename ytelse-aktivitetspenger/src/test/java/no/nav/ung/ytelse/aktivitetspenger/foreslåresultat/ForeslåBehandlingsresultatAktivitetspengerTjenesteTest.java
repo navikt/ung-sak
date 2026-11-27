@@ -20,7 +20,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
-import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +36,8 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -66,9 +67,8 @@ class ForeslåBehandlingsresultatAktivitetspengerTjenesteTest {
         when(referanse.getBehandlingId()).thenReturn(BEHANDLING_ID);
         when(perioderTilVurderingTjeneste.definerendeVilkår()).thenReturn(Set.of(VilkårType.ALDERSVILKÅR));
         vurderPerioder(HELE_PERIODEN);
-        when(avklaringTjeneste.hentSenesteForeslåtteAvklaringForBehandling(BEHANDLING_ID)).thenReturn(Optional.empty());
         tjeneste = new ForeslåBehandlingsresultatAktivitetspengerTjeneste(
-            repositoryProvider, perioderTilVurderingTjeneste, new UnitTestLookupInstanceImpl<>(avklaringTjeneste));
+            repositoryProvider, perioderTilVurderingTjeneste, avklaringTjeneste);
     }
 
     @Test
@@ -184,7 +184,7 @@ class ForeslåBehandlingsresultatAktivitetspengerTjenesteTest {
             .leggTil(vilkår(VilkårType.ALDERSVILKÅR, vurdering(HELE_PERIODEN, Utfall.OPPFYLT)))
             .leggTil(vilkår(VilkårType.BOSTEDSVILKÅR, vurdering(HELE_PERIODEN, Utfall.IKKE_OPPFYLT)))
             .build(), BehandlingResultatType.AVSLÅTT);
-        verify(avklaringTjeneste, never()).hentSenesteForeslåtteAvklaringForBehandling(BEHANDLING_ID);
+        verify(avklaringTjeneste, never()).hentSenesteForeslåtteAvklaringForBehandling(eq(BEHANDLING_ID), any());
     }
 
     @Test
@@ -294,7 +294,7 @@ class ForeslåBehandlingsresultatAktivitetspengerTjenesteTest {
             .build();
 
         assertThat(tjeneste.skalBehandlingResultatSettesTilOpphør(referanse, vilkårene)).isFalse();
-        verify(avklaringTjeneste, never()).hentSenesteForeslåtteAvklaringForBehandling(BEHANDLING_ID);
+        verify(avklaringTjeneste, never()).hentSenesteForeslåtteAvklaringForBehandling(eq(BEHANDLING_ID), any());
     }
 
     private void foreslåOgVerifiser(Vilkårene vilkårene, BehandlingResultatType forventetResultat) {
@@ -314,7 +314,7 @@ class ForeslåBehandlingsresultatAktivitetspengerTjenesteTest {
     private void opphørsavklaring(VilkårType vilkårType, DatoIntervallEntitet periode, Avklaringtype avklaringtype) {
         when(behandling.getBehandlingÅrsakerTyper())
             .thenReturn(List.of(VilkårsavklaringÅrsaker.avklaringsårsakFor(vilkårType).orElseThrow()));
-        when(avklaringTjeneste.hentSenesteForeslåtteAvklaringForBehandling(BEHANDLING_ID))
+        when(avklaringTjeneste.hentSenesteForeslåtteAvklaringForBehandling(BEHANDLING_ID, vilkårType))
             .thenReturn(Optional.of(new Vilkårsavklaring(avklaringtype, periode, null, null)));
     }
 

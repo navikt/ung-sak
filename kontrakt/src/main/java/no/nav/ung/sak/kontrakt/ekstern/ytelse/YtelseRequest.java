@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
 import no.nav.ung.sak.typer.PersonIdent;
 
 import java.time.LocalDate;
+import java.util.regex.Pattern;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record YtelseRequest(
@@ -15,11 +18,27 @@ public record YtelseRequest(
     @NotNull LocalDate tom
 ) {
 
-    // Valideres her og ikke via @Valid på PersonIdent, fordi meldingen derfra gjentar ident
+    private static final Pattern ELLEVE_SIFRE = Pattern.compile("\\d{11}");
+
+    // Valideres her og ikke via @Valid på PersonIdent, fordi meldingen derfra gjentar ident.
+    // getIdent() gir fnr eller d-nummer, ellers null. erNorskIdent() kaster ved tom ident.
+    // PersonIdent sjekker ikke at alle tegnene er sifre, så det gjør vi her.
     @JsonIgnore
     @AssertTrue(message = "ident må være et gyldig fødselsnummer eller d-nummer")
     public boolean isGyldigIdent() {
-        return ident == null || ident.erNorskIdent();
+        if (ident == null) {
+            return true;
+        }
+        var fnrEllerDnr = ident.getIdent();
+        return fnrEllerDnr != null && ELLEVE_SIFRE.matcher(fnrEllerDnr).matches();
+    }
+
+    // EKSTERN_SYSTEM vurderes bare på token og bruker ikke attributtet. Det gir likevel personsjekk
+    // dersom requesten gjenbrukes i et endepunkt for innloggede brukere.
+    @JsonIgnore
+    @StandardAbacAttributt(StandardAbacAttributtType.FNR)
+    public String getFnr() {
+        return ident == null ? null : ident.getIdent();
     }
 
     @JsonIgnore

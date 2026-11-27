@@ -8,8 +8,7 @@ import java.util.Set;
 
 /**
  * Koblingen mellom et vilkår og behandlingsårsaken som utløser en vilkårsavklaring for det.
- * Koblingen er 1:1 – se {@code VilkårsavklaringTjeneste}, der {@code BehandlingÅrsakTypeRef.Lookup}
- * krever at hver årsak har nøyaktig én tjeneste.
+ * Koblingen er 1:1, og vilkårene her er de som støttes av {@code VilkårsavklaringTjeneste}.
  */
 public final class VilkårsavklaringÅrsaker {
 
