@@ -159,7 +159,7 @@ public class VilkårBuilderTest {
 
         var vilkår = vilkårBuilder.build();
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertThat(vilkår.getPerioder()).hasSize(4);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(1),
             LocalDate.now().plusMonths(5));
