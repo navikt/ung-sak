@@ -14,22 +14,21 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPeriode;
 import no.nav.ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderRequest;
 import no.nav.ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderResponse;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.web.app.tjenester.ekstern.EksterntKallLoggkontekst;
+import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.EksterneSystemer;
 import no.nav.ung.ytelse.aktivitetspenger.perioder.AktivitetspengerPerioderTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Function;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
@@ -77,24 +76,16 @@ public class TilleggsstonaderRestTjeneste {
         })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public AktivitetspengerPerioderResponse hentAktivitetspengerPerioder(
-        @NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenAbacAttributter.class) AktivitetspengerPerioderRequest request) {
+        @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) AktivitetspengerPerioderRequest request) {
+        EksterntKallLoggkontekst.leggTilKall(BASE_PATH + AKTIVITETSPENGER_PERIODER_PATH);
         var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
-        var perioder = aktivitetspengerPerioderTjeneste.hentInnvilgedeOverlappendePerioder(aktørIder, new Periode(request.fom(), request.tom())).stream()
+        var innvilgede = aktivitetspengerPerioderTjeneste.hentInnvilgedeOverlappendePerioder(aktørIder, new Periode(request.fom(), request.tom()));
+        EksterntKallLoggkontekst.leggTilSaksnumre(innvilgede.saksnumre().stream().map(Saksnummer::getVerdi).toList());
+        var perioder = innvilgede.perioder().stream()
             .map(p -> new AktivitetspengerPeriode(p.getFom(), p.getTom()))
             .toList();
 
-        log.info("Tilleggsstønader hentet aktivitetspengeperioder. konsument={}, antallPerioder={}",
-            SubjectHandler.getSubjectHandler().getUid(), perioder.size());
+        log.info("Tilleggsstønader hentet aktivitetspengeperioder. antallPerioder={}", perioder.size());
         return new AktivitetspengerPerioderResponse(perioder);
-    }
-
-    /**
-     * Endepunktet er kun for systemkall, og tilgang avgjøres på ressurstype. Fnr sendes derfor ikke videre som abac-attributt.
-     */
-    public static class IngenAbacAttributter implements Function<Object, AbacDataAttributter> {
-        @Override
-        public AbacDataAttributter apply(Object obj) {
-            return AbacDataAttributter.opprett();
-        }
     }
 }

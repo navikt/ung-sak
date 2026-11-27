@@ -22,6 +22,8 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggPeriode;
+import no.nav.ung.sak.kontrakt.ekstern.ytelse.BarnetilleggResponse;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.Ytelse;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelsePeriode;
 import no.nav.ung.sak.kontrakt.ekstern.ytelse.YtelseResponse;
@@ -37,6 +39,8 @@ class VedtakYtelseTjenesteTest {
     private static final LocalDate JAN_FOM = LocalDate.of(2026, 1, 1);
     private static final LocalDate JAN_TOM = LocalDate.of(2026, 1, 31);
     private static final LocalDate FEB_FOM = LocalDate.of(2026, 2, 1);
+    private static final LocalDate FEB_TOM = LocalDate.of(2026, 2, 28);
+    private static final LocalDate MAR_FOM = LocalDate.of(2026, 3, 1);
     private static final LocalDate MAR_TOM = LocalDate.of(2026, 3, 31);
     private static final LocalDate APR_FOM = LocalDate.of(2026, 4, 1);
     private static final LocalDate APR_TOM = LocalDate.of(2026, 4, 30);
@@ -59,7 +63,7 @@ class VedtakYtelseTjenesteTest {
     }
 
     @Test
-    void skal_returnere_gjeldende_vedtak_med_perioder_og_barnetillegg() {
+    void skal_returnere_gjeldende_vedtak_med_perioder() {
         var sak = lagSak(FagsakYtelseType.AKTIVITETSPENGER, aktørId);
         var vedtakReferanse = UUID.randomUUID();
         lagreVedtak(sak, vedtakReferanse, VEDTATT, DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, MAR_TOM),
@@ -77,8 +81,8 @@ class VedtakYtelseTjenesteTest {
             assertThat(vedtak.perioder()).usingRecursiveComparison()
                 .withComparatorForType(BigDecimal::compareTo, BigDecimal.class)
                 .isEqualTo(List.of(
-                    new YtelsePeriode(JAN_FOM, JAN_TOM, new BigDecimal("800"), new BigDecimal("9600"), 2, 74),
-                    new YtelsePeriode(FEB_FOM, MAR_TOM, null, null, 2, 74)));
+                    new YtelsePeriode(JAN_FOM, JAN_TOM, new BigDecimal("800"), new BigDecimal("9600")),
+                    new YtelsePeriode(FEB_FOM, MAR_TOM, null, null)));
         });
     }
 
@@ -163,6 +167,78 @@ class VedtakYtelseTjenesteTest {
             .satisfies(vedtak -> assertThat(vedtak.perioder()).as("periodene kuttes ikke").hasSize(2));
     }
 
+    @Test
+    void skal_returnere_barnetillegg_og_slå_sammen_like_perioder() {
+        var sak = lagSak(FagsakYtelseType.AKTIVITETSPENGER, aktørId);
+        var vedtakReferanse = UUID.randomUUID();
+        lagreVedtak(sak, vedtakReferanse, VEDTATT, DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, APR_TOM),
+            beregnet(JAN_FOM, JAN_TOM, "800", "17600", 2, 74),
+            beregnet(FEB_FOM, FEB_TOM, "700", "14000", 2, 74),
+            ikkeBeregnet(MAR_FOM, MAR_TOM, 3, 111),
+            ikkeBeregnet(APR_FOM, APR_TOM, 0, 0));
+
+        var resultat = hentBarnetillegg(JAN_FOM, APR_TOM);
+
+        assertThat(VALIDATOR.validate(resultat)).isEmpty();
+        assertThat(resultat.vedtak()).singleElement().satisfies(vedtak -> {
+            assertThat(vedtak.ytelse()).isEqualTo(YtelseType.AKTIVITETSPENGER);
+            assertThat(vedtak.saksnummer()).isEqualTo(sak.saksnummer().getVerdi());
+            assertThat(vedtak.vedtakReferanse()).isEqualTo(vedtakReferanse);
+            assertThat(vedtak.vedtattTidspunkt()).isEqualTo(VEDTATT);
+            assertThat(vedtak.perioder()).as("perioder uten barn utelates, like naboperioder slås sammen").containsExactly(
+                new BarnetilleggPeriode(JAN_FOM, FEB_TOM, 2, 74),
+                new BarnetilleggPeriode(MAR_FOM, MAR_TOM, 3, 111));
+        });
+    }
+
+    @Test
+    void skal_ikke_slå_sammen_barnetillegg_med_hull_mellom_periodene() {
+        var sak = lagSak(FagsakYtelseType.UNGDOMSYTELSE, aktørId);
+        lagreVedtak(sak, UUID.randomUUID(), VEDTATT, DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, APR_TOM),
+            ikkeBeregnet(JAN_FOM, JAN_TOM, 1, 37),
+            ikkeBeregnet(APR_FOM, APR_TOM, 1, 37));
+
+        var resultat = hentBarnetillegg(JAN_FOM, APR_TOM);
+
+        assertThat(resultat.vedtak()).singleElement().satisfies(vedtak -> assertThat(vedtak.perioder()).containsExactly(
+            new BarnetilleggPeriode(JAN_FOM, JAN_TOM, 1, 37),
+            new BarnetilleggPeriode(APR_FOM, APR_TOM, 1, 37)));
+    }
+
+    @Test
+    void skal_ikke_returnere_vedtak_uten_barnetillegg() {
+        lagreVedtak(lagSak(FagsakYtelseType.UNGDOMSYTELSE, aktørId), UUID.randomUUID(), VEDTATT,
+            DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, MAR_TOM),
+            beregnet(JAN_FOM, JAN_TOM, "800", "17600", 0, 0),
+            ikkeBeregnet(FEB_FOM, MAR_TOM));
+
+        assertThat(hentBarnetillegg(JAN_FOM, APR_TOM).vedtak()).isEmpty();
+    }
+
+    @Test
+    void skal_kun_returnere_barnetillegg_når_en_barnetilleggsperiode_overlapper_uten_å_kutte_perioden() {
+        lagreVedtak(lagSak(FagsakYtelseType.AKTIVITETSPENGER, aktørId), UUID.randomUUID(), VEDTATT,
+            DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, MAR_TOM),
+            ikkeBeregnet(JAN_FOM, JAN_TOM, 0, 0),
+            ikkeBeregnet(FEB_FOM, MAR_TOM, 1, 37));
+
+        var kunPeriodeUtenBarn = hentBarnetillegg(JAN_FOM, JAN_TOM);
+        var overlapperBarnetillegg = hentBarnetillegg(MAR_TOM, APR_TOM);
+
+        assertThat(kunPeriodeUtenBarn.vedtak()).isEmpty();
+        assertThat(overlapperBarnetillegg.vedtak()).singleElement()
+            .satisfies(vedtak -> assertThat(vedtak.perioder()).containsExactly(new BarnetilleggPeriode(FEB_FOM, MAR_TOM, 1, 37)));
+    }
+
+    @Test
+    void skal_kun_returnere_barnetillegg_fra_gjeldende_vedtak() {
+        var sak = lagSak(FagsakYtelseType.AKTIVITETSPENGER, aktørId);
+        lagreVedtak(sak, UUID.randomUUID(), VEDTATT, DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, MAR_TOM), ikkeBeregnet(JAN_FOM, MAR_TOM, 2, 74));
+        lagreVedtak(sak, UUID.randomUUID(), VEDTATT.plusDays(10), DatoIntervallEntitet.fraOgMedTilOgMed(JAN_FOM, MAR_TOM), ikkeBeregnet(JAN_FOM, MAR_TOM, 0, 0));
+
+        assertThat(hentBarnetillegg(JAN_FOM, APR_TOM).vedtak()).isEmpty();
+    }
+
     private record Sak(FagsakYtelseType ytelseType, AktørId aktørId, Saksnummer saksnummer) {
     }
 
@@ -206,6 +282,10 @@ class VedtakYtelseTjenesteTest {
 
     private YtelseResponse hent(LocalDate fom, LocalDate tom) {
         return tjeneste.hentVedtak(Set.of(aktørId), new Periode(fom, tom));
+    }
+
+    private BarnetilleggResponse hentBarnetillegg(LocalDate fom, LocalDate tom) {
+        return tjeneste.hentBarnetillegg(Set.of(aktørId), new Periode(fom, tom));
     }
 
     private static YtelsePeriode enestePeriode(YtelseResponse resultat) {
