@@ -43,6 +43,20 @@ public class BeregningTjeneste {
         return List.copyOf(inntektsposter);
     }
 
+    public Year utledSisteLignedeÅr(List<Inntektspost> inntektsposter, LocalDate skjæringstidspunkt) {
+        LocalDate grenseForNårLigningsverdiKanVæreTilgjengelig = LocalDate.of(skjæringstidspunkt.getYear(), 5, 1);
+        if (skjæringstidspunkt.isBefore(grenseForNårLigningsverdiKanVæreTilgjengelig)) {
+            return Year.of(skjæringstidspunkt.minusYears(2).getYear());
+        } else {
+            return inntektsposter.stream()
+                .map(ip -> Year.from(ip.getPeriode().getFomDato()))
+                .max(Year::compareTo)
+                .orElseGet(() ->
+                    Year.of(skjæringstidspunkt.minusYears(1).getYear())
+                );
+        }
+    }
+
     public static BeregningInput lagBeregningInput(Year sisteTilgjengeligeLigningsår, LocalDate skjæringstidspunkt, List<Inntektspost> inntekter) {
         PgiHjelper pgiHjelper = new PgiHjelper(inntekter, sisteTilgjengeligeLigningsår);
         return new BeregningInput(

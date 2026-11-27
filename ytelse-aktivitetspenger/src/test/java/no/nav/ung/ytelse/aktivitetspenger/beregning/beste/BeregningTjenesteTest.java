@@ -12,6 +12,7 @@ import java.util.List;
 
 import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningTjeneste.lagBeregningInput;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class BeregningTjenesteTest {
 
@@ -72,6 +73,21 @@ class BeregningTjenesteTest {
     void ingen_inntektsposter_gir_null_resultat() {
         var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, List.of()));
         assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    void siste_lignede_år_er_seneste_år_med_inntektspost() {
+        var inntektsposter = List.of(
+            lagInntektspost(2023, BigDecimal.ZERO),
+            lagInntektspost(2025, BigDecimal.ZERO),
+            lagInntektspost(2024, BigDecimal.ZERO)
+        );
+
+        assertThat(utledSisteLignedeÅr(inntektsposter)).isEqualTo(Year.of(2025));
+    }
+
+    private static Year utledSisteLignedeÅr(List<Inntektspost> inntektsposter) {
+        return new BeregningTjeneste().utledSisteLignedeÅr(inntektsposter, LocalDate.now());
     }
 
     private static Inntektspost lagInntektspost(int år, BigDecimal beløp) {

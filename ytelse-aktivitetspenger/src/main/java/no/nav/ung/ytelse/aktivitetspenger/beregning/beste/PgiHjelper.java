@@ -17,7 +17,6 @@ public class PgiHjelper {
     public PgiHjelper(List<Inntektspost> inntekter, Year sisteTilgjengeligeLigningsår) {
         this.sisteTilgjengeligeLigningsår = sisteTilgjengeligeLigningsår;
         var sisteTilgjengeligeLigningsårTom = sisteTilgjengeligeLigningsår.atMonth(12).atEndOfMonth();
-
         this.summerBeløpPrInntektsposttypePrÅr = inntekter.stream()
             .filter(ip -> !ip.getPeriode().getTomDato().isAfter(sisteTilgjengeligeLigningsårTom))
             .collect(Collectors.groupingBy(
